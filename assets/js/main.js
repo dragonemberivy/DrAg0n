@@ -230,13 +230,14 @@
     // ------------------------------------
     // FIREBASE CONFIG
     firebase.initializeApp({
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
+      apiKey: "AIzaSyCDSYPrpnXW1ci2qLrDXvQsmsH9OmUVVFs",
+      authDomain: "drag0n-chat.firebaseapp.com",
+      databaseURL: "https://drag0n-chat-default-rtdb.firebaseio.com",
+      projectId: "drag0n-chat",
+      storageBucket: "drag0n-chat.firebasestorage.app",
+      messagingSenderId: "44918974111",
+      appId: "1:44918974111:web:f017bed12e06b4ae3824aa",
+      measurementId: "G-42G7DLKZ4M"
     });
 
     const db = firebase.database();
