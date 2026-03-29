@@ -1,0 +1,1211 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+
+<head>
+<strong>Hello and Welcome! This is my Amazing first web page about everything! </strong>
+</head>
+<body>
+</body>
+
+<head>
+  <title> Maanya</title>
+</head>
+<body></body>
+  
+
+<head>
+  <style>
+  body {
+    background-color: rgb(2, 0, 123);
+  }
+  
+  h1 {
+    color: rgb(255, 255, 255);
+    text-align: center;
+  }
+  
+  p {
+    font-family:Papyrus, fantasy;
+    font-size: 20px;
+  }
+  </style>
+  </head>
+  <body>
+  </body>
+  <p> This is my CUTE gallery. ; )</p>
+  <img src = "duckling.jpg" width="300" height="300">
+  <img src = "baby_chameleon.jpg" width="300" height="300">
+  <img src = "mouse.jpg" width="300" height="300">
+  <img src = "harper_seal.jpg" width="300" height="300">    
+  <img src = "cat_and_deer.jpg" width="300" height="300"> 
+  <img src = "tiger.jpg" width="300" height="300">
+  <img src = "cat.jpg" width="300" height="300">
+  <img src = "kangaroo_rat.jpg" width="300" height="300"> 
+  <img src = "joey.jpg" width="300" height="300">  
+  <img src = "sugar_glider.jpg" width="300" height="300">   
+  <h1>         ME           : )</h1>
+  <p>Hello! This is Maanya. I love playing board games such as Arkham Horror and Carrom Board      
+    I live in California and I love sports and cats. : )      
+    Curious as I was, I wanted to build a  website at age 9.
+   One thing for sure about me is I LOVE to READ! 
+   <style>
+    body {
+      font-size: 20px;
+    }
+    </style>
+    <body>
+    
+    <span style='font-size:100px;'>&#128044;</span>
+    </body>
+    <h2>Books I recomend </h2>
+    <p><u><li>Hidden World of Changers series</li>
+      <li>Percy Jackson</li>
+<li>Dogman</li>
+<li>Why? 1,111 answers to everything</li>
+<li>Amulet Series</li>
+<li>Harry Potter Series</li>
+<li>Cleopatra in space Series</li>
+<li>Swan Lake</li>
+<li>Paint the Wind</li>
+<li>Diary of a Wimpy kid</li>
+<li>Geronimo and Thea Stilton books</li>
+<li>The Mark of the Thief</li> </u></p>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+  .container {
+    position: relative;
+    width: 50%;
+  }
+  
+  .image {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  
+  .overlay {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    width: 100%;
+    opacity: 0;
+    transition: .5s ease;
+    background-color: #008CBA;
+  }
+  
+  .container:hover .overlay {
+    opacity: 1;
+  }
+  
+  .text {
+    color: white;
+    font-size: 20px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  </style>
+  </head>
+  
+  <body>
+  
+  <h2>Fade in Overlay</h2>
+  <p>Hover over the picture to see something...</p><span style='font-size:100px;'>&#129327;</span>
+  
+  <div class="container">
+    <img src="otter.jpg" alt="Avatar" class="image">
+    <div class="overlay">
+      <div class="text">Hello World</div>
+    </div>
+  </div>
+  <button onclick="document.getElementById('myImage').src='pic_bulbon.gif'">Turn on the light</button>
+
+<img id="myImage" src="pic_bulboff.gif" style="width:100px">
+
+<button onclick="document.getElementById('myImage').src='pic_bulboff.gif'">Turn off the light</button>
+  </body>
+ <p>do you like fidgits? There is a few up here.</p>
+ 
+ 
+ 
+ <style> p> style="color:rgb(255, 0, 174);">Hello peeps, how are you?</p>
+
+  p.double border-style: double;
+  <p> class = "double">Weibel game status... Grimmer:won Brier:won MSJE:Lost Hirsh:won Millard: Bringhurst:won </p>
+ 
+ 
+ 
+ </style>
+ 
+ <style>
+  /* Animate clock only */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); animation-timing-function: ease-in-out; }
+    50% { transform: translateY(-15px); animation-timing-function: ease-in-out; }
+  }
+
+  /* Container for the clock */
+  #clock-container {
+    background: #e79967;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 320px;
+    margin: 20px auto; /* centers horizontally */
+    text-align: center;
+  }
+
+  /* The clock itself */
+  #clock {
+    font-family: 'Lucida Bright', 'Georgia', serif;
+    font-size: 1.5em;
+    padding: 12px 24px;
+    background: #aee5df;
+    border-radius: 8px;
+    color: #000;
+    display: inline-block;
+    animation: fadeIn 1s ease-in-out, bounce 2s infinite;
+  }
+</style>
+
+<div id="clock-container">
+  <div id="clock">Loading time...</div>
+</div>
+
+<script>
+  const emojis = ['🕐', '🕒', '🕔', '🕘', '⏰', '🕰️'];
+  let emojiIndex = 0;
+
+  function updateClock() {
+    const now = new Date();
+
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const dayName = days[now.getDay()];
+
+    const date = now.toLocaleDateString(undefined, {
+      year: 'numeric', month: 'long', day: 'numeric'
+    });
+
+    const time = now.toLocaleTimeString(undefined, {
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    });
+
+    const emoji = emojis[emojiIndex];
+    emojiIndex = (emojiIndex + 1) % emojis.length;
+
+    document.getElementById('clock').textContent = `${dayName}, ${date} – ${emoji} ${time}`;
+  }
+
+  updateClock();
+  setInterval(updateClock, 1000);
+</script>
+
+<!-- Old Emoji Hunt Container -->
+<div id="emoji-hunt-container-1" style="display: none;"></div>
+
+<!-- Old Score Display -->
+<div id="emoji-score-display-1" style="display: none;"></div>
+
+<!-- Old Pop Sound -->
+<audio id="pop-sound-1" src="https://www.myinstants.com/media/sounds/pop.mp3" preload="auto"></audio>
+
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  const emojis1 = ['🧋', '🥤', '🧃', '🍹', '🍵', '🍼', '🌶️', '💰', '💵', '🪙', '💸', '🤑'];
+  const count1 = 30;
+  const popSound1 = document.getElementById('pop-sound-1');
+  const container1 = document.getElementById('emoji-hunt-container-1');
+  const scoreDisplay1 = document.getElementById('emoji-score-display-1');
+  let score1 = 0;
+  let revealed1 = false;
+
+  // Setup container styles
+  Object.assign(container1.style, {
+    position: 'fixed',
+    bottom: '20px',
+    left: '20px',  // Move to left side so it doesn't overlap with new one on right
+    background: 'aqua',
+    padding: '30px',
+    borderRadius: '20px',
+    width: '300px',
+    height: '300px',
+    overflow: 'hidden',
+    zIndex: '9999',
+    pointerEvents: 'none',
+    display: 'block'
+  });
+
+  // Setup score display styles
+  Object.assign(scoreDisplay1.style, {
+    position: 'fixed',
+    bottom: '340px',
+    left: '30px',
+    background: '#fff',
+    color: '#000',
+    padding: '10px 20px',
+    borderRadius: '10px',
+    fontSize: '16px',
+    fontWeight: 'bold',
+    zIndex: '10000',
+    display: 'block'
+  });
+  scoreDisplay1.textContent = `Found: ${score1}/${count1}`;
+
+  const bobaElements1 = [];
+
+  // Inject styles
+  const style1 = document.createElement('style');
+  style1.textContent = `
+    #emoji-hunt-container-1 .emoji-hidden {
+      position: absolute;
+      opacity: 0.05;
+      color: aqua;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.3s ease;
+      pointer-events: auto;
+    }
+    #emoji-hunt-container-1 .emoji-visible {
+      opacity: 1;
+      color: black;
+    }
+    @keyframes bounce-1 {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    #emoji-hunt-container-1 .bounce {
+      animation: bounce-1 0.4s ease;
+    }
+  `;
+  document.head.appendChild(style1);
+
+  // Generate emojis
+  for (let i = 0; i < count1; i++) {
+    const el = document.createElement('span');
+    el.textContent = emojis1[Math.floor(Math.random() * emojis1.length)];
+    el.className = 'emoji-hidden';
+
+    el.style.fontSize = `${Math.random() * 6 + 14}px`;
+    const top = Math.random() * 85;
+    const left = Math.random() * 85;
+    const offsetX = (Math.random() - 0.5) * 10;
+    const offsetY = (Math.random() - 0.5) * 10;
+    el.style.top = `${top}%`;
+    el.style.left = `${left}%`;
+    el.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(${Math.random() * 30 - 15}deg)`;
+
+    const shouldPop = Math.random() < 0.5;
+
+    el.addEventListener('click', () => {
+      revealElement1(el, shouldPop);
+    });
+
+    container1.appendChild(el);
+    bobaElements1.push(el);
+    el.revealElement = () => revealElement1(el, false); // no sound in mass reveal
+  }
+
+  function revealElement1(el, shouldPop) {
+    if (!el.classList.contains('emoji-visible')) {
+      el.classList.add('emoji-visible');
+      updateScore1();
+    }
+    el.classList.remove('bounce');
+    void el.offsetWidth;
+    el.classList.add('bounce');
+    if (shouldPop) playPopSound1();
+  }
+
+  function playPopSound1() {
+    popSound1.currentTime = 0;
+    popSound1.play().catch(() => {});
+  }
+
+  function updateScore1() {
+    score1++;
+    scoreDisplay1.textContent = `Found: ${score1}/${count1}`;
+    if (score1 === count1) {
+      showVictoryMessage1();
+    }
+  }
+
+  function showVictoryMessage1() {
+    const msg = document.createElement('div');
+    msg.textContent = '🎉 You found them all!';
+    Object.assign(msg.style, {
+      position: 'fixed',
+      bottom: '400px',
+      left: '30px',
+      background: 'gold',
+      padding: '20px',
+      borderRadius: '10px',
+      fontSize: '18px',
+      fontWeight: 'bold',
+      zIndex: '10001',
+      boxShadow: '0 0 10px black'
+    });
+    document.body.appendChild(msg);
+  }
+
+  // Secret code unlock
+  let inputSequence1 = '';
+  const secretCode1 = 'chili';
+
+  document.addEventListener('keydown', (e) => {
+    inputSequence1 += e.key.toLowerCase();
+    inputSequence1 = inputSequence1.slice(-secretCode1.length);
+
+    if (inputSequence1 === secretCode1 && !revealed1) {
+      revealed1 = true;
+      bobaElements1.forEach(el => {
+        if (!el.classList.contains('emoji-visible')) {
+          el.revealElement();
+        }
+      });
+    }
+  });
+
+  // Ensure container is in body
+  if (!document.body.contains(container1)) {
+    document.body.appendChild(container1);
+  }
+  if (!document.body.contains(scoreDisplay1)) {
+    document.body.appendChild(scoreDisplay1);
+  }
+});
+</script>
+
+
+
+
+
+
+
+
+
+
+<!-- Fantasy Name Generator with Reset Button -->
+<div id="fantasy-name-generator" style="margin:20px 0; font-family: monospace; color:#ff0000;">
+  <button id="generate-names-btn" style="padding:8px 16px; font-size:16px; cursor:pointer;">
+    Show 10 Names
+  </button>
+  <button id="reset-btn" style="padding:8px 16px; font-size:16px; cursor:pointer; margin-left:10px;">
+    Reset
+  </button>
+  <pre id="names-output" style="margin-top:12px; white-space: pre-line;"></pre>
+</div>
+
+<script>
+(function() {
+  const prefixes = ["Ara", "Bel", "Cal", "Dar", "Eli", "Fen", "Gal", "Hal", "Ira", "Jen",
+                    "Kel", "Lor", "Mor", "Nel", "Ori", "Pal", "Quin", "Ral", "Sel", "Tor",
+                    "Ul", "Var", "Win", "Xan", "Yel", "Zor"];
+  const middles = ["dor", "len", "mir", "nor", "ras", "sil", "tan", "vor", "wyn", "zor",
+                   "bal", "cen", "dal", "fel", "gar", "hel", "il", "jan", "kel", "lin"];
+  const suffixes = ["a", "an", "ar", "el", "en", "il", "or", "us", "yn", "ir"];
+
+  function generateName() {
+    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+    const middle = middles[Math.floor(Math.random() * middles.length)];
+    const suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+    return prefix + middle + suffix;
+  }
+
+  // Generate 1000 unique names once
+  const allNames = new Set();
+  while (allNames.size < 1000) {
+    allNames.add(generateName());
+  }
+  const namesArray = Array.from(allNames);
+
+  let currentIndex = 0;
+  const batchSize = 10;
+
+  const btn = document.getElementById('generate-names-btn');
+  const resetBtn = document.getElementById('reset-btn');
+  const output = document.getElementById('names-output');
+
+  btn.addEventListener('click', () => {
+    if (currentIndex >= namesArray.length) {
+      output.textContent = "All names have been displayed!";
+      btn.disabled = true;
+      return;
+    }
+    const batch = namesArray.slice(currentIndex, currentIndex + batchSize);
+    currentIndex += batchSize;
+    output.textContent = batch.join('\n');
+  });
+
+  resetBtn.addEventListener('click', () => {
+    currentIndex = 0;
+    output.textContent = "";
+    btn.disabled = false;
+  });
+})();
+</script>
+
+<div id="guessing-game" style="max-width: 400px; margin: 20px auto; font-family: sans-serif;">
+  <h2>🎯 Number Guessing Game</h2>
+  <p>Guess a number between <strong>1</strong> and <strong>100</strong>.</p>
+  <input type="number" id="userGuess" placeholder="Enter your guess" min="1" max="100">
+  <button onclick="checkGuess()">Submit Guess</button>
+  <p id="feedback"></p>
+  <p id="attempts"></p>
+  <button onclick="resetGame()">🔄 Restart</button>
+</div>
+
+<script>
+  let secretNumber = Math.floor(Math.random() * 100) + 1;
+  let guesses = 0;
+
+  function checkGuess() {
+    const guess = Number(document.getElementById('userGuess').value);
+    const feedback = document.getElementById('feedback');
+    const attempts = document.getElementById('attempts');
+    guesses++;
+
+    if (!guess || guess < 1 || guess > 100) {
+      feedback.textContent = '🚫 Please enter a number between 1 and 100.';
+    } else if (guess === secretNumber) {
+      feedback.textContent = `✅ Correct! The number was ${secretNumber}.`;
+      attempts.textContent = `You guessed it in ${guesses} tries.`;
+    } else if (guess < secretNumber) {
+      feedback.textContent = '📉 Too low. Try again.';
+    } else {
+      feedback.textContent = '📈 Too high. Try again.';
+    }
+  }
+
+  function resetGame() {
+    secretNumber = Math.floor(Math.random() * 100) + 1;
+    guesses = 0;
+    document.getElementById('userGuess').value = '';
+    document.getElementById('feedback').textContent = '';
+    document.getElementById('attempts').textContent = '';
+  }
+</script>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Memory Game with Code Word</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #2c3e50;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #ecf0f1;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+  }
+
+  h1 {
+    margin-bottom: 20px;
+  }
+
+  .game-container {
+    display: grid;
+    grid-template-columns: repeat(4, 100px);
+    grid-gap: 15px;
+  }
+
+  .card {
+    width: 100px;
+    height: 100px;
+    background: #34495e;
+    border-radius: 8px;
+    cursor: pointer;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.5s;
+  }
+
+  .card.flip {
+    transform: rotateY(180deg);
+    cursor: default;
+  }
+
+  .card.match {
+    cursor: default;
+    box-shadow: 0 0 15px 3px #2ecc71;
+  }
+
+  .card .front,
+  .card .back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 50px;
+  }
+
+  .card .front {
+    background: #34495e;
+    color: #ecf0f1;
+    transform: rotateY(180deg);
+  }
+
+  .card .back {
+    background: #2980b9;
+  }
+
+  .stats {
+    margin-top: 20px;
+    font-size: 18px;
+  }
+
+  button {
+    margin-top: 25px;
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    background: #27ae60;
+    color: white;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  button:hover {
+    background: #2ecc71;
+  }
+
+  .code-input-container {
+    margin-top: 25px;
+    display: flex;
+    gap: 10px;
+  }
+
+  input[type="text"] {
+    padding: 8px 10px;
+    font-size: 16px;
+    border-radius: 6px;
+    border: none;
+    outline: none;
+    width: 150px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Memory Matching Game</h1>
+
+<div class="game-container" id="game"></div>
+
+<div class="stats">
+  Moves: <span id="moves">0</span> | Matches: <span id="matches">0</span>
+</div>
+
+<button id="restart">Restart Game</button>
+
+<div class="code-input-container">
+  <input type="text" id="codeInput" placeholder="Enter code word" />
+  <button id="codeBtn">Reveal Cards</button>
+</div>
+
+<script>
+  const cardsArray = [
+    '🍎', '🍎',
+    '🍌', '🍌',
+    '🍇', '🍇',
+    '🍓', '🍓',
+    '🥝', '🥝',
+    '🍍', '🍍',
+    '🍉', '🍉',
+    '🍒', '🍒'
+  ];
+
+  const gameContainer = document.getElementById('game');
+  const movesSpan = document.getElementById('moves');
+  const matchesSpan = document.getElementById('matches');
+  const restartBtn = document.getElementById('restart');
+  const codeInput = document.getElementById('codeInput');
+  const codeBtn = document.getElementById('codeBtn');
+
+  let cardsChosen = [];
+  let cardsChosenIds = [];
+  let cardsMatched = 0;
+  let moves = 0;
+  let allRevealed = false;
+
+  // Shuffle function (Fisher-Yates)
+  function shuffle(array) {
+    let currentIndex = array.length, randomIndex;
+
+    while (currentIndex !== 0) {
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+
+      [array[currentIndex], array[randomIndex]] = [
+        array[randomIndex], array[currentIndex]];
+    }
+    return array;
+  }
+
+  function createBoard() {
+    gameContainer.innerHTML = '';
+    shuffle(cardsArray);
+    cardsMatched = 0;
+    moves = 0;
+    movesSpan.textContent = moves;
+    matchesSpan.textContent = cardsMatched;
+    cardsChosen = [];
+    cardsChosenIds = [];
+    allRevealed = false;
+    codeInput.value = '';
+
+    for (let i = 0; i < cardsArray.length; i++) {
+      const card = document.createElement('div');
+      card.classList.add('card');
+      card.setAttribute('data-id', i);
+
+      card.innerHTML = `
+        <div class="front">${cardsArray[i]}</div>
+        <div class="back"></div>
+      `;
+
+      card.addEventListener('click', flipCard);
+      gameContainer.appendChild(card);
+    }
+  }
+
+  function flipCard() {
+    if (allRevealed) return; // Disable flipping if all cards are revealed
+
+    const cardId = this.getAttribute('data-id');
+    if (
+      cardsChosenIds.includes(cardId) || 
+      this.classList.contains('flip') || 
+      cardsChosen.length === 2
+    ) {
+      return; // Prevent flipping same or more than 2 cards
+    }
+
+    this.classList.add('flip');
+    cardsChosen.push(cardsArray[cardId]);
+    cardsChosenIds.push(cardId);
+
+    if (cardsChosen.length === 2) {
+      moves++;
+      movesSpan.textContent = moves;
+      setTimeout(checkForMatch, 800);
+    }
+  }
+
+  function checkForMatch() {
+    const cards = document.querySelectorAll('.card');
+    const [idOne, idTwo] = cardsChosenIds;
+
+    if (cardsChosen[0] === cardsChosen[1] && idOne !== idTwo) {
+      // Match found
+      cards[idOne].classList.add('match');
+      cards[idTwo].classList.add('match');
+      cardsMatched++;
+      matchesSpan.textContent = cardsMatched;
+
+      if (cardsMatched === cardsArray.length / 2) {
+        setTimeout(() => alert(`Congrats! You found all matches in ${moves} moves.`), 300);
+      }
+    } else {
+      // Not a match - flip cards back
+      cards[idOne].classList.remove('flip');
+      cards[idTwo].classList.remove('flip');
+    }
+    cardsChosen = [];
+    cardsChosenIds = [];
+  }
+
+  function revealAllCards() {
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+      card.classList.add('flip');
+    });
+    allRevealed = true;
+  }
+
+  codeBtn.addEventListener('click', () => {
+    const code = codeInput.value.trim().toLowerCase();
+    if (code === 'fruits') {
+      revealAllCards();
+    } else {
+      alert('Incorrect code word!');
+    }
+  });
+
+  restartBtn.addEventListener('click', createBoard);
+
+  // Initialize game on page load
+  createBoard();
+</script>
+
+</body>
+</html>
+
+<!-- Emoji Hunt Container -->
+<div id="emoji-hunt-container-2" style="display: none;"></div>
+
+<!-- Score Display -->
+<div id="emoji-score-display-2" style="display: none;"></div>
+
+<!-- Pop Sound -->
+<audio id="pop-sound-2" src="https://cdn.freesound.org/previews/344/344163_5121236-lq.mp3" preload="auto"></audio>
+
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  const emojis2 = ['🧋', '🥤', '🧃', '🍹', '🍵', '🍼', '🌶️', '💰', '💵', '🪙', '💸', '🤑'];
+  const count2 = 30;
+  const popSound2 = document.getElementById('pop-sound-2');
+  const container2 = document.getElementById('emoji-hunt-container-2');
+  const scoreDisplay2 = document.getElementById('emoji-score-display-2');
+  let score2 = 0;
+  let revealed2 = false;
+
+  // Setup container styles
+  Object.assign(container2.style, {
+    position: 'fixed',
+    bottom: '20px',
+    right: '20px',
+    background: '#FFEF00',  // Canary yellow
+    padding: '30px',
+    borderRadius: '20px',
+    width: '300px',
+    height: '300px',
+    overflow: 'hidden',
+    zIndex: '9999',
+    pointerEvents: 'none',
+    display: 'block'
+  });
+
+  // Setup score display styles
+  Object.assign(scoreDisplay2.style, {
+    position: 'fixed',
+    bottom: '340px',
+    right: '30px',
+    background: '#fff',
+    color: '#000',
+    padding: '10px 20px',
+    borderRadius: '10px',
+    fontSize: '16px',
+    fontWeight: 'bold',
+    zIndex: '10000',
+    display: 'block'
+  });
+  scoreDisplay2.textContent = `Found: ${score2}/${count2}`;
+
+  const bobaElements2 = [];
+
+  // Inject styles
+  const style2 = document.createElement('style');
+  style2.textContent = `
+    #emoji-hunt-container-2 .emoji-hidden {
+      position: absolute;
+      opacity: 0.05;
+      color: aqua;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.3s ease;
+      pointer-events: auto;
+    }
+    #emoji-hunt-container-2 .emoji-visible {
+      opacity: 1;
+      color: black;
+    }
+    @keyframes bounce-2 {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    #emoji-hunt-container-2 .bounce {
+      animation: bounce-2 0.4s ease;
+    }
+  `;
+  document.head.appendChild(style2);
+
+  // Generate emojis
+  for (let i = 0; i < count2; i++) {
+    const el = document.createElement('span');
+    el.textContent = emojis2[Math.floor(Math.random() * emojis2.length)];
+    el.className = 'emoji-hidden';
+
+    el.style.fontSize = `${Math.random() * 6 + 14}px`;
+    const top = Math.random() * 85;
+    const left = Math.random() * 85;
+    const offsetX = (Math.random() - 0.5) * 10;
+    const offsetY = (Math.random() - 0.5) * 10;
+    el.style.top = `${top}%`;
+    el.style.left = `${left}%`;
+    el.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(${Math.random() * 30 - 15}deg)`;
+
+    const shouldPop = Math.random() < 0.5;
+
+    el.addEventListener('click', () => {
+      revealElement2(el, shouldPop);
+    });
+
+    container2.appendChild(el);
+    bobaElements2.push(el);
+    el.revealElement = () => revealElement2(el, false); // no sound in mass reveal
+  }
+
+  function revealElement2(el, shouldPop) {
+    if (!el.classList.contains('emoji-visible')) {
+      el.classList.add('emoji-visible');
+      updateScore2();
+    }
+    el.classList.remove('bounce');
+    void el.offsetWidth;
+    el.classList.add('bounce');
+    if (shouldPop) playPopSound2();
+  }
+
+  function playPopSound2() {
+    popSound2.currentTime = 0;
+    popSound2.play().catch(() => {});
+  }
+
+  function updateScore2() {
+    score2++;
+    scoreDisplay2.textContent = `Found: ${score2}/${count2}`;
+    if (score2 === count2) {
+      showVictoryMessage2();
+    }
+  }
+
+  function showVictoryMessage2() {
+    const msg = document.createElement('div');
+    msg.textContent = '🎉 You found them all!';
+    Object.assign(msg.style, {
+      position: 'fixed',
+      bottom: '400px',
+      right: '30px',
+      background: 'gold',
+      padding: '20px',
+      borderRadius: '10px',
+      fontSize: '18px',
+      fontWeight: 'bold',
+      zIndex: '10001',
+      boxShadow: '0 0 10px black'
+    });
+    document.body.appendChild(msg);
+  }
+
+  // Secret code unlock
+  let inputSequence2 = '';
+  const secretCode2 = 'yay';
+
+  document.addEventListener('keydown', (e) => {
+    inputSequence2 += e.key.toLowerCase();
+    inputSequence2 = inputSequence2.slice(-secretCode2.length);
+
+    if (inputSequence2 === secretCode2 && !revealed2) {
+      revealed2 = true;
+      bobaElements2.forEach(el => {
+        if (!el.classList.contains('emoji-visible')) {
+          el.revealElement();
+        }
+      });
+    }
+  });
+
+  // Ensure container is in body
+  if (!document.body.contains(container2)) {
+    document.body.appendChild(container2);
+  }
+  if (!document.body.contains(scoreDisplay2)) {
+    document.body.appendChild(scoreDisplay2);
+  }
+});
+</script>
+
+<h2 style="font-family: sans-serif; text-align: center; margin-bottom: 10px;">🎨 Fun Color!</h2>
+
+<div id="colorControls" style="text-align:center;">
+  <label>R: <input type="range" id="rSlider" min="0" max="255" value="100"></label><br>
+  <label>G: <input type="range" id="gSlider" min="0" max="255" value="150"></label><br>
+  <label>B: <input type="range" id="bSlider" min="0" max="255" value="100"></label><br>
+  <div id="colorPreview" style="width: 50px; height: 30px; border: 1px solid #000; margin: 10px auto;"></div>
+  <button id="undoBtn" style="margin-bottom: 20px;">Undo</button>
+</div>
+
+<div id="svgContainer" style="text-align:center;">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="320" height="320" style="cursor:pointer; user-select:none;">
+    <circle cx="200" cy="200" r="190" fill="#fff" stroke="#000" stroke-width="2"/>
+    
+    <!-- Outer petals -->
+    <g stroke="#000" stroke-width="2" fill="#fff">
+      <path class="colorable" d="M200 20 L230 90 L270 90 L240 140 L270 190 L220 180 L200 230 L180 180 L130 190 L160 140 L130 90 L170 90 Z"/>
+    </g>
+    
+    <!-- Inner flower petals -->
+    <g stroke="#000" stroke-width="2" fill="#fff">
+      <ellipse class="colorable" cx="200" cy="140" rx="30" ry="60"/>
+      <ellipse class="colorable" cx="260" cy="200" rx="30" ry="60" transform="rotate(60 260 200)"/>
+      <ellipse class="colorable" cx="140" cy="200" rx="30" ry="60" transform="rotate(-60 140 200)"/>
+    </g>
+    
+    <!-- Center circle -->
+    <circle class="colorable" cx="200" cy="200" r="40" fill="#fff" stroke="#000" stroke-width="2"/>
+    
+    <!-- Leaf details -->
+    <g stroke="#000" stroke-width="2" fill="#fff">
+      <path class="colorable" d="M200 80 Q210 100 200 120 Q190 100 200 80 Z"/>
+      <path class="colorable" d="M230 140 Q245 150 230 160 Q215 150 230 140 Z"/>
+      <path class="colorable" d="M170 140 Q155 150 170 160 Q185 150 170 140 Z"/>
+      <path class="colorable" d="M200 260 Q210 280 200 300 Q190 280 200 260 Z"/>
+    </g>
+  </svg>
+</div>
+
+<script>
+  const rSlider = document.getElementById("rSlider");
+  const gSlider = document.getElementById("gSlider");
+  const bSlider = document.getElementById("bSlider");
+  const colorPreview = document.getElementById("colorPreview");
+  const undoBtn = document.getElementById("undoBtn");
+  const undoStack = [];
+
+  function getCurrentColor() {
+    return `rgb(${rSlider.value},${gSlider.value},${bSlider.value})`;
+  }
+
+  function updatePreview() {
+    colorPreview.style.backgroundColor = getCurrentColor();
+  }
+
+  rSlider.oninput = gSlider.oninput = bSlider.oninput = updatePreview;
+  updatePreview();
+
+  // Setup coloring on all colorable elements
+  const svgContainer = document.getElementById("svgContainer");
+  const svg = svgContainer.querySelector("svg");
+  const colorables = svg.querySelectorAll(".colorable");
+
+  colorables.forEach(el => {
+    el.style.cursor = "pointer";
+    el.addEventListener("click", e => {
+      e.stopPropagation();
+      const oldColor = el.getAttribute("fill");
+      const newColor = getCurrentColor();
+      undoStack.push({element: el, oldColor});
+      el.setAttribute("fill", newColor);
+    });
+  });
+
+  undoBtn.onclick = () => {
+    if (undoStack.length === 0) return;
+    const last = undoStack.pop();
+    last.element.setAttribute("fill", last.oldColor);
+  };
+</script>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Combined Kawaii Carousel</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+      background: #f0f0f0;
+    }
+    .carousel {
+      position: relative;
+      width: 600px;
+      max-width: 100%;
+      overflow: hidden;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      background: #fff;
+    }
+    .carousel-images {
+      display: flex;
+      transition: transform 0.5s ease-in-out;
+      width: 100%;
+    }
+    .carousel-images img {
+      width: 600px;
+      max-width: 100%;
+      user-select: none;
+      object-fit: contain;
+      background: #fff;
+      padding: 20px;
+    }
+    .carousel-button {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgb(0, 0, 0);
+      border: none;
+      color: rgb(0, 5, 77);
+      padding: 10px 15px;
+      cursor: pointer;
+      border-radius: 50%;
+      font-size: 18px;
+      user-select: none;
+    }
+    .carousel-button:hover {
+      background: rgb(0, 0, 90);
+    }
+    #prev {
+      left: 10px;
+    }
+    #next {
+      right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="carousel">
+    <div class="carousel-images" id="carouselImages">
+      <!-- Kawaii Frog -->
+      <img src="https://cdn-icons-png.flaticon.com/512/616/616408.png" alt="Kawaii Frog" />
+      <!-- Kawaii Boba -->
+      <img src="https://cdn-icons-png.flaticon.com/512/3062/3062634.png" alt="Kawaii Boba" />
+      <!-- Kawaii Chili -->
+      <img src="https://cdn-icons-png.flaticon.com/512/4147/4147561.png" alt="Kawaii Chili" />
+      <!-- Mind Icon -->
+      <img src="https://cdn-icons-png.flaticon.com/512/4140/4140047.png" alt="Mind Icon" />
+      <!-- Dog Icon -->
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Emoji_u1f436.svg/512px-Emoji_u1f436.svg.png" alt="Dog Icon" />
+      <!-- Burger Icon -->
+      <img src="https://cdn-icons-png.flaticon.com/512/1046/1046784.png" alt="Burger Icon" />
+    </div>
+    <button class="carousel-button" id="prev">&#10094;</button>
+    <button class="carousel-button" id="next">&#10095;</button>
+  </div>
+
+  <script>
+    const carouselImages = document.getElementById('carouselImages');
+    const images = carouselImages.querySelectorAll('img');
+    const totalImages = images.length;
+    let currentIndex = 0;
+
+    document.getElementById('next').addEventListener('click', () => {
+      currentIndex = (currentIndex + 1) % totalImages;
+      updateCarousel();
+    });
+
+    document.getElementById('prev').addEventListener('click', () => {
+      currentIndex = (currentIndex - 1 + totalImages) % totalImages;
+      updateCarousel();
+    });
+
+    function updateCarousel() {
+      const width = images[0].clientWidth;
+      carouselImages.style.transform = translateX(-${currentIndex * width}px);
+    }
+
+    // Initialize position on page load
+    updateCarousel();
+
+    // Auto slide every 5 seconds
+    setInterval(() => {
+      currentIndex = (currentIndex + 1) % totalImages;
+      updateCarousel();
+    }, 5000);
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+         
+
+ 
+ 
+
+
+
+
+
+
+
+
+
+  </html>

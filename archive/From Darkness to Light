@@ -1,0 +1,120 @@
+mkdir from-darkness-to-light
+cd from-darkness-to-light
+/from-darkness-to-light
+│
+├── index.html
+├── main.js
+├── styles.css
+├── /assets
+│   ├── player.png         ← placeholder player sprite
+│   ├── tiles.png          ← basic tileset
+│   └── map.json           ← dummy tilemap (we’ll generate it or use Tiled)
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>From Darkness to Light</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.js"></script>
+</head>
+<body>
+  <div id="game-container"></div>
+  <button id="photo-btn">📸 Photo Mode</button>
+  <script src="main.js"></script>
+</body>
+</html>
+body {
+  margin: 0;
+  background-color: black;
+  overflow: hidden;
+}
+#photo-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+  padding: 10px;
+  background: white;
+  border: none;
+  cursor: pointer;
+}
+const config = {
+  type: Phaser.AUTO,
+  width: 800,
+  height: 600,
+  parent: 'game-container',
+  physics: {
+    default: 'arcade',
+    arcade: {
+      debug: false
+    }
+  },
+  scene: {
+    preload,
+    create,
+    update
+  }
+};
+
+let player, cursors, spotlight, lightMask;
+
+const game = new Phaser.Game(config);
+
+function preload() {
+  this.load.image('player', 'assets/player.png');
+  this.load.image('tiles', 'assets/tiles.png');
+  this.load.tilemapTiledJSON('map', 'assets/map.json');
+}
+
+function create() {
+  const map = this.make.tilemap({ key: 'map' });
+  const tileset = map.addTilesetImage('tiles');
+  map.createLayer('Ground', tileset);
+
+  player = this.physics.add.sprite(100, 100, 'player');
+
+  cursors = this.input.keyboard.createCursorKeys();
+
+  // Spotlight graphics mask
+  spotlight = this.make.graphics();
+  spotlight.fillStyle(0xffffff, 1);
+  spotlight.fillCircle(100, 100, 120);
+  lightMask = spotlight.createGeometryMask();
+  this.cameras.main.setMask(lightMask);
+
+  // Photo mode
+  document.getElementById('photo-btn').addEventListener('click', () => {
+    takeScreenshot(this.game.canvas);
+  });
+}
+
+function update() {
+  player.setVelocity(0);
+
+  if (cursors.left.isDown) player.setVelocityX(-160);
+  if (cursors.right.isDown) player.setVelocityX(160);
+  if (cursors.up.isDown) player.setVelocityY(-160);
+  if (cursors.down.isDown) player.setVelocityY(160);
+
+  spotlight.clear();
+  spotlight.fillStyle(0xffffff, 1);
+  spotlight.fillCircle(player.x, player.y, 120);
+}
+
+function takeScreenshot(canvas) {
+  const url = canvas.toDataURL("image/png");
+  const link = document.createElement('a');
+  link.download = "screenshot.png";
+  link.href = url;
+  link.click();
+}
+/from-darkness-to-light
+│
+├── index.html
+├── main.js
+├── styles.css
+└── /assets
+    └── player.png   ✅ ← Put the image file here
+this.load.image('player', 'assets/player.png');
+player.setScale(0.5); // half size
+

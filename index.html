@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DrAg0n</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+
+<body style="overflow: hidden;">
+
+  <!-- SITE-WIDE PASSWORD LOCK -->
+  <div id="site-password-modal"
+    style="display:flex; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.95); z-index:100000; align-items:center; justify-content:center; backdrop-filter:blur(10px);">
+    <div class="glass-card"
+      style="text-align:center; min-width: 320px; transform: scale(1); box-shadow: 0 20px 50px rgba(56, 189, 248, 0.3); border: 1px solid rgba(56, 189, 248, 0.5);">
+      <h2 style="font-size: 3rem; margin-bottom: 0.5rem;">🔒</h2>
+      <h3 id="modal-title" style="margin-bottom: 1rem; font-size: 1.5rem;">Site Locked</h3>
+      <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">Please enter the daily flavor to
+        enter.</p>
+      <input type="password" id="site-pw-input" placeholder="Password..."
+        style="margin-bottom:1rem; width:100%; text-align: center; font-size: 1.1rem; padding: 12px;">
+      <p id="site-modal-error" style="color: #ef4444; font-size: 0.9rem; margin-bottom: 1rem; display:none;">Incorrect
+        daily password!</p>
+      <button id="site-unlock-btn" style="width: 100%; font-size: 1.1rem; padding: 12px;">Unlock Website</button>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header>
+    <h1 style="font-size: 4rem;"><span class="gradient-text">DrAg0n</span></h1>
+    <p style="font-size: 1.25rem; color: var(--text-muted); max-width: 600px; margin: 0 auto;">
+      Hello and Welcome! This is my Amazing first web page about everything!
+    </p>
+
+    <div id="clock-container">
+      <div id="clock">Loading time...</div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- IMAGES SECTION -->
+    <section id="images-section">
+      <h2 class="section-title">My CUTE Gallery</h2>
+      <div class="gallery-grid">
+        <div class="gallery-item"><img src="assets/images/duckling.jpg" alt="Duckling"
+            onerror="this.src='https://images.unsplash.com/photo-1555685812-4b943f1cb0eb?w=500&q=80'"></div>
+        <div class="gallery-item"><img src="assets/images/baby_chameleon.jpg" alt="Baby Chameleon"
+            onerror="this.src='https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?w=500&q=80'"></div>
+        <div class="gallery-item"><img src="assets/images/mouse.jpg" alt="Mouse"
+            onerror="this.src='https://images.unsplash.com/photo-1502120000005-4b3f81e3a246?w=500&q=80'"></div>
+        <div class="gallery-item"><img src="assets/images/harper_seal.jpg" alt="Harper Seal"
+            onerror="this.src='https://images.unsplash.com/photo-1582855502183-b9be9398b95c?w=500&q=80'"></div>
+        <div class="gallery-item"><img src="assets/images/cat_and_deer.jpg" alt="Cat and Deer"
+            onerror="this.src='https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=500&q=80'"></div>
+        <div class="gallery-item"><img src="assets/images/tiger.jpg" alt="Tiger"
+            onerror="this.src='https://images.unsplash.com/photo-1561731216-c3a4d99437d5?w=500&q=80'"></div>
+        <div class="gallery-item"><img src="assets/images/cat.jpg" alt="Cat"
+            onerror="this.src='https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=500&q=80'"></div>
+        <div class="gallery-item"><img src="assets/images/kangaroo_rat.jpg" alt="Kangaroo Rat"
+            onerror="this.src='https://images.unsplash.com/photo-1628102491629-778571d893a3?w=500&q=80'"></div>
+        <div class="gallery-item"><img src="assets/images/joey.jpg" alt="Joey"
+            onerror="this.src='https://images.unsplash.com/photo-1526336024174-e58f5cdd8e13?w=500&q=80'"></div>
+        <div class="gallery-item"><img src="assets/images/sugar_glider.jpg" alt="Sugar Glider"
+            onerror="this.src='https://images.unsplash.com/photo-1548509925-0e7ea519914e?w=500&q=80'"></div>
+      </div>
+    </section>
+
+    <!-- GAMES SECTION -->
+    <section id="games-section">
+      <h2 class="section-title">Games & Interactivity</h2>
+      <div class="games-grid">
+
+
+
+        <!-- Game 1: Number Guessing -->
+        <div class="glass-card">
+          <h3>Number Guessing</h3>
+          <p>Guess a number between <strong>1</strong> and <strong>100</strong>.</p>
+          <div class="flex-center gap-2 mb-4">
+            <input type="number" id="userGuess" placeholder="Enter guess" min="1" max="100" style="margin:0;">
+            <button onclick="checkGuess()">Guess</button>
+          </div>
+          <p id="guessFeedback" style="font-weight: 600; color: var(--accent);"></p>
+          <p id="guessAttempts" class="mb-4"></p>
+          <button onclick="resetGuessGame()" style="background: rgba(255,255,255,0.1); width: 100%;">Restart</button>
+        </div>
+
+        <!-- Game 2: Rock Paper Scissors -->
+        <div class="glass-card">
+          <h3>Rock Paper Scissors</h3>
+          <p>Can you beat the computer?</p>
+          <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <button onclick="playRPS('rock')" style="flex:1;">Rock</button>
+            <button onclick="playRPS('paper')" style="flex:1;">Paper</button>
+            <button onclick="playRPS('scissors')" style="flex:1;">Scissors</button>
+          </div>
+          <div id="rpsResult"
+            style="padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 8px; text-align: center; font-weight: 600;">
+            Make a choice!</div>
+        </div>
+
+        <!-- Game 3: Memory Game -->
+        <div class="glass-card" style="grid-column: 1 / -1;">
+          <h3>Memory Match (<span style="opacity:0.3; font-size: 1rem;">Code: fruits</span>)</h3>
+          <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+            <div id="memory-game" class="memory-board" style="flex: 1; min-width: 300px;"></div>
+            <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+              <div style="font-size: 1.25rem; margin-bottom: 1rem;">
+                Moves: <span id="memory-moves" style="color: var(--accent); font-weight: bold;">0</span> |
+                Matches: <span id="memory-matches" style="color: var(--accent); font-weight: bold;">0</span>/8
+              </div>
+              <button onclick="createMemoryBoard()" class="mb-4">Restart Game</button>
+
+              <div
+                style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; border: 1px solid var(--border);">
+                <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">Secret Unlock Code:</p>
+                <div class="flex-center gap-2">
+                  <input type="text" id="memoryCodeInput" placeholder="Enter code" style="margin:0;">
+                  <button onclick="revealMemoryCards()">Reveal</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Game 4: Fun Color SVG -->
+        <div class="glass-card">
+          <h3>Fun Color!</h3>
+          <p>Click the flower parts to paint them.</p>
+          <div style="display: flex; gap: 1rem; align-items: start;">
+            <div style="flex: 1;">
+              <label style="font-size:0.8rem;">Red: <input type="range" id="rSlider" min="0" max="255" value="255"
+                  style="width:100%;"></label>
+              <label style="font-size:0.8rem;">Green: <input type="range" id="gSlider" min="0" max="255" value="100"
+                  style="width:100%;"></label>
+              <label style="font-size:0.8rem;">Blue: <input type="range" id="bSlider" min="0" max="255" value="200"
+                  style="width:100%;"></label>
+              <div id="colorPreview"
+                style="height: 40px; border-radius: 8px; border: 1px solid var(--border); margin: 10px 0;"></div>
+              <button id="undoBtn" style="width: 100%; background: rgba(255,255,255,0.1);">Undo</button>
+            </div>
+
+            <div id="svgContainer" style="background: white; border-radius: 12px; padding: 10px;">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="160" height="160"
+                style="cursor:pointer; user-select:none;">
+                <circle cx="200" cy="200" r="190" fill="#fff" stroke="#000" stroke-width="4" />
+                <g stroke="#000" stroke-width="4" fill="#fff">
+                  <path class="colorable"
+                    d="M200 20 L230 90 L270 90 L240 140 L270 190 L220 180 L200 230 L180 180 L130 190 L160 140 L130 90 L170 90 Z" />
+                </g>
+                <g stroke="#000" stroke-width="4" fill="#fff">
+                  <ellipse class="colorable" cx="200" cy="140" rx="30" ry="60" />
+                  <ellipse class="colorable" cx="260" cy="200" rx="30" ry="60" transform="rotate(60 260 200)" />
+                  <ellipse class="colorable" cx="140" cy="200" rx="30" ry="60" transform="rotate(-60 140 200)" />
+                </g>
+                <circle class="colorable" cx="200" cy="200" r="40" fill="#fff" stroke="#000" stroke-width="4" />
+                <g stroke="#000" stroke-width="4" fill="#fff">
+                  <path class="colorable" d="M200 80 Q210 100 200 120 Q190 100 200 80 Z" />
+                  <path class="colorable" d="M230 140 Q245 150 230 160 Q215 150 230 140 Z" />
+                  <path class="colorable" d="M170 140 Q155 150 170 160 Q185 150 170 140 Z" />
+                  <path class="colorable" d="M200 260 Q210 280 200 300 Q190 280 200 260 Z" />
+                </g>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- FUN STUFF SECTION -->
+    <section>
+      <h2 class="section-title">Fun Facts & Things I Like</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+
+        <div class="glass-card">
+          <h3>Books I Recommend</h3>
+          <ul style="list-style-type: none; padding-left: 0;">
+            <li style="padding: 8px 0; border-bottom: 1px solid var(--border);">Hidden World of Changers</li>
+            <li style="padding: 8px 0; border-bottom: 1px solid var(--border);">Percy Jackson</li>
+            <li style="padding: 8px 0; border-bottom: 1px solid var(--border);">Dogman</li>
+            <li style="padding: 8px 0; border-bottom: 1px solid var(--border);">Why? 1,111 answers to everything</li>
+            <li style="padding: 8px 0; border-bottom: 1px solid var(--border);">Amulet Series</li>
+            <li style="padding: 8px 0; border-bottom: 1px solid var(--border);">Harry Potter Series</li>
+            <li style="padding: 8px 0; border-bottom: 1px solid var(--border);">Cleopatra in space Series</li>
+            <li style="padding: 8px 0; border-bottom: 1px solid var(--border);">Swan Lake</li>
+            <li style="padding: 8px 0;">...and more!</li>
+          </ul>
+        </div>
+
+        <div class="glass-card">
+          <h3>About Me Attributes</h3>
+          <div style="display: flex; flex-wrap: wrap;">
+            <span class="badge" style="background-color: Tomato;">Money</span>
+            <span class="badge" style="background-color: Orange;">Loyal</span>
+            <span class="badge" style="background-color: DarkOrchid;">DrAg0n</span>
+            <span class="badge" style="background-color: MediumSeaGreen;">Boba</span>
+            <span class="badge" style="background-color: Gray;">Hates Spiders</span>
+            <span class="badge" style="background-color: SlateBlue;">Imaginative</span>
+            <span class="badge" style="background-color: Violet;">Nice</span>
+            <span class="badge" style="background-color: #ef4444;">Short Tempered</span>
+            <span class="badge" style="background-color: #22c55e;">Happy</span>
+          </div>
+
+          <h3 style="margin-top: 2rem;">Interactive Bits</h3>
+          <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem;">
+            <img id="myLightbulb" src="assets/images/pic_bulboff.gif" alt="Bulb"
+              onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'60\' height=\'60\'><circle cx=\'30\' cy=\'30\' r=\'25\' fill=\'gray\'/></svg>'"
+              style="width:60px; height:60px; object-fit:contain; border-radius:8px;">
+            <div>
+              <button
+                onclick="document.getElementById('myLightbulb').style.filter='brightness(1.5) sepia(1) hue-rotate(-50deg) saturate(3)'"
+                style="padding: 0.5rem 1rem; font-size: 0.8rem; margin-bottom: 5px;">Turn On</button>
+              <br>
+              <button onclick="document.getElementById('myLightbulb').style.filter='none'"
+                style="padding: 0.5rem 1rem; font-size: 0.8rem; background: rgba(255,255,255,0.1);">Turn Off</button>
+            </div>
+          </div>
+
+          <div class="hover-overlay-container">
+            <img src="assets/images/otter.jpg" alt="Otter"
+              onerror="this.src='https://images.unsplash.com/photo-1541414779316-d565994236ab?w=500&q=80'">
+            <div class="hover-overlay">
+              <h3 style="margin: 0;">Hello World!</h3>
+            </div>
+          </div>
+          <p style="text-align: center; font-size: 0.8rem; margin-top: 5px; color: var(--text-muted);">Hover the image!
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ANIMAL CHATROOM SECTION -->
+    <section id="chat-section">
+      <h2 class="section-title">Animal Chat Rooms</h2>
+      <div class="glass-card" style="max-width: 600px; margin: 0 auto; border-color: rgba(56, 189, 248, 0.4);">
+        <p style="text-align: center; margin-bottom: 1.5rem; color: var(--text-muted);">Connect with other animals in
+          the wild!</p>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
+          <select id="chat-room-select" style="flex:1; margin:0;">
+            <option value="" disabled selected>Select Room</option>
+            <option value="Forest">Forest</option>
+            <option value="Cave">Cave</option>
+            <option value="Ocean">Ocean</option>
+          </select>
+          <select id="chat-profile-select" style="flex:1; margin:0;" disabled>
+            <option value="" disabled selected>Select Animal</option>
+            <option value="Dragon">Dragon</option>
+            <option value="Cat">Cat</option>
+            <option value="Dog">Dog</option>
+            <option value="Kitsune">Kitsune</option>
+          </select>
+        </div>
+
+        <div id="chat-messages">
+          <div style="text-align: center; color: var(--text-muted); margin-top: 120px;">
+            Select a room and profile to join the chat.
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+          <input type="text" id="chat-input-field" placeholder="Select room & profile first..."
+            style="margin:0; flex: 1;" disabled>
+          <button id="chat-send-btn" disabled>Send</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER ADVERT -->
+    <div class="glass-card"
+      style="text-align: center; margin-top: 4rem; background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(0,0,0,0.2)); border-color: rgba(34, 197, 94, 0.3);">
+      <h3 style="color: #4ade80;">🌱 Advert</h3>
+      <p>There are people trying to make the world a better place. One of these companies harnessing nature's bounty is
+        Sasya.</p>
+      <p style="font-weight: bold; font-size: 1.2rem;">Choose natural. Choose Sasya.</p>
+    </div>
+
+  </main>
+
+  <!-- PASSWORD MODAL -->
+  <div id="password-modal"
+    style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10001; align-items:center; justify-content:center; backdrop-filter:blur(5px);">
+    <div class="glass-card"
+      style="text-align:center; min-width: 300px; transform: scale(1); box-shadow: 0 10px 40px rgba(56, 189, 248, 0.2);">
+      <h3 id="modal-title" style="margin-bottom: 1rem;">Enter Password</h3>
+      <input type="password" id="modal-pw-input" placeholder="Password..." style="margin-bottom:1rem; width:100%;">
+      <p id="modal-error" style="color: #ef4444; font-size: 0.9rem; margin-bottom: 1rem; display:none;">Wrong password!
+      </p>
+      <div style="display:flex; gap:10px; justify-content:center;">
+        <button id="modal-join-btn" style="flex:1;">Join</button>
+        <button id="modal-cancel-btn" style="flex:1; background:rgba(255,255,255,0.1);">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOATING EMOJI HUNTS -->
+  <div id="emoji-hunt-1" class="emoji-hunt-box"></div>
+  <div id="score-display-1" class="emoji-score">Left Hunt: 0/30 (Code: chili)</div>
+  <audio id="pop-sound" src="https://www.myinstants.com/media/sounds/pop.mp3" preload="auto"></audio>
+
+  <div id="emoji-hunt-2" class="emoji-hunt-box"></div>
+  <div id="score-display-2" class="emoji-score">Right Hunt: 0/30 (Code: yay)</div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <!-- ALL SCRIPTS (Consolidated) -->
+  <script src="assets/js/main.js"></script>
+</body>
+
+</html>
