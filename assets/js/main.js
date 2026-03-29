@@ -310,6 +310,50 @@
       sitePwInput.focus();
     });
 
+    // CRYPTO HELPERS
+    let roomCryptoKey = null;
+
+    async function deriveKey(password) {
+      const enc = new TextEncoder();
+      const keyMaterial = await crypto.subtle.importKey(
+        "raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveKey"]
+      );
+      return crypto.subtle.deriveKey(
+        { name: "PBKDF2", salt: enc.encode("drag0ns-salt"), iterations: 100000, hash: "SHA-256" },
+        keyMaterial, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]
+      );
+    }
+
+    async function encryptText(text) {
+      if (!roomCryptoKey) return text;
+      const enc = new TextEncoder();
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const ciphertext = await crypto.subtle.encrypt(
+        { name: "AES-GCM", iv: iv }, roomCryptoKey, enc.encode(text)
+      );
+      const combined = new Uint8Array(iv.length + ciphertext.byteLength);
+      combined.set(iv, 0);
+      combined.set(new Uint8Array(ciphertext), iv.length);
+      return btoa(String.fromCharCode(...combined));
+    }
+
+    async function decryptText(base64Str) {
+      if (!roomCryptoKey) return base64Str;
+      try {
+        const str = atob(base64Str);
+        const combined = new Uint8Array(str.length);
+        for (let i = 0; i < str.length; i++) combined[i] = str.charCodeAt(i);
+        const iv = combined.slice(0, 12);
+        const ciphertext = combined.slice(12);
+        const decrypted = await crypto.subtle.decrypt(
+          { name: "AES-GCM", iv: iv }, roomCryptoKey, ciphertext
+        );
+        return new TextDecoder().decode(decrypted);
+      } catch (e) {
+        return "🔒 [Encrypted Message]";
+      }
+    }
+
     // ROOM SELECTION
     let pendingRoomKey = null;
     const pwModal = document.getElementById('password-modal');
@@ -342,6 +386,8 @@
         return;
       }
 
+      roomCryptoKey = await deriveKey(pw);
+
       pwModal.style.display = 'none';
       enterRoom(pendingRoomKey);
       pendingRoomKey = null;
@@ -371,9 +417,10 @@
 
         chatProfSel.disabled = false;
 
-        messagesRef.limitToLast(100).on("child_added", snap => {
+        messagesRef.limitToLast(100).on("child_added", async snap => {
           const m = snap.val();
-          displayMessage(m.profile, m.text, m.timestamp);
+          const decryptedText = await decryptText(m.text);
+          displayMessage(m.profile, decryptedText, m.timestamp);
         });
 
       } catch (e) {
@@ -394,16 +441,18 @@
     chatBtn.onclick = sendMessage;
     chatInp.onkeypress = e => { if (e.key === "Enter") sendMessage(); };
 
-    function sendMessage() {
+    async function sendMessage() {
       if (!currentRoom || !currentProfile) return;
       const text = chatInp.value.trim();
       if (!text) return;
+
+      const encryptedText = await encryptText(text);
 
       if (messagesRef) {
         try {
           messagesRef.push({
             profile: currentProfile,
-            text,
+            text: encryptedText,
             timestamp: Date.now()
           });
         } catch (e) {
