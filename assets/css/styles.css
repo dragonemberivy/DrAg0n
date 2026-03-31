@@ -39,6 +39,7 @@
     .gradient-text {
       background: linear-gradient(to right, #38bdf8, #818cf8, #c084fc);
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
       display: inline-block;
     }
@@ -421,4 +422,30 @@
 
     .mb-4 {
       margin-bottom: 1rem;
+    }
+
+    /* BOBA CLICKER */
+    .boba-cup:active {
+      transform: scale(0.9) !important;
+    }
+
+    .upgrade-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .upgrade-btn:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .upgrade-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      filter: grayscale(100%);
     }

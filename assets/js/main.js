@@ -443,3 +443,92 @@
       if (typingRef && currentRoom) typingRef.child(userId).remove();
     });
 
+    // ------------------------------------
+    // 8. BOBA SHOP CLICKER
+    // ------------------------------------
+    let bobaPoints = 0;
+    let clickPower = 1;
+    let bobaPerSecond = 0;
+
+    const upgrades = {
+      straw: { cost: 10, count: 0, clickBonus: 1, bpsBonus: 0 },
+      stirrer: { cost: 50, count: 0, clickBonus: 0, bpsBonus: 2 },
+      barista: { cost: 200, count: 0, clickBonus: 0, bpsBonus: 10 }
+    };
+
+    function updateBobaUI() {
+      const bobaCountEl = document.getElementById('boba-points');
+      if (!bobaCountEl) return;
+      bobaCountEl.textContent = Math.floor(bobaPoints);
+      document.getElementById('boba-bps').textContent = bobaPerSecond;
+      
+      for (const id in upgrades) {
+        const btncost = document.getElementById('cost-' + id);
+        if(btncost) {
+          btncost.textContent = upgrades[id].cost + ' 🧋';
+          const btnElement = btncost.parentElement;
+          if (bobaPoints < upgrades[id].cost) {
+            btnElement.setAttribute('disabled', 'true');
+          } else {
+            btnElement.removeAttribute('disabled');
+          }
+        }
+      }
+    }
+
+    function clickBoba() {
+      bobaPoints += clickPower;
+      
+      const cup = document.getElementById('boba-cup');
+      if(!cup) return;
+      const popup = document.createElement('div');
+      popup.textContent = '+' + clickPower;
+      popup.style.position = 'absolute';
+      popup.style.color = '#4ade80';
+      popup.style.fontWeight = 'bold';
+      popup.style.fontSize = '2rem';
+      popup.style.pointerEvents = 'none';
+      popup.style.top = '10px';
+      popup.style.left = (Math.random() * 80 + 10) + 'px';
+      popup.style.animation = 'floatUp 1s ease-out forwards';
+      
+      if (!document.getElementById('boba-keyframes')) {
+        const style = document.createElement('style');
+        style.id = 'boba-keyframes';
+        style.innerHTML = `@keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-50px); } }`;
+        document.head.appendChild(style);
+      }
+      
+      cup.parentElement.style.position = 'relative';
+      cup.parentElement.appendChild(popup);
+      
+      setTimeout(() => popup.remove(), 1000);
+      updateBobaUI();
+    }
+
+    // Attach to window so it works from onclick
+    window.clickBoba = clickBoba;
+
+    function buyUpgrade(id) {
+      if (bobaPoints >= upgrades[id].cost) {
+        bobaPoints -= upgrades[id].cost;
+        upgrades[id].count++;
+        
+        clickPower += upgrades[id].clickBonus;
+        bobaPerSecond += upgrades[id].bpsBonus;
+        
+        upgrades[id].cost = Math.ceil(upgrades[id].cost * 1.15);
+        updateBobaUI();
+      }
+    }
+    window.buyUpgrade = buyUpgrade;
+
+    setInterval(() => {
+      if (bobaPerSecond > 0) {
+        bobaPoints += (bobaPerSecond / 10);
+        updateBobaUI();
+      }
+    }, 100);
+
+    // Initial delay for UI to be ready
+    setTimeout(updateBobaUI, 100);
