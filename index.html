@@ -79,35 +79,41 @@
         <!-- Game 0: Boba Shop Clicker -->
         <div class="glass-card" style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem;">
           <h3 style="font-size: 2rem; margin-bottom: 0.5rem;">🧋 Boba Empire</h3>
-          <div style="font-size: 1.25rem; margin-bottom: 2rem;">
-            Total Boba: <span id="boba-points" style="font-weight: bold; color: var(--accent); font-size: 1.5rem;">0</span> <br>
-            <span style="font-size: 0.9rem; color: var(--text-muted);"><span id="boba-bps">0</span> Boba per second</span>
+          <div style="font-size: 1.25rem; margin-bottom: 2rem; display: flex; gap: 2rem; justify-content: center; text-align: left;">
+            <div>
+              Inventory: <span id="boba-points" style="font-weight: bold; color: var(--accent); font-size: 1.5rem;">0</span> 🧋<br>
+              <span style="font-size: 0.9rem; color: var(--text-muted);"><span id="boba-bps">0</span> Brewing/sec</span>
+            </div>
+            <div style="border-left: 2px solid var(--border); padding-left: 2rem;">
+              Coins: <span id="coin-points" style="font-weight: bold; color: #fbbf24; font-size: 1.5rem;">0</span> 🪙<br>
+              <span style="font-size: 0.9rem; color: var(--text-muted);"><span id="customers-rate">0</span> Customers/sec</span>
+            </div>
           </div>
           
           <div style="display: flex; gap: 2rem; flex-wrap: wrap; width: 100%; justify-content: center;">
             <!-- Click Area -->
             <div style="flex: 1; min-width: 250px; text-align: center;">
               <div id="boba-cup" class="boba-cup" onclick="clickBoba()" style="font-size: 8rem; cursor: pointer; user-select: none; display: inline-block; transition: transform 0.1s;">🧋</div>
-              <p style="margin-top: 1rem; color: var(--text-muted);">Click to brew!</p>
+              <p style="margin-top: 1rem; color: var(--text-muted);">Click to brew Boba!</p>
             </div>
 
             <!-- Shop Area -->
             <div style="flex: 1; min-width: 250px; text-align: left; background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border);">
               <h4 style="margin-top: 0; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">Upgrade Shop</h4>
               
-              <button onclick="buyUpgrade('straw')" class="upgrade-btn" style="width: 100%; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
-                <span>Better Straw (+1 click)</span>
-                <span id="cost-straw" style="font-weight: bold; color: #4ade80;">10 🧋</span>
+              <button onclick="buyUpgrade('barista')" class="upgrade-btn" style="width: 100%; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+                <span>Auto-Barista (+1 Brew/s)</span>
+                <span id="cost-barista" style="font-weight: bold; color: #fbbf24;">10 🪙</span>
               </button>
               
-              <button onclick="buyUpgrade('stirrer')" class="upgrade-btn" style="width: 100%; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
-                <span>Auto-Stirrer (+2 BPS)</span>
-                <span id="cost-stirrer" style="font-weight: bold; color: #4ade80;">50 🧋</span>
+              <button onclick="buyUpgrade('marketing')" class="upgrade-btn" style="width: 100%; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+                <span>Marketing (+1 Cust/s)</span>
+                <span id="cost-marketing" style="font-weight: bold; color: #fbbf24;">50 🪙</span>
               </button>
 
-              <button onclick="buyUpgrade('barista')" class="upgrade-btn" style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
-                <span>Boba Barista (+10 BPS)</span>
-                <span id="cost-barista" style="font-weight: bold; color: #4ade80;">200 🧋</span>
+              <button onclick="buyUpgrade('premium')" class="upgrade-btn" style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+                <span>Premium Quality (+$1/Boba)</span>
+                <span id="cost-premium" style="font-weight: bold; color: #fbbf24;">200 🪙</span>
               </button>
             </div>
           </div>

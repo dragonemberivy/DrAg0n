@@ -444,30 +444,38 @@
     });
 
     // ------------------------------------
-    // 8. BOBA SHOP CLICKER
+    // 8. BOBA SHOP CLICKER (ECONOMY V2)
     // ------------------------------------
-    let bobaPoints = 0;
-    let clickPower = 1;
-    let bobaPerSecond = 0;
+    let bobaPoints = 0; // Inventory
+    let coinPoints = 0; // Money
+    
+    let clickPower = 1; // Brews per manual click
+    let bobaPerSecond = 0; // Auto-brewing
+    
+    let customersPerSecond = 0.5; // Base rate: 1 customer every 2 seconds
+    let coinPerBoba = 1; // Price per boba bought
 
     const upgrades = {
-      straw: { cost: 10, count: 0, clickBonus: 1, bpsBonus: 0 },
-      stirrer: { cost: 50, count: 0, clickBonus: 0, bpsBonus: 2 },
-      barista: { cost: 200, count: 0, clickBonus: 0, bpsBonus: 10 }
+      barista: { cost: 10, count: 0, bobaBonus: 1, custBonus: 0, priceBonus: 0 },
+      marketing: { cost: 50, count: 0, bobaBonus: 0, custBonus: 1, priceBonus: 0 },
+      premium: { cost: 200, count: 0, bobaBonus: 0, custBonus: 0, priceBonus: 1 }
     };
 
     function updateBobaUI() {
       const bobaCountEl = document.getElementById('boba-points');
       if (!bobaCountEl) return;
       bobaCountEl.textContent = Math.floor(bobaPoints);
-      document.getElementById('boba-bps').textContent = bobaPerSecond;
+      document.getElementById('boba-bps').textContent = bobaPerSecond.toFixed(1);
       
+      document.getElementById('coin-points').textContent = Math.floor(coinPoints);
+      document.getElementById('customers-rate').textContent = customersPerSecond.toFixed(1);
+
       for (const id in upgrades) {
         const btncost = document.getElementById('cost-' + id);
         if(btncost) {
-          btncost.textContent = upgrades[id].cost + ' 🧋';
+          btncost.textContent = upgrades[id].cost + ' 🪙';
           const btnElement = btncost.parentElement;
-          if (bobaPoints < upgrades[id].cost) {
+          if (coinPoints < upgrades[id].cost) {
             btnElement.setAttribute('disabled', 'true');
           } else {
             btnElement.removeAttribute('disabled');
@@ -481,6 +489,7 @@
       
       const cup = document.getElementById('boba-cup');
       if(!cup) return;
+      
       const popup = document.createElement('div');
       popup.textContent = '+' + clickPower;
       popup.style.position = 'absolute';
@@ -505,30 +514,53 @@
       setTimeout(() => popup.remove(), 1000);
       updateBobaUI();
     }
-
-    // Attach to window so it works from onclick
     window.clickBoba = clickBoba;
 
     function buyUpgrade(id) {
-      if (bobaPoints >= upgrades[id].cost) {
-        bobaPoints -= upgrades[id].cost;
+      if (coinPoints >= upgrades[id].cost) {
+        coinPoints -= upgrades[id].cost;
         upgrades[id].count++;
         
-        clickPower += upgrades[id].clickBonus;
-        bobaPerSecond += upgrades[id].bpsBonus;
+        bobaPerSecond += upgrades[id].bobaBonus;
+        customersPerSecond += upgrades[id].custBonus;
+        coinPerBoba += upgrades[id].priceBonus;
         
-        upgrades[id].cost = Math.ceil(upgrades[id].cost * 1.15);
+        upgrades[id].cost = Math.ceil(upgrades[id].cost * 1.5); // 50% jump in price
         updateBobaUI();
       }
     }
     window.buyUpgrade = buyUpgrade;
 
+    // Game Loop
     setInterval(() => {
+      // 1. Auto Brew
       if (bobaPerSecond > 0) {
         bobaPoints += (bobaPerSecond / 10);
-        updateBobaUI();
       }
+      
+      // 2. Customers Buy Boba
+      if (bobaPoints >= 1 && Math.random() < (customersPerSecond / 10)) {
+        bobaPoints -= 1;
+        coinPoints += coinPerBoba;
+        
+        const cup = document.getElementById('boba-cup');
+        if(cup) {
+           const salePop = document.createElement('div');
+           salePop.textContent = '+' + coinPerBoba + ' 🪙';
+           salePop.style.position = 'absolute';
+           salePop.style.color = '#fbbf24';
+           salePop.style.fontWeight = 'bold';
+           salePop.style.fontSize = '1.5rem';
+           salePop.style.pointerEvents = 'none';
+           salePop.style.top = '60px'; // lower than boba generator
+           salePop.style.left = '140px';
+           salePop.style.animation = 'floatUp 1s ease-out forwards';
+           cup.parentElement.appendChild(salePop);
+           setTimeout(() => salePop.remove(), 1000);
+        }
+      }
+      
+      updateBobaUI();
     }, 100);
 
-    // Initial delay for UI to be ready
     setTimeout(updateBobaUI, 100);
