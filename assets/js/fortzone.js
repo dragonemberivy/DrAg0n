@@ -1,146 +1,216 @@
-// ------------------------------------
-// DRAGON FORTZONE BATTLE ROYALE
-// ------------------------------------
-const canvas = document.getElementById('dragon-royale');
-const ctx = canvas ? canvas.getContext('2d') : null;
-let drGameLoop;
+/* 3D FORTZONE ENGINE */
+const container = document.getElementById('dragon-royale-3d');
+const parentContainer = document.getElementById('dr-container');
+let scene, camera, renderer, controls;
+let drGameLoopId;
 let drIsDeploying = false;
 
+// Config
 const MAP_SIZE = 2000;
 const DRAGON_EMOJIS = ['🐲', '🦖', '🦕', '🐉', '🐊'];
-const PLAYER_SPEED = 4;
-const BOT_SPEED = 2.5;
+const PLAYER_SPEED = 6;
+const BOT_SPEED = 2; // Nerfed
 
-let drState = 'playing'; 
-let drBus = { x: 0, y: 0, angle: 0 };
-let drEntities = []; 
+// State
+let drState = 'playing'; // bus, playing, over
+let drEntities = []; // Index 0 is player
 let drProjectiles = [];
 let drWalls = [];
 let drChests = [];
-let drStorm = { radius: MAP_SIZE, x: MAP_SIZE/2, y: MAP_SIZE/2, shrinkRate: 0.15 };
-let keys = { w: false, a: false, s: false, d: false, e: false, space: false };
-let mousePos = { x: 300, y: 200 };
-let cam = { x: 0, y: 0 };
+let drStorm = { radius: MAP_SIZE/1.5, shrinkRate: 0.15 };
 let frameCount = 0;
 
-if(canvas) {
-  window.addEventListener('keydown', e => { 
-    const k = e.key.toLowerCase();
-    if(["w","a","s","d","e"].includes(k)) keys[k] = true; 
-    if(e.code === 'Space') keys.space = true;
-  });
-  window.addEventListener('keyup', e => { 
-    const k = e.key.toLowerCase();
-    if(["w","a","s","d","e"].includes(k)) keys[k] = false; 
-    if(e.code === 'Space') keys.space = false;
-  });
-  
-  canvas.addEventListener('mousemove', e => {
-    const rect = canvas.getBoundingClientRect();
-    mousePos.x = (e.clientX - rect.left) * (canvas.width / rect.width);
-    mousePos.y = (e.clientY - rect.top) * (canvas.height / rect.height);
-  });
+let moveForward = false;
+let moveBackward = false;
+let moveLeft = false;
+let moveRight = false;
+let velocity = new THREE.Vector3();
+let direction = new THREE.Vector3();
 
-  canvas.addEventListener('contextmenu', e => {
-    e.preventDefault();
-    if (drState !== 'playing' || drEntities.length === 0 || drEntities[0].isDead) return;
-    const p = drEntities[0];
-    if (p.mats > 0 && p.buildCooldown <= 0) {
-       buildWall(p);
-       p.mats--;
-       p.buildCooldown = 20;
+function init3D() {
+  if (!container) return;
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x87CEEB); // Sky blue
+  scene.fog = new THREE.Fog(0x87CEEB, 0, MAP_SIZE/2);
+
+  const aspect = container.clientWidth / container.clientHeight;
+  camera = new THREE.PerspectiveCamera(75, aspect, 1, MAP_SIZE);
+
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  container.innerHTML = '';
+  container.appendChild(renderer.domElement);
+
+  // Lighting
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+  scene.add(ambientLight);
+  const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
+  dirLight.position.set(100, 200, 50);
+  scene.add(dirLight);
+
+  // Ground
+  const floorGeo = new THREE.PlaneGeometry(MAP_SIZE, MAP_SIZE);
+  const floorMat = new THREE.MeshLambertMaterial({ color: 0x22c55e });
+  const floor = new THREE.Mesh(floorGeo, floorMat);
+  floor.rotation.x = -Math.PI / 2;
+  scene.add(floor);
+
+  // Controls
+  controls = new THREE.PointerLockControls(camera, document.body);
+  
+  window.addEventListener('resize', () => {
+    if(container && camera && renderer) {
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
     }
   });
 
-  canvas.addEventListener('mousedown', e => {
-    if (e.button === 2) return;
-    if (drState !== 'playing' || drEntities.length === 0 || drEntities[0].isDead) return;
-    
-    const p = drEntities[0];
-    if (p.cooldown > 0) return;
-    
-    const worldMouseX = mousePos.x + cam.x;
-    const worldMouseY = mousePos.y + cam.y;
-    const angle = Math.atan2(worldMouseY - p.y, worldMouseX - p.x);
-    
-    drProjectiles.push({
-      ownerId: p.id,
-      x: p.x, y: p.y,
-      vx: Math.cos(angle) * (10 + p.weaponLvl), 
-      vy: Math.sin(angle) * (10 + p.weaponLvl),
-      radius: 8 + p.weaponLvl,
-      dmg: 20 + (p.weaponLvl * 10)
-    });
-    p.cooldown = Math.max(5, 20 - p.weaponLvl * 2); 
-  });
+  document.addEventListener('keydown', onKeyDown);
+  document.addEventListener('keyup', onKeyUp);
+  document.addEventListener('mousedown', onMouseDown);
 }
 
-function buildWall(entity) {
-  let angle = 0;
-  if (entity.isPlayer) {
-    angle = Math.atan2((mousePos.y + cam.y) - entity.y, (mousePos.x + cam.x) - entity.x);
-  } else if (entity.targetEnemy) {
-    angle = Math.atan2(entity.targetEnemy.y - entity.y, entity.targetEnemy.x - entity.x);
+function onKeyDown(e) {
+  if (!drIsDeploying || drState !== 'playing') return;
+  switch (e.code) {
+    case 'KeyW': moveForward = true; break;
+    case 'KeyA': moveLeft = true; break;
+    case 'KeyS': moveBackward = true; break;
+    case 'KeyD': moveRight = true; break;
+    case 'KeyE': build3DWall(); break;
   }
-  drWalls.push({
-    x: entity.x + Math.cos(angle)*40,
-    y: entity.y + Math.sin(angle)*40,
-    hp: 100, maxHp: 100, radius: 25
-  });
 }
 
-function spawnGameObjects() {
-  drEntities = [];
-  drWalls = [];
-  drChests = [];
-  drProjectiles = [];
-  drStorm = { radius: MAP_SIZE, x: MAP_SIZE/2, y: MAP_SIZE/2, shrinkRate: 0.15 };
-  frameCount = 0;
+function onKeyUp(e) {
+  if (!drIsDeploying || drState !== 'playing') return;
+  switch (e.code) {
+    case 'KeyW': moveForward = false; break;
+    case 'KeyA': moveLeft = false; break;
+    case 'KeyS': moveBackward = false; break;
+    case 'KeyD': moveRight = false; break;
+  }
+}
+
+function build3DWall() {
+  const p = drEntities[0];
+  if (p.mats > 0 && p.buildCooldown <= 0 && controls.isLocked) {
+     p.mats--; p.buildCooldown = 30;
+     const dir = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+     dir.y = 0; dir.normalize();
+     
+     const spawnPos = camera.position.clone().add(dir.multiplyScalar(30));
+     spawnPos.y = 15; // half height
+     
+     const wallGeo = new THREE.BoxGeometry(30, 30, 5);
+     const wallMat = new THREE.MeshLambertMaterial({ color: 0x8b5a2b });
+     const wallMesh = new THREE.Mesh(wallGeo, wallMat);
+     wallMesh.position.copy(spawnPos);
+     wallMesh.lookAt(camera.position.clone().setY(15));
+     scene.add(wallMesh);
+     
+     drWalls.push({ mesh: wallMesh, hp: 100 });
+  }
+}
+
+function createEmojiSprite(emoji, size) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 256; canvas.height = 256;
+  const cx = canvas.getContext('2d');
+  cx.font = '200px Arial';
+  cx.textAlign = 'center';
+  cx.textBaseline = 'middle';
+  cx.fillText(emoji, 128, 128);
+  const texture = new THREE.CanvasTexture(canvas);
+  // Need to set texture needsUpdate in newer threejs but usually automatic
+  const mat = new THREE.SpriteMaterial({ map: texture, transparent: true });
+  const sprite = new THREE.Sprite(mat);
+  sprite.scale.set(size, size, 1);
+  return sprite;
+}
+
+function spawn3DGameObjects() {
+  while(scene.children.length > 0){ scene.remove(scene.children[0]); }
   
-  drState = 'bus';
-  drBus = { x: -100, y: -100, angle: Math.PI/4, speed: 5 };
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); scene.add(ambientLight);
+  const dirLight = new THREE.DirectionalLight(0xffffff, 0.6); dirLight.position.set(100, 200, 50); scene.add(dirLight);
   
+  const floorGeo = new THREE.PlaneGeometry(MAP_SIZE, MAP_SIZE);
+  const floorMat = new THREE.MeshLambertMaterial({ color: 0x22c55e });
+  const floor = new THREE.Mesh(floorGeo, floorMat); floor.rotation.x = -Math.PI / 2; scene.add(floor);
+
+  drEntities = []; drProjectiles = []; drWalls = []; drChests = [];
+  drStorm = { radius: MAP_SIZE, x: 0, z: 0, shrinkRate: 0.15 };
+  frameCount = 0; drState = 'playing';
+  
+  camera.position.set((Math.random()-0.5)*MAP_SIZE*0.8, 10, (Math.random()-0.5)*MAP_SIZE*0.8);
   drEntities.push({
     id: 0, isPlayer: true,
-    x: -100, y: -100,
-    emoji: '🐉', hp: 100, maxHp: 100, shield: 0, maxShield: 100,
-    radius: 15, cooldown: 0, buildCooldown: 0, weaponLvl: 0, mats: 10,
-    isDead: false, dropped: false
+    hp: 100, maxHp: 100, shield: 0, maxShield: 100,
+    cooldown: 0, buildCooldown: 0, weaponLvl: 0, mats: 20, isDead: false
   });
   
-  for(let i = 1; i <= 49; i++) {
+  // Bots
+  for(let i=1; i<=49; i++) {
+    const rx = (Math.random()-0.5)*MAP_SIZE*0.9;
+    const rz = (Math.random()-0.5)*MAP_SIZE*0.9;
+    const emoji = DRAGON_EMOJIS[Math.floor(Math.random() * DRAGON_EMOJIS.length)];
+    const sprite = createEmojiSprite(emoji, 25);
+    sprite.position.set(rx, 12.5, rz);
+    scene.add(sprite);
+    
     drEntities.push({
-      id: i, isPlayer: false,
-      x: -100, y: -100,
-      emoji: DRAGON_EMOJIS[Math.floor(Math.random() * DRAGON_EMOJIS.length)],
-      hp: 100, maxHp: 100, shield: 0, maxShield: 100,
-      radius: 15, cooldown: 0, buildCooldown: 0, weaponLvl: 0, mats: 10,
-      isDead: false, dropped: false,
-      targetX: 0, targetY: 0, state: 'roam',
-      dropTime: 60 + Math.random() * 400
+      id: i, isPlayer: false, mesh: sprite,
+      hp: 100, maxHp: 100, shield: 0, maxShield: 100, weaponLvl: 0, mats: 10,
+      cooldown: 0, buildCooldown: 0, isDead: false,
+      state: 'roam', targetX: undefined, targetZ: undefined
     });
   }
   
-  for(let i=0; i<100; i++) {
-    drChests.push({
-      x: 50 + Math.random()*(MAP_SIZE-100),
-      y: 50 + Math.random()*(MAP_SIZE-100),
-      radius: 15
-    });
+  // Chests
+  for(let i=0; i<30; i++) {
+    const chest = createEmojiSprite('🧰', 15);
+    chest.position.set((Math.random()-0.5)*MAP_SIZE*0.9, 7.5, (Math.random()-0.5)*MAP_SIZE*0.9);
+    scene.add(chest);
+    drChests.push({ mesh: chest });
   }
+  
+  // Storm
+  const stormGeo = new THREE.CylinderGeometry(MAP_SIZE, MAP_SIZE, 500, 32, 1, true);
+  const stormMat = new THREE.MeshBasicMaterial({ color: 0xa855f7, transparent: true, opacity: 0.3, side: THREE.DoubleSide });
+  drStorm.mesh = new THREE.Mesh(stormGeo, stormMat);
+  drStorm.mesh.position.set(0,0,0);
+  scene.add(drStorm.mesh);
 }
 
 window.startDragonRoyale = function() {
+  if (!scene) init3D();
   document.getElementById('dr-overlay').style.display = 'none';
   document.getElementById('dr-score-hud').style.display = 'block';
+  document.getElementById('dr-crosshair').style.display = 'block';
   document.getElementById('dr-score').textContent = 50;
   
   drIsDeploying = true;
-  spawnGameObjects();
+  spawn3DGameObjects();
   
-  if (drGameLoop) cancelAnimationFrame(drGameLoop);
-  keys = { w: false, a: false, s: false, d: false, e: false, space: false };
-  drUpdate();
+  if (drGameLoopId) cancelAnimationFrame(drGameLoopId);
+  velocity.set(0,0,0);
+  direction.set(0,0,0);
+  
+  moveForward = false; moveBackward = false; moveLeft = false; moveRight = false;
+  controls.lock();
+  
+  drUpdate3D();
+};
+
+window.toggleFullscreenDR = function() {
+  if (!document.fullscreenElement) {
+    parentContainer.requestFullscreen().catch(err => {
+      console.log(`Error attempting to enable fullscreen: ${err.message}`);
+    });
+  } else {
+    document.exitFullscreen();
+  }
 };
 
 function drEndGame(placed) {
@@ -161,257 +231,247 @@ function drEndGame(placed) {
   }
 }
 
-function doDamage(entity, amt) {
-   if (entity.shield > 0) {
-     entity.shield -= amt;
-     if (entity.shield < 0) {
-       entity.hp += entity.shield;
-       entity.shield = 0;
-     }
-   } else {
-     entity.hp -= amt;
-   }
+function onMouseDown(e) {
+  if (!drIsDeploying || drState !== 'playing' || !controls.isLocked) return;
+  if (e.button === 2) return; 
+
+  const p = drEntities[0];
+  if (p.cooldown > 0) return;
+
+  const fbGeo = new THREE.SphereGeometry(2 + p.weaponLvl, 8, 8);
+  const fbMat = new THREE.MeshBasicMaterial({ color: 0xfbbf24 });
+  const fb = new THREE.Mesh(fbGeo, fbMat);
+  
+  const dir = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+  fb.position.copy(camera.position).add(dir.clone().multiplyScalar(10));
+  scene.add(fb);
+  
+  drProjectiles.push({
+    ownerId: 0, mesh: fb,
+    velocity: dir.multiplyScalar(8 + p.weaponLvl),
+    dmg: 25 + (p.weaponLvl*5)
+  });
+  p.cooldown = Math.max(10, 30 - p.weaponLvl*2);
 }
 
-function drUpdate() {
+function doDamage(e, amt) {
+   if (e.shield > 0) {
+     e.shield -= amt;
+     if (e.shield < 0) { e.hp += e.shield; e.shield = 0; }
+   } else { e.hp -= amt; }
+}
+
+function drUpdate3D() {
   if (!drIsDeploying) return;
-  drGameLoop = requestAnimationFrame(drUpdate);
+  drGameLoopId = requestAnimationFrame(drUpdate3D);
   frameCount++;
   
-  if (drState === 'bus') {
-    drBus.x += Math.cos(drBus.angle) * drBus.speed;
-    drBus.y += Math.sin(drBus.angle) * drBus.speed;
+  let aliveCount = 0;
+  
+  // PLAYER MOVEMENT
+  const p = drEntities[0];
+  if (!p.isDead && controls.isLocked) {
+    aliveCount++;
+    if (p.cooldown > 0) p.cooldown--;
+    if (p.buildCooldown > 0) p.buildCooldown--;
     
-    let allDropped = true;
-    let p = drEntities[0];
-    if (!p.dropped) {
-      allDropped = false;
-      p.x = drBus.x; p.y = drBus.y;
-      if (keys.space && drBus.x > 0 && drBus.y > 0) p.dropped = true;
-    }
+    direction.z = Number(moveForward) - Number(moveBackward);
+    direction.x = Number(moveRight) - Number(moveLeft);
+    direction.normalize(); 
     
-    for (let i = 1; i < drEntities.length; i++) {
-      let b = drEntities[i];
-      if (!b.dropped) {
-        allDropped = false;
-        b.x = drBus.x; b.y = drBus.y;
-        if (frameCount > b.dropTime && drBus.x > 0) {
-          b.dropped = true;
-          b.x += (Math.random() - 0.5) * 50;
-          b.y += (Math.random() - 0.5) * 50;
-        }
-      }
-    }
+    if (moveForward || moveBackward) velocity.z -= direction.z * 1.5;
+    if (moveLeft || moveRight) velocity.x -= direction.x * 1.5;
     
-    if (drBus.x > MAP_SIZE + 100 || allDropped) {
-      drState = 'playing';
-      if (!p.dropped) { p.dropped = true; p.x = Math.max(0, Math.min(MAP_SIZE, p.x)); p.y = Math.max(0, Math.min(MAP_SIZE, p.y)); }
-      for(let b of drEntities) { if(!b.dropped) { b.dropped = true; b.x = MAP_SIZE/2; b.y = MAP_SIZE/2; } }
-    }
+    controls.moveRight(-velocity.x);
+    controls.moveForward(-velocity.z);
+    
+    velocity.x *= 0.8; velocity.z *= 0.8;
+    
+    camera.position.x = Math.max(-MAP_SIZE/2, Math.min(MAP_SIZE/2, camera.position.x));
+    camera.position.z = Math.max(-MAP_SIZE/2, Math.min(MAP_SIZE/2, camera.position.z));
+    camera.position.y = 10;
   }
   
-  let aliveCount = 0;
-  for (let i = 0; i < drEntities.length; i++) {
-    let e = drEntities[i];
-    if (e.isDead || !e.dropped) continue;
+  // BOT AI 
+  for (let i = 1; i < drEntities.length; i++) {
+    let b = drEntities[i];
+    if (b.isDead) continue;
     aliveCount++;
     
-    if (e.cooldown > 0) e.cooldown--;
-    if (e.buildCooldown > 0) e.buildCooldown--;
+    if (b.cooldown > 0) b.cooldown--;
+    if (b.buildCooldown > 0) b.buildCooldown--;
     
-    if (e.isPlayer && drState === 'playing') {
-      if (keys.w) e.y -= PLAYER_SPEED;
-      if (keys.s) e.y += PLAYER_SPEED;
-      if (keys.a) e.x -= PLAYER_SPEED;
-      if (keys.d) e.x += PLAYER_SPEED;
-      
-      if (keys.e && e.mats > 0 && e.buildCooldown <= 0) { buildWall(e); e.mats--; e.buildCooldown = 20; }
-    } else if (!e.isPlayer && drState === 'playing') {
-      const distToStormCenter = Math.hypot(e.x - drStorm.x, e.y - drStorm.y);
-      if (distToStormCenter > drStorm.radius - 100) {
-        e.state = 'run_storm';
-        e.targetX = drStorm.x; e.targetY = drStorm.y;
-      } else if (e.state === 'run_storm') { e.state = 'roam'; }
-      
-      let closestEnemyDist = 500; let closestEnemy = null;
-      if (frameCount % 30 === 0 && e.state !== 'run_storm') {
-        for (let other of drEntities) {
-          if (other.id === e.id || other.isDead || !other.dropped) continue;
-          const dist = Math.hypot(e.x - other.x, e.y - other.y);
-          if (dist < closestEnemyDist) { closestEnemyDist = dist; closestEnemy = other; }
-        }
-        if (closestEnemy) { e.state = 'fight'; e.targetEnemy = closestEnemy; } 
-        else { e.state = 'roam'; }
+    const bx = b.mesh.position.x; const bz = b.mesh.position.z;
+    
+    const distToCenter = Math.hypot(bx, bz);
+    if (distToCenter > drStorm.radius - 100) {
+      b.state = 'run_storm'; b.targetX = 0; b.targetZ = 0;
+    } else if (b.state === 'run_storm') { b.state = 'roam'; }
+    
+    let closestEnemyDist = 500; let closestEnemy = null;
+    
+    if (frameCount % 60 === 0 && b.state !== 'run_storm') {
+      for (let other of drEntities) {
+        if (other.id === b.id || other.isDead) continue;
+        let ox, oz;
+        if (other.isPlayer) { ox = camera.position.x; oz = camera.position.z; }
+        else { ox = other.mesh.position.x; oz = other.mesh.position.z; }
         
-        if (e.targetEnemy && e.mats > 0 && e.buildCooldown <= 0 && Math.random() < 0.3) {
-           buildWall(e); e.mats--; e.buildCooldown = 60;
-        }
+        const dist = Math.hypot(bx - ox, bz - oz);
+        if (dist < closestEnemyDist) { closestEnemyDist = dist; closestEnemy = other; }
       }
       
-      if (e.state === 'fight' && e.targetEnemy && !e.targetEnemy.isDead) {
-        if (closestEnemyDist > 200) { e.targetX = e.targetEnemy.x; e.targetY = e.targetEnemy.y; } 
-        else { e.targetX = e.x; e.targetY = e.y; }
+      if (closestEnemy) { b.state = 'fight'; b.targetEnemy = closestEnemy; }
+      else { b.state = 'roam'; }
+      
+      if (b.targetEnemy && b.mats > 0 && b.buildCooldown <= 0 && Math.random() < 0.1) {
+         b.mats--; b.buildCooldown = 120;
+         const wx = bx + (Math.random()-0.5)*40; const wz = bz + (Math.random()-0.5)*40;
+         const wallGeo = new THREE.BoxGeometry(30, 30, 5);
+         const wallMat = new THREE.MeshLambertMaterial({ color: 0x8b5a2b });
+         const wallMesh = new THREE.Mesh(wallGeo, wallMat);
+         wallMesh.position.set(wx, 15, wz); wallMesh.lookAt(camera.position);
+         scene.add(wallMesh); drWalls.push({ mesh: wallMesh, hp: 100 });
+      }
+    }
+    
+    if (b.state === 'fight' && b.targetEnemy && !b.targetEnemy.isDead) {
+      let ox, oz;
+      if (b.targetEnemy.isPlayer) { ox = camera.position.x; oz = camera.position.z; }
+      else { ox = b.targetEnemy.mesh.position.x; oz = b.targetEnemy.mesh.position.z; }
+      
+      if (closestEnemyDist > 200) { b.targetX = ox; b.targetZ = oz; }
+      else { b.targetX = bx; b.targetZ = bz; } 
+      
+      if (b.cooldown <= 0 && closestEnemyDist < 500) {
+        const sprayX = (Math.random() - 0.5) * 100;
+        const sprayZ = (Math.random() - 0.5) * 100;
+        const dir = new THREE.Vector3(ox + sprayX - bx, 0, oz + sprayZ - bz).normalize();
         
-        if (e.cooldown <= 0 && closestEnemyDist < 500) {
-          const aim = Math.atan2(e.targetEnemy.y - e.y, e.targetEnemy.x - e.x) + (Math.random()-0.5)*0.2;
-          drProjectiles.push({
-            ownerId: e.id, x: e.x, y: e.y,
-            vx: Math.cos(aim) * (8 + e.weaponLvl), vy: Math.sin(aim) * (8 + e.weaponLvl),
-            radius: 8 + e.weaponLvl, dmg: 15 + e.weaponLvl*10
-          });
-          e.cooldown = 40;
-        }
-      }
-      
-      if (e.state === 'roam' && frameCount % 60 === 0) {
-         let closestChestDist = 300; let closestChest = null;
-         for (let c of drChests) {
-           const dist = Math.hypot(e.x - c.x, e.y - c.y);
-           if (dist < closestChestDist) { closestChestDist = dist; closestChest = c; }
-         }
-         if (closestChest) { e.targetX = closestChest.x; e.targetY = closestChest.y; } 
-         else { e.targetX = e.x + (Math.random()-0.5)*400; e.targetY = e.y + (Math.random()-0.5)*400; }
-      }
-      
-      if (e.targetX && e.targetY) {
-        const angle = Math.atan2(e.targetY - e.y, e.targetX - e.x);
-        if (Math.hypot(e.targetX-e.x, e.targetY-e.y) > 5) {
-          e.x += Math.cos(angle) * BOT_SPEED; e.y += Math.sin(angle) * BOT_SPEED;
-        }
+        const fbGeo = new THREE.SphereGeometry(2 + b.weaponLvl, 8, 8);
+        const fbMat = new THREE.MeshBasicMaterial({ color: 0xfbbf24 });
+        const fb = new THREE.Mesh(fbGeo, fbMat);
+        fb.position.set(bx, 10, bz).add(dir.clone().multiplyScalar(10));
+        scene.add(fb);
+        
+        drProjectiles.push({
+          ownerId: b.id, mesh: fb,
+          velocity: dir.multiplyScalar(6 + b.weaponLvl), 
+          dmg: 10 + b.weaponLvl*5
+        });
+        b.cooldown = 90; 
       }
     }
     
-    e.x = Math.max(e.radius, Math.min(MAP_SIZE-e.radius, e.x));
-    e.y = Math.max(e.radius, Math.min(MAP_SIZE-e.radius, e.y));
-    
-    for (let w of drWalls) {
-       const dx = e.x - w.x; const dy = e.y - w.y;
-       if (Math.hypot(dx, dy) < e.radius + w.radius) {
-          const angle = Math.atan2(dy, dx);
-          e.x = w.x + Math.cos(angle) * (e.radius + w.radius);
-          e.y = w.y + Math.sin(angle) * (e.radius + w.radius);
-       }
+    if (b.state === 'roam' && frameCount % 120 === 0) {
+      if(Math.random() < 0.3 && drChests.length > 0) {
+        // try to find chest
+        const c = drChests[Math.floor(Math.random() * drChests.length)];
+        b.targetX = c.mesh.position.x; b.targetZ = c.mesh.position.z;
+      } else {
+        b.targetX = bx + (Math.random() - 0.5) * 600;
+        b.targetZ = bz + (Math.random() - 0.5) * 600;
+      }
     }
     
-    for (let j = drChests.length - 1; j >= 0; j--) {
-       const c = drChests[j];
-       if (Math.hypot(e.x - c.x, e.y - c.y) < e.radius + c.radius) {
-          drChests.splice(j, 1);
-          if (Math.random() > 0.3) { e.shield = Math.min(e.maxShield, e.shield + 50); }
-          else { e.weaponLvl++; }
-          e.mats += 10;
-       }
+    if (b.targetX !== undefined && b.targetZ !== undefined) {
+      const dirX = b.targetX - bx; const dirZ = b.targetZ - bz;
+      const dist = Math.hypot(dirX, dirZ);
+      if (dist > 5) {
+        b.mesh.position.x += (dirX/dist) * BOT_SPEED;
+        b.mesh.position.z += (dirZ/dist) * BOT_SPEED;
+      }
     }
     
-    if (Math.hypot(e.x - drStorm.x, e.y - drStorm.y) > drStorm.radius && drState === 'playing') {
-      doDamage(e, 0.5); 
-    }
+    b.mesh.position.x = Math.max(-MAP_SIZE/2, Math.min(MAP_SIZE/2, b.mesh.position.x));
+    b.mesh.position.z = Math.max(-MAP_SIZE/2, Math.min(MAP_SIZE/2, b.mesh.position.z));
+    b.mesh.lookAt(camera.position); 
     
-    if (e.hp <= 0 && !e.isDead) { e.isDead = true; if (e.isPlayer) drEndGame(aliveCount); }
+    // Storm Damage
+    if (Math.hypot(b.mesh.position.x, b.mesh.position.z) > drStorm.radius) {
+      doDamage(b, 0.5);
+    }
+    if (b.hp <= 0 && !b.isDead) {
+      b.isDead = true; scene.remove(b.mesh);
+    }
   }
   
-  document.getElementById('dr-score').textContent = drState === 'bus' ? 50 : aliveCount;
+  // PLAYER STORM/HP/WIN
+  if (!p.isDead) {
+    if (Math.hypot(camera.position.x, camera.position.z) > drStorm.radius) { doDamage(p, 0.5); }
+    if (p.hp <= 0) { p.isDead = true; drEndGame(aliveCount); controls.unlock(); }
+  }
   
+  document.getElementById('dr-score').textContent = aliveCount;
+  
+  // PROJECTILES
   for (let i = drProjectiles.length - 1; i >= 0; i--) {
-    let p = drProjectiles[i];
-    p.x += p.vx; p.y += p.vy;
+    let pr = drProjectiles[i];
+    pr.mesh.position.add(pr.velocity);
     
-    if (p.x < 0 || p.x > MAP_SIZE || p.y < 0 || p.y > MAP_SIZE) { drProjectiles.splice(i, 1); continue; }
+    if (Math.abs(pr.mesh.position.x) > MAP_SIZE/2 || Math.abs(pr.mesh.position.z) > MAP_SIZE/2) {
+      scene.remove(pr.mesh); drProjectiles.splice(i, 1); continue;
+    }
     
     let hit = false;
     for (let e of drEntities) {
-      if (e.isDead || e.id === p.ownerId || !e.dropped) continue;
-      if (Math.hypot(p.x - e.x, p.y - e.y) < p.radius + e.radius) { doDamage(e, p.dmg); hit = true; break; }
+      if (e.isDead || e.id === pr.ownerId) continue;
+      let ex, ez;
+      if (e.isPlayer) { ex = camera.position.x; ez = camera.position.z; }
+      else { ex = e.mesh.position.x; ez = e.mesh.position.z; }
+      
+      if (Math.hypot(pr.mesh.position.x - ex, pr.mesh.position.z - ez) < 20) {
+        doDamage(e, pr.dmg); hit = true; break;
+      }
     }
     if (!hit) {
-       for (let w of drWalls) {
-         if (Math.hypot(p.x - w.x, p.y - w.y) < p.radius + w.radius) { w.hp -= p.dmg; hit = true; break; }
-       }
+      for (let w of drWalls) {
+         if (w.mesh.position.distanceTo(pr.mesh.position) < 30) {
+            w.hp -= pr.dmg; hit = true; break;
+         }
+      }
     }
-    if (hit) drProjectiles.splice(i, 1);
+    if (hit) { scene.remove(pr.mesh); drProjectiles.splice(i, 1); }
   }
   
-  drWalls = drWalls.filter(w => w.hp > 0);
-  
-  if (drState === 'playing' && aliveCount <= 1 && !drEntities[0].isDead) drEndGame(1);
-  
-  if (drState === 'playing') { drStorm.radius -= drStorm.shrinkRate; if (drStorm.radius < 50) drStorm.radius = 50; }
-  drRender();
-}
-
-function drRender() {
-  const p = drEntities[0];
-  
-  if (!p.isDead && p.dropped) { cam.x = p.x - canvas.width / 2; cam.y = p.y - canvas.height / 2; } 
-  else if (drState === 'bus' && !p.dropped) { cam.x = drBus.x - canvas.width / 2; cam.y = drBus.y - canvas.height / 2; }
-  
-  cam.x = Math.max(0, Math.min(MAP_SIZE - canvas.width, cam.x));
-  cam.y = Math.max(0, Math.min(MAP_SIZE - canvas.height, cam.y));
-  
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.save(); ctx.translate(-cam.x, -cam.y);
-  
-  ctx.fillStyle = '#166534'; ctx.fillRect(0, 0, MAP_SIZE, MAP_SIZE);
-  
-  ctx.beginPath(); ctx.arc(drStorm.x, drStorm.y, drStorm.radius, 0, Math.PI * 2);
-  ctx.fillStyle = '#22c55e'; ctx.fill();
-  
-  ctx.beginPath(); ctx.rect(0, 0, MAP_SIZE, MAP_SIZE);
-  ctx.arc(drStorm.x, drStorm.y, drStorm.radius, 0, Math.PI * 2, true);
-  ctx.fillStyle = 'rgba(168, 85, 247, 0.4)'; ctx.fill();
-  ctx.strokeStyle = '#a855f7'; ctx.lineWidth = 3; ctx.stroke();
-
-  ctx.font = '24px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  drChests.forEach(c => ctx.fillText('🧰', c.x, c.y));
-  
-  drWalls.forEach(w => {
-     ctx.font = '36px Arial'; ctx.globalAlpha = w.hp / 100;
-     ctx.fillText('🧱', w.x, w.y); ctx.globalAlpha = 1;
+  // WALLS
+  drWalls = drWalls.filter(w => {
+    if (w.hp <= 0) { scene.remove(w.mesh); return false; }
+    return true;
   });
-
-  for (let e of drEntities) {
-    if (!e.dropped) continue;
-    if (e.isDead) { ctx.font = '20px Arial'; ctx.fillText('🦴', e.x, e.y); continue; }
+  
+  // CHESTS
+  for (let i = drChests.length - 1; i >= 0; i--) {
+    let c = drChests[i];
+    if (p.isDead) continue;
     
-    ctx.save(); ctx.translate(e.x, e.y);
-    let pAngle = 0;
-    if (e.isPlayer && drState === 'playing') { pAngle = Math.atan2((mousePos.y + cam.y) - e.y, (mousePos.x + cam.x) - e.x); }
-    else if (e.state === 'fight' && e.targetEnemy) { pAngle = Math.atan2(e.targetEnemy.y - e.y, e.targetEnemy.x - e.x); }
-    else if (e.targetX) { pAngle = Math.atan2(e.targetY - e.y, e.targetX - e.x); }
-    
-    if (Math.abs(pAngle) > Math.PI / 2) { ctx.scale(-1, 1); }
-    ctx.font = '30px Arial'; ctx.fillText(e.emoji, 0, 0); ctx.restore();
-    
-    const hw = 15;
-    if (e.shield > 0) {
-       ctx.fillStyle = '#0ea5e9'; ctx.fillRect(e.x - hw, e.y - 25, 30 * (e.shield / e.maxShield), 4);
-       ctx.fillStyle = 'red'; ctx.fillRect(e.x - hw, e.y - 20, 30, 4);
-       ctx.fillStyle = '#4ade80'; ctx.fillRect(e.x - hw, e.y - 20, 30 * (e.hp / e.maxHp), 4);
-    } else {
-       ctx.fillStyle = 'red'; ctx.fillRect(e.x - hw, e.y - 25, 30, 4);
-       ctx.fillStyle = '#4ade80'; ctx.fillRect(e.x - hw, e.y - 25, 30 * (e.hp / e.maxHp), 4);
+    if (Math.hypot(c.mesh.position.x - camera.position.x, c.mesh.position.z - camera.position.z) < 25) {
+      scene.remove(c.mesh); drChests.splice(i, 1);
+      if (Math.random() > 0.4) { p.shield = Math.min(p.maxShield, p.shield + 50); }
+      else { p.weaponLvl++; }
+      p.mats += 10;
     }
+    c.mesh.lookAt(camera.position); 
   }
   
-  ctx.fillStyle = '#fbbf24';
-  drProjectiles.forEach(pr => { ctx.beginPath(); ctx.arc(pr.x, pr.y, pr.radius, 0, Math.PI*2); ctx.fill(); });
+  // STORM
+  drStorm.radius -= drStorm.shrinkRate;
+  if(drStorm.radius < 50) drStorm.radius = 50;
+  drStorm.mesh.scale.set(drStorm.radius/MAP_SIZE, 1, drStorm.radius/MAP_SIZE);
   
-  if (drState === 'bus') {
-    ctx.save(); ctx.translate(drBus.x, drBus.y);
-    if (drBus.angle > Math.PI/2) ctx.scale(-1, 1);
-    ctx.font = '50px Arial'; ctx.fillText('🚌', 0, 0); ctx.restore();
-    
-    ctx.restore();
-    ctx.font = '20px Arial'; ctx.fillStyle = 'white'; ctx.strokeStyle = 'black'; ctx.lineWidth = 3;
-    ctx.strokeText('Press SPACE to eject into Fortzone!', canvas.width/2, 50);
-    ctx.fillText('Press SPACE to eject into Fortzone!', canvas.width/2, 50);
-    ctx.save(); ctx.translate(-cam.x, -cam.y);
+  // HUD
+  if (!p.isDead) {
+    document.getElementById('dr-score-display').style.display = 'block';
+    document.getElementById('dr-score-display').innerHTML = `
+       ❤️ HP: ${Math.floor(p.hp)} | 🛡️ SHIELD: ${Math.floor(p.shield)}<br>
+       🧱 MATS: ${p.mats} | 🔥 LVL: ${p.weaponLvl}
+    `;
+    document.getElementById('dr-score-display').style.color = '#fff';
+    document.getElementById('dr-score-display').style.textShadow = '1px 1px 0 #000';
   }
-  ctx.restore();
   
-  if (p && p.dropped && !p.isDead) {
-     ctx.font = '16px Arial'; ctx.fillStyle = 'white'; ctx.textAlign = 'left';
-     ctx.fillText('🧱 Mats: ' + p.mats, 10, canvas.height - 20);
-     ctx.fillText('🔥 Lvl: ' + p.weaponLvl, 10, canvas.height - 40);
-  }
+  // WIN
+  if (aliveCount <= 1 && !p.isDead) { drEndGame(1); controls.unlock(); }
+
+  renderer.render(scene, camera);
 }

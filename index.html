@@ -74,22 +74,24 @@
       <h2 class="section-title">Games & Interactivity</h2>
       <div class="games-grid">
 
-
-
-
-        <!-- Game 0: Dragon Royale -->
+        <!-- Game 0: Dragon Fortzone 3D -->
         <div class="glass-card" style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem;">
-          <h3 style="font-size: 2rem; margin-bottom: 0.5rem; text-align: center;">🐉 Dragon Fortzone 👑</h3>
-          <p style="margin-bottom: 1rem; color: var(--text-muted); text-align: center;">SPACE to eject from the Battle Bus 🚌. WASD to move. Click to shoot fireballs.<br>Right-Click or 'E' to build walls 🧱. Loot chests 🧰 for shields and upgrades!</p>
-
+          <h3 style="font-size: 2rem; margin-bottom: 0.5rem; text-align: center;">🐉 Dragon Fortzone (3D) 👑</h3>
+          <p style="margin-bottom: 1rem; color: var(--text-muted); text-align: center;">First-Person 3D! Look around with mouse. WASD to move. Click to shoot.<br>Press 'E' to build walls 🧱. Loot chests 🧰 for shields!</p>
           
-          <div style="position: relative; width: 600px; max-width: 100%; aspect-ratio: 3/2; margin-bottom: 1rem; overflow: hidden; border-radius: 12px;">
-            <canvas id="dragon-royale" class="dragon-canvas" width="600" height="400" style="width: 100%; height: 100%; border: 3px solid #8b5cf6; background: #22c55e; cursor: crosshair; display: block;"></canvas>
+          <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+              <button onclick="startDragonRoyale()" style="font-size: 1.5rem; padding: 0.5rem 2rem; border-radius: 50px;">Play 3D Royale</button>
+              <button onclick="toggleFullscreenDR()" style="font-size: 1.5rem; padding: 0.5rem 2rem; border-radius: 50px; background: rgba(255,255,255,0.2);">⛶ Fullscreen</button>
+          </div>
+
+          <div style="position: relative; width: 800px; max-width: 100%; aspect-ratio: 16/9; overflow: hidden; border-radius: 12px; background: #000;" id="dr-container">
+            <div id="dragon-royale-3d" style="width: 100%; height: 100%; display: block;"></div>
             
-            <div id="dr-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 12px; pointer-events: none; z-index: 10;">
-              <h2 id="dr-title" style="font-size: 3rem; margin: 0; color: #fff;">BATTLE ROYALE</h2>
-              <p id="dr-score-display" style="font-size: 1.5rem; color: #fbbf24; margin: 1rem 0; display: none; font-weight: bold;">Placed: #50</p>
-              <button onclick="startDragonRoyale()" style="font-size: 1.5rem; padding: 1rem 2rem; border-radius: 50px; pointer-events: auto;">Play Now</button>
+            <div id="dr-crosshair" style="position: absolute; top: 50%; left: 50%; width: 6px; height: 6px; background: white; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; mix-blend-mode: difference; display: none; z-index: 6;"></div>
+            
+            <div id="dr-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 12px; pointer-events: none; z-index: 10;">
+              <h2 id="dr-title" style="font-size: 3rem; margin: 0; color: #fff;">FORTZONE 3D</h2>
+              <p id="dr-score-display" style="font-size: 1.5rem; color: #fbbf24; margin: 1rem 0; font-weight: bold; text-align: center; line-height: 1.5; pointer-events: none;">Placed: #50</p>
             </div>
             
             <div id="dr-score-hud" style="position: absolute; top: 10px; right: 20px; font-size: 1.5rem; font-weight: bold; color: white; text-shadow: 2px 2px 0 #000; pointer-events: none; display: none; z-index: 5;">
