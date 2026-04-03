@@ -77,6 +77,26 @@
 
 
 
+        <!-- Game 0: Dragon Royale -->
+        <div class="glass-card" style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem;">
+          <h3 style="font-size: 2rem; margin-bottom: 0.5rem; text-align: center;">🐉 True Battle Royale 👑</h3>
+          <p style="margin-bottom: 1rem; color: var(--text-muted); text-align: center;">WASD to move. Mouse to aim. Click to shoot fireballs!<br>Fight 49 other dragons. Stay inside the Storm. Be the last one standing.</p>
+          
+          <div style="position: relative; width: 600px; max-width: 100%; aspect-ratio: 3/2; margin-bottom: 1rem; overflow: hidden; border-radius: 12px;">
+            <canvas id="dragon-royale" class="dragon-canvas" width="600" height="400" style="width: 100%; height: 100%; border: 3px solid #8b5cf6; background: #22c55e; cursor: crosshair; display: block;"></canvas>
+            
+            <div id="dr-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 12px; pointer-events: none; z-index: 10;">
+              <h2 id="dr-title" style="font-size: 3rem; margin: 0; color: #fff;">BATTLE ROYALE</h2>
+              <p id="dr-score-display" style="font-size: 1.5rem; color: #fbbf24; margin: 1rem 0; display: none; font-weight: bold;">Placed: #50</p>
+              <button onclick="startDragonRoyale()" style="font-size: 1.5rem; padding: 1rem 2rem; border-radius: 50px; pointer-events: auto;">Play Now</button>
+            </div>
+            
+            <div id="dr-score-hud" style="position: absolute; top: 10px; right: 20px; font-size: 1.5rem; font-weight: bold; color: white; text-shadow: 2px 2px 0 #000; pointer-events: none; display: none; z-index: 5;">
+              Remaining: <span id="dr-score">50</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Game 0.5: Slice Master -->
         <div class="glass-card" style="grid-column: 1 / -1; padding: 1.5rem;">
           <h3>Slice Master</h3>

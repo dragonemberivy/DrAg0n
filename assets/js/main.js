@@ -444,24 +444,29 @@
     });
 
     // ------------------------------------
-    // 8. DRAGON ROYALE (CANVAS GAME)
+    // 8. DRAGON BATTLE ROYALE
     // ------------------------------------
     const canvas = document.getElementById('dragon-royale');
     const ctx = canvas ? canvas.getContext('2d') : null;
     let drGameLoop;
     let drIsDeploying = false;
 
+    // Config
+    const MAP_SIZE = 2000;
+    const DRAGON_EMOJIS = ['🐲', '🦖', '🦕', '🐉', '🐊'];
+    const PLAYER_SPEED = 4;
+    const BOT_SPEED = 2.5;
+
     // Game State
-    let drScore = 0;
-    let drPlayer = { x: 300, y: 200, radius: 15, speed: 3, hp: 100, maxHp: 100 };
+    let drEntities = []; // Index 0 is player
     let drProjectiles = [];
-    let drEnemies = [];
-    let drStorm = { radius: 500, maxRadius: 500, shrinkRate: 0.1 };
+    let drStorm = { radius: MAP_SIZE, x: MAP_SIZE/2, y: MAP_SIZE/2, shrinkRate: 0.15 };
     let keys = { w: false, a: false, s: false, d: false };
     let mousePos = { x: 300, y: 200 };
+    let cam = { x: 0, y: 0 };
+    let frameCount = 0;
 
     if(canvas) {
-      // Event Listeners
       window.addEventListener('keydown', e => { 
         if(["w","a","s","d"].includes(e.key.toLowerCase())) keys[e.key.toLowerCase()] = true; 
       });
@@ -471,183 +476,317 @@
       
       canvas.addEventListener('mousemove', e => {
         const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        mousePos.x = (e.clientX - rect.left) * scaleX;
-        mousePos.y = (e.clientY - rect.top) * scaleY;
+        mousePos.x = (e.clientX - rect.left) * (canvas.width / rect.width);
+        mousePos.y = (e.clientY - rect.top) * (canvas.height / rect.height);
       });
 
       canvas.addEventListener('mousedown', e => {
-        if (!drIsDeploying) return;
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        const mx = (e.clientX - rect.left) * scaleX;
-        const my = (e.clientY - rect.top) * scaleY;
+        if (!drIsDeploying || drEntities.length === 0 || drEntities[0].isDead) return;
         
-        const angle = Math.atan2(my - drPlayer.y, mx - drPlayer.x);
+        // Player shoots
+        const p = drEntities[0];
+        if (p.cooldown > 0) return;
+        
+        const worldMouseX = mousePos.x + cam.x;
+        const worldMouseY = mousePos.y + cam.y;
+        const angle = Math.atan2(worldMouseY - p.y, worldMouseX - p.x);
+        
         drProjectiles.push({
-          x: drPlayer.x, y: drPlayer.y,
-          vx: Math.cos(angle) * 7, vy: Math.sin(angle) * 7,
+          ownerId: p.id,
+          x: p.x, y: p.y,
+          vx: Math.cos(angle) * 10, vy: Math.sin(angle) * 10,
           radius: 8
         });
+        p.cooldown = 15; // 15 frames cooldown
       });
     }
 
-    function spawnEnemy() {
-      if (!drIsDeploying) return;
-      const angle = Math.random() * Math.PI * 2;
-      const dist = 300 + Math.random() * 100; // spawn outside boundary
-      drEnemies.push({
-        x: drPlayer.x + Math.cos(angle) * dist,
-        y: drPlayer.y + Math.sin(angle) * dist,
-        radius: 12, speed: 1 + Math.random() * 0.5
+    function spawnEntities() {
+      drEntities = [];
+      // Player
+      drEntities.push({
+        id: 0, isPlayer: true,
+        x: Math.random() * MAP_SIZE, y: Math.random() * MAP_SIZE,
+        emoji: '🐉', hp: 100, maxHp: 100, radius: 15, cooldown: 0, isDead: false
       });
-      setTimeout(spawnEnemy, 1000 + Math.random() * 2000);
+      
+      // 49 Bots
+      for(let i = 1; i <= 49; i++) {
+        drEntities.push({
+          id: i, isPlayer: false,
+          x: Math.random() * MAP_SIZE, y: Math.random() * MAP_SIZE,
+          emoji: DRAGON_EMOJIS[Math.floor(Math.random() * DRAGON_EMOJIS.length)],
+          hp: 100, maxHp: 100, radius: 15, cooldown: 0, isDead: false,
+          targetX: Math.random() * MAP_SIZE, targetY: Math.random() * MAP_SIZE,
+          state: 'roam' // roam, fight, run_storm
+        });
+      }
     }
 
     window.startDragonRoyale = function() {
       document.getElementById('dr-overlay').style.display = 'none';
       document.getElementById('dr-score-hud').style.display = 'block';
-      drScore = 0;
-      document.getElementById('dr-score').textContent = 0;
+      document.getElementById('dr-score').textContent = 50;
       
-      drPlayer = { x: 300, y: 200, radius: 15, speed: 4, hp: 100, maxHp: 100 };
       drProjectiles = [];
-      drEnemies = [];
-      drStorm = { radius: 450, shrinkRate: 0.1 };
+      drStorm = { radius: MAP_SIZE, x: MAP_SIZE/2, y: MAP_SIZE/2, shrinkRate: 0.15 };
       keys = { w: false, a: false, s: false, d: false };
+      frameCount = 0;
       
       drIsDeploying = true;
-      spawnEnemy();
+      spawnEntities();
       
       if (drGameLoop) cancelAnimationFrame(drGameLoop);
       drUpdate();
     };
 
-    function drEndGame() {
+    function drEndGame(placed) {
       drIsDeploying = false;
       document.getElementById('dr-overlay').style.display = 'flex';
-      document.getElementById('dr-title').textContent = 'GAME OVER';
+      
+      const title = document.getElementById('dr-title');
       const finalScore = document.getElementById('dr-score-display');
       finalScore.style.display = 'block';
-      finalScore.textContent = 'Knights Defeated: ' + drScore;
+      
+      if (placed === 1 && !drEntities[0].isDead) {
+        title.textContent = 'VICTORY ROYALE 👑';
+        title.style.color = '#fbbf24';
+        finalScore.textContent = 'You are the last dragon standing!';
+      } else {
+        title.textContent = 'ELIMINATED 💀';
+        title.style.color = '#ef4444';
+        finalScore.textContent = 'Placed: #' + placed;
+      }
     }
 
     function drUpdate() {
       if (!drIsDeploying) return;
       drGameLoop = requestAnimationFrame(drUpdate);
+      frameCount++;
       
-      // Player Movement
-      if (keys.w && drPlayer.y - drPlayer.radius > 0) drPlayer.y -= drPlayer.speed;
-      if (keys.s && drPlayer.y + drPlayer.radius < canvas.height) drPlayer.y += drPlayer.speed;
-      if (keys.a && drPlayer.x - drPlayer.radius > 0) drPlayer.x -= drPlayer.speed;
-      if (keys.d && drPlayer.x + drPlayer.radius < canvas.width) drPlayer.x += drPlayer.speed;
+      let aliveCount = 0;
       
-      // Projectiles
-      for (let i = drProjectiles.length - 1; i >= 0; i--) {
-        let p = drProjectiles[i];
-        p.x += p.vx; p.y += p.vy;
-        if (p.x < 0 || p.x > canvas.width || p.y < 0 || p.y > canvas.height) {
-          drProjectiles.splice(i, 1);
-        }
-      }
-      
-      // Enemies
-      for (let i = drEnemies.length - 1; i >= 0; i--) {
-        let e = drEnemies[i];
-        const angle = Math.atan2(drPlayer.y - e.y, drPlayer.x - e.x);
-        e.x += Math.cos(angle) * e.speed;
-        e.y += Math.sin(angle) * e.speed;
+      // Update Entities
+      for (let i = 0; i < drEntities.length; i++) {
+        let e = drEntities[i];
+        if (e.isDead) continue;
+        aliveCount++;
         
-        // Collide with player
-        const distPlayer = Math.hypot(drPlayer.x - e.x, drPlayer.y - e.y);
-        if (distPlayer < drPlayer.radius + e.radius) {
-          drPlayer.hp -= 20;
-          drEnemies.splice(i, 1);
-          if (drPlayer.hp <= 0) { drEndGame(); return; }
-          continue;
+        if (e.cooldown > 0) e.cooldown--;
+        
+        // 1. Move
+        if (e.isPlayer) {
+          if (keys.w && e.y - e.radius > 0) e.y -= PLAYER_SPEED;
+          if (keys.s && e.y + e.radius < MAP_SIZE) e.y += PLAYER_SPEED;
+          if (keys.a && e.x - e.radius > 0) e.x -= PLAYER_SPEED;
+          if (keys.d && e.x + e.radius < MAP_SIZE) e.x += PLAYER_SPEED;
+        } else {
+          // AI Logic
+          
+          // Check storm distance
+          const distToStormCenter = Math.hypot(e.x - drStorm.x, e.y - drStorm.y);
+          if (distToStormCenter > drStorm.radius - 100) {
+            e.state = 'run_storm';
+            e.targetX = drStorm.x; e.targetY = drStorm.y;
+          } else if (e.state === 'run_storm') {
+            e.state = 'roam'; // Safe now
+          }
+          
+          // Look for enemies if not running purely from storm
+          if (e.state !== 'run_storm' && frameCount % 30 === 0) {
+            let closestDist = 400; // aggro range
+            let closestEnemy = null;
+            for (let other of drEntities) {
+              if (other.id === e.id || other.isDead) continue;
+              const dist = Math.hypot(e.x - other.x, e.y - other.y);
+              if (dist < closestDist) {
+                closestDist = dist;
+                closestEnemy = other;
+              }
+            }
+            if (closestEnemy) {
+              e.state = 'fight';
+              e.targetEnemy = closestEnemy;
+            } else {
+              e.state = 'roam';
+            }
+          }
+          
+          if (e.state === 'fight' && e.targetEnemy && !e.targetEnemy.isDead) {
+            const dist = Math.hypot(e.x - e.targetEnemy.x, e.y - e.targetEnemy.y);
+            if (dist > 150) {
+              e.targetX = e.targetEnemy.x;
+              e.targetY = e.targetEnemy.y;
+            } else {
+              e.targetX = e.x; e.targetY = e.y;
+            }
+            
+            // Shoot
+            if (e.cooldown <= 0 && dist < 400) {
+              const aimError = (Math.random() - 0.5) * 0.3;
+              const angle = Math.atan2(e.targetEnemy.y - e.y, e.targetEnemy.x - e.x) + aimError;
+              drProjectiles.push({
+                ownerId: e.id,
+                x: e.x, y: e.y,
+                vx: Math.cos(angle) * 8, vy: Math.sin(angle) * 8,
+                radius: 8
+              });
+              e.cooldown = 40; // Bots shoot slower
+            }
+          }
+          
+          if (e.state === 'roam' && frameCount % 60 === 0) {
+            e.targetX = e.x + (Math.random() - 0.5) * 400;
+            e.targetY = e.y + (Math.random() - 0.5) * 400;
+            e.targetX = Math.max(50, Math.min(MAP_SIZE-50, e.targetX));
+            e.targetY = Math.max(50, Math.min(MAP_SIZE-50, e.targetY));
+          }
+          
+          if (e.targetX && e.targetY) {
+            const angle = Math.atan2(e.targetY - e.y, e.targetX - e.x);
+            const dist = Math.hypot(e.targetX - e.x, e.targetY - e.y);
+            if (dist > 5) {
+              e.x += Math.cos(angle) * BOT_SPEED;
+              e.y += Math.sin(angle) * BOT_SPEED;
+            }
+          }
+          
+          e.x = Math.max(e.radius, Math.min(MAP_SIZE-e.radius, e.x));
+          e.y = Math.max(e.radius, Math.min(MAP_SIZE-e.radius, e.y));
         }
         
-        // Collide with projectile
-        for (let j = drProjectiles.length - 1; j >= 0; j--) {
-          let p = drProjectiles[j];
-          const dist = Math.hypot(p.x - e.x, p.y - e.y);
-          if (dist < p.radius + e.radius) {
-            drEnemies.splice(i, 1);
-            drProjectiles.splice(j, 1);
-            drScore++;
-            document.getElementById('dr-score').textContent = drScore;
-            break;
+        // Storm Damage
+        const distCenter = Math.hypot(e.x - drStorm.x, e.y - drStorm.y);
+        if (distCenter > drStorm.radius) {
+          e.hp -= 0.5; // Tick damage
+        }
+        
+        // Die?
+        if (e.hp <= 0 && !e.isDead) {
+          e.isDead = true;
+          if (e.isPlayer) {
+            drEndGame(aliveCount); // player died, gets whatever placement
           }
         }
       }
       
-      // Storm
+      document.getElementById('dr-score').textContent = aliveCount;
+      
+      // Update Projectiles
+      for (let i = drProjectiles.length - 1; i >= 0; i--) {
+        let p = drProjectiles[i];
+        p.x += p.vx; p.y += p.vy;
+        
+        if (p.x < 0 || p.x > MAP_SIZE || p.y < 0 || p.y > MAP_SIZE) {
+          drProjectiles.splice(i, 1);
+          continue;
+        }
+        
+        let hit = false;
+        for (let e of drEntities) {
+          if (e.isDead || e.id === p.ownerId) continue;
+          const dist = Math.hypot(p.x - e.x, p.y - e.y);
+          if (dist < p.radius + e.radius) {
+            e.hp -= 25;
+            hit = true;
+            break;
+          }
+        }
+        if (hit) drProjectiles.splice(i, 1);
+      }
+      
+      if (aliveCount === 1 && !drEntities[0].isDead) {
+        drEndGame(1);
+      }
+      
+      // Storm Shrink
       drStorm.radius -= drStorm.shrinkRate;
       if (drStorm.radius < 50) drStorm.radius = 50;
-      
-      const distCenter = Math.hypot(drPlayer.x - 300, drPlayer.y - 200);
-      if (distCenter > drStorm.radius) {
-        drPlayer.hp -= 0.5; // Tick damage
-        if (drPlayer.hp <= 0) { drEndGame(); return; }
-      }
 
       drRender();
     }
 
     function drRender() {
+      const p = drEntities[0];
+      
+      if (!p.isDead) {
+        cam.x = p.x - canvas.width / 2;
+        cam.y = p.y - canvas.height / 2;
+      }
+      
+      cam.x = Math.max(0, Math.min(MAP_SIZE - canvas.width, cam.x));
+      cam.y = Math.max(0, Math.min(MAP_SIZE - canvas.height, cam.y));
+      
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      ctx.save();
+      ctx.translate(-cam.x, -cam.y);
+      
+      // Map Background
+      ctx.fillStyle = '#166534';
+      ctx.fillRect(0, 0, MAP_SIZE, MAP_SIZE);
       
       // Safe Zone
       ctx.beginPath();
-      ctx.arc(300, 200, drStorm.radius, 0, Math.PI * 2);
+      ctx.arc(drStorm.x, drStorm.y, drStorm.radius, 0, Math.PI * 2);
       ctx.fillStyle = '#22c55e'; // Green grass
       ctx.fill();
       
       // Storm Overlay
       ctx.beginPath();
-      ctx.rect(0, 0, canvas.width, canvas.height);
-      ctx.arc(300, 200, drStorm.radius, 0, Math.PI * 2, true);
-      ctx.fillStyle = 'rgba(168, 85, 247, 0.4)'; // Purple storm filter
+      ctx.rect(0, 0, MAP_SIZE, MAP_SIZE);
+      ctx.arc(drStorm.x, drStorm.y, drStorm.radius, 0, Math.PI * 2, true);
+      ctx.fillStyle = 'rgba(168, 85, 247, 0.4)';
       ctx.fill();
       ctx.strokeStyle = '#a855f7';
       ctx.lineWidth = 3;
       ctx.stroke();
 
-      // Draw Enemies
-      ctx.font = '24px Arial';
+      ctx.font = '30px Arial';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      drEnemies.forEach(e => {
-        ctx.fillText('🤺', e.x, e.y + 2);
-      });
       
-      // Draw Projectiles
+      for (let e of drEntities) {
+        if (e.isDead) {
+          ctx.font = '20px Arial';
+          ctx.fillText('🦴', e.x, e.y);
+          continue;
+        }
+        
+        ctx.save();
+        ctx.translate(e.x, e.y);
+        
+        let pAngle = 0;
+        if (e.isPlayer) {
+          pAngle = Math.atan2((mousePos.y + cam.y) - e.y, (mousePos.x + cam.x) - e.x);
+        } else if (e.state === 'fight' && e.targetEnemy) {
+          pAngle = Math.atan2(e.targetEnemy.y - e.y, e.targetEnemy.x - e.x);
+        } else if (e.targetX) {
+          pAngle = Math.atan2(e.targetY - e.y, e.targetX - e.x);
+        }
+        
+        if (Math.abs(pAngle) > Math.PI / 2) {
+          ctx.scale(-1, 1);
+        }
+        
+        ctx.font = '30px Arial';
+        ctx.fillText(e.emoji, 0, 0);
+        ctx.restore();
+        
+        // Healthbar
+        ctx.fillStyle = 'red';
+        ctx.fillRect(e.x - 15, e.y - 25, 30, 4);
+        ctx.fillStyle = '#4ade80';
+        ctx.fillRect(e.x - 15, e.y - 25, 30 * (e.hp / e.maxHp), 4);
+      }
+      
       ctx.fillStyle = '#fbbf24';
-      drProjectiles.forEach(p => {
+      drProjectiles.forEach(pr => {
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI*2);
+        ctx.arc(pr.x, pr.y, pr.radius, 0, Math.PI*2);
         ctx.fill();
       });
       
-      // Draw Player
-      const pAngle = Math.atan2(mousePos.y - drPlayer.y, mousePos.x - drPlayer.x);
-      ctx.save();
-      ctx.translate(drPlayer.x, drPlayer.y);
-      // Let's just point the dragon text in that direction, flipping depending on angle
-      // Emojis don't rotate well natively, we will use scaleX for flip
-      if (Math.abs(pAngle) > Math.PI / 2) {
-        ctx.scale(-1, 1);
-      }
-      ctx.font = '30px Arial';
-      ctx.fillText('🐉', 0, 0);
       ctx.restore();
-      
-      // Healthbar
-      ctx.fillStyle = 'red';
-      ctx.fillRect(drPlayer.x - 20, drPlayer.y - 25, 40, 5);
-      ctx.fillStyle = '#4ade80';
-      ctx.fillRect(drPlayer.x - 20, drPlayer.y - 25, 40 * (drPlayer.hp / drPlayer.maxHp), 5);
     }
 
