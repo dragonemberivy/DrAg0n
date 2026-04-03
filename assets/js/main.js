@@ -443,3 +443,211 @@
       if (typingRef && currentRoom) typingRef.child(userId).remove();
     });
 
+    // ------------------------------------
+    // 8. DRAGON ROYALE (CANVAS GAME)
+    // ------------------------------------
+    const canvas = document.getElementById('dragon-royale');
+    const ctx = canvas ? canvas.getContext('2d') : null;
+    let drGameLoop;
+    let drIsDeploying = false;
+
+    // Game State
+    let drScore = 0;
+    let drPlayer = { x: 300, y: 200, radius: 15, speed: 3, hp: 100, maxHp: 100 };
+    let drProjectiles = [];
+    let drEnemies = [];
+    let drStorm = { radius: 500, maxRadius: 500, shrinkRate: 0.1 };
+    let keys = { w: false, a: false, s: false, d: false };
+    let mousePos = { x: 300, y: 200 };
+
+    if(canvas) {
+      // Event Listeners
+      window.addEventListener('keydown', e => { 
+        if(["w","a","s","d"].includes(e.key.toLowerCase())) keys[e.key.toLowerCase()] = true; 
+      });
+      window.addEventListener('keyup', e => { 
+        if(["w","a","s","d"].includes(e.key.toLowerCase())) keys[e.key.toLowerCase()] = false; 
+      });
+      
+      canvas.addEventListener('mousemove', e => {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        mousePos.x = (e.clientX - rect.left) * scaleX;
+        mousePos.y = (e.clientY - rect.top) * scaleY;
+      });
+
+      canvas.addEventListener('mousedown', e => {
+        if (!drIsDeploying) return;
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const mx = (e.clientX - rect.left) * scaleX;
+        const my = (e.clientY - rect.top) * scaleY;
+        
+        const angle = Math.atan2(my - drPlayer.y, mx - drPlayer.x);
+        drProjectiles.push({
+          x: drPlayer.x, y: drPlayer.y,
+          vx: Math.cos(angle) * 7, vy: Math.sin(angle) * 7,
+          radius: 8
+        });
+      });
+    }
+
+    function spawnEnemy() {
+      if (!drIsDeploying) return;
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 300 + Math.random() * 100; // spawn outside boundary
+      drEnemies.push({
+        x: drPlayer.x + Math.cos(angle) * dist,
+        y: drPlayer.y + Math.sin(angle) * dist,
+        radius: 12, speed: 1 + Math.random() * 0.5
+      });
+      setTimeout(spawnEnemy, 1000 + Math.random() * 2000);
+    }
+
+    window.startDragonRoyale = function() {
+      document.getElementById('dr-overlay').style.display = 'none';
+      document.getElementById('dr-score-hud').style.display = 'block';
+      drScore = 0;
+      document.getElementById('dr-score').textContent = 0;
+      
+      drPlayer = { x: 300, y: 200, radius: 15, speed: 4, hp: 100, maxHp: 100 };
+      drProjectiles = [];
+      drEnemies = [];
+      drStorm = { radius: 450, shrinkRate: 0.1 };
+      keys = { w: false, a: false, s: false, d: false };
+      
+      drIsDeploying = true;
+      spawnEnemy();
+      
+      if (drGameLoop) cancelAnimationFrame(drGameLoop);
+      drUpdate();
+    };
+
+    function drEndGame() {
+      drIsDeploying = false;
+      document.getElementById('dr-overlay').style.display = 'flex';
+      document.getElementById('dr-title').textContent = 'GAME OVER';
+      const finalScore = document.getElementById('dr-score-display');
+      finalScore.style.display = 'block';
+      finalScore.textContent = 'Knights Defeated: ' + drScore;
+    }
+
+    function drUpdate() {
+      if (!drIsDeploying) return;
+      drGameLoop = requestAnimationFrame(drUpdate);
+      
+      // Player Movement
+      if (keys.w && drPlayer.y - drPlayer.radius > 0) drPlayer.y -= drPlayer.speed;
+      if (keys.s && drPlayer.y + drPlayer.radius < canvas.height) drPlayer.y += drPlayer.speed;
+      if (keys.a && drPlayer.x - drPlayer.radius > 0) drPlayer.x -= drPlayer.speed;
+      if (keys.d && drPlayer.x + drPlayer.radius < canvas.width) drPlayer.x += drPlayer.speed;
+      
+      // Projectiles
+      for (let i = drProjectiles.length - 1; i >= 0; i--) {
+        let p = drProjectiles[i];
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0 || p.x > canvas.width || p.y < 0 || p.y > canvas.height) {
+          drProjectiles.splice(i, 1);
+        }
+      }
+      
+      // Enemies
+      for (let i = drEnemies.length - 1; i >= 0; i--) {
+        let e = drEnemies[i];
+        const angle = Math.atan2(drPlayer.y - e.y, drPlayer.x - e.x);
+        e.x += Math.cos(angle) * e.speed;
+        e.y += Math.sin(angle) * e.speed;
+        
+        // Collide with player
+        const distPlayer = Math.hypot(drPlayer.x - e.x, drPlayer.y - e.y);
+        if (distPlayer < drPlayer.radius + e.radius) {
+          drPlayer.hp -= 20;
+          drEnemies.splice(i, 1);
+          if (drPlayer.hp <= 0) { drEndGame(); return; }
+          continue;
+        }
+        
+        // Collide with projectile
+        for (let j = drProjectiles.length - 1; j >= 0; j--) {
+          let p = drProjectiles[j];
+          const dist = Math.hypot(p.x - e.x, p.y - e.y);
+          if (dist < p.radius + e.radius) {
+            drEnemies.splice(i, 1);
+            drProjectiles.splice(j, 1);
+            drScore++;
+            document.getElementById('dr-score').textContent = drScore;
+            break;
+          }
+        }
+      }
+      
+      // Storm
+      drStorm.radius -= drStorm.shrinkRate;
+      if (drStorm.radius < 50) drStorm.radius = 50;
+      
+      const distCenter = Math.hypot(drPlayer.x - 300, drPlayer.y - 200);
+      if (distCenter > drStorm.radius) {
+        drPlayer.hp -= 0.5; // Tick damage
+        if (drPlayer.hp <= 0) { drEndGame(); return; }
+      }
+
+      drRender();
+    }
+
+    function drRender() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Safe Zone
+      ctx.beginPath();
+      ctx.arc(300, 200, drStorm.radius, 0, Math.PI * 2);
+      ctx.fillStyle = '#22c55e'; // Green grass
+      ctx.fill();
+      
+      // Storm Overlay
+      ctx.beginPath();
+      ctx.rect(0, 0, canvas.width, canvas.height);
+      ctx.arc(300, 200, drStorm.radius, 0, Math.PI * 2, true);
+      ctx.fillStyle = 'rgba(168, 85, 247, 0.4)'; // Purple storm filter
+      ctx.fill();
+      ctx.strokeStyle = '#a855f7';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      // Draw Enemies
+      ctx.font = '24px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      drEnemies.forEach(e => {
+        ctx.fillText('🤺', e.x, e.y + 2);
+      });
+      
+      // Draw Projectiles
+      ctx.fillStyle = '#fbbf24';
+      drProjectiles.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI*2);
+        ctx.fill();
+      });
+      
+      // Draw Player
+      const pAngle = Math.atan2(mousePos.y - drPlayer.y, mousePos.x - drPlayer.x);
+      ctx.save();
+      ctx.translate(drPlayer.x, drPlayer.y);
+      // Let's just point the dragon text in that direction, flipping depending on angle
+      // Emojis don't rotate well natively, we will use scaleX for flip
+      if (Math.abs(pAngle) > Math.PI / 2) {
+        ctx.scale(-1, 1);
+      }
+      ctx.font = '30px Arial';
+      ctx.fillText('🐉', 0, 0);
+      ctx.restore();
+      
+      // Healthbar
+      ctx.fillStyle = 'red';
+      ctx.fillRect(drPlayer.x - 20, drPlayer.y - 25, 40, 5);
+      ctx.fillStyle = '#4ade80';
+      ctx.fillRect(drPlayer.x - 20, drPlayer.y - 25, 40 * (drPlayer.hp / drPlayer.maxHp), 5);
+    }
+
