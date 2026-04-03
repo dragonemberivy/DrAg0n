@@ -1,6 +1,6 @@
 /* 3D FORTZONE ENGINE */
-const container = document.getElementById('dragon-royale-3d');
-const parentContainer = document.getElementById('dr-container');
+const container = document.getElementById('dr-container'); // The parent
+const gameContainer = document.getElementById('dragon-royale-3d'); // The 3D box
 let scene, camera, renderer, controls;
 let drGameLoopId;
 let drIsDeploying = false;
@@ -24,22 +24,41 @@ let moveForward = false;
 let moveBackward = false;
 let moveLeft = false;
 let moveRight = false;
-let velocity = new THREE.Vector3();
-let direction = new THREE.Vector3();
+let velocity;
+let direction;
+
+// We attach event listeners globally, but they only trigger actions if drState is active
+window.addEventListener('keydown', e => { 
+  const k = e.key.toLowerCase();
+  if(["w","a","s","d","e"].includes(k)) keys[k] = true; 
+  if(e.code === 'Space') keys.space = true;
+});
+window.addEventListener('keyup', e => { 
+  const k = e.key.toLowerCase();
+  if(["w","a","s","d","e"].includes(k)) keys[k] = false; 
+  if(e.code === 'Space') keys.space = false;
+});
+
+let keys = { w: false, a: false, s: false, d: false, e: false, space: false };
+let mousePos = { x: 300, y: 200 };
+let cam = { x: 0, y: 0 };
 
 function init3D() {
-  if (!container) return;
+  if (!gameContainer) return;
+  velocity = new THREE.Vector3();
+  direction = new THREE.Vector3();
+  
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x87CEEB); // Sky blue
   scene.fog = new THREE.Fog(0x87CEEB, 0, MAP_SIZE/2);
 
-  const aspect = container.clientWidth / container.clientHeight;
+  const aspect = gameContainer.clientWidth / gameContainer.clientHeight;
   camera = new THREE.PerspectiveCamera(75, aspect, 1, MAP_SIZE);
 
   renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(container.clientWidth, container.clientHeight);
-  container.innerHTML = '';
-  container.appendChild(renderer.domElement);
+  renderer.setSize(gameContainer.clientWidth, gameContainer.clientHeight);
+  gameContainer.innerHTML = '';
+  gameContainer.appendChild(renderer.domElement);
 
   // Lighting
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
@@ -59,10 +78,10 @@ function init3D() {
   controls = new THREE.PointerLockControls(camera, document.body);
   
   window.addEventListener('resize', () => {
-    if(container && camera && renderer) {
-      camera.aspect = container.clientWidth / container.clientHeight;
+    if(gameContainer && camera && renderer) {
+      camera.aspect = gameContainer.clientWidth / gameContainer.clientHeight;
       camera.updateProjectionMatrix();
-      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setSize(gameContainer.clientWidth, gameContainer.clientHeight);
     }
   });
 
