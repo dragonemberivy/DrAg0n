@@ -47,8 +47,10 @@
     scene.add(sunLight);
 
     spawnSolarSystem();
-
+    const resizeObserver = new ResizeObserver(() => onResize());
+    resizeObserver.observe(container);
     window.addEventListener('resize', onResize);
+
     document.addEventListener('keydown', onKeyDown);
     document.addEventListener('keyup', onKeyUp);
     
