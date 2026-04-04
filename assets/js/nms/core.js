@@ -40,7 +40,7 @@
     yawObject.add(pitchObject);
 
     // Visible Player Character Mesh
-    const playerGeo = new THREE.CapsuleGeometry(1, 2, 4, 8);
+    const playerGeo = new THREE.CylinderGeometry(1, 1, 4, 8);
     const playerMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
     let playerMesh = new THREE.Mesh(playerGeo, playerMat);
     playerMesh.position.y = -1; // Offset capsule so feet touch the ground (planet height + 5 sets center higher)
