@@ -8,8 +8,7 @@
   const debugMode = document.getElementById('nms-debug-mode');
 
   let scene, camera, renderer;
-  let planetMesh;
-  const PLANET_RADIUS = 100;
+  let planets = [];
 
   let pitchObject, yawObject;
   let keys = { w: false, a: false, s: false, d: false, space: false };
@@ -26,36 +25,35 @@
     scene.background = new THREE.Color(0x050510); // Deep space
     
     const aspect = container.clientWidth / container.clientHeight;
-    camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 10000);
+    camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 100000);
 
     pitchObject = new THREE.Object3D();
     pitchObject.add(camera);
     yawObject = new THREE.Object3D();
-    yawObject.position.y = PLANET_RADIUS + 2; 
+    // Start slightly above Earth-like planet at origin
+    yawObject.position.set(0, 102, 0); 
     yawObject.add(pitchObject);
     scene.add(yawObject);
 
-    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
     renderer.setSize(container.clientWidth, container.clientHeight);
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
     scene.add(ambientLight);
-    const sunLight = new THREE.DirectionalLight(0xffffff, 1.0);
-    sunLight.position.set(500, 200, 500);
+    const sunLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    sunLight.position.set(2000, 1000, 2000);
     scene.add(sunLight);
 
-    createPlanet();
+    spawnSolarSystem();
 
     window.addEventListener('resize', onResize);
     document.addEventListener('keydown', onKeyDown);
     document.addEventListener('keyup', onKeyUp);
     
     overlay.addEventListener('click', () => {
-      if (!isLocked) {
-        container.requestPointerLock();
-      }
+      if (!isLocked) container.requestPointerLock();
     });
 
     document.addEventListener('pointerlockchange', () => {
@@ -74,18 +72,15 @@
     document.addEventListener('mousemove', onMouseMove);
   }
 
-  function createPlanet() {
-    const geometry = new THREE.SphereGeometry(PLANET_RADIUS, 128, 128);
+  function createPlanet(x, y, z, radius, seed, colorSet) {
+    const geometry = new THREE.SphereGeometry(radius, 128, 128);
     const material = new THREE.MeshStandardMaterial({ 
-      wireframe: false,
-      roughness: 0.8,
-      metalness: 0.1
+      wireframe: false, roughness: 0.8, metalness: 0.1
     });
     
-    const simplex = new SimplexNoise('seed_123');
+    const simplex = new SimplexNoise(seed);
     const positionAttribute = geometry.attributes.position;
     const vertex = new THREE.Vector3();
-    
     const colors = [];
     const colorObj = new THREE.Color();
     
@@ -94,31 +89,43 @@
        vertex.normalize(); 
 
        let noiseVal = 0;
-       let freq = 0.05;
-       let amp = 6;
-       // 2 Octaves
+       // Adaptive frequency/amplitude based on radius
+       let freq = 0.05 * (100 / radius);
+       let amp = 6 * (radius / 100);
        noiseVal += simplex.noise3D(vertex.x * freq, vertex.y * freq, vertex.z * freq) * amp;
        freq *= 2; amp *= 0.5;
        noiseVal += simplex.noise3D(vertex.x * freq, vertex.y * freq, vertex.z * freq) * amp;
 
-       if (noiseVal < 0) { noiseVal = 0; colorObj.setHex(0x1d4ed8); } 
-       else if (noiseVal < 1) { colorObj.setHex(0x3b82f6); }
-       else if (noiseVal < 3) { colorObj.setHex(0x22c55e); }
-       else if (noiseVal < 5) { colorObj.setHex(0x78716c); }
-       else { colorObj.setHex(0xf8fafc); }
+       if (noiseVal < 0) { noiseVal = 0; colorObj.setHex(colorSet[0]); } 
+       else if (noiseVal < 1) { colorObj.setHex(colorSet[1]); }
+       else if (noiseVal < 3) { colorObj.setHex(colorSet[2]); }
+       else if (noiseVal < 5) { colorObj.setHex(colorSet[3]); }
+       else { colorObj.setHex(colorSet[4]); }
        
-       vertex.multiplyScalar(PLANET_RADIUS + noiseVal);
+       vertex.multiplyScalar(radius + noiseVal);
        positionAttribute.setXYZ(i, vertex.x, vertex.y, vertex.z);
        colors.push(colorObj.r, colorObj.g, colorObj.b);
     }
     
     geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
     geometry.computeVertexNormals();
-    
     material.vertexColors = true;
     
-    planetMesh = new THREE.Mesh(geometry, material);
-    scene.add(planetMesh);
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(x, y, z);
+    scene.add(mesh);
+    planets.push({ mesh, radius, position: new THREE.Vector3(x, y, z) });
+  }
+
+  function spawnSolarSystem() {
+     // Earth-like (Origin)
+     createPlanet(0, 0, 0, 100, 'seed_earth', [0x1d4ed8, 0x3b82f6, 0x22c55e, 0x78716c, 0xf8fafc]);
+     // Mars-like
+     createPlanet(800, 300, -1200, 150, 'seed_mars', [0x7f1d1d, 0x991b1b, 0xd97706, 0xfcd34d, 0xfef3c7]);
+     // Small Ice planet
+     createPlanet(-1000, -500, -500, 60, 'seed_ice', [0x0284c7, 0x38bdf8, 0xbae6fd, 0xf0f9ff, 0xffffff]);
+     // Toxic gas giant
+     createPlanet(500, -800, 1500, 250, 'seed_gas', [0x064e3b, 0x166534, 0x65a30d, 0x84cc16, 0xd9f99d]);
   }
 
   function onResize() {
@@ -170,7 +177,8 @@
     if(keys.d) direction.x += 1;
     direction.normalize();
 
-    const speed = isFlying ? 150 : 20;
+    // Flight mode travels 10x faster
+    const speed = isFlying ? 400 : 20;
 
     if (isFlying) {
        direction.set(0,0,0);
@@ -189,10 +197,21 @@
        direction.applyQuaternion(yawObject.quaternion);
        yawObject.position.add(direction.multiplyScalar(speed * dt));
        
-       const center = new THREE.Vector3(0,0,0);
+       // Calculate closest planet for gravity
+       let closestPlanet = planets[0];
+       let minDist = Infinity;
+       for (let p of planets) {
+         const dist = yawObject.position.distanceTo(p.position);
+         if (dist < minDist) {
+            minDist = dist;
+            closestPlanet = p;
+         }
+       }
+       
+       const center = closestPlanet.position;
        const up = yawObject.position.clone().sub(center).normalize();
        
-       yawObject.position.copy(center).add(up.multiplyScalar(PLANET_RADIUS + 5)); 
+       yawObject.position.copy(center).add(up.multiplyScalar(closestPlanet.radius + 5)); 
 
        const targetQuat = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0), up);
        
