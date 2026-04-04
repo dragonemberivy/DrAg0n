@@ -128,6 +128,21 @@
 
     lod.position.set(x, y, z);
     scene.add(lod);
+
+    // Planet Aura / Atmosphere
+    const auraGeo = new THREE.SphereGeometry(radius * 1.15, 64, 64);
+    const auraMat = new THREE.MeshBasicMaterial({
+      color: colorSet[1], 
+      transparent: true,
+      opacity: 0.15,
+      blending: THREE.AdditiveBlending,
+      side: THREE.BackSide,
+      depthWrite: false
+    });
+    const auraMesh = new THREE.Mesh(auraGeo, auraMat);
+    auraMesh.position.set(x, y, z);
+    scene.add(auraMesh);
+
     planets.push({ mesh: lod, radius, position: new THREE.Vector3(x, y, z) });
   }
 
