@@ -75,48 +75,60 @@
   }
 
   function createPlanet(x, y, z, radius, seed, colorSet) {
-    const geometry = new THREE.SphereGeometry(radius, 128, 128);
-    const material = new THREE.MeshStandardMaterial({ 
-      wireframe: false, roughness: 0.8, metalness: 0.1
+    const lod = new THREE.LOD();
+    
+    // Creating different levels of detail
+    const levels = [
+      { res: 128, dist: 0 },
+      { res: 64, dist: radius * 3 },
+      { res: 32, dist: radius * 12 }
+    ];
+
+    levels.forEach(level => {
+      const geometry = new THREE.SphereGeometry(radius, level.res, level.res);
+      const material = new THREE.MeshStandardMaterial({ 
+        wireframe: false, roughness: 0.8, metalness: 0.1
+      });
+      
+      const simplex = new SimplexNoise(seed);
+      const positionAttribute = geometry.attributes.position;
+      const vertex = new THREE.Vector3();
+      const colors = [];
+      const colorObj = new THREE.Color();
+      
+      for ( let i = 0; i < positionAttribute.count; i ++ ) {
+         vertex.fromBufferAttribute( positionAttribute, i );
+         vertex.normalize(); 
+
+         let noiseVal = 0;
+         let freq = 0.05 * (100 / radius);
+         let amp = 6 * (radius / 100);
+         noiseVal += simplex.noise3D(vertex.x * freq, vertex.y * freq, vertex.z * freq) * amp;
+         freq *= 2; amp *= 0.5;
+         noiseVal += simplex.noise3D(vertex.x * freq, vertex.y * freq, vertex.z * freq) * amp;
+
+         if (noiseVal < 0) { noiseVal = 0; colorObj.setHex(colorSet[0]); } 
+         else if (noiseVal < 1) { colorObj.setHex(colorSet[1]); }
+         else if (noiseVal < 3) { colorObj.setHex(colorSet[2]); }
+         else if (noiseVal < 5) { colorObj.setHex(colorSet[3]); }
+         else { colorObj.setHex(colorSet[4]); }
+         
+         vertex.multiplyScalar(radius + noiseVal);
+         positionAttribute.setXYZ(i, vertex.x, vertex.y, vertex.z);
+         colors.push(colorObj.r, colorObj.g, colorObj.b);
+      }
+      
+      geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+      geometry.computeVertexNormals();
+      material.vertexColors = true;
+      
+      const mesh = new THREE.Mesh(geometry, material);
+      lod.addLevel(mesh, level.dist);
     });
-    
-    const simplex = new SimplexNoise(seed);
-    const positionAttribute = geometry.attributes.position;
-    const vertex = new THREE.Vector3();
-    const colors = [];
-    const colorObj = new THREE.Color();
-    
-    for ( let i = 0; i < positionAttribute.count; i ++ ) {
-       vertex.fromBufferAttribute( positionAttribute, i );
-       vertex.normalize(); 
 
-       let noiseVal = 0;
-       // Adaptive frequency/amplitude based on radius
-       let freq = 0.05 * (100 / radius);
-       let amp = 6 * (radius / 100);
-       noiseVal += simplex.noise3D(vertex.x * freq, vertex.y * freq, vertex.z * freq) * amp;
-       freq *= 2; amp *= 0.5;
-       noiseVal += simplex.noise3D(vertex.x * freq, vertex.y * freq, vertex.z * freq) * amp;
-
-       if (noiseVal < 0) { noiseVal = 0; colorObj.setHex(colorSet[0]); } 
-       else if (noiseVal < 1) { colorObj.setHex(colorSet[1]); }
-       else if (noiseVal < 3) { colorObj.setHex(colorSet[2]); }
-       else if (noiseVal < 5) { colorObj.setHex(colorSet[3]); }
-       else { colorObj.setHex(colorSet[4]); }
-       
-       vertex.multiplyScalar(radius + noiseVal);
-       positionAttribute.setXYZ(i, vertex.x, vertex.y, vertex.z);
-       colors.push(colorObj.r, colorObj.g, colorObj.b);
-    }
-    
-    geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-    geometry.computeVertexNormals();
-    material.vertexColors = true;
-    
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.position.set(x, y, z);
-    scene.add(mesh);
-    planets.push({ mesh, radius, position: new THREE.Vector3(x, y, z) });
+    lod.position.set(x, y, z);
+    scene.add(lod);
+    planets.push({ mesh: lod, radius, position: new THREE.Vector3(x, y, z) });
   }
 
   function spawnSolarSystem() {
@@ -230,6 +242,11 @@
     nmsLoopId = requestAnimationFrame(animate);
     const dt = clock.getDelta();
     updatePhysics(dt);
+    
+    for (let p of planets) {
+      if (p.mesh && p.mesh.isLOD) p.mesh.update(camera);
+    }
+    
     if(renderer && scene && camera) renderer.render(scene, camera);
   }
 
