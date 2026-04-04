@@ -299,14 +299,18 @@
   }
 
   window.startNMS = function() {
-    if (!scene) {
-      init();
-      animate();
-    }
     if (!isLocked && container) {
        container.requestPointerLock();
     }
   };
+
+  // Pre-initialize the massive planetary math so it doesn't block the play button Event Loop!
+  setTimeout(() => {
+    if (!scene) {
+      init();
+      animate();
+    }
+  }, 100);
 
   window.toggleFullscreenNMS = function() {
     const parent = document.getElementById('nms-container');
