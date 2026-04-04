@@ -1,4 +1,5 @@
 /* 3D FORTZONE ENGINE */
+(function() {
 const container = document.getElementById('dr-container'); // The parent
 const gameContainer = document.getElementById('dragon-royale-3d'); // The 3D box
 let scene, camera, renderer, controls;
@@ -494,3 +495,4 @@ function drUpdate3D() {
 
   renderer.render(scene, camera);
 }
+})();
