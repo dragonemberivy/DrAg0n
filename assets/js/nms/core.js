@@ -241,4 +241,13 @@
     }
   };
 
+  window.toggleFullscreenNMS = function() {
+    const parent = document.getElementById('nms-container');
+    if (!document.fullscreenElement) {
+      if(parent) parent.requestFullscreen().catch(err => console.log(err));
+    } else {
+      document.exitFullscreen();
+    }
+  };
+
 })();
