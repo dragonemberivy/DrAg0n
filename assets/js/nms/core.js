@@ -4,10 +4,12 @@
   const overlay = document.getElementById('nms-overlay');
   const crosshair = document.getElementById('nms-crosshair');
   const hud = document.getElementById('nms-hud');
+  const objectivesPanel = document.getElementById('nms-objectives');
   const debugPos = document.getElementById('nms-debug-pos');
   const debugMode = document.getElementById('nms-debug-mode');
 
   let scene, camera, renderer;
+  let visitedPlanets = new Set();
   let planets = [];
 
   let pitchObject, yawObject;
@@ -64,10 +66,12 @@
         overlay.style.display = 'none';
         crosshair.style.display = 'block';
         hud.style.display = 'block';
+        if (objectivesPanel) objectivesPanel.style.display = 'block';
       } else {
         overlay.style.display = 'flex';
         crosshair.style.display = 'none';
         hud.style.display = 'none';
+        if (objectivesPanel) objectivesPanel.style.display = 'none';
       }
     });
 
@@ -229,18 +233,30 @@
        // Calculate closest planet for gravity
        let closestPlanet = planets[0];
        let minDist = Infinity;
+       let planetIndex = 0;
+       let closestIdx = 0;
        for (let p of planets) {
          const dist = yawObject.position.distanceTo(p.position);
          if (dist < minDist) {
             minDist = dist;
             closestPlanet = p;
+            closestIdx = planetIndex;
          }
+         planetIndex++;
        }
+
+       // Mission Objectives Tracker
+       visitedPlanets.add(closestIdx);
+       if (visitedPlanets.size > 1) { const el = document.getElementById('obj-leave'); if(el) el.innerText = '[x] Leave Origin\'s orbit'; }
+       if (visitedPlanets.has(1)) { const el = document.getElementById('obj-mars'); if(el) el.innerText = '[x] Visit Mars-like planet'; }
+       if (visitedPlanets.has(2)) { const el = document.getElementById('obj-ice'); if(el) el.innerText = '[x] Visit Ice Planet'; }
+       if (visitedPlanets.has(3)) { const el = document.getElementById('obj-gas'); if(el) el.innerText = '[x] Visit Toxic Gas Giant'; }
+       if (visitedPlanets.size === 4) { const el = document.getElementById('obj-all'); if(el) el.innerText = '[x] Explore the Solar System'; }
        
        const center = closestPlanet.position;
        const up = yawObject.position.clone().sub(center).normalize();
        
-       yawObject.position.copy(center).add(up.multiplyScalar(closestPlanet.radius + 5)); 
+       yawObject.position.copy(center).add(up.multiplyScalar(closestPlanet.radius + 5));  
 
        const targetQuat = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0), up);
        
