@@ -29,12 +29,23 @@
     const aspect = container.clientWidth / container.clientHeight;
     camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 100000);
 
+    // 3rd Person Camera Offset (Orbital tracking)
+    camera.position.set(0, 2, 7);
+
     pitchObject = new THREE.Object3D();
     pitchObject.add(camera);
     yawObject = new THREE.Object3D();
     // Start slightly above Earth-like planet at origin
     yawObject.position.set(0, 102, 0); 
     yawObject.add(pitchObject);
+
+    // Visible Player Character Mesh
+    const playerGeo = new THREE.CapsuleGeometry(1, 2, 4, 8);
+    const playerMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+    let playerMesh = new THREE.Mesh(playerGeo, playerMat);
+    playerMesh.position.y = -1; // Offset capsule so feet touch the ground (planet height + 5 sets center higher)
+    yawObject.add(playerMesh);
+
     scene.add(yawObject);
 
     renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
@@ -159,6 +170,14 @@
      createPlanet(-1000, -500, -500, 60, 'seed_ice', [0x0284c7, 0x38bdf8, 0xbae6fd, 0xf0f9ff, 0xffffff]);
      // Toxic gas giant
      createPlanet(500, -800, 1500, 250, 'seed_gas', [0x064e3b, 0x166534, 0x65a30d, 0x84cc16, 0xd9f99d]);
+     
+     // 6 New Planets
+     createPlanet(2500, 1000, 500, 120, 'seed_magma', [0x450a0a, 0x7f1d1d, 0xb91c1c, 0xef4444, 0xfca5a5]);
+     createPlanet(-2500, 1500, 1000, 180, 'seed_pink', [0x831843, 0xbe185d, 0xdb2777, 0xf472b6, 0xfbcfe8]);
+     createPlanet(0, 2500, -2000, 200, 'seed_desert', [0x78350f, 0x92400e, 0xb45309, 0xd97706, 0xfcd34d]);
+     createPlanet(-800, -2500, -1500, 90, 'seed_ocean', [0x1e3a8a, 0x1e40af, 0x1d4ed8, 0x2563eb, 0x3b82f6]);
+     createPlanet(1800, -2000, -2500, 140, 'seed_purple', [0x4c1d95, 0x5b21b6, 0x6d28d9, 0x7c3aed, 0xa78bfa]);
+     createPlanet(-400, 500, -300, 30, 'seed_moon', [0x1c1917, 0x292524, 0x44403c, 0x57534e, 0x78716c]);
   }
 
   function onResize() {
@@ -248,10 +267,8 @@
        // Mission Objectives Tracker
        visitedPlanets.add(closestIdx);
        if (visitedPlanets.size > 1) { const el = document.getElementById('obj-leave'); if(el) el.innerText = '[x] Leave Origin\'s orbit'; }
-       if (visitedPlanets.has(1)) { const el = document.getElementById('obj-mars'); if(el) el.innerText = '[x] Visit Mars-like planet'; }
-       if (visitedPlanets.has(2)) { const el = document.getElementById('obj-ice'); if(el) el.innerText = '[x] Visit Ice Planet'; }
-       if (visitedPlanets.has(3)) { const el = document.getElementById('obj-gas'); if(el) el.innerText = '[x] Visit Toxic Gas Giant'; }
-       if (visitedPlanets.size === 4) { const el = document.getElementById('obj-all'); if(el) el.innerText = '[x] Explore the Solar System'; }
+       { const el = document.getElementById('obj-progress'); if(el) el.innerText = `[-] Visited ${visitedPlanets.size}/10 Planets`; }
+       if (visitedPlanets.size === 10) { const el = document.getElementById('obj-all'); if(el) el.innerText = '[x] Explore ALL 10 Planets!'; }
        
        const center = closestPlanet.position;
        const up = yawObject.position.clone().sub(center).normalize();
