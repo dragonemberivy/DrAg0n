@@ -130,10 +130,10 @@
 
   function onKeyDown(e) {
     switch(e.code) {
-      case 'KeyW': keys.w = true; break;
-      case 'KeyA': keys.a = true; break;
-      case 'KeyS': keys.s = true; break;
-      case 'KeyD': keys.d = true; break;
+      case 'ArrowUp': keys.w = true; break;
+      case 'ArrowLeft': keys.a = true; break;
+      case 'ArrowDown': keys.s = true; break;
+      case 'ArrowRight': keys.d = true; break;
       case 'Space': keys.space = true; break;
       case 'KeyF': if(isLocked) isFlying = !isFlying; break;
     }
@@ -141,10 +141,10 @@
 
   function onKeyUp(e) {
     switch(e.code) {
-      case 'KeyW': keys.w = false; break;
-      case 'KeyA': keys.a = false; break;
-      case 'KeyS': keys.s = false; break;
-      case 'KeyD': keys.d = false; break;
+      case 'ArrowUp': keys.w = false; break;
+      case 'ArrowLeft': keys.a = false; break;
+      case 'ArrowDown': keys.s = false; break;
+      case 'ArrowRight': keys.d = false; break;
       case 'Space': keys.space = false; break;
     }
   }
