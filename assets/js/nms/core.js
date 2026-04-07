@@ -349,19 +349,7 @@
       case 'ArrowRight': keys.d = true; break;
       case 'Space': keys.space = true; break;
       case 'KeyF': 
-        if(isLocked) {
-           isFlying = !isFlying; 
-           if(window.astronautGroup && window.spaceshipGroup) {
-              window.astronautGroup.visible = !isFlying;
-              window.spaceshipGroup.visible = isFlying;
-           }
-           // Adjust Camera perspective
-           if (isFlying) {
-               camera.position.set(0, 4, 15); // Pull back for ship
-           } else {
-               camera.position.set(0, 2, 7); // Close up for walking
-           }
-        }
+        toggleFlightMode();
         break;
     }
   }
@@ -371,8 +359,23 @@
       case 'ArrowUp': keys.w = false; break;
       case 'ArrowLeft': keys.a = false; break;
       case 'ArrowDown': keys.s = false; break;
-      case 'ArrowRight': keys.d = false; break;
+      case 'Right': keys.d = false; break;
       case 'Space': keys.space = false; break;
+    }
+  }
+
+  function toggleFlightMode() {
+    if(!isLocked) return;
+    isFlying = !isFlying; 
+    if(window.astronautGroup && window.spaceshipGroup) {
+       window.astronautGroup.visible = !isFlying;
+       window.spaceshipGroup.visible = isFlying;
+    }
+    // Adjust Camera perspective
+    if (isFlying) {
+        camera.position.set(0, 4, 15); // Pull back for ship
+    } else {
+        camera.position.set(0, 2, 7); // Close up for walking
     }
   }
 
@@ -433,6 +436,11 @@
        }
     }
 
+    const center = closestPlanet.position;
+    const up = yawObject.position.clone().sub(center).normalize();
+    const currentDistCenter = yawObject.position.distanceTo(center);
+    const surfaceRadius = closestPlanet.radius + 5;
+
     if (isFlying) {
        direction.set(0,0,0);
        if(keys.w) direction.z -= 1;
@@ -446,6 +454,14 @@
        direction.applyQuaternion(camQuat);
        
        yawObject.position.add(direction.multiplyScalar(speed * dt));
+
+       // Auto-Dismount if crashing into the planetary surface
+       const newDistCenter = yawObject.position.distanceTo(center);
+       if (newDistCenter < surfaceRadius) {
+           yawObject.position.copy(center).add(up.multiplyScalar(surfaceRadius));
+           toggleFlightMode(); // Simulated crash landing auto-dismount!
+       }
+
     } else {
        direction.applyQuaternion(yawObject.quaternion);
        yawObject.position.add(direction.multiplyScalar(speed * dt));
@@ -456,10 +472,18 @@
        { const el = document.getElementById('obj-progress'); if(el) el.innerText = `[-] Visited ${visitedPlanets.size}/10 Planets`; }
        if (visitedPlanets.size === 10) { const el = document.getElementById('obj-all'); if(el) el.innerText = '[x] Explore ALL 10 Planets!'; }
        
-       const center = closestPlanet.position;
-       const up = yawObject.position.clone().sub(center).normalize();
-       
-       yawObject.position.copy(center).add(up.multiplyScalar(closestPlanet.radius + 5));  
+       // Smooth vertical gravity falling OR clamp to ground if currently below surface
+       let targetDist = currentDistCenter;
+       if (currentDistCenter > surfaceRadius + 1) { // High up in air
+           targetDist -= 80 * dt; // Gravity descent speed
+           if(targetDist < surfaceRadius) targetDist = surfaceRadius;
+       } else if (currentDistCenter < surfaceRadius) { // Clipped into ground
+           targetDist = surfaceRadius; 
+       } else { // Already resting
+           targetDist = surfaceRadius;
+       }
+
+       yawObject.position.copy(center).add(up.multiplyScalar(targetDist));  
 
        const targetQuat = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0), up);
        
