@@ -374,6 +374,21 @@
   }
 
   const PI_2 = Math.PI / 2;
+  
+  function getTerrainHeight(planet, unitVector) {
+     let noiseVal = 0;
+     let amplitude = 15;
+     let frequency = 0.05;
+     for(let j=0; j<3; j++) {
+        let n = simplex.noise3D(unitVector.x * frequency + planet.position.x, unitVector.y * frequency + planet.position.y, unitVector.z * frequency + planet.position.z);
+        noiseVal += (1.0 - Math.abs(n)) * amplitude;
+        amplitude *= 0.5;
+        frequency *= 2;
+     }
+     noiseVal -= 5 * (planet.radius / 100); // Ocean depth modifier
+     if (noiseVal <= 0) noiseVal = 0; // Flat water
+     return planet.radius + noiseVal;
+  }
   function onMouseMove(event) {
     if (!isLocked) return;
     const movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
@@ -433,7 +448,11 @@
     const center = closestPlanet.position;
     const up = yawObject.position.clone().sub(center).normalize();
     const currentDistCenter = yawObject.position.distanceTo(center);
-    const surfaceRadius = closestPlanet.radius + 5;
+    
+    // Evaluate procedural noise exactly at player's latitude/longitude
+    const terrainRadius = getTerrainHeight(closestPlanet, up);
+    // +3 allows the capsule mesh (-2 downward span) to rest precisely on the ground without clipping
+    const surfaceRadius = terrainRadius + 3;
 
     if (isFlying) {
        direction.set(0,0,0);
@@ -497,7 +516,10 @@
     const camPos = new THREE.Vector3();
     camera.getWorldPosition(camPos);
     const clipDist = camPos.distanceTo(center);
-    const minCamRad = closestPlanet.radius + 1.5;
+    
+    const camUp = camPos.clone().sub(center).normalize();
+    const camTerrainRad = getTerrainHeight(closestPlanet, camUp);
+    const minCamRad = camTerrainRad + 1.5;
     
     if (clipDist < minCamRad) {
         const deficit = minCamRad - clipDist;
