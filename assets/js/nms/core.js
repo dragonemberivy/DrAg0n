@@ -43,12 +43,96 @@
     yawObject.position.set(0, 102, 0); 
     yawObject.add(pitchObject);
 
-    // Visible Player Character Mesh
-    const playerGeo = new THREE.CylinderGeometry(1, 1, 4, 8);
-    const playerMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
-    let playerMesh = new THREE.Mesh(playerGeo, playerMat);
-    playerMesh.position.y = -1; // Offset capsule so feet touch the ground (planet height + 5 sets center higher)
-    yawObject.add(playerMesh);
+    // Astronaut Group
+    window.astronautGroup = new THREE.Group();
+    window.astronautGroup.position.y = -1;
+
+    // Body
+    const bodyMat = new THREE.MeshStandardMaterial({ color: 0xdddddf, roughness: 0.8 });
+    const bodyGeo = new THREE.CylinderGeometry(0.8, 0.8, 2.5, 16);
+    const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
+    bodyMesh.position.y = 1.25;
+    window.astronautGroup.add(bodyMesh);
+
+    // Helmet
+    const helmetGeo = new THREE.SphereGeometry(0.7, 16, 16);
+    const helmetMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1, metalness: 0.8 });
+    const helmetMesh = new THREE.Mesh(helmetGeo, helmetMat);
+    helmetMesh.position.y = 2.8;
+    window.astronautGroup.add(helmetMesh);
+    
+    // Visor
+    const visorGeo = new THREE.SphereGeometry(0.6, 16, 16, 0, Math.PI * 2, 0, Math.PI/2.5);
+    const visorMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.0, metalness: 1.0 });
+    const visorMesh = new THREE.Mesh(visorGeo, visorMat);
+    visorMesh.position.set(0, 2.8, -0.15);
+    visorMesh.rotation.x = Math.PI / 8;
+    window.astronautGroup.add(visorMesh);
+
+    // Jetpack / Backpack
+    const packGeo = new THREE.BoxGeometry(1.2, 1.5, 0.6);
+    const packMat = new THREE.MeshStandardMaterial({ color: 0x444444 });
+    const packMesh = new THREE.Mesh(packGeo, packMat);
+    packMesh.position.set(0, 1.8, 0.6);
+    window.astronautGroup.add(packMesh);
+
+    // Glowing Jetpack Ring
+    const ringGeo = new THREE.TorusGeometry(0.3, 0.05, 8, 16);
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
+    const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+    ringMesh.position.set(0, 1.8, 0.85);
+    window.astronautGroup.add(ringMesh);
+
+    yawObject.add(window.astronautGroup);
+
+    // Spaceship Group
+    window.spaceshipGroup = new THREE.Group();
+    window.spaceshipGroup.visible = false; // Hidden at start
+    
+    // Hull
+    const hullGeo = new THREE.CylinderGeometry(0.5, 1.5, 5, 8);
+    hullGeo.rotateX(Math.PI / 2);
+    const hullMat = new THREE.MeshStandardMaterial({ color: 0xaa3333, metalness: 0.5 });
+    const hullMesh = new THREE.Mesh(hullGeo, hullMat);
+    window.spaceshipGroup.add(hullMesh);
+
+    // Cockpit
+    const shipVisorGeo = new THREE.SphereGeometry(1, 16, 16);
+    shipVisorGeo.scale(1, 0.5, 1.5);
+    const shipVisorMat = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 1.0, roughness: 0.1 });
+    const shipVisorMesh = new THREE.Mesh(shipVisorGeo, shipVisorMat);
+    shipVisorMesh.position.set(0, 0.5, -0.5);
+    window.spaceshipGroup.add(shipVisorMesh);
+
+    // Wings
+    const wingGeo = new THREE.BoxGeometry(6, 0.2, 2);
+    const wingMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+    const wingMesh = new THREE.Mesh(wingGeo, wingMat);
+    wingMesh.position.set(0, 0, 1);
+    window.spaceshipGroup.add(wingMesh);
+
+    // Thrusters
+    const thrusterGeo = new THREE.CylinderGeometry(0.6, 0.4, 1, 8);
+    thrusterGeo.rotateX(Math.PI / 2);
+    const thrusterMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
+    const thrusterMesh1 = new THREE.Mesh(thrusterGeo, thrusterMat);
+    thrusterMesh1.position.set(-1.5, 0, 2.5);
+    const thrusterMesh2 = new THREE.Mesh(thrusterGeo, thrusterMat);
+    thrusterMesh2.position.set(1.5, 0, 2.5);
+    window.spaceshipGroup.add(thrusterMesh1);
+    window.spaceshipGroup.add(thrusterMesh2);
+
+    // Engine Glow
+    const glowGeo = new THREE.SphereGeometry(0.4, 8, 8);
+    const glowMat = new THREE.MeshBasicMaterial({ color: 0xff8800 });
+    const glow1 = new THREE.Mesh(glowGeo, glowMat);
+    glow1.position.set(-1.5, 0, 3);
+    const glow2 = new THREE.Mesh(glowGeo, glowMat);
+    glow2.position.set(1.5, 0, 3);
+    window.spaceshipGroup.add(glow1);
+    window.spaceshipGroup.add(glow2);
+
+    yawObject.add(window.spaceshipGroup);
 
     scene.add(yawObject);
 
@@ -252,7 +336,21 @@
       case 'ArrowDown': keys.s = true; break;
       case 'ArrowRight': keys.d = true; break;
       case 'Space': keys.space = true; break;
-      case 'KeyF': if(isLocked) isFlying = !isFlying; break;
+      case 'KeyF': 
+        if(isLocked) {
+           isFlying = !isFlying; 
+           if(window.astronautGroup && window.spaceshipGroup) {
+              window.astronautGroup.visible = !isFlying;
+              window.spaceshipGroup.visible = isFlying;
+           }
+           // Adjust Camera perspective
+           if (isFlying) {
+               camera.position.set(0, 4, 15); // Pull back for ship
+           } else {
+               camera.position.set(0, 2, 7); // Close up for walking
+           }
+        }
+        break;
     }
   }
 
@@ -275,6 +373,11 @@
     yawObject.rotation.y -= movementX * 0.002;
     pitchObject.rotation.x -= movementY * 0.002;
     pitchObject.rotation.x = Math.max(-PI_2, Math.min(PI_2, pitchObject.rotation.x));
+    
+    // Tilt the Spaceship model up/down visually when flying
+    if (window.spaceshipGroup && isFlying) {
+       window.spaceshipGroup.rotation.x = pitchObject.rotation.x;
+    }
   }
 
   function updatePhysics(dt) {
