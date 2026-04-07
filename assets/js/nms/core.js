@@ -359,7 +359,7 @@
       case 'ArrowUp': keys.w = false; break;
       case 'ArrowLeft': keys.a = false; break;
       case 'ArrowDown': keys.s = false; break;
-      case 'Right': keys.d = false; break;
+      case 'ArrowRight': keys.d = false; break;
       case 'Space': keys.space = false; break;
     }
   }
