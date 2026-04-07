@@ -20,6 +20,10 @@
   let clock = new THREE.Clock();
   let nmsLoopId;
 
+  let raycaster = new THREE.Raycaster();
+  let weatherSystem;
+  let minedCrystals = 0;
+
   function init() {
     if (!container) return;
     
@@ -59,6 +63,16 @@
     sunLight.position.set(2000, 1000, 2000);
     scene.add(sunLight);
 
+    // Global Weather Particles
+    const particleCount = 2000;
+    const particleGeo = new THREE.BufferGeometry();
+    const pArray = new Float32Array(particleCount * 3);
+    for(let i=0; i<particleCount*3; i++) pArray[i] = (Math.random() - 0.5) * 150;
+    particleGeo.setAttribute('position', new THREE.BufferAttribute(pArray, 3));
+    const particleMat = new THREE.PointsMaterial({color: 0xffffff, size: 1.0, transparent: true, opacity: 0.0, depthWrite: false});
+    weatherSystem = new THREE.Points(particleGeo, particleMat);
+    yawObject.add(weatherSystem);
+
     spawnSolarSystem();
     const resizeObserver = new ResizeObserver(() => onResize());
     resizeObserver.observe(container);
@@ -71,6 +85,7 @@
       if (!isLocked) container.requestPointerLock();
     });
 
+    document.addEventListener('mousedown', onMouseDown);
     document.addEventListener('pointerlockchange', () => {
       isLocked = document.pointerLockElement === container;
       if (isLocked) {
@@ -117,15 +132,25 @@
 
          let noiseVal = 0;
          let freq = 0.05 * (100 / radius);
-         let amp = 6 * (radius / 100);
-         noiseVal += simplex.noise3D(vertex.x * freq, vertex.y * freq, vertex.z * freq) * amp;
-         freq *= 2; amp *= 0.5;
-         noiseVal += simplex.noise3D(vertex.x * freq, vertex.y * freq, vertex.z * freq) * amp;
+         let amp = 8 * (radius / 100);
+         
+         // 3-Octave Ridged Multifractal
+         for(let o = 0; o < 3; o++) {
+           let v = simplex.noise3D(vertex.x * freq, vertex.y * freq, vertex.z * freq);
+           v = 1.0 - Math.abs(v); // Creates sharp ridges
+           noiseVal += v * amp;
+           freq *= 2.0; amp *= 0.5;
+         }
 
-         if (noiseVal < 0) { noiseVal = 0; colorObj.setHex(colorSet[0]); } 
-         else if (noiseVal < 1) { colorObj.setHex(colorSet[1]); }
-         else if (noiseVal < 3) { colorObj.setHex(colorSet[2]); }
-         else if (noiseVal < 5) { colorObj.setHex(colorSet[3]); }
+         noiseVal -= 5 * (radius / 100); // Sink down for oceans
+
+         if (noiseVal <= 0) { 
+            noiseVal = 0; // Flat water
+            colorObj.setHex(colorSet[0]); 
+         } 
+         else if (noiseVal < 1.5 * (radius/100)) { colorObj.setHex(colorSet[1]); }
+         else if (noiseVal < 4 * (radius/100)) { colorObj.setHex(colorSet[2]); }
+         else if (noiseVal < 7 * (radius/100)) { colorObj.setHex(colorSet[3]); }
          else { colorObj.setHex(colorSet[4]); }
          
          vertex.multiplyScalar(radius + noiseVal);
@@ -138,6 +163,21 @@
       material.vertexColors = true;
       
       const mesh = new THREE.Mesh(geometry, material);
+
+      // Spawn Minable Crystals on Highest LOD (level.dist === 0)
+      if (level.dist === 0) {
+         for(let r=0; r<15; r++) {
+            const resGeo = new THREE.OctahedronGeometry(1.5, 0);
+            const resMat = new THREE.MeshStandardMaterial({color: colorSet[3], emissive: colorSet[2], roughness: 0.1, flatShading: true});
+            const resMesh = new THREE.Mesh(resGeo, resMat);
+            resMesh.userData.isResource = true;
+            const randVec = new THREE.Vector3(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).normalize();
+            resMesh.position.copy(randVec).multiplyScalar(radius + 5); 
+            resMesh.lookAt(new THREE.Vector3(0,0,0));
+            mesh.add(resMesh);
+         }
+      }
+
       lod.addLevel(mesh, level.dist);
     });
 
@@ -158,7 +198,7 @@
     auraMesh.position.set(x, y, z);
     scene.add(auraMesh);
 
-    planets.push({ mesh: lod, radius, position: new THREE.Vector3(x, y, z) });
+    planets.push({ mesh: lod, radius, position: new THREE.Vector3(x, y, z), colorSet: colorSet });
   }
 
   function spawnSolarSystem() {
@@ -178,6 +218,24 @@
      createPlanet(-800, -2500, -1500, 90, 'seed_ocean', [0x1e3a8a, 0x1e40af, 0x1d4ed8, 0x2563eb, 0x3b82f6]);
      createPlanet(1800, -2000, -2500, 140, 'seed_purple', [0x4c1d95, 0x5b21b6, 0x6d28d9, 0x7c3aed, 0xa78bfa]);
      createPlanet(-400, 500, -300, 30, 'seed_moon', [0x1c1917, 0x292524, 0x44403c, 0x57534e, 0x78716c]);
+  }
+
+  function onMouseDown(e) {
+    if (!isLocked || isFlying) return;
+    raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
+    const intersects = raycaster.intersectObjects(scene.children, true);
+    for (let pt of intersects) {
+       if (pt.distance < 30 && pt.object.userData && pt.object.userData.isResource) {
+          pt.object.parent.remove(pt.object);
+          minedCrystals++;
+          const scoreEl = document.getElementById('obj-mine');
+          if (scoreEl) {
+             if(minedCrystals >= 10) scoreEl.innerText = '[x] Mine Crystals: 10/10';
+             else scoreEl.innerText = `[ ] Mine Crystals: ${minedCrystals}/10 (Click!)`;
+          }
+          break;
+       }
+    }
   }
 
   function onResize() {
@@ -232,6 +290,34 @@
     // Flight mode travels 10x faster
     const speed = isFlying ? 400 : 20;
 
+    // Calculate closest planet
+    let closestPlanet = planets[0];
+    let minDist = Infinity;
+    let planetIndex = 0;
+    let closestIdx = 0;
+    for (let p of planets) {
+      const dist = yawObject.position.distanceTo(p.position);
+      if (dist < minDist) {
+         minDist = dist;
+         closestPlanet = p;
+         closestIdx = planetIndex;
+      }
+      planetIndex++;
+    }
+
+    // Weather Effects
+    if (weatherSystem) {
+       const distToSurface = minDist - closestPlanet.radius;
+       if (distToSurface < 180) {
+          weatherSystem.material.opacity = Math.min(0.6, Math.max(0, 1.0 - (distToSurface / 180)));
+          weatherSystem.material.color.setHex(closestPlanet.colorSet[4] || 0xffffff); // Use planet's lightest color 
+          weatherSystem.rotation.y += 0.1 * dt;
+          weatherSystem.rotation.x -= 0.05 * dt;
+       } else {
+          weatherSystem.material.opacity = 0;
+       }
+    }
+
     if (isFlying) {
        direction.set(0,0,0);
        if(keys.w) direction.z -= 1;
@@ -249,21 +335,6 @@
        direction.applyQuaternion(yawObject.quaternion);
        yawObject.position.add(direction.multiplyScalar(speed * dt));
        
-       // Calculate closest planet for gravity
-       let closestPlanet = planets[0];
-       let minDist = Infinity;
-       let planetIndex = 0;
-       let closestIdx = 0;
-       for (let p of planets) {
-         const dist = yawObject.position.distanceTo(p.position);
-         if (dist < minDist) {
-            minDist = dist;
-            closestPlanet = p;
-            closestIdx = planetIndex;
-         }
-         planetIndex++;
-       }
-
        // Mission Objectives Tracker
        visitedPlanets.add(closestIdx);
        if (visitedPlanets.size > 1) { const el = document.getElementById('obj-leave'); if(el) el.innerText = '[x] Leave Origin\'s orbit'; }
