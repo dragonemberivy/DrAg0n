@@ -30,6 +30,18 @@
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x050510); // Deep space
     
+    // Starfield Background
+    const starsGeo = new THREE.BufferGeometry();
+    const starsCount = 8000;
+    const posArray = new Float32Array(starsCount * 3);
+    for(let i = 0; i < starsCount * 3; i++) {
+        posArray[i] = (Math.random() - 0.5) * 80000; 
+    }
+    starsGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+    const starsMat = new THREE.PointsMaterial({color: 0xffffff, size: 1.0, sizeAttenuation: false, transparent: true, opacity: 0.8});
+    const starMesh = new THREE.Points(starsGeo, starsMat);
+    scene.add(starMesh);
+
     const aspect = container.clientWidth / container.clientHeight;
     camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 100000);
 
