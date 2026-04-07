@@ -371,12 +371,6 @@
        window.astronautGroup.visible = !isFlying;
        window.spaceshipGroup.visible = isFlying;
     }
-    // Adjust Camera perspective
-    if (isFlying) {
-        camera.position.set(0, 4, 15); // Pull back for ship
-    } else {
-        camera.position.set(0, 2, 7); // Close up for walking
-    }
   }
 
   const PI_2 = Math.PI / 2;
@@ -459,6 +453,7 @@
        const newDistCenter = yawObject.position.distanceTo(center);
        if (newDistCenter < surfaceRadius) {
            yawObject.position.copy(center).add(up.multiplyScalar(surfaceRadius));
+           pitchObject.rotation.x = 0; // Re-level camera to horizon!
            toggleFlightMode(); // Simulated crash landing auto-dismount!
        }
 
@@ -490,6 +485,24 @@
        const currentYaw = yawObject.rotation.y;
        yawObject.quaternion.copy(targetQuat);
        yawObject.rotateY(currentYaw);
+    }
+    
+    // Dynamic Camera Zoom & Collision Avoidance
+    let targetZ = isFlying ? 15 : 7;
+    let targetY = isFlying ? 4 : 2;
+    camera.position.z += (targetZ - camera.position.z) * 5 * dt;
+    camera.position.y += (targetY - camera.position.y) * 5 * dt;
+
+    camera.updateMatrixWorld();
+    const camPos = new THREE.Vector3();
+    camera.getWorldPosition(camPos);
+    const clipDist = camPos.distanceTo(center);
+    const minCamRad = closestPlanet.radius + 1.5;
+    
+    if (clipDist < minCamRad) {
+        const deficit = minCamRad - clipDist;
+        camera.position.z -= deficit * 1.5; // Push camera closer to player
+        camera.position.y += deficit * 0.5; // Push camera slightly up
     }
     
     debugPos.innerText = `Pos: ${yawObject.position.x.toFixed(0)}, ${yawObject.position.y.toFixed(0)}, ${yawObject.position.z.toFixed(0)}`;
