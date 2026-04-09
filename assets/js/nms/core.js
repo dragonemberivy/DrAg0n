@@ -274,6 +274,61 @@
             resMesh.lookAt(new THREE.Vector3(0,0,0));
             mesh.add(resMesh);
          }
+         
+         // Procedural Flora (Instanced Mesh for Extreme Performance)
+         const treeCount = Math.floor(radius * 1.5);
+         const trunkGeo = new THREE.CylinderGeometry(0.3, 0.5, 3, 5);
+         const leavesGeo = new THREE.ConeGeometry(1.5, 5, 5);
+         leavesGeo.translate(0, 3, 0);
+         
+         const trunkMat = new THREE.MeshStandardMaterial({color: 0x3d2817, roughness: 0.9, flatShading: true});
+         const leavesMat = new THREE.MeshStandardMaterial({color: colorSet[2], roughness: 0.8, flatShading: true});
+
+         const imTrunk = new THREE.InstancedMesh(trunkGeo, trunkMat, treeCount);
+         const imLeaves = new THREE.InstancedMesh(leavesGeo, leavesMat, treeCount);
+         
+         const dummy = new THREE.Object3D();
+         let validTrees = 0;
+         
+         for(let r=0; r < treeCount * 5; r++) {
+            if (validTrees >= treeCount) break;
+            const u = Math.random();
+            const v = Math.random();
+            const theta = u * 2.0 * Math.PI;
+            const phi = Math.acos(2.0 * v - 1.0);
+            const rPos = new THREE.Vector3(
+               Math.sin(phi) * Math.cos(theta),
+               Math.sin(phi) * Math.sin(theta),
+               Math.cos(phi)
+            );
+            
+            let noiseVal = 0;
+            let freq = 0.05 * (100 / radius);
+            let amp = 8 * (radius / 100);
+            for(let o = 0; o < 3; o++) {
+                let n = simplex.noise3D(rPos.x * freq, rPos.y * freq, rPos.z * freq);
+                noiseVal += (1.0 - Math.abs(n)) * amp;
+                freq *= 2.0; amp *= 0.5;
+            }
+            noiseVal -= 5 * (radius / 100);
+            
+            // Only spawn trees on solid land (above water!)
+            if (noiseVal > 0.5) {
+                dummy.position.copy(rPos).multiplyScalar(radius + noiseVal);
+                dummy.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), rPos);
+                const scale = 0.5 + Math.random() * 0.8;
+                dummy.scale.set(scale, scale, scale);
+                dummy.rotateY(Math.random() * Math.PI * 2);
+                dummy.updateMatrix();
+                imTrunk.setMatrixAt(validTrees, dummy.matrix);
+                imLeaves.setMatrixAt(validTrees, dummy.matrix);
+                validTrees++;
+            }
+         }
+         imTrunk.count = validTrees;
+         imLeaves.count = validTrees;
+         mesh.add(imTrunk);
+         mesh.add(imLeaves);
       }
 
       lod.addLevel(mesh, level.dist);
@@ -296,7 +351,24 @@
     auraMesh.position.set(x, y, z);
     scene.add(auraMesh);
 
-    planets.push({ mesh: lod, radius, position: new THREE.Vector3(x, y, z), colorSet: colorSet, simplex: new SimplexNoise(seed) });
+    // Fauna (Circling abstract birds/creatures)
+    const faunaGroup = new THREE.Group();
+    for(let f=0; f<12; f++) {
+       const bGeo = new THREE.ConeGeometry(0.4, 1.2, 3);
+       bGeo.rotateX(Math.PI/2);
+       const bMat = new THREE.MeshStandardMaterial({color: colorSet[4], emissive: colorSet[1], flatShading: true});
+       const bMesh = new THREE.Mesh(bGeo, bMat);
+       const randY = (Math.random() - 0.5) * radius * 0.8;
+       const randAngle = Math.random() * Math.PI * 2;
+       const bDist = radius + 8 + Math.random() * 15;
+       bMesh.position.set(Math.sin(randAngle) * bDist, randY, Math.cos(randAngle) * bDist);
+       // Point along the orbit path
+       bMesh.lookAt(new THREE.Vector3(Math.sin(randAngle + 0.1) * bDist, randY, Math.cos(randAngle + 0.1) * bDist));
+       faunaGroup.add(bMesh);
+    }
+    lod.addLevel(faunaGroup, 0); // Only visible on highest LOD level
+
+    planets.push({ mesh: lod, radius, position: new THREE.Vector3(x, y, z), colorSet: colorSet, simplex: new SimplexNoise(seed), faunaGroup: faunaGroup });
   }
 
   function spawnSolarSystem() {
@@ -464,6 +536,15 @@
            scene.fog.density = 0;
            scene.background = new THREE.Color(0x050510);
        }
+    }
+    
+    // Animate local planet's fauna flock (Boids)
+    if (closestPlanet && closestPlanet.faunaGroup) {
+        closestPlanet.faunaGroup.rotation.y -= 0.6 * dt; // Orbit planet
+        closestPlanet.faunaGroup.children.forEach((boid, idx) => {
+            // Give them some individual drifting variation
+            boid.position.y += Math.sin((Date.now() * 0.003) + idx) * 0.05;
+        });
     }
 
     const center = closestPlanet.position;
