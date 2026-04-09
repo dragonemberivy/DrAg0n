@@ -15,6 +15,7 @@
   let pitchObject, yawObject;
   let keys = { w: false, a: false, s: false, d: false, space: false };
   let isFlying = false;
+  let playerHealth = 100;
 
   let isLocked = false;
   let clock = new THREE.Clock();
@@ -538,16 +539,45 @@
        }
     }
     
-    // Animate local planet's fauna flock (Boids)
+    const center = closestPlanet.position;
+
+    // Animate local planet's fauna flock (Boids) & Hostile Predator AI
     if (closestPlanet && closestPlanet.faunaGroup) {
-        closestPlanet.faunaGroup.rotation.y -= 0.6 * dt; // Orbit planet
+        // Re-calculate the player's true local matrix relative to the spinning flock
+        const rawLocalPlayer = yawObject.position.clone().sub(center);
+        const invRot = new THREE.Euler(0, -closestPlanet.faunaGroup.rotation.y, 0);
+        const localPlayer = rawLocalPlayer.applyEuler(invRot);
+
+        closestPlanet.faunaGroup.rotation.y -= 0.6 * dt; // Entire flock orbits planet
+        
         closestPlanet.faunaGroup.children.forEach((boid, idx) => {
-            // Give them some individual drifting variation
-            boid.position.y += Math.sin((Date.now() * 0.003) + idx) * 0.05;
+            const distToPlayer = boid.position.distanceTo(localPlayer);
+            
+            // Seek and Destroy Player (Aggro behavior)
+            if (distToPlayer < 25 && !isFlying) {
+               const dir = localPlayer.clone().sub(boid.position).normalize();
+               boid.position.add(dir.multiplyScalar(20 * dt)); // Rush player bounds
+               boid.lookAt(localPlayer); // Face victim
+               
+               if (distToPlayer < 4) { // Visceral Hit
+                  playerHealth -= 20 * dt;
+                  const healthBar = document.getElementById('nms-health-bar');
+                  if (healthBar) healthBar.style.width = Math.max(0, playerHealth) + '%';
+                  
+                  // Game Over State -> Origin Respawn
+                  if (playerHealth <= 0) {
+                      playerHealth = 100;
+                      if (healthBar) healthBar.style.width = '100%';
+                      yawObject.position.set(0, 150, 0); // Kick to Origin
+                      if (!isFlying) toggleFlightMode(); // Put back in ship safely
+                  }
+               }
+            } else {
+               // Give them some individual drifting variation when wandering calmly
+               boid.position.y += Math.sin((Date.now() * 0.003) + idx) * 0.05;
+            }
         });
     }
-
-    const center = closestPlanet.position;
     const up = yawObject.position.clone().sub(center).normalize();
     const currentDistCenter = yawObject.position.distanceTo(center);
     
