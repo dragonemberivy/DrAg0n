@@ -153,6 +153,8 @@
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
 
+    scene.fog = new THREE.FogExp2(0x050510, 0);
+
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
     scene.add(ambientLight);
     const sunLight = new THREE.DirectionalLight(0xffffff, 1.2);
@@ -435,17 +437,26 @@
       planetIndex++;
     }
 
-    // Weather Effects
-    if (weatherSystem) {
-       const distToSurface = minDist - closestPlanet.radius;
-       if (distToSurface < 180) {
-          weatherSystem.material.opacity = Math.min(0.6, Math.max(0, 1.0 - (distToSurface / 180)));
+    // Weather & Atmospheric Fog Effects
+    const distToSurface = minDist - closestPlanet.radius;
+    if (distToSurface < 180) {
+       let intensity = Math.max(0, 1.0 - (distToSurface / 180));
+       
+       if (weatherSystem) {
+          weatherSystem.material.opacity = Math.min(0.6, intensity);
           weatherSystem.material.color.setHex(closestPlanet.colorSet[4] || 0xffffff); // Use planet's lightest color 
           weatherSystem.rotation.y += 0.1 * dt;
           weatherSystem.rotation.x -= 0.05 * dt;
-       } else {
-          weatherSystem.material.opacity = 0;
        }
+       
+       // Dynamic volumetric fog to hide planet curvature
+       if (scene.fog) {
+          scene.fog.color.setHex(closestPlanet.colorSet[1] || 0x050510);
+          scene.fog.density = intensity * (0.012 * (100 / closestPlanet.radius)); 
+       }
+    } else {
+       if (weatherSystem) weatherSystem.material.opacity = 0;
+       if (scene.fog) scene.fog.density = 0;
     }
 
     const center = closestPlanet.position;
@@ -509,11 +520,14 @@
        yawObject.rotateY(currentYaw);
     }
     
-    // Dynamic Camera Zoom & Collision Avoidance
+    // Dynamic Camera FOV, Zoom & Collision Avoidance
     let targetZ = isFlying ? 15 : 7;
     let targetY = isFlying ? 4 : 2;
+    let targetFOV = isFlying ? 85 : 55; // Lower FOV compresses and flattens the landscape!
     camera.position.z += (targetZ - camera.position.z) * 5 * dt;
     camera.position.y += (targetY - camera.position.y) * 5 * dt;
+    camera.fov += (targetFOV - camera.fov) * 5 * dt;
+    camera.updateProjectionMatrix();
 
     camera.updateMatrixWorld();
     const camPos = new THREE.Vector3();
