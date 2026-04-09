@@ -451,12 +451,19 @@
        
        // Dynamic volumetric fog to hide planet curvature
        if (scene.fog) {
-          scene.fog.color.setHex(closestPlanet.colorSet[1] || 0x050510);
-          scene.fog.density = intensity * (0.012 * (100 / closestPlanet.radius)); 
+          const targetColor = new THREE.Color(closestPlanet.colorSet[1] || 0x050510);
+          const spaceColor = new THREE.Color(0x050510);
+          
+          scene.fog.color = spaceColor.lerp(targetColor, Math.pow(intensity, 2));
+          scene.background = scene.fog.color; // Sky MUST match fog color to complete flat illusion
+          scene.fog.density = intensity * (0.015 * (100 / closestPlanet.radius)); 
        }
     } else {
        if (weatherSystem) weatherSystem.material.opacity = 0;
-       if (scene.fog) scene.fog.density = 0;
+       if (scene.fog) {
+           scene.fog.density = 0;
+           scene.background = new THREE.Color(0x050510);
+       }
     }
 
     const center = closestPlanet.position;
