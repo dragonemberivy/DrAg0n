@@ -294,7 +294,7 @@
     auraMesh.position.set(x, y, z);
     scene.add(auraMesh);
 
-    planets.push({ mesh: lod, radius, position: new THREE.Vector3(x, y, z), colorSet: colorSet });
+    planets.push({ mesh: lod, radius, position: new THREE.Vector3(x, y, z), colorSet: colorSet, simplex: new SimplexNoise(seed) });
   }
 
   function spawnSolarSystem() {
@@ -377,13 +377,16 @@
   
   function getTerrainHeight(planet, unitVector) {
      let noiseVal = 0;
-     let amplitude = 15;
-     let frequency = 0.05;
-     for(let j=0; j<3; j++) {
-        let n = simplex.noise3D(unitVector.x * frequency + planet.position.x, unitVector.y * frequency + planet.position.y, unitVector.z * frequency + planet.position.z);
-        noiseVal += (1.0 - Math.abs(n)) * amplitude;
-        amplitude *= 0.5;
-        frequency *= 2;
+     let freq = 0.05 * (100 / planet.radius);
+     let amp = 8 * (planet.radius / 100);
+     
+     if (planet.simplex) {
+        for(let j=0; j<3; j++) {
+           let n = planet.simplex.noise3D(unitVector.x * freq, unitVector.y * freq, unitVector.z * freq);
+           noiseVal += (1.0 - Math.abs(n)) * amp;
+           amp *= 0.5;
+           freq *= 2.0;
+        }
      }
      noiseVal -= 5 * (planet.radius / 100); // Ocean depth modifier
      if (noiseVal <= 0) noiseVal = 0; // Flat water
