@@ -367,7 +367,8 @@
        bMesh.lookAt(new THREE.Vector3(Math.sin(randAngle + 0.1) * bDist, randY, Math.cos(randAngle + 0.1) * bDist));
        faunaGroup.add(bMesh);
     }
-    lod.addLevel(faunaGroup, 0); // Only visible on highest LOD level
+    faunaGroup.position.set(x, y, z);
+    scene.add(faunaGroup);
 
     planets.push({ mesh: lod, radius, position: new THREE.Vector3(x, y, z), colorSet: colorSet, simplex: new SimplexNoise(seed), faunaGroup: faunaGroup });
   }
