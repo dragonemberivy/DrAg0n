@@ -451,12 +451,12 @@
        
        // Dynamic volumetric fog to hide planet curvature
        if (scene.fog) {
-          const targetColor = new THREE.Color(closestPlanet.colorSet[1] || 0x050510);
+          const targetColor = new THREE.Color(closestPlanet.colorSet[4] || 0xffffff); // Use bright atmospheric color!
           const spaceColor = new THREE.Color(0x050510);
           
           scene.fog.color = spaceColor.lerp(targetColor, Math.pow(intensity, 2));
           scene.background = scene.fog.color; // Sky MUST match fog color to complete flat illusion
-          scene.fog.density = intensity * (0.015 * (100 / closestPlanet.radius)); 
+          scene.fog.density = intensity * (0.06 * Math.sqrt(100 / closestPlanet.radius)); 
        }
     } else {
        if (weatherSystem) weatherSystem.material.opacity = 0;
