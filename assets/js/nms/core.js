@@ -446,6 +446,14 @@
     if(window.astronautGroup && window.spaceshipGroup) {
        window.astronautGroup.visible = !isFlying;
        window.spaceshipGroup.visible = isFlying;
+       
+       // Transfer pitch mathematically between ship hull and camera origin without Euler overlaps
+       if (isFlying) {
+           yawObject.rotateX(pitchObject.rotation.x);
+           pitchObject.rotation.x = 0;
+       } else {
+           pitchObject.rotation.x = 0;
+       }
     }
   }
 
@@ -473,13 +481,13 @@
     const movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
     const movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
 
-    yawObject.rotation.y -= movementX * 0.002;
-    pitchObject.rotation.x -= movementY * 0.002;
-    pitchObject.rotation.x = Math.max(-PI_2, Math.min(PI_2, pitchObject.rotation.x));
+    yawObject.rotateY(-movementX * 0.002);
     
-    // Tilt the Spaceship model up/down visually when flying
-    if (window.spaceshipGroup && isFlying) {
-       window.spaceshipGroup.rotation.x = pitchObject.rotation.x;
+    if (isFlying) {
+       yawObject.rotateX(-movementY * 0.002);
+    } else {
+       pitchObject.rotation.x -= movementY * 0.002;
+       pitchObject.rotation.x = Math.max(-PI_2, Math.min(PI_2, pitchObject.rotation.x));
     }
   }
 
@@ -632,11 +640,10 @@
 
        yawObject.position.copy(center).add(up.multiplyScalar(targetDist));  
 
-       const targetQuat = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0), up);
-       
-       const currentYaw = yawObject.rotation.y;
-       yawObject.quaternion.copy(targetQuat);
-       yawObject.rotateY(currentYaw);
+       // Align Local Y perfectly to the planet's normal utilizing pure Quaternions to prevent Euler twisting
+       const currentUp = new THREE.Vector3(0,1,0).applyQuaternion(yawObject.quaternion);
+       const alignQuat = new THREE.Quaternion().setFromUnitVectors(currentUp, up);
+       yawObject.quaternion.premultiply(alignQuat);
     }
     
     // Dynamic Camera FOV, Zoom & Collision Avoidance
