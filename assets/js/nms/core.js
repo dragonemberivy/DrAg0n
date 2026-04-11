@@ -339,7 +339,22 @@
             const resMesh = new THREE.Mesh(resGeo, resMat);
             resMesh.userData.isResource = true;
             const randVec = new THREE.Vector3(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).normalize();
-            resMesh.position.copy(randVec).multiplyScalar(radius + 5); 
+            
+            // Calculate exact procedural height at this vertex to sit directly on ground
+            let tHeight = radius;
+            let noiseV = 0;
+            let amp = 8 * (radius/100);
+            let freq = 0.05 * (100/radius);
+            for(let oct=0; oct<3; oct++) {
+               let n = simplex.noise3D(randVec.x * freq, randVec.y * freq, randVec.z * freq);
+               noiseV += (1.0 - Math.abs(n)) * amp;
+               amp *= 0.5; freq *= 2.0;
+            }
+            noiseV -= 5 * (radius/100);
+            if (noiseV <= 0) noiseV = 0;
+            tHeight += noiseV;
+            
+            resMesh.position.copy(randVec).multiplyScalar(tHeight + 1.2); 
             resMesh.lookAt(new THREE.Vector3(0,0,0));
             mesh.add(resMesh);
          }
@@ -536,10 +551,14 @@
 
   function onKeyDown(e) {
     switch(e.code) {
-      case 'ArrowUp': keys.w = true; break;
-      case 'ArrowLeft': keys.a = true; break;
-      case 'ArrowDown': keys.s = true; break;
-      case 'ArrowRight': keys.d = true; break;
+      case 'ArrowUp': 
+      case 'KeyW': keys.w = true; break;
+      case 'ArrowLeft': 
+      case 'KeyA': keys.a = true; break;
+      case 'ArrowDown': 
+      case 'KeyS': keys.s = true; break;
+      case 'ArrowRight': 
+      case 'KeyD': keys.d = true; break;
       case 'Space': keys.space = true; break;
       case 'KeyF': 
         toggleFlightMode();
@@ -575,10 +594,14 @@
 
   function onKeyUp(e) {
     switch(e.code) {
-      case 'ArrowUp': keys.w = false; break;
-      case 'ArrowLeft': keys.a = false; break;
-      case 'ArrowDown': keys.s = false; break;
-      case 'ArrowRight': keys.d = false; break;
+      case 'ArrowUp': 
+      case 'KeyW': keys.w = false; break;
+      case 'ArrowLeft': 
+      case 'KeyA': keys.a = false; break;
+      case 'ArrowDown': 
+      case 'KeyS': keys.s = false; break;
+      case 'ArrowRight': 
+      case 'KeyD': keys.d = false; break;
       case 'Space': keys.space = false; break;
     }
   }
