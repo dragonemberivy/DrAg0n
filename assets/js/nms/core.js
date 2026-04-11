@@ -4,6 +4,9 @@
   const overlay = document.getElementById('nms-overlay');
   const crosshair = document.getElementById('nms-crosshair');
   const hud = document.getElementById('nms-hud');
+  const hudPlanetInfo = document.getElementById('nms-planet-info');
+  const hudPlanetName = document.getElementById('nms-planet-name');
+  const hudPlanetResource = document.getElementById('nms-planet-resource');
   const objectivesPanel = document.getElementById('nms-objectives');
   const debugPos = document.getElementById('nms-debug-pos');
   const debugMode = document.getElementById('nms-debug-mode');
@@ -231,7 +234,7 @@
     document.addEventListener('mousemove', onMouseMove);
   }
 
-  function createPlanet(x, y, z, radius, seed, colorSet) {
+  function createPlanet(x, y, z, radius, seed, colorSet, name, resource) {
     const lod = new THREE.LOD();
     
     // Creating different levels of detail
@@ -421,26 +424,26 @@
     rideableGroup.position.set(x, y, z);
     scene.add(rideableGroup);
 
-    planets.push({ mesh: lod, radius, position: new THREE.Vector3(x, y, z), colorSet: colorSet, simplex: new SimplexNoise(seed), faunaGroup: faunaGroup, rideableGroup });
+    planets.push({ mesh: lod, radius, position: new THREE.Vector3(x, y, z), colorSet: colorSet, simplex: new SimplexNoise(seed), faunaGroup: faunaGroup, rideableGroup, name: name, resource: resource });
   }
 
   function spawnSolarSystem() {
      // Earth-like (Origin)
-     createPlanet(0, 0, 0, 100, 'seed_earth', [0x1d4ed8, 0x3b82f6, 0x22c55e, 0x78716c, 0xf8fafc]);
+     createPlanet(0, 0, 0, 100, 'seed_earth', [0x1d4ed8, 0x3b82f6, 0x22c55e, 0x78716c, 0xf8fafc], 'Aethelgard IV', 'Iron');
      // Mars-like
-     createPlanet(800, 300, -1200, 150, 'seed_mars', [0x7f1d1d, 0x991b1b, 0xd97706, 0xfcd34d, 0xfef3c7]);
+     createPlanet(800, 300, -1200, 150, 'seed_mars', [0x7f1d1d, 0x991b1b, 0xd97706, 0xfcd34d, 0xfef3c7], 'Cygnus Prime', 'Platinum');
      // Small Ice planet
-     createPlanet(-1000, -500, -500, 60, 'seed_ice', [0x0284c7, 0x38bdf8, 0xbae6fd, 0xf0f9ff, 0xffffff]);
+     createPlanet(-1000, -500, -500, 60, 'seed_ice', [0x0284c7, 0x38bdf8, 0xbae6fd, 0xf0f9ff, 0xffffff], 'Vespera Beta', 'Gold');
      // Toxic gas giant
-     createPlanet(500, -800, 1500, 250, 'seed_gas', [0x064e3b, 0x166534, 0x65a30d, 0x84cc16, 0xd9f99d]);
+     createPlanet(500, -800, 1500, 250, 'seed_gas', [0x064e3b, 0x166534, 0x65a30d, 0x84cc16, 0xd9f99d], 'Romulus II', 'Titanium');
      
      // 6 New Planets
-     createPlanet(2500, 1000, 500, 120, 'seed_magma', [0x450a0a, 0x7f1d1d, 0xb91c1c, 0xef4444, 0xfca5a5]);
-     createPlanet(-2500, 1500, 1000, 180, 'seed_pink', [0x831843, 0xbe185d, 0xdb2777, 0xf472b6, 0xfbcfe8]);
-     createPlanet(0, 2500, -2000, 200, 'seed_desert', [0x78350f, 0x92400e, 0xb45309, 0xd97706, 0xfcd34d]);
-     createPlanet(-800, -2500, -1500, 90, 'seed_ocean', [0x1e3a8a, 0x1e40af, 0x1d4ed8, 0x2563eb, 0x3b82f6]);
-     createPlanet(1800, -2000, -2500, 140, 'seed_purple', [0x4c1d95, 0x5b21b6, 0x6d28d9, 0x7c3aed, 0xa78bfa]);
-     createPlanet(-400, 500, -300, 30, 'seed_moon', [0x1c1917, 0x292524, 0x44403c, 0x57534e, 0x78716c]);
+     createPlanet(2500, 1000, 500, 120, 'seed_magma', [0x450a0a, 0x7f1d1d, 0xb91c1c, 0xef4444, 0xfca5a5], 'Tholian Colony', 'Dilithium');
+     createPlanet(-2500, 1500, 1000, 180, 'seed_pink', [0x831843, 0xbe185d, 0xdb2777, 0xf472b6, 0xfbcfe8], 'Qo\'noS Beta', 'Tritanium');
+     createPlanet(0, 2500, -2000, 200, 'seed_desert', [0x78350f, 0x92400e, 0xb45309, 0xd97706, 0xfcd34d], 'Audet IX', 'Uranium');
+     createPlanet(-800, -2500, -1500, 90, 'seed_ocean', [0x1e3a8a, 0x1e40af, 0x1d4ed8, 0x2563eb, 0x3b82f6], 'Sarpeidon VII', 'Plutonium');
+     createPlanet(1800, -2000, -2500, 140, 'seed_purple', [0x4c1d95, 0x5b21b6, 0x6d28d9, 0x7c3aed, 0xa78bfa], 'Atrea Alpha', 'Silver');
+     createPlanet(-400, 500, -300, 30, 'seed_moon', [0x1c1917, 0x292524, 0x44403c, 0x57534e, 0x78716c], 'Coppelius IV', 'Copper');
   }
 
   function onMouseDown(e) {
@@ -453,8 +456,9 @@
           minedCrystals++;
           const scoreEl = document.getElementById('obj-mine');
           if (scoreEl) {
+             const resName = window.currentPlanetResource || 'Crystal';
              if(minedCrystals >= 10) scoreEl.innerText = '[x] Mine Crystals: 10/10';
-             else scoreEl.innerText = `[ ] Mine Crystals: ${minedCrystals}/10 (Click!)`;
+             else scoreEl.innerText = `[ ] Mined ${resName}: ${minedCrystals}/10 (Click!)`;
           }
           break;
        }
@@ -616,8 +620,21 @@
       planetIndex++;
     }
 
-    // Weather & Atmospheric Fog Effects
+    // Planet Proximity UI updates
     const distToSurface = minDist - closestPlanet.radius;
+    
+    if (distToSurface < 600 && hudPlanetInfo) {
+       hudPlanetInfo.style.display = 'block';
+       hudPlanetInfo.style.opacity = '1';
+       hudPlanetName.innerText = closestPlanet.name || 'Unknown Planet';
+       hudPlanetResource.innerText = `Scans detect: ${closestPlanet.resource || 'Generic Crystals'}`;
+       window.currentPlanetResource = closestPlanet.resource;
+    } else if (hudPlanetInfo) {
+       hudPlanetInfo.style.opacity = '0';
+       window.currentPlanetResource = null;
+    }
+
+    // Weather & Atmospheric Fog Effects
     if (distToSurface < 180) {
        let intensity = Math.max(0, 1.0 - (distToSurface / 180));
        
