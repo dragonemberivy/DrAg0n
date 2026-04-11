@@ -209,17 +209,30 @@
     // Global Asteroids
     const astCount = 2000;
     const astGeo = new THREE.DodecahedronGeometry(8, 1);
+    
+    // Distort vertices to make base rocks extremely jagged and misshapen
+    const astPos = astGeo.attributes.position;
+    for (let j = 0; j < astPos.count; j++) {
+        const vx = astPos.getX(j) * (0.6 + Math.random() * 0.8);
+        const vy = astPos.getY(j) * (0.6 + Math.random() * 0.8);
+        const vz = astPos.getZ(j) * (0.6 + Math.random() * 0.8);
+        astPos.setXYZ(j, vx, vy, vz);
+    }
+    astGeo.computeVertexNormals();
+
     const astMat = new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.9, metalness: 0.1, flatShading: true });
     const astMesh = new THREE.InstancedMesh(astGeo, astMat, astCount);
     
     const dummy = new THREE.Object3D();
     for (let i = 0; i < astCount; i++) {
-        // Spread evenly but avoid absolute center origin
         let pos = new THREE.Vector3((Math.random() - 0.5) * 8000, (Math.random() - 0.5) * 8000, (Math.random() - 0.5) * 8000);
         dummy.position.copy(pos);
         dummy.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
-        const scale = 0.5 + Math.random() * 2.5;
-        dummy.scale.set(scale, scale, scale);
+        // Provide chaotic non-uniform scaling per instance
+        const sx = 0.5 + Math.random() * 3.0;
+        const sy = 0.5 + Math.random() * 3.0;
+        const sz = 0.5 + Math.random() * 3.0;
+        dummy.scale.set(sx, sy, sz);
         dummy.updateMatrix();
         astMesh.setMatrixAt(i, dummy.matrix);
     }
