@@ -318,7 +318,7 @@
 
       // Spawn Minable Crystals on Highest LOD (level.dist === 0)
       if (level.dist === 0) {
-         for(let r=0; r<15; r++) {
+         for(let r=0; r<100; r++) {
             const resGeo = new THREE.OctahedronGeometry(1.5, 0);
             const resMat = new THREE.MeshStandardMaterial({color: colorSet[3], emissive: colorSet[2], roughness: 0.1, flatShading: true});
             const resMesh = new THREE.Mesh(resGeo, resMat);
@@ -888,11 +888,13 @@
            targetDist = surfaceRadius;
        }
 
-       yawObject.position.copy(center).add(up.multiplyScalar(targetDist));  
+       // Recalculate 'up' to account for the horizontal walk offset!
+       const newUp = yawObject.position.clone().sub(center).normalize();
+       yawObject.position.copy(center).add(newUp.multiplyScalar(targetDist));  
 
        // Align Local Y perfectly to the planet's normal utilizing pure Quaternions to prevent Euler twisting
        const currentUp = new THREE.Vector3(0,1,0).applyQuaternion(yawObject.quaternion);
-       const alignQuat = new THREE.Quaternion().setFromUnitVectors(currentUp, up);
+       const alignQuat = new THREE.Quaternion().setFromUnitVectors(currentUp, newUp);
        yawObject.quaternion.premultiply(alignQuat);
     }
     
