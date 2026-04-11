@@ -15,6 +15,7 @@
   let pitchObject, yawObject;
   let keys = { w: false, a: false, s: false, d: false, space: false };
   let isFlying = false;
+  let isRiding = false;
   let playerHealth = 100;
 
   let isLocked = false;
@@ -97,6 +98,33 @@
     window.astronautGroup.add(ringMesh);
 
     yawObject.add(window.astronautGroup);
+
+    // Alien Mount Group (Hidden until 'E' is pressed)
+    window.alienMountGroup = new THREE.Group();
+    window.alienMountGroup.visible = false;
+    window.alienMountGroup.position.y = -1;
+
+    // Beast Body
+    const beastGeo = new THREE.BoxGeometry(2, 2.5, 6);
+    const beastMat = new THREE.MeshStandardMaterial({ color: 0x4b5563, roughness: 0.9, flatShading: true });
+    const beastMesh = new THREE.Mesh(beastGeo, beastMat);
+    beastMesh.position.y = 1.25;
+    window.alienMountGroup.add(beastMesh);
+    
+    // Add glowing spots
+    const spotGeo = new THREE.SphereGeometry(0.3, 8, 8);
+    const spotMat = new THREE.MeshBasicMaterial({ color: 0x10b981 });
+    const spot1 = new THREE.Mesh(spotGeo, spotMat); spot1.position.set(1.1, 1.5, 2);
+    const spot2 = new THREE.Mesh(spotGeo, spotMat); spot2.position.set(-1.1, 1.5, 2);
+    window.alienMountGroup.add(spot1); window.alienMountGroup.add(spot2);
+
+    // Add tiny rider on top
+    const rider = window.astronautGroup.clone();
+    rider.position.set(0, 3.5, 0.5);
+    rider.scale.set(0.8, 0.8, 0.8);
+    window.alienMountGroup.add(rider);
+
+    yawObject.add(window.alienMountGroup);
 
     // Spaceship Group
     window.spaceshipGroup = new THREE.Group();
@@ -370,7 +398,30 @@
     faunaGroup.position.set(x, y, z);
     scene.add(faunaGroup);
 
-    planets.push({ mesh: lod, radius, position: new THREE.Vector3(x, y, z), colorSet: colorSet, simplex: new SimplexNoise(seed), faunaGroup: faunaGroup });
+    // Rideable Procedural Beasts
+    const rideableGroup = new THREE.Group();
+    for(let m=0; m<3; m++) {
+       const mGeo = new THREE.BoxGeometry(2, 2.5, 6);
+       const mMat = new THREE.MeshStandardMaterial({color: 0x4b5563, roughness: 0.9, flatShading: true});
+       const mMesh = new THREE.Mesh(mGeo, mMat);
+       const randY = (Math.random() - 0.5) * radius;
+       const randAngle = Math.random() * Math.PI * 2;
+       const bDist = radius + 1.25; // Walk strictly on surface
+       mMesh.position.set(Math.sin(randAngle) * bDist, randY, Math.cos(randAngle) * bDist);
+       mMesh.lookAt(new THREE.Vector3(Math.sin(randAngle + 0.1) * bDist, randY, Math.cos(randAngle + 0.1) * bDist));
+       
+       // Orient explicitly away from planet center!
+       const currentUp = new THREE.Vector3(0,1,0).applyQuaternion(mMesh.quaternion);
+       const upVector = mMesh.position.clone().normalize();
+       const alignQuat = new THREE.Quaternion().setFromUnitVectors(currentUp, upVector);
+       mMesh.quaternion.premultiply(alignQuat);
+       
+       rideableGroup.add(mMesh);
+    }
+    rideableGroup.position.set(x, y, z);
+    scene.add(rideableGroup);
+
+    planets.push({ mesh: lod, radius, position: new THREE.Vector3(x, y, z), colorSet: colorSet, simplex: new SimplexNoise(seed), faunaGroup: faunaGroup, rideableGroup });
   }
 
   function spawnSolarSystem() {
@@ -427,6 +478,9 @@
       case 'KeyF': 
         toggleFlightMode();
         break;
+      case 'KeyE':
+        toggleRidingMode();
+        break;
     }
   }
 
@@ -444,15 +498,58 @@
     if(!isLocked) return;
     isFlying = !isFlying; 
     if(window.astronautGroup && window.spaceshipGroup) {
-       window.astronautGroup.visible = !isFlying;
+       window.astronautGroup.visible = !isFlying && !isRiding;
        window.spaceshipGroup.visible = isFlying;
+       window.alienMountGroup.visible = !isFlying && isRiding;
        
        // Transfer pitch mathematically between ship hull and camera origin without Euler overlaps
        if (isFlying) {
            yawObject.rotateX(pitchObject.rotation.x);
            pitchObject.rotation.x = 0;
+           isRiding = false; // Dismount if somehow forcing flight
        } else {
            pitchObject.rotation.x = 0;
+       }
+    }
+  }
+
+  function toggleRidingMode() {
+    if (!isLocked || isFlying) return; // Can't ride in space!
+    
+    if (isRiding) {
+        isRiding = false;
+        window.astronautGroup.visible = true;
+        window.alienMountGroup.visible = false;
+        return;
+    }
+    
+    // Find closest planet
+    let closestPlanet = planets[0];
+    let minDist = Infinity;
+    for (let p of planets) {
+       const dist = yawObject.position.distanceTo(p.position);
+       if (dist < minDist) { minDist = dist; closestPlanet = p; }
+    }
+    
+    // Check if we are near a beast on this planet
+    const distToSurface = minDist - closestPlanet.radius;
+    if (closestPlanet && closestPlanet.rideableGroup && distToSurface < 180) { 
+       const planetCenter = closestPlanet.position;
+       // Inverse rotate the player back into the beast local group
+       const rawLocalPlayer = yawObject.position.clone().sub(planetCenter);
+       const invRot = new THREE.Euler(0, -closestPlanet.rideableGroup.rotation.y, 0);
+       const localPlayer = rawLocalPlayer.applyEuler(invRot);
+       
+       for (let beast of closestPlanet.rideableGroup.children) {
+           if (beast.position.distanceTo(localPlayer) < 20) {
+               // Mount it!
+               isRiding = true;
+               window.astronautGroup.visible = false;
+               window.alienMountGroup.visible = true;
+               // Rotate player to face same direction as beast?
+               // Just stick with current rotation for seamless gameplay!
+               break;
+           }
        }
     }
   }
@@ -501,8 +598,8 @@
     if(keys.d) direction.x += 1;
     direction.normalize();
 
-    // Flight mode travels 10x faster
-    const speed = isFlying ? 400 : 20;
+    // Flight mode travels 10x faster, Riding travels 6x faster
+    const speed = isFlying ? 400 : (isRiding ? 120 : 20);
 
     // Calculate closest planet
     let closestPlanet = planets[0];
@@ -548,6 +645,16 @@
        }
     }
     
+    // Animate local planet's rideable fauna (Beasts) 
+    if (closestPlanet && closestPlanet.rideableGroup) {
+       closestPlanet.rideableGroup.rotation.y += 0.2 * dt; // Orbit planet slowly
+       
+       // Give them a slight bobbing motion to simulate walking/hovering
+       closestPlanet.rideableGroup.children.forEach((beast, idx) => {
+           beast.position.y += Math.sin((Date.now() * 0.002) + idx) * 0.02;
+       });
+    }
+
     const center = closestPlanet.position;
 
     // Animate local planet's fauna flock (Boids) & Hostile Predator AI
@@ -670,8 +777,12 @@
         camera.position.y += deficit * 0.5; // Push camera slightly up
     }
     
-    debugPos.innerText = `Pos: ${yawObject.position.x.toFixed(0)}, ${yawObject.position.y.toFixed(0)}, ${yawObject.position.z.toFixed(0)}`;
-    debugMode.innerText = `Mode: ${isFlying ? 'Spaceship 🚀' : 'Walking 🚶'}`;
+    if(debugPos) debugPos.innerText = `Pos: ${yawObject.position.x.toFixed(0)}, ${yawObject.position.y.toFixed(0)}, ${yawObject.position.z.toFixed(0)}`;
+    if(debugMode) {
+        if (isFlying) debugMode.innerText = 'Mode: Spaceship \uD83D\uDE80';
+        else if (isRiding) debugMode.innerText = 'Mode: Riding Beast \uD83E\uDD9A';
+        else debugMode.innerText = 'Mode: Walking \uD83D\uDEB6';
+    }
   }
 
   function animate() {
