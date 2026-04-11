@@ -28,6 +28,9 @@
   let raycaster = new THREE.Raycaster();
   let weatherSystem;
   let minedCrystals = 0;
+  let inventory = {};
+  let lasers = [];
+  let pirates = [];
 
   function init() {
     if (!container) return;
@@ -202,6 +205,25 @@
     const particleMat = new THREE.PointsMaterial({color: 0xffffff, size: 1.0, transparent: true, opacity: 0.0, depthWrite: false});
     weatherSystem = new THREE.Points(particleGeo, particleMat);
     yawObject.add(weatherSystem);
+
+    // Global Asteroids
+    const astCount = 2000;
+    const astGeo = new THREE.DodecahedronGeometry(8, 1);
+    const astMat = new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.9, metalness: 0.1, flatShading: true });
+    const astMesh = new THREE.InstancedMesh(astGeo, astMat, astCount);
+    
+    const dummy = new THREE.Object3D();
+    for (let i = 0; i < astCount; i++) {
+        // Spread evenly but avoid absolute center origin
+        let pos = new THREE.Vector3((Math.random() - 0.5) * 8000, (Math.random() - 0.5) * 8000, (Math.random() - 0.5) * 8000);
+        dummy.position.copy(pos);
+        dummy.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+        const scale = 0.5 + Math.random() * 2.5;
+        dummy.scale.set(scale, scale, scale);
+        dummy.updateMatrix();
+        astMesh.setMatrixAt(i, dummy.matrix);
+    }
+    scene.add(astMesh);
 
     spawnSolarSystem();
     const resizeObserver = new ResizeObserver(() => onResize());
@@ -429,25 +451,48 @@
 
   function spawnSolarSystem() {
      // Earth-like (Origin)
-     createPlanet(0, 0, 0, 100, 'seed_earth', [0x1d4ed8, 0x3b82f6, 0x22c55e, 0x78716c, 0xf8fafc], 'Aethelgard IV', 'Iron');
+     createPlanet(0, 0, 0, 100, 'seed_earth', [0x1d4ed8, 0x3b82f6, 0x22c55e, 0x78716c, 0xf8fafc], 'Aethelgard IV (Origin World)', 'Iron');
      // Mars-like
-     createPlanet(800, 300, -1200, 150, 'seed_mars', [0x7f1d1d, 0x991b1b, 0xd97706, 0xfcd34d, 0xfef3c7], 'Cygnus Prime', 'Platinum');
+     createPlanet(800, 300, -1200, 150, 'seed_mars', [0x7f1d1d, 0x991b1b, 0xd97706, 0xfcd34d, 0xfef3c7], 'Cygnus Prime (Desert Planet)', 'Platinum');
      // Small Ice planet
-     createPlanet(-1000, -500, -500, 60, 'seed_ice', [0x0284c7, 0x38bdf8, 0xbae6fd, 0xf0f9ff, 0xffffff], 'Vespera Beta', 'Gold');
+     createPlanet(-1000, -500, -500, 60, 'seed_ice', [0x0284c7, 0x38bdf8, 0xbae6fd, 0xf0f9ff, 0xffffff], 'Vespera Beta (Alien Ice World)', 'Gold');
      // Toxic gas giant
-     createPlanet(500, -800, 1500, 250, 'seed_gas', [0x064e3b, 0x166534, 0x65a30d, 0x84cc16, 0xd9f99d], 'Romulus II', 'Titanium');
+     createPlanet(500, -800, 1500, 250, 'seed_gas', [0x064e3b, 0x166534, 0x65a30d, 0x84cc16, 0xd9f99d], 'Romulus II (Toxic Gas Giant)', 'Titanium');
      
      // 6 New Planets
-     createPlanet(2500, 1000, 500, 120, 'seed_magma', [0x450a0a, 0x7f1d1d, 0xb91c1c, 0xef4444, 0xfca5a5], 'Tholian Colony', 'Dilithium');
-     createPlanet(-2500, 1500, 1000, 180, 'seed_pink', [0x831843, 0xbe185d, 0xdb2777, 0xf472b6, 0xfbcfe8], 'Qo\'noS Beta', 'Tritanium');
-     createPlanet(0, 2500, -2000, 200, 'seed_desert', [0x78350f, 0x92400e, 0xb45309, 0xd97706, 0xfcd34d], 'Audet IX', 'Uranium');
-     createPlanet(-800, -2500, -1500, 90, 'seed_ocean', [0x1e3a8a, 0x1e40af, 0x1d4ed8, 0x2563eb, 0x3b82f6], 'Sarpeidon VII', 'Plutonium');
-     createPlanet(1800, -2000, -2500, 140, 'seed_purple', [0x4c1d95, 0x5b21b6, 0x6d28d9, 0x7c3aed, 0xa78bfa], 'Atrea Alpha', 'Silver');
-     createPlanet(-400, 500, -300, 30, 'seed_moon', [0x1c1917, 0x292524, 0x44403c, 0x57534e, 0x78716c], 'Coppelius IV', 'Copper');
+     createPlanet(2500, 1000, 500, 120, 'seed_magma', [0x450a0a, 0x7f1d1d, 0xb91c1c, 0xef4444, 0xfca5a5], 'Tholian Colony (Lava World)', 'Dilithium');
+     createPlanet(-2500, 1500, 1000, 180, 'seed_pink', [0x831843, 0xbe185d, 0xdb2777, 0xf472b6, 0xfbcfe8], 'Qo\'noS Beta (Hostile Pink World)', 'Tritanium');
+     createPlanet(0, 2500, -2000, 200, 'seed_desert', [0x78350f, 0x92400e, 0xb45309, 0xd97706, 0xfcd34d], 'Audet IX (Arid Alien Planet)', 'Uranium');
+     createPlanet(-800, -2500, -1500, 90, 'seed_ocean', [0x1e3a8a, 0x1e40af, 0x1d4ed8, 0x2563eb, 0x3b82f6], 'Sarpeidon VII (Deep Ocean World)', 'Plutonium');
+     createPlanet(1800, -2000, -2500, 140, 'seed_purple', [0x4c1d95, 0x5b21b6, 0x6d28d9, 0x7c3aed, 0xa78bfa], 'Atrea Alpha (Mystic Purple Planet)', 'Silver');
+     createPlanet(-400, 500, -300, 30, 'seed_moon', [0x1c1917, 0x292524, 0x44403c, 0x57534e, 0x78716c], 'Coppelius IV (Desolate Moon)', 'Copper');
   }
 
   function onMouseDown(e) {
-    if (!isLocked || isFlying) return;
+    if (!isLocked) return;
+    
+    if (isFlying) {
+       // Space Laser Shoot
+       const laserGeo = new THREE.CylinderGeometry(0.2, 0.2, 4, 8);
+       laserGeo.rotateX(Math.PI / 2);
+       const laserMat = new THREE.MeshBasicMaterial({ color: 0x00ffcc });
+       const laser = new THREE.Mesh(laserGeo, laserMat);
+       
+       const startPos = new THREE.Vector3();
+       camera.getWorldPosition(startPos);
+       laser.position.copy(startPos);
+       
+       const laserDir = new THREE.Vector3();
+       camera.getWorldDirection(laserDir);
+       
+       const targetPoint = startPos.clone().add(laserDir.clone().multiplyScalar(10));
+       laser.lookAt(targetPoint);
+       
+       scene.add(laser);
+       lasers.push({ mesh: laser, dir: laserDir, life: 100 });
+       return;
+    }
+    
     raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
     const intersects = raycaster.intersectObjects(scene.children, true);
     for (let pt of intersects) {
@@ -457,8 +502,10 @@
           const scoreEl = document.getElementById('obj-mine');
           if (scoreEl) {
              const resName = window.currentPlanetResource || 'Crystal';
+             inventory[resName] = (inventory[resName] || 0) + 1;
+             
              if(minedCrystals >= 10) scoreEl.innerText = '[x] Mine Crystals: 10/10';
-             else scoreEl.innerText = `[ ] Mined ${resName}: ${minedCrystals}/10 (Click!)`;
+             else scoreEl.innerText = `[ ] Mined ${resName}: ${inventory[resName]} (Total: ${minedCrystals}/10)`;
           }
           break;
        }
@@ -484,6 +531,29 @@
         break;
       case 'KeyE':
         toggleRidingMode();
+        break;
+      case 'KeyR':
+        if (Object.keys(inventory).length > 0) {
+            // Expend 1 random metal to summon a pirate
+            const met = Object.keys(inventory)[0];
+            if (inventory[met] > 0) {
+                inventory[met]--;
+                const scoreEl = document.getElementById('obj-mine');
+                if(scoreEl) scoreEl.innerText = `[-] Spent 1 ${met} summoning Pirate!`;
+                
+                // Spawn Pirate
+                const pGeo = new THREE.ConeGeometry(5, 15, 4);
+                pGeo.rotateX(Math.PI/2);
+                const pMat = new THREE.MeshStandardMaterial({color: 0x111111, emissive: 0xff0000, metalness: 0.8});
+                const pirate = new THREE.Mesh(pGeo, pMat);
+                
+                // Spawn near player
+                const spawnPos = yawObject.position.clone().add(new THREE.Vector3((Math.random() - 0.5) * 500, (Math.random() - 0.5) * 500 + 100, (Math.random() - 0.5) * 500));
+                pirate.position.copy(spawnPos);
+                scene.add(pirate);
+                pirates.push({ mesh: pirate });
+            }
+        }
         break;
     }
   }
@@ -594,6 +664,62 @@
 
   function updatePhysics(dt) {
     if (!isLocked) return;
+    
+    // Update Lasers
+    for (let i = lasers.length - 1; i >= 0; i--) {
+        let l = lasers[i];
+        l.mesh.position.add(l.dir.clone().multiplyScalar(1000 * dt)); // Fast lasers
+        l.life -= 100 * dt;
+        if (l.life <= 0) {
+            scene.remove(l.mesh);
+            lasers.splice(i, 1);
+        }
+    }
+
+    // Update Pirates
+    for (let i = pirates.length - 1; i >= 0; i--) {
+        let p = pirates[i].mesh;
+        
+        // Move towards player fast
+        const toPlayer = yawObject.position.clone().sub(p.position).normalize();
+        p.position.add(toPlayer.multiplyScalar(80 * dt));
+        p.lookAt(yawObject.position);
+        
+        // Check hits against lasers
+        let hit = false;
+        for (let j = lasers.length - 1; j >= 0; j--) {
+            if (p.position.distanceTo(lasers[j].mesh.position) < 15) {
+                // BOOM
+                scene.remove(lasers[j].mesh);
+                lasers.splice(j, 1);
+                hit = true;
+                
+                const scoreEl = document.getElementById('obj-progress');
+                if (scoreEl) scoreEl.innerText = '[-] Pīřåțë Đεšťrøýed!';
+                break;
+            }
+        }
+        
+        // Check hits against player
+        if (!hit && p.position.distanceTo(yawObject.position) < 5) {
+            playerHealth -= 10;
+            const hpBar = document.getElementById('nms-health-bar');
+            if(hpBar) hpBar.style.width = Math.max(0, playerHealth) + '%';
+            scene.remove(p);
+            pirates.splice(i, 1);
+            if (playerHealth <= 0) {
+                playerHealth = 100;
+                yawObject.position.set(0, 102, 0);
+                if (!isFlying) toggleFlightMode();
+            }
+            continue;
+        }
+        
+        if (hit) {
+            scene.remove(p);
+            pirates.splice(i, 1);
+        }
+    }
     
     const direction = new THREE.Vector3(0,0,0);
     if(keys.w) direction.z -= 1;
