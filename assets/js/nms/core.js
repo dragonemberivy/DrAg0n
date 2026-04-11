@@ -31,6 +31,7 @@
   let inventory = {};
   let lasers = [];
   let pirates = [];
+  let asteroidPositions = [];
 
   function init() {
     if (!container) return;
@@ -235,6 +236,7 @@
         dummy.scale.set(sx, sy, sz);
         dummy.updateMatrix();
         astMesh.setMatrixAt(i, dummy.matrix);
+        asteroidPositions.push(pos.clone());
     }
     scene.add(astMesh);
 
@@ -677,6 +679,32 @@
 
   function updatePhysics(dt) {
     if (!isLocked) return;
+    
+    // Evaluate Asteroid Collisions
+    if (isFlying && asteroidPositions.length > 0) {
+        for (let i = 0; i < asteroidPositions.length; i++) {
+            if (yawObject.position.distanceTo(asteroidPositions[i]) < 18) {
+                // Hard Bounce Calculation
+                const bounceDir = yawObject.position.clone().sub(asteroidPositions[i]).normalize();
+                yawObject.position.add(bounceDir.multiplyScalar(30));
+                
+                // Damage Ship
+                playerHealth -= 20;
+                const hpBar = document.getElementById('nms-health-bar');
+                if(hpBar) hpBar.style.width = Math.max(0, playerHealth) + '%';
+                
+                const scoreEl = document.getElementById('obj-progress');
+                if (scoreEl) scoreEl.innerText = '[!] HULL BREACH: ASTEROID COLLISION!';
+                
+                if (playerHealth <= 0) {
+                    playerHealth = 100;
+                    if(hpBar) hpBar.style.width = '100%';
+                    yawObject.position.set(0, 102, 0);
+                    toggleFlightMode();
+                }
+            }
+        }
+    }
     
     // Update Lasers
     for (let i = lasers.length - 1; i >= 0; i--) {
