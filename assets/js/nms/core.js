@@ -550,16 +550,16 @@
   }
 
   function onKeyDown(e) {
-    switch(e.code) {
-      case 'ArrowUp': 
-      case 'KeyW': keys.w = true; break;
-      case 'ArrowLeft': 
-      case 'KeyA': keys.a = true; break;
-      case 'ArrowDown': 
-      case 'KeyS': keys.s = true; break;
-      case 'ArrowRight': 
-      case 'KeyD': keys.d = true; break;
-      case 'Space': keys.space = true; break;
+    let code = e.code || "";
+    let key = (e.key || "").toLowerCase();
+    
+    if (code === 'ArrowUp' || code === 'KeyW' || key === 'w') keys.w = true;
+    if (code === 'ArrowLeft' || code === 'KeyA' || key === 'a') keys.a = true;
+    if (code === 'ArrowDown' || code === 'KeyS' || key === 's') keys.s = true;
+    if (code === 'ArrowRight' || code === 'KeyD' || key === 'd') keys.d = true;
+    if (code === 'Space' || key === ' ') keys.space = true;
+    
+    switch(code) {
       case 'KeyF': 
         toggleFlightMode();
         break;
@@ -593,17 +593,14 @@
   }
 
   function onKeyUp(e) {
-    switch(e.code) {
-      case 'ArrowUp': 
-      case 'KeyW': keys.w = false; break;
-      case 'ArrowLeft': 
-      case 'KeyA': keys.a = false; break;
-      case 'ArrowDown': 
-      case 'KeyS': keys.s = false; break;
-      case 'ArrowRight': 
-      case 'KeyD': keys.d = false; break;
-      case 'Space': keys.space = false; break;
-    }
+    let code = e.code || "";
+    let key = (e.key || "").toLowerCase();
+    
+    if (code === 'ArrowUp' || code === 'KeyW' || key === 'w') keys.w = false;
+    if (code === 'ArrowLeft' || code === 'KeyA' || key === 'a') keys.a = false;
+    if (code === 'ArrowDown' || code === 'KeyS' || key === 's') keys.s = false;
+    if (code === 'ArrowRight' || code === 'KeyD' || key === 'd') keys.d = false;
+    if (code === 'Space' || key === ' ') keys.space = false;
   }
 
   function toggleFlightMode() {
@@ -791,6 +788,9 @@
     if(keys.a) direction.x -= 1;
     if(keys.d) direction.x += 1;
     direction.normalize();
+    if(keys.w || keys.a || keys.s || keys.d || Math.random() < 0.05) {
+        console.log(`WALKING ATTEMPT | keys: W:${keys.w} A:${keys.a} S:${keys.s} D:${keys.d} | speed: ${speed} | dirZ: ${direction.z.toFixed(2)} | quat: ${yawObject.quaternion.x.toFixed(2)} ${yawObject.quaternion.y.toFixed(2)}`);
+    }
 
     // Flight mode travels 10x faster, Riding travels 6x faster
     const speed = isFlying ? 400 : (isRiding ? 120 : 20);
@@ -986,7 +986,7 @@
         camera.position.y += deficit * 0.5; // Push camera slightly up
     }
     
-    if(debugPos) debugPos.innerText = `Pos: ${yawObject.position.x.toFixed(0)}, ${yawObject.position.y.toFixed(0)}, ${yawObject.position.z.toFixed(0)}`;
+    if(debugPos) debugPos.innerText = `Pos: ${yawObject.position.x.toFixed(0)}, ${yawObject.position.y.toFixed(0)}, ${yawObject.position.z.toFixed(0)} | Speed: ${speed * dt} | Keys: ${keys.w ? 'W' : '_'}${keys.s ? 'S' : '_'}${keys.a ? 'A' : '_'}${keys.d ? 'D' : '_'} | z:${direction.z.toFixed(2)}`;
     if(debugMode) {
         if (isFlying) debugMode.innerText = 'Mode: Spaceship \uD83D\uDE80';
         else if (isRiding) debugMode.innerText = 'Mode: Riding Beast \uD83E\uDD9A';
