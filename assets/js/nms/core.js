@@ -97,6 +97,22 @@
     packMesh.position.set(0, 1.8, 0.6);
     window.astronautGroup.add(packMesh);
 
+    // Handheld Multi-Tool Gun
+    const gunGeo = new THREE.BoxGeometry(0.3, 0.4, 1.2);
+    const gunMat = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.8 });
+    const gunMesh = new THREE.Mesh(gunGeo, gunMat);
+    gunMesh.position.set(0.7, 1.5, 0.4); // Right-hand position
+    
+    // Glowing Barrel
+    const barrelGeo = new THREE.CylinderGeometry(0.1, 0.1, 0.4);
+    barrelGeo.rotateX(Math.PI / 2);
+    const barrelMat = new THREE.MeshBasicMaterial({ color: 0x00ffcc });
+    const barrelMesh = new THREE.Mesh(barrelGeo, barrelMat);
+    barrelMesh.position.set(0, 0.1, -0.6);
+    gunMesh.add(barrelMesh);
+    
+    window.astronautGroup.add(gunMesh);
+
     // Glowing Jetpack Ring
     const ringGeo = new THREE.TorusGeometry(0.3, 0.05, 8, 16);
     const ringMat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
@@ -448,6 +464,7 @@
        bMesh.position.set(Math.sin(randAngle) * bDist, randY, Math.cos(randAngle) * bDist);
        // Point along the orbit path
        bMesh.lookAt(new THREE.Vector3(Math.sin(randAngle + 0.1) * bDist, randY, Math.cos(randAngle + 0.1) * bDist));
+       bMesh.userData.isFauna = true; // Tag for Multi-Tool Raycaster
        faunaGroup.add(bMesh);
     }
     faunaGroup.position.set(x, y, z);
@@ -523,21 +540,50 @@
        return;
     }
     
+    // Handheld Multi-Tool Shoot (Mining & Culling)
+    const pLaserGeo = new THREE.CylinderGeometry(0.08, 0.08, 2, 8);
+    pLaserGeo.rotateX(Math.PI / 2);
+    const pLaserMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    const pLaser = new THREE.Mesh(pLaserGeo, pLaserMat);
+    
+    const pStartPos = new THREE.Vector3();
+    camera.getWorldPosition(pStartPos);
+    pStartPos.y -= 0.5; // Fire slightly below eye level (from gun)
+    pLaser.position.copy(pStartPos);
+    
+    const pLaserDir = new THREE.Vector3();
+    camera.getWorldDirection(pLaserDir);
+    
+    pLaser.lookAt(pStartPos.clone().add(pLaserDir.clone().multiplyScalar(10)));
+    scene.add(pLaser);
+    lasers.push({ mesh: pLaser, dir: pLaserDir, life: 50 }); // Fast dissipating beam
+
     raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
     const intersects = raycaster.intersectObjects(scene.children, true);
     for (let pt of intersects) {
-       if (pt.distance < 30 && pt.object.userData && pt.object.userData.isResource) {
-          pt.object.parent.remove(pt.object);
-          minedCrystals++;
-          const scoreEl = document.getElementById('obj-mine');
-          if (scoreEl) {
-             const resName = window.currentPlanetResource || 'Crystal';
-             inventory[resName] = (inventory[resName] || 0) + 1;
-             
-             if(minedCrystals >= 10) scoreEl.innerText = '[x] Mine Crystals: 10/10';
-             else scoreEl.innerText = `[ ] Mined ${resName}: ${inventory[resName]} (Total: ${minedCrystals}/10)`;
-          }
-          break;
+       if (pt.distance < 45) { // Range of handheld Multi-Tool
+           
+           if (pt.object.userData && pt.object.userData.isResource) {
+              pt.object.parent.remove(pt.object);
+              minedCrystals++;
+              const scoreEl = document.getElementById('obj-mine');
+              if (scoreEl) {
+                 const resName = window.currentPlanetResource || 'Crystal';
+                 inventory[resName] = (inventory[resName] || 0) + 1;
+                 
+                 if(minedCrystals >= 10) scoreEl.innerText = '[x] Mine Crystals: 10/10';
+                 else scoreEl.innerText = `[ ] Mined ${resName}: ${inventory[resName]} (Total: ${minedCrystals}/10)`;
+              }
+              break;
+           }
+           
+           if (pt.object.userData && pt.object.userData.isFauna) {
+              pt.object.parent.remove(pt.object);
+              
+              const scoreEl = document.getElementById('obj-progress');
+              if (scoreEl) scoreEl.innerText = '[-] Culled Biological Entity!';
+              break;
+           }
        }
     }
   }
