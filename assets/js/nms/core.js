@@ -788,9 +788,7 @@
     if(keys.a) direction.x -= 1;
     if(keys.d) direction.x += 1;
     direction.normalize();
-    if(keys.w || keys.a || keys.s || keys.d || Math.random() < 0.05) {
-        console.log(`WALKING ATTEMPT | keys: W:${keys.w} A:${keys.a} S:${keys.s} D:${keys.d} | speed: ${speed} | dirZ: ${direction.z.toFixed(2)} | quat: ${yawObject.quaternion.x.toFixed(2)} ${yawObject.quaternion.y.toFixed(2)}`);
-    }
+    direction.normalize();
 
     // Flight mode travels 10x faster, Riding travels 6x faster
     const speed = isFlying ? 400 : (isRiding ? 120 : 20);
@@ -933,7 +931,7 @@
 
     } else {
        direction.applyQuaternion(yawObject.quaternion);
-       yawObject.position.add(direction.multiplyScalar(3)); // Hardcoded horizontal step
+       yawObject.position.add(direction.multiplyScalar(speed * dt)); 
 
        
        // Mission Objectives Tracker
@@ -957,10 +955,12 @@
        const newUp = yawObject.position.clone().sub(center).normalize();
        yawObject.position.copy(center).add(newUp.multiplyScalar(targetDist));  
 
-       // Align Local Y perfectly to the planet's normal utilizing pure Quaternions to prevent Euler twisting
-       const currentUp = new THREE.Vector3(0,1,0).applyQuaternion(yawObject.quaternion);
-       const alignQuat = new THREE.Quaternion().setFromUnitVectors(currentUp, newUp);
-       yawObject.quaternion.premultiply(alignQuat);
+        // Align Local Y perfectly to the planet's normal utilizing pure Quaternions to prevent Euler twisting
+        yawObject.quaternion.normalize(); // Force float stabilization
+        const currentUp = new THREE.Vector3(0,1,0).applyQuaternion(yawObject.quaternion).normalize();
+        const alignQuat = new THREE.Quaternion().setFromUnitVectors(currentUp, newUp);
+        yawObject.quaternion.premultiply(alignQuat);
+        yawObject.quaternion.normalize(); // Guarantee safe rotational constraints
     }
     
     // Dynamic Camera FOV, Zoom & Collision Avoidance
