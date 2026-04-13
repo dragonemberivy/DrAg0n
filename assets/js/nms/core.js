@@ -22,7 +22,7 @@
   let playerHealth = 100;
 
   let isLocked = false;
-  let clock = new THREE.Clock();
+  let lastTime = performance.now();
   let nmsLoopId;
 
   let raycaster = new THREE.Raycaster();
@@ -933,7 +933,8 @@
 
     } else {
        direction.applyQuaternion(yawObject.quaternion);
-       yawObject.position.add(direction.multiplyScalar(speed * dt));
+       yawObject.position.add(direction.multiplyScalar(3)); // Hardcoded horizontal step
+
        
        // Mission Objectives Tracker
        visitedPlanets.add(closestIdx);
@@ -986,7 +987,7 @@
         camera.position.y += deficit * 0.5; // Push camera slightly up
     }
     
-    if(debugPos) debugPos.innerText = `Pos: ${yawObject.position.x.toFixed(0)}, ${yawObject.position.y.toFixed(0)}, ${yawObject.position.z.toFixed(0)} | Speed: ${speed * dt} | Keys: ${keys.w ? 'W' : '_'}${keys.s ? 'S' : '_'}${keys.a ? 'A' : '_'}${keys.d ? 'D' : '_'} | z:${direction.z.toFixed(2)}`;
+    if(debugPos) debugPos.innerText = `Pos: ${yawObject.position.x.toFixed(0)}, ${yawObject.position.y.toFixed(0)}, ${yawObject.position.z.toFixed(0)} | FixedStep: 3 | Keys: ${keys.w ? 'W' : '_'}${keys.s ? 'S' : '_'}${keys.a ? 'A' : '_'}${keys.d ? 'D' : '_'} | z:${direction.z.toFixed(2)}`;
     if(debugMode) {
         if (isFlying) debugMode.innerText = 'Mode: Spaceship \uD83D\uDE80';
         else if (isRiding) debugMode.innerText = 'Mode: Riding Beast \uD83E\uDD9A';
@@ -996,7 +997,12 @@
 
   function animate() {
     nmsLoopId = requestAnimationFrame(animate);
-    const dt = clock.getDelta();
+    const now = performance.now();
+    let dt = (now - lastTime) / 1000;
+    // Cap dt aggressively to prevent massive jumps when tab is in background 
+    if (dt > 0.1) dt = 0.016; 
+    lastTime = now;
+    
     updatePhysics(dt);
     
     for (let p of planets) {
