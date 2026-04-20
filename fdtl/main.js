@@ -159,6 +159,35 @@ function loadLevel(index) {
   triggerWhisper(level.whisper);
 }
 
+function resetGame() {
+  state.health = 100;
+  state.maxHealth = 100;
+  state.lightEnergy = 100;
+  state.maxLightEnergy = 100;
+  state.whisperTimer = 0;
+  state.currentLevelIdx = 0;
+  state.moral = 0;
+  state.paused = false;
+  state.shieldTimer = 0;
+  state.flashTimer = 0;
+  state.gatewayPos = null;
+  state.relics = { boots: false, lens: false, core: false };
+  
+  player.speed = 250;
+  player.baseLightRadius = 180;
+  player.currentLightRadius = 180;
+  player.targetLightRadius = 180;
+  
+  companion.singTimer = 0;
+  
+  projectiles = [];
+  
+  choiceOverlay.classList.add('hidden');
+  narrativeTerminal.classList.add('hidden');
+  
+  loadLevel(0);
+}
+
 // Initialize canvas size
 function resize() {
   width = window.innerWidth;
@@ -709,9 +738,14 @@ function update(dt) {
   state.lightEnergy -= 2 * dt;
   if (state.lightEnergy < 0) state.lightEnergy = 0;
   
-  if (state.health <= 0) {
+  if (state.health <= 0 || state.lightEnergy <= 0) {
     state.health = 0;
+    state.lightEnergy = 0;
     triggerWhisper("The darkness consumes you...");
+    state.paused = true;
+    setTimeout(() => {
+      resetGame();
+    }, 4000);
   }
 
   state.whisperTimer += dt;
