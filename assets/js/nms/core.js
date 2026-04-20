@@ -30,6 +30,7 @@
   let minedCrystals = 0;
   let inventory = {};
   let lasers = [];
+  let enemyLasers = [];
   let pirates = [];
   let asteroidPositions = [];
 
@@ -707,7 +708,8 @@
             pirate.position.copy(spawnPos);
             pirate.lookAt(yawObject.position); 
             scene.add(pirate);
-            pirates.push({ mesh: pirate });
+            const offset = new THREE.Vector3((Math.random() - 0.5) * 300, (Math.random() - 0.5) * 150, 0);
+            pirates.push({ mesh: pirate, offset: offset, nextFire: Math.random() * 2 });
             
             const scoreEl = document.getElementById('obj-progress');
             if (scoreEl) scoreEl.innerText = '[!] MANUALLY SUMMONED PIRATE!';
@@ -837,7 +839,8 @@
             pirate.position.copy(spawnPos);
             pirate.lookAt(yawObject.position);
             scene.add(pirate);
-            pirates.push({ mesh: pirate });
+            const offset = new THREE.Vector3((Math.random() - 0.5) * 300, (Math.random() - 0.5) * 150, 0);
+            pirates.push({ mesh: pirate, offset: offset, nextFire: Math.random() * 2 });
             
             const scoreEl = document.getElementById('obj-progress');
             if (scoreEl) scoreEl.innerText = '[!] SPACE PIRATE INTERCEPTED!';
@@ -881,20 +884,84 @@
         }
     }
 
+    // Update Enemy Lasers
+    for (let i = enemyLasers.length - 1; i >= 0; i--) {
+        let l = enemyLasers[i];
+        l.mesh.position.add(l.dir.clone().multiplyScalar(400 * dt));
+        l.life -= 100 * dt;
+        
+        if (l.mesh.position.distanceTo(yawObject.position) < 20) {
+            playerHealth -= 5;
+            const hpBar = document.getElementById('nms-health-bar');
+            if(hpBar) hpBar.style.width = Math.max(0, playerHealth) + '%';
+            
+            scene.remove(l.mesh);
+            enemyLasers.splice(i, 1);
+            
+            if (playerHealth <= 0) {
+                playerHealth = 100;
+                if(hpBar) hpBar.style.width = '100%';
+                yawObject.position.set(0, 102, 0);
+                if (isFlying) toggleFlightMode();
+            }
+            continue;
+        }
+        
+        if (l.life <= 0) {
+            scene.remove(l.mesh);
+            enemyLasers.splice(i, 1);
+        }
+    }
+
     // Update Pirates
     for (let i = pirates.length - 1; i >= 0; i--) {
-        let p = pirates[i].mesh;
+        let pData = pirates[i];
+        let p = pData.mesh;
         
-        // Move towards player fast
+        const distToPlayer = p.position.distanceTo(yawObject.position);
         const toPlayer = yawObject.position.clone().sub(p.position).normalize();
-        p.position.add(toPlayer.multiplyScalar(80 * dt));
+        
+        // Formation and Movement
+        if (distToPlayer > 300) {
+            const right = new THREE.Vector3().crossVectors(toPlayer, new THREE.Vector3(0,1,0)).normalize();
+            if (right.lengthSq() < 0.1) right.set(1,0,0); // Fallback if pointing straight up/down
+            const up = new THREE.Vector3(0, 1, 0);
+            const formationTarget = yawObject.position.clone()
+                .add(right.multiplyScalar(pData.offset.x))
+                .add(up.multiplyScalar(pData.offset.y));
+                
+            const toTarget = formationTarget.sub(p.position).normalize();
+            p.position.add(toTarget.multiplyScalar(220 * dt)); // faster intercept
+        } else {
+            // Strafe orbit within close range
+            const right = new THREE.Vector3().crossVectors(toPlayer, new THREE.Vector3(0,1,0)).normalize();
+            if (right.lengthSq() < 0.1) right.set(1,0,0);
+            p.position.add(right.multiplyScalar(pData.offset.x > 0 ? 80 * dt : -80 * dt));
+        }
         p.lookAt(yawObject.position);
         
-        // Check hits against lasers
+        // Combat: Shooting Red Lasers
+        pData.nextFire -= dt;
+        if (pData.nextFire <= 0 && distToPlayer < 400 && isFlying) {
+            pData.nextFire = 1.5 + Math.random() * 2; // Fire every 1.5 to 3.5 seconds
+            
+            const eLaserGeo = new THREE.CylinderGeometry(0.8, 0.8, 6, 8);
+            eLaserGeo.rotateX(Math.PI / 2);
+            const eLaserMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+            const eLaser = new THREE.Mesh(eLaserGeo, eLaserMat);
+            
+            eLaser.position.copy(p.position);
+            eLaser.lookAt(yawObject.position);
+            
+            const laserDir = yawObject.position.clone().sub(p.position).normalize();
+            scene.add(eLaser);
+            enemyLasers.push({ mesh: eLaser, dir: laserDir, life: 100 });
+        }
+        
+        // Check hits against player's lasers
         let hit = false;
         for (let j = lasers.length - 1; j >= 0; j--) {
-            if (p.position.distanceTo(lasers[j].mesh.position) < 15) {
-                // BOOM
+            if (p.position.distanceTo(lasers[j].mesh.position) < 25) {
                 scene.remove(lasers[j].mesh);
                 lasers.splice(j, 1);
                 hit = true;
@@ -910,9 +977,9 @@
             }
         }
         
-        // Check hits against player
+        // Check direct crashes against player
         if (!hit && p.position.distanceTo(yawObject.position) < 80) {
-            playerHealth -= 10;
+            playerHealth -= 15;
             const hpBar = document.getElementById('nms-health-bar');
             if(hpBar) hpBar.style.width = Math.max(0, playerHealth) + '%';
             scene.remove(p);
@@ -920,7 +987,7 @@
             if (playerHealth <= 0) {
                 playerHealth = 100;
                 yawObject.position.set(0, 102, 0);
-                if (!isFlying) toggleFlightMode();
+                if (isFlying) toggleFlightMode();
             }
             continue;
         }
