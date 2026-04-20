@@ -610,6 +610,73 @@
     renderer.setSize(container.clientWidth, container.clientHeight);
   }
 
+  function createPirateShip() {
+    const group = new THREE.Group();
+    
+    // Hull
+    const hullGeo = new THREE.CylinderGeometry(0.5, 1.5, 5, 8);
+    hullGeo.rotateX(Math.PI / 2);
+    const hullMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.5 });
+    const hullMesh = new THREE.Mesh(hullGeo, hullMat);
+    group.add(hullMesh);
+
+    // Cockpit
+    const shipVisorGeo = new THREE.SphereGeometry(1, 16, 16);
+    shipVisorGeo.scale(1, 0.5, 1.5);
+    const shipVisorMat = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 1.0, roughness: 0.1 });
+    const shipVisorMesh = new THREE.Mesh(shipVisorGeo, shipVisorMat);
+    shipVisorMesh.position.set(0, 0.5, -0.5);
+    group.add(shipVisorMesh);
+
+    // Wings
+    const wingGeo = new THREE.BoxGeometry(6, 0.2, 2);
+    const wingMat = new THREE.MeshStandardMaterial({ color: 0xdddddd });
+    const wingMesh = new THREE.Mesh(wingGeo, wingMat);
+    wingMesh.position.set(0, 0, 1);
+    group.add(wingMesh);
+
+    // Thrusters
+    const thrusterGeo = new THREE.CylinderGeometry(0.6, 0.4, 1, 8);
+    thrusterGeo.rotateX(Math.PI / 2);
+    const thrusterMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
+    const thrusterMesh1 = new THREE.Mesh(thrusterGeo, thrusterMat);
+    thrusterMesh1.position.set(-1.5, 0, 2.5);
+    const thrusterMesh2 = new THREE.Mesh(thrusterGeo, thrusterMat);
+    thrusterMesh2.position.set(1.5, 0, 2.5);
+    group.add(thrusterMesh1);
+    group.add(thrusterMesh2);
+
+    // Engine Glow
+    const glowGeo = new THREE.SphereGeometry(0.4, 8, 8);
+    const glowMat = new THREE.MeshBasicMaterial({ color: 0xff8800 });
+    const glow1 = new THREE.Mesh(glowGeo, glowMat);
+    glow1.position.set(-1.5, 0, 3);
+    const glow2 = new THREE.Mesh(glowGeo, glowMat);
+    glow2.position.set(1.5, 0, 3);
+    group.add(glow1);
+    group.add(glow2);
+
+    // Pirate Flag Emoji
+    const canvas = document.createElement('canvas');
+    canvas.width = 64;
+    canvas.height = 64;
+    const context = canvas.getContext('2d');
+    context.font = '48px Arial';
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.fillText('🏴‍☠️', 32, 32);
+    const texture = new THREE.CanvasTexture(canvas);
+    const spriteMaterial = new THREE.SpriteMaterial({ map: texture, transparent: true });
+    const sprite = new THREE.Sprite(spriteMaterial);
+    sprite.scale.set(6, 6, 1);
+    sprite.position.set(0, 4, 0); 
+    group.add(sprite);
+
+    // Scale up to match the original sphere size (radius ~60)
+    group.scale.set(12, 12, 12);
+    return group;
+  }
+
   function onKeyDown(e) {
     let code = e.code || "";
     let key = (e.key || "").toLowerCase();
@@ -630,9 +697,7 @@
       case 'KeyP':
         // Manual Pirate Spawn
         if (pirates.length < 5) {
-            const pGeo = new THREE.SphereGeometry(60, 16, 16);
-            const pMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-            const pirate = new THREE.Mesh(pGeo, pMat);
+            const pirate = createPirateShip();
             
             const camDir = new THREE.Vector3();
             camera.getWorldDirection(camDir);
@@ -762,9 +827,7 @@
     // Natural Pirate Spawns in Space
     if (isFlying && Math.random() < 0.002) {
         if (pirates.length < 3) { // Limit number of active pirates
-            const pGeo = new THREE.SphereGeometry(60, 16, 16);
-            const pMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-            const pirate = new THREE.Mesh(pGeo, pMat);
+            const pirate = createPirateShip();
             
             const camDir = new THREE.Vector3();
             camera.getWorldDirection(camDir);
