@@ -21,6 +21,11 @@
   let isRiding = false;
   let playerHealth = 100;
 
+  let isTrading = false;
+  let spaceStation = null;
+  let credits = 0;
+  let engineMultiplier = 1;
+
   let isLocked = false;
   let lastTime = performance.now();
   let nmsLoopId;
@@ -529,6 +534,23 @@
      createPlanet(-800, -2500, -1500, 90, 'seed_ocean', [0x1e3a8a, 0x1e40af, 0x1d4ed8, 0x2563eb, 0x3b82f6], 'Sarpeidon VII (Deep Ocean World)', 'Plutonium');
      createPlanet(1800, -2000, -2500, 140, 'seed_purple', [0x4c1d95, 0x5b21b6, 0x6d28d9, 0x7c3aed, 0xa78bfa], 'Atrea Alpha (Mystic Purple Planet)', 'Silver');
      createPlanet(-400, 500, -300, 30, 'seed_moon', [0x1c1917, 0x292524, 0x44403c, 0x57534e, 0x78716c], 'Coppelius IV (Desolate Moon)', 'Copper');
+     
+     createSpaceStation();
+  }
+  
+  function createSpaceStation() {
+     const stGeo = new THREE.TorusGeometry(80, 15, 16, 100);
+     const stMat = new THREE.MeshStandardMaterial({color: 0x8888aa, metalness: 0.8, roughness: 0.2});
+     spaceStation = new THREE.Mesh(stGeo, stMat);
+     
+     const coreGeo = new THREE.CylinderGeometry(30, 30, 100, 16);
+     const coreMat = new THREE.MeshStandardMaterial({color: 0x444455, metalness: 0.9});
+     const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+     spaceStation.add(coreMesh);
+     
+     spaceStation.position.set(0, 400, 0); // High orbit above origin
+     spaceStation.rotation.x = Math.PI / 2;
+     scene.add(spaceStation);
   }
 
   function onMouseDown(e) {
@@ -689,6 +711,13 @@
     if (code === 'Space' || key === ' ') keys.space = true;
     
     switch(code) {
+      case 'KeyT':
+        if (spaceStation && yawObject.position.distanceTo(spaceStation.position) < 300 && isFlying) {
+            document.exitPointerLock();
+            document.getElementById('nms-trade-overlay').style.display = 'flex';
+            isTrading = true;
+        }
+        break;
       case 'KeyF': 
         toggleFlightMode();
         break;
@@ -1007,7 +1036,7 @@
     direction.normalize();
 
     // Flight mode travels 10x faster, Riding travels 6x faster
-    const speed = isFlying ? 400 : (isRiding ? 120 : 20);
+    const speed = isFlying ? (400 * engineMultiplier) : (isRiding ? 120 : 20);
 
     // Calculate closest planet
     let closestPlanet = planets[0];
@@ -1027,7 +1056,25 @@
     // Planet Proximity UI updates
     const distToSurface = minDist - closestPlanet.radius;
     
-    if (distToSurface < 600 && hudPlanetInfo) {
+    // Space Station Docking
+    if (spaceStation) {
+        spaceStation.rotation.z += 0.1 * dt; // slow spin
+        const distToStation = yawObject.position.distanceTo(spaceStation.position);
+        
+        let promptEl = document.getElementById('nms-planet-info');
+        if (distToStation < 300) {
+           if (promptEl) {
+               promptEl.style.display = 'block';
+               promptEl.style.opacity = '1';
+               document.getElementById('nms-planet-name').innerText = 'Galactic Trade Station';
+               document.getElementById('nms-planet-resource').innerText = 'Press T to Dock & Trade';
+           }
+        } else if (distToStation >= 300 && distToStation < 350) {
+           if (promptEl) promptEl.style.opacity = '0';
+        }
+    }
+    
+    if (distToSurface < 600 && hudPlanetInfo && !isTrading && (!spaceStation || yawObject.position.distanceTo(spaceStation.position) > 350)) {
        hudPlanetInfo.style.display = 'block';
        hudPlanetInfo.style.opacity = '1';
        hudPlanetName.innerText = closestPlanet.name || 'Unknown Planet';
@@ -1251,4 +1298,52 @@
     }
   };
 
+  window.tradeSellScrap = function() {
+      if (inventory['Pirate Scrap'] > 0) {
+          credits += inventory['Pirate Scrap'] * 50;
+          inventory['Pirate Scrap'] = 0;
+          updateTradeUI('Sold all Pirate Scrap!');
+      } else updateTradeUI('No Pirate Scrap to sell!');
+  };
+  window.tradeSellMinerals = function() {
+      let sold = false;
+      for (let key in inventory) {
+          if (key !== 'Pirate Scrap' && inventory[key] > 0) {
+              credits += inventory[key] * 20;
+              inventory[key] = 0;
+              sold = true;
+          }
+      }
+      if (sold) updateTradeUI('Sold all Mined Minerals!');
+      else updateTradeUI('No Minerals to sell!');
+  };
+  window.tradeRepairHull = function() {
+      if (credits >= 100 && playerHealth < 100) {
+          credits -= 100;
+          playerHealth = 100;
+          const hpBar = document.getElementById('nms-health-bar');
+          if(hpBar) hpBar.style.width = '100%';
+          updateTradeUI('Hull repaired to MAXIMUM!');
+      } else if (playerHealth >= 100) updateTradeUI('Hull is already full!');
+      else updateTradeUI('Not enough credits!');
+  };
+  window.tradeUpgradeEngine = function() {
+      if (credits >= 500) {
+          credits -= 500;
+          engineMultiplier += 0.5;
+          updateTradeUI('Engine Boosted! Speed Increased!');
+      } else updateTradeUI('Not enough credits!');
+  };
+  window.undockStation = function() {
+      document.getElementById('nms-trade-overlay').style.display = 'none';
+      isTrading = false;
+      container.requestPointerLock();
+  };
+  function updateTradeUI(msg) {
+      document.getElementById('trade-credits').innerText = credits + ' ¢';
+      document.getElementById('trade-feedback').innerText = msg;
+      
+      const mineObj = document.getElementById('obj-mine');
+      if (mineObj) mineObj.innerText = `[ ] Cargo Empty`;
+  }
 })();

@@ -111,6 +111,32 @@
                <p id="nms-planet-resource" style="margin: 5px 0 0 0; color: #fbbf24; font-size: 0.9rem;">Scans detect: Unknown</p>
             </div>
 
+            <!-- TRADE STATION OVERLAY -->
+            <div id="nms-trade-overlay" style="position: absolute; top:0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 20, 0.85); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 20; color: white; font-family: monospace; backdrop-filter: blur(8px);">
+               <h2 style="font-size: 3rem; margin-bottom: 0.5rem; text-shadow: 0 0 10px #fbbf24; color: #fbbf24;">GALACTIC TRADING POST</h2>
+               <p style="font-size: 1.2rem; margin-bottom: 2rem; color: #aaa;">"We trade scrap for credits, explorer. Simple as."</p>
+               
+               <div style="background: rgba(0,0,0,0.5); border: 1px solid #444; padding: 2rem; border-radius: 12px; width: 80%; max-width: 500px;">
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; border-bottom: 1px solid #444; padding-bottom: 1rem;">
+                     <span>Your Credits:</span>
+                     <span id="trade-credits" style="color: #4ade80; font-weight: bold; font-size: 1.2rem;">0 ¢</span>
+                  </div>
+                  
+                  <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
+                     <button onclick="window.tradeSellScrap()" style="flex:1; padding: 10px; background: rgba(59, 130, 246, 0.2); border: 1px solid #3b82f6; color: white; cursor: pointer; border-radius: 4px;">Sell Pirate Scrap</button>
+                     <button onclick="window.tradeSellMinerals()" style="flex:1; padding: 10px; background: rgba(234, 179, 8, 0.2); border: 1px solid #eab308; color: white; cursor: pointer; border-radius: 4px;">Sell Minerals</button>
+                  </div>
+                  
+                  <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
+                     <button onclick="window.tradeRepairHull()" style="flex:1; padding: 10px; background: rgba(34, 197, 94, 0.2); border: 1px solid #22c55e; color: white; cursor: pointer; border-radius: 4px;">Repair Hull (100 ¢)</button>
+                     <button onclick="window.tradeUpgradeEngine()" style="flex:1; padding: 10px; background: rgba(168, 85, 247, 0.2); border: 1px solid #a855f7; color: white; cursor: pointer; border-radius: 4px;">Upgrade Engine (500 ¢)</button>
+                  </div>
+               </div>
+               
+               <button onclick="window.undockStation()" style="margin-top: 2rem; padding: 10px 30px; font-size: 1.2rem; background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: white; border-radius: 8px; cursor: pointer;">Undock & Leave</button>
+               <div id="trade-feedback" style="margin-top: 1rem; color: #a855f7; font-weight: bold; height: 20px;"></div>
+            </div>
+
             <!-- OBJECTIVES PANEL -->
             <div id="nms-objectives" style="position: absolute; top: 20px; right: 20px; width: 250px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 1rem; color: #fff; font-family: monospace; pointer-events: none; display: none; z-index: 5; text-shadow: 1px 1px 0 #000; backdrop-filter: blur(4px);">
               <h4 style="margin: 0 0 0.5rem 0; color: #fbbf24; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 0.5rem;">MISSION LOG</h4>
