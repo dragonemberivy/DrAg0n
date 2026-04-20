@@ -377,12 +377,20 @@
          
          // Procedural Flora (Instanced Mesh for Extreme Performance)
          const treeCount = Math.floor(radius * 1.5);
-         const trunkGeo = new THREE.CylinderGeometry(0.3, 0.5, 3, 5);
-         const leavesGeo = new THREE.ConeGeometry(1.5, 5, 5);
-         leavesGeo.translate(0, 3, 0);
+         let trunkGeo, leavesGeo, trunkMat, leavesMat;
          
-         const trunkMat = new THREE.MeshStandardMaterial({color: 0x3d2817, roughness: 0.9, flatShading: true});
-         const leavesMat = new THREE.MeshStandardMaterial({color: colorSet[2], roughness: 0.8, flatShading: true});
+         if (seed === 'seed_ocean') {
+            trunkGeo = new THREE.CylinderGeometry(0.2, 0.2, 3, 5); // Kelp
+            leavesGeo = new THREE.DodecahedronGeometry(1.5, 0); // Coral
+            trunkMat = new THREE.MeshStandardMaterial({color: 0x228b22, roughness: 0.9, flatShading: true}); // Green kelp
+            leavesMat = new THREE.MeshStandardMaterial({color: 0xff7f50, roughness: 0.8, flatShading: true}); // Coral color
+         } else {
+            trunkGeo = new THREE.CylinderGeometry(0.3, 0.5, 3, 5);
+            leavesGeo = new THREE.ConeGeometry(1.5, 5, 5);
+            leavesGeo.translate(0, 3, 0);
+            trunkMat = new THREE.MeshStandardMaterial({color: 0x3d2817, roughness: 0.9, flatShading: true});
+            leavesMat = new THREE.MeshStandardMaterial({color: colorSet[2], roughness: 0.8, flatShading: true});
+         }
 
          const imTrunk = new THREE.InstancedMesh(trunkGeo, trunkMat, treeCount);
          const imLeaves = new THREE.InstancedMesh(leavesGeo, leavesMat, treeCount);
@@ -412,7 +420,7 @@
             }
             noiseVal -= 5 * (radius / 100);
             
-            // Only spawn trees on solid land (above water!)
+            // Only spawn trees/flora on solid land (above water!)
             if (noiseVal > 0.5) {
                 dummy.position.copy(rPos).multiplyScalar(radius + noiseVal);
                 dummy.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), rPos);
@@ -451,12 +459,19 @@
     auraMesh.position.set(x, y, z);
     scene.add(auraMesh);
 
-    // Fauna (Circling abstract birds/creatures)
+    // Fauna (Circling abstract birds/creatures or fish/sharks for ocean)
     const faunaGroup = new THREE.Group();
     for(let f=0; f<12; f++) {
-       const bGeo = new THREE.ConeGeometry(0.4, 1.2, 3);
-       bGeo.rotateX(Math.PI/2);
-       const bMat = new THREE.MeshStandardMaterial({color: colorSet[4], emissive: colorSet[1], flatShading: true});
+       let bGeo, bMat;
+       if (seed === 'seed_ocean') {
+           bGeo = new THREE.ConeGeometry(0.6, 2.0, 4); // Fish/Shark shape
+           bGeo.rotateX(Math.PI/2);
+           bMat = new THREE.MeshStandardMaterial({color: 0x708090, emissive: 0x2f4f4f, flatShading: true});
+       } else {
+           bGeo = new THREE.ConeGeometry(0.4, 1.2, 3);
+           bGeo.rotateX(Math.PI/2);
+           bMat = new THREE.MeshStandardMaterial({color: colorSet[4], emissive: colorSet[1], flatShading: true});
+       }
        const bMesh = new THREE.Mesh(bGeo, bMat);
        const randY = (Math.random() - 0.5) * radius * 0.8;
        const randAngle = Math.random() * Math.PI * 2;
@@ -612,27 +627,25 @@
       case 'KeyE':
         toggleRidingMode();
         break;
-      case 'KeyR':
-        if (Object.keys(inventory).length > 0) {
-            // Expend 1 random metal to summon a pirate
-            const met = Object.keys(inventory)[0];
-            if (inventory[met] > 0) {
-                inventory[met]--;
-                const scoreEl = document.getElementById('obj-mine');
-                if(scoreEl) scoreEl.innerText = `[-] Spent 1 ${met} summoning Pirate!`;
-                
-                // Spawn Pirate
-                const pGeo = new THREE.ConeGeometry(5, 15, 4);
-                pGeo.rotateX(Math.PI/2);
-                const pMat = new THREE.MeshStandardMaterial({color: 0x111111, emissive: 0xff0000, metalness: 0.8});
-                const pirate = new THREE.Mesh(pGeo, pMat);
-                
-                // Spawn near player
-                const spawnPos = yawObject.position.clone().add(new THREE.Vector3((Math.random() - 0.5) * 500, (Math.random() - 0.5) * 500 + 100, (Math.random() - 0.5) * 500));
-                pirate.position.copy(spawnPos);
-                scene.add(pirate);
-                pirates.push({ mesh: pirate });
-            }
+      case 'KeyP':
+        // Manual Pirate Spawn
+        if (pirates.length < 5) {
+            const pGeo = new THREE.SphereGeometry(60, 16, 16);
+            const pMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+            const pirate = new THREE.Mesh(pGeo, pMat);
+            
+            const camDir = new THREE.Vector3();
+            camera.getWorldDirection(camDir);
+            
+            // Spawn directly in front of the player
+            const spawnPos = yawObject.position.clone().add(camDir.multiplyScalar(600));
+            pirate.position.copy(spawnPos);
+            pirate.lookAt(yawObject.position); 
+            scene.add(pirate);
+            pirates.push({ mesh: pirate });
+            
+            const scoreEl = document.getElementById('obj-progress');
+            if (scoreEl) scoreEl.innerText = '[!] MANUALLY SUMMONED PIRATE!';
         }
         break;
     }
@@ -746,6 +759,28 @@
   function updatePhysics(dt) {
     if (!isLocked) return;
     
+    // Natural Pirate Spawns in Space
+    if (isFlying && Math.random() < 0.002) {
+        if (pirates.length < 3) { // Limit number of active pirates
+            const pGeo = new THREE.SphereGeometry(60, 16, 16);
+            const pMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+            const pirate = new THREE.Mesh(pGeo, pMat);
+            
+            const camDir = new THREE.Vector3();
+            camera.getWorldDirection(camDir);
+            
+            const spawnPos = yawObject.position.clone().add(camDir.multiplyScalar(800));
+            
+            pirate.position.copy(spawnPos);
+            pirate.lookAt(yawObject.position);
+            scene.add(pirate);
+            pirates.push({ mesh: pirate });
+            
+            const scoreEl = document.getElementById('obj-progress');
+            if (scoreEl) scoreEl.innerText = '[!] SPACE PIRATE INTERCEPTED!';
+        }
+    }
+    
     // Evaluate Asteroid Collisions
     if (isFlying && asteroidPositions.length > 0) {
         for (let i = 0; i < asteroidPositions.length; i++) {
@@ -802,13 +837,18 @@
                 hit = true;
                 
                 const scoreEl = document.getElementById('obj-progress');
-                if (scoreEl) scoreEl.innerText = '[-] Pīřåțë Đεšťrøýed!';
+                if (scoreEl) {
+                    scoreEl.innerText = '[-] Pīřåțë Đεšťrøýed! (+1 Pirate Scrap)';
+                    inventory['Pirate Scrap'] = (inventory['Pirate Scrap'] || 0) + 1;
+                    const mineObj = document.getElementById('obj-mine');
+                    if (mineObj) mineObj.innerText = `[ ] Resources: ${inventory['Pirate Scrap']}x Pirate Scrap`;
+                }
                 break;
             }
         }
         
         // Check hits against player
-        if (!hit && p.position.distanceTo(yawObject.position) < 5) {
+        if (!hit && p.position.distanceTo(yawObject.position) < 80) {
             playerHealth -= 10;
             const hpBar = document.getElementById('nms-health-bar');
             if(hpBar) hpBar.style.width = Math.max(0, playerHealth) + '%';
