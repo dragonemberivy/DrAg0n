@@ -573,6 +573,27 @@
      const hull = new THREE.Mesh(hullGeo, hullMat);
      group.add(hull);
      
+     // Slimey Green Ooze Patches
+     const oozeGeo = new THREE.SphereGeometry(1, 8, 8);
+     const oozeMat = new THREE.MeshStandardMaterial({color: 0x33ff00, roughness: 0.1, metalness: 0.2, emissive: 0x118800, emissiveIntensity: 0.5, transparent: true, opacity: 0.8});
+     for (let i = 0; i < 60; i++) {
+         const ooze = new THREE.Mesh(oozeGeo, oozeMat);
+         ooze.scale.set(Math.random() * 8 + 4, Math.random() * 8 + 4, Math.random() * 8 + 4);
+         
+         let x = (Math.random() - 0.5) * 62;
+         let y = (Math.random() - 0.5) * 42;
+         let z = (Math.random() - 0.5) * 202;
+         
+         // Stick to the outer faces roughly 
+         const face = Math.floor(Math.random() * 6);
+         if (face === 0) x = 30; else if (face === 1) x = -30;
+         else if (face === 2) y = 20; else if (face === 3) y = -20;
+         else if (face === 4) z = 100; else z = -100;
+         
+         ooze.position.set(x, y, z);
+         group.add(ooze);
+     }
+     
      // Interior Corridor (BackSide)
      const corridorGeo = new THREE.BoxGeometry(20, 20, 180);
      const corridorMat = new THREE.MeshStandardMaterial({color: 0x1a1a24, side: THREE.BackSide});
