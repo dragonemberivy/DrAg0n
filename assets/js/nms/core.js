@@ -961,7 +961,7 @@
       case 'KeyH':
         if (!isInsideDungeon) {
             const now = Date.now();
-            if (now - lastFreighterSummonTime >= 5 * 60 * 1000) {
+            if (now - lastFreighterSummonTime >= 30 * 1000) { // 30 sec cooldown for testing
                 lastFreighterSummonTime = now;
                 
                 // Remove old dungeon if exists
@@ -975,15 +975,15 @@
                 
                 const dir = new THREE.Vector3();
                 camera.getWorldDirection(dir);
-                // Spawn 600 units in front of player
-                const spawnPos = yawObject.position.clone().add(dir.multiplyScalar(600));
+                // Spawn 150 units in front and 100 units UP, so it's impossible to miss!
+                const spawnPos = yawObject.position.clone().add(dir.multiplyScalar(150)).add(new THREE.Vector3(0, 100, 0));
                 
                 createDungeon(spawnPos.x, spawnPos.y, spawnPos.z);
                 
                 const scoreEl = document.getElementById('obj-progress');
-                if (scoreEl) scoreEl.innerText = '[HYPERSPACE] Derelict Freighter warped in!';
+                if (scoreEl) scoreEl.innerText = '[HYPERSPACE] Derelict Freighter warped right above you!';
             } else {
-                const remaining = Math.ceil((5 * 60 * 1000 - (now - lastFreighterSummonTime)) / 1000);
+                const remaining = Math.ceil((30 * 1000 - (now - lastFreighterSummonTime)) / 1000);
                 const scoreEl = document.getElementById('obj-progress');
                 if (scoreEl) scoreEl.innerText = `[!] Freighter Jump on Cooldown: ${remaining}s left`;
             }
