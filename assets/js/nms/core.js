@@ -38,6 +38,7 @@
   let baseParts = [];
   let activeBoss = null;
   let hasDualLasers = false;
+  let lastFreighterSummonTime = 0;
 
   let isLocked = false;
   let lastTime = performance.now();
@@ -935,6 +936,37 @@
         break;
       case 'KeyE':
         toggleRidingMode();
+        break;
+      case 'KeyH':
+        if (!isInsideDungeon) {
+            const now = Date.now();
+            if (now - lastFreighterSummonTime >= 5 * 60 * 1000) {
+                lastFreighterSummonTime = now;
+                
+                // Remove old dungeon if exists
+                if (dungeon) {
+                    scene.remove(dungeon);
+                    for(let droneObj of dungeonDrones) {
+                        if (droneObj.mesh.parent) scene.remove(droneObj.mesh);
+                    }
+                    dungeonDrones = [];
+                }
+                
+                const dir = new THREE.Vector3();
+                camera.getWorldDirection(dir);
+                // Spawn 600 units in front of player
+                const spawnPos = yawObject.position.clone().add(dir.multiplyScalar(600));
+                
+                createDungeon(spawnPos.x, spawnPos.y, spawnPos.z);
+                
+                const scoreEl = document.getElementById('obj-progress');
+                if (scoreEl) scoreEl.innerText = '[HYPERSPACE] Derelict Freighter warped in!';
+            } else {
+                const remaining = Math.ceil((5 * 60 * 1000 - (now - lastFreighterSummonTime)) / 1000);
+                const scoreEl = document.getElementById('obj-progress');
+                if (scoreEl) scoreEl.innerText = `[!] Freighter Jump on Cooldown: ${remaining}s left`;
+            }
+        }
         break;
       case 'KeyK':
         if (!activeBoss && !isInsideDungeon) {
