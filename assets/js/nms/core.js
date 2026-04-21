@@ -37,6 +37,7 @@
   let placedBasesGroup = new THREE.Group();
   let baseParts = [];
   let activeBoss = null;
+  let hasDualLasers = false;
 
   let isLocked = false;
   let lastTime = performance.now();
@@ -672,20 +673,37 @@
        const laserGeo = new THREE.CylinderGeometry(0.2, 0.2, 4, 8);
        laserGeo.rotateX(Math.PI / 2);
        const laserMat = new THREE.MeshBasicMaterial({ color: 0x00ffcc });
-       const laser = new THREE.Mesh(laserGeo, laserMat);
        
        const startPos = new THREE.Vector3();
        camera.getWorldPosition(startPos);
-       laser.position.copy(startPos);
-       
        const laserDir = new THREE.Vector3();
        camera.getWorldDirection(laserDir);
        
-       const targetPoint = startPos.clone().add(laserDir.clone().multiplyScalar(10));
-       laser.lookAt(targetPoint);
-       
-       scene.add(laser);
-       lasers.push({ mesh: laser, dir: laserDir, life: 100 });
+       if (hasDualLasers) {
+           const offsetLeft = new THREE.Vector3(-1.5, -0.5, 0).applyQuaternion(camera.quaternion);
+           const offsetRight = new THREE.Vector3(1.5, -0.5, 0).applyQuaternion(camera.quaternion);
+           
+           const laser1 = new THREE.Mesh(laserGeo, laserMat);
+           laser1.position.copy(startPos).add(offsetLeft);
+           laser1.lookAt(laser1.position.clone().add(laserDir.clone().multiplyScalar(10)));
+           scene.add(laser1);
+           lasers.push({ mesh: laser1, dir: laserDir, life: 100 });
+           
+           const laser2 = new THREE.Mesh(laserGeo, laserMat);
+           laser2.position.copy(startPos).add(offsetRight);
+           laser2.lookAt(laser2.position.clone().add(laserDir.clone().multiplyScalar(10)));
+           scene.add(laser2);
+           lasers.push({ mesh: laser2, dir: laserDir, life: 100 });
+       } else {
+           const laser = new THREE.Mesh(laserGeo, laserMat);
+           laser.position.copy(startPos);
+           
+           const targetPoint = startPos.clone().add(laserDir.clone().multiplyScalar(10));
+           laser.lookAt(targetPoint);
+           
+           scene.add(laser);
+           lasers.push({ mesh: laser, dir: laserDir, life: 100 });
+       }
        return;
     }
     
@@ -1799,6 +1817,27 @@
           credits -= 500;
           engineMultiplier += 0.5;
           updateTradeUI('Engine Boosted! Speed Increased!');
+      } else updateTradeUI('Not enough credits!');
+  };
+  window.tradeDualLasers = function() {
+      if (credits >= 2000 && !hasDualLasers) {
+          credits -= 2000;
+          hasDualLasers = true;
+          updateTradeUI('Ship Upgraded: DUAL LASERS INSTALLED!');
+      } else if (hasDualLasers) updateTradeUI('Already installed Dual Lasers!');
+      else updateTradeUI('Not enough credits!');
+  };
+  window.tradePaintJob = function() {
+      if (credits >= 1000) {
+          credits -= 1000;
+          const newColor = Math.random() * 0xffffff;
+          window.spaceshipGroup.children.forEach(child => {
+             if (child.type === "Mesh" && child.geometry.type === "BoxGeometry") {
+                 child.material = child.material.clone();
+                 child.material.color.setHex(newColor);
+             }
+          });
+          updateTradeUI('Applied fresh procedural Paint Job!');
       } else updateTradeUI('Not enough credits!');
   };
   window.undockStation = function() {
