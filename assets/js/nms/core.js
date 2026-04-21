@@ -31,6 +31,12 @@
   let isInsideDungeon = false;
   let dungeonDrones = [];
 
+  let isBuildMode = false;
+  let buildPartIndex = 0;
+  let buildHologram = null;
+  let placedBasesGroup = new THREE.Group();
+  let baseParts = [];
+
   let isLocked = false;
   let lastTime = performance.now();
   let nmsLoopId;
@@ -217,6 +223,14 @@
     container.appendChild(renderer.domElement);
 
     scene.fog = new THREE.FogExp2(0x050510, 0);
+    scene.add(placedBasesGroup);
+    
+    baseParts = [
+        { name: "Iron Wall", geo: new THREE.BoxGeometry(10, 10, 1), mat: new THREE.MeshStandardMaterial({color: 0x444444, roughness: 0.8}) },
+        { name: "Metal Floor", geo: new THREE.BoxGeometry(10, 1, 10), mat: new THREE.MeshStandardMaterial({color: 0x222222, roughness: 0.9}) },
+        { name: "Glass Dome", geo: new THREE.SphereGeometry(15, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2), mat: new THREE.MeshStandardMaterial({color: 0x88ccaa, transparent: true, opacity: 0.4}) },
+        { name: "Sodium Light", geo: new THREE.CylinderGeometry(0.5, 0.5, 8), mat: new THREE.MeshStandardMaterial({color: 0xffffee, emissive: 0xffffaa, emissiveIntensity: 1.0}) }
+    ];
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
     scene.add(ambientLight);
@@ -587,6 +601,24 @@
      dungeon = group;
   }
 
+  function updateBuildHologram() {
+      if (buildHologram) {
+          scene.remove(buildHologram);
+          buildHologram = null;
+      }
+      if (!isBuildMode) return;
+      
+      const part = baseParts[buildPartIndex];
+      const holoMat = part.mat.clone();
+      holoMat.transparent = true;
+      holoMat.opacity = 0.5;
+      holoMat.emissive = new THREE.Color(0x00ff00);
+      holoMat.emissiveIntensity = 0.5;
+      
+      buildHologram = new THREE.Mesh(part.geo, holoMat);
+      scene.add(buildHologram);
+  }
+
   function createSpaceStation() {
      const stGeo = new THREE.TorusGeometry(80, 15, 16, 100);
      const stMat = new THREE.MeshStandardMaterial({color: 0x8888aa, metalness: 0.8, roughness: 0.2});
@@ -604,6 +636,35 @@
 
   function onMouseDown(e) {
     if (!isLocked) return;
+    
+    if (isBuildMode && buildHologram && buildHologram.visible) {
+        if (credits >= 10) {
+            credits -= 10;
+            document.getElementById('trade-credits').innerText = credits + ' ¢';
+            
+            const part = baseParts[buildPartIndex];
+            const newPart = new THREE.Mesh(part.geo, part.mat);
+            newPart.position.copy(buildHologram.position);
+            newPart.quaternion.copy(buildHologram.quaternion);
+            
+            if (buildPartIndex === 3) { // Sodium Light logic
+                const pl = new THREE.PointLight(0xffffaa, 1.5, 100);
+                pl.position.set(0, 3, 0);
+                newPart.add(pl);
+            }
+            
+            placedBasesGroup.add(newPart);
+            
+            const scoreEl = document.getElementById('obj-progress');
+            if (scoreEl) scoreEl.innerText = '[-10 ¢] Constructed Base Element!';
+        } else {
+            document.body.style.backgroundColor = "rgba(255, 0, 0, 0.3)";
+            setTimeout(() => { document.body.style.backgroundColor = "transparent"; }, 150);
+            const scoreEl = document.getElementById('obj-progress');
+            if (scoreEl) scoreEl.innerText = '[!] NEED 10 CREDITS TO BUILD!';
+        }
+        return; // Prevents normal shooting raycaster code from running
+    }
     
     if (isFlying) {
        // Space Laser Shoot
@@ -785,6 +846,21 @@
     if (code === 'Space' || key === ' ') keys.space = true;
     
     switch(code) {
+      case 'KeyB':
+        if (!isFlying && !isRiding && !isInsideDungeon) {
+            isBuildMode = !isBuildMode;
+            updateBuildHologram();
+            const progressObj = document.getElementById('obj-progress');
+            if (progressObj) {
+                if (isBuildMode) progressObj.innerText = `[BUILD] Mode Active! Press 1-4 to switch.`;
+                else progressObj.innerText = ``;
+            }
+        }
+        break;
+      case 'Digit1': if(isBuildMode) { buildPartIndex = 0; updateBuildHologram(); } break;
+      case 'Digit2': if(isBuildMode) { buildPartIndex = 1; updateBuildHologram(); } break;
+      case 'Digit3': if(isBuildMode) { buildPartIndex = 2; updateBuildHologram(); } break;
+      case 'Digit4': if(isBuildMode) { buildPartIndex = 3; updateBuildHologram(); } break;
       case 'KeyG':
         if (dungeon && !isInsideDungeon && yawObject.position.distanceTo(dungeon.position) < 300 && isFlying) {
             isFlying = false;
@@ -1152,6 +1228,38 @@
          closestIdx = planetIndex;
       }
       planetIndex++;
+    }
+
+    if (isBuildMode && buildHologram) {
+        raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
+        const intersects = raycaster.intersectObjects(scene.children, true);
+        
+        let validHit = null;
+        for (let pt of intersects) {
+            if (pt.object !== buildHologram && pt.object.parent !== placedBasesGroup && !pt.object.userData.isFauna && !pt.object.userData.isTreasure && !pt.object.userData.isDrone) {
+                validHit = pt;
+                break;
+            }
+        }
+        if (validHit && validHit.distance < 80) {
+            buildHologram.visible = true;
+            buildHologram.position.copy(validHit.point);
+            
+            const groundUp = validHit.face ? validHit.face.normal.clone().transformDirection(validHit.object.matrixWorld).normalize() : yawObject.position.clone().sub(center).normalize();
+            buildHologram.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), groundUp);
+            
+            if (buildPartIndex === 0) buildHologram.translateY(5); // Wall
+            else if (buildPartIndex === 1) buildHologram.translateY(0.5); // Floor
+            else if (buildPartIndex === 3) buildHologram.translateY(4); // Light
+            
+            if (buildPartIndex === 3 && buildHologram.children.length === 0) {
+                const pl = new THREE.PointLight(0xffffaa, 1.5, 100);
+                pl.position.set(0, 3, 0);
+                buildHologram.add(pl);
+            }
+        } else {
+            buildHologram.visible = false;
+        }
     }
 
     // Planet Proximity UI updates
