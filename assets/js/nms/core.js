@@ -601,26 +601,39 @@
     for (let pt of intersects) {
        if (pt.distance < 45) { // Range of handheld Multi-Tool
            
-           if (pt.object.userData && pt.object.userData.isResource) {
-              pt.object.parent.remove(pt.object);
-              minedCrystals++;
-              const scoreEl = document.getElementById('obj-mine');
-              if (scoreEl) {
-                 const resName = window.currentPlanetResource || 'Crystal';
-                 inventory[resName] = (inventory[resName] || 0) + 1;
-                 
-                 if(minedCrystals >= 10) scoreEl.innerText = '[x] Mine Crystals: 10/10';
-                 else scoreEl.innerText = `[ ] Mined ${resName}: ${inventory[resName]} (Total: ${minedCrystals}/10)`;
-              }
-              break;
+           // Handle specific interactable elements
+           if (pt.object.userData && (pt.object.userData.isResource || pt.object.userData.isFauna)) {
+               if (pt.object.userData.isResource) {
+                   pt.object.parent.remove(pt.object);
+                   minedCrystals++;
+                   const scoreEl = document.getElementById('obj-mine');
+                   if (scoreEl) {
+                      const resName = window.currentPlanetResource || 'Crystal';
+                      inventory[resName] = (inventory[resName] || 0) + 1;
+                      
+                      if(minedCrystals >= 10) scoreEl.innerText = '[x] Mine Crystals: 10/10';
+                      else scoreEl.innerText = `[ ] Mined ${resName}: ${inventory[resName]} (Total: ${minedCrystals}/10)`;
+                   }
+               }
+               else if (pt.object.userData.isFauna) {
+                   pt.object.parent.remove(pt.object);
+                   const scoreEl = document.getElementById('obj-progress');
+                   if (scoreEl) scoreEl.innerText = '[-] Culled Biological Entity!';
+               }
+               break;
            }
-           
-           if (pt.object.userData && pt.object.userData.isFauna) {
-              pt.object.parent.remove(pt.object);
-              
-              const scoreEl = document.getElementById('obj-progress');
-              if (scoreEl) scoreEl.innerText = '[-] Culled Biological Entity!';
-              break;
+           // Terrain hit check (Not fauna/resource, meaning we hit a solid planet surface)
+           else if (window.currentPlanetResource) {
+               minedCrystals++;
+               const scoreEl = document.getElementById('obj-mine');
+               if (scoreEl) {
+                  const resName = window.currentPlanetResource;
+                  inventory[resName] = (inventory[resName] || 0) + 1;
+                  
+                  if(minedCrystals >= 10) scoreEl.innerText = '[x] Mine Crystals: 10/10';
+                  else scoreEl.innerText = `[ ] Mined ${resName}: ${inventory[resName]} (Total: ${minedCrystals}/10)`;
+               }
+               break; // Only mine 1 chunk per click on the ground
            }
        }
     }
