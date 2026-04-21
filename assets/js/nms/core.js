@@ -36,6 +36,7 @@
   let buildHologram = null;
   let placedBasesGroup = new THREE.Group();
   let baseParts = [];
+  let activeBoss = null;
 
   let isLocked = false;
   let lastTime = performance.now();
@@ -742,6 +743,22 @@
                    const scoreEl = document.getElementById('obj-progress');
                    if (scoreEl) scoreEl.innerText = '[-] Destroyed Alien Drone!';
                }
+               else if (pt.object.userData.isBoss) {
+                   if (activeBoss) {
+                       activeBoss.health -= 25;
+                       if (activeBoss.health <= 0) {
+                           for (let seg of activeBoss.segments) scene.remove(seg);
+                           activeBoss = null;
+                           credits += 10000;
+                           document.getElementById('trade-credits').innerText = credits + ' ¢';
+                           const scoreEl = document.getElementById('obj-progress');
+                           if (scoreEl) scoreEl.innerText = '[$$$] SLAIN THE PLANETARY TITAN!';
+                       } else {
+                           const scoreEl = document.getElementById('obj-progress');
+                           if (scoreEl) scoreEl.innerText = `[⚠️] Boss HP: ${activeBoss.health}`;
+                       }
+                   }
+               }
                break;
            }
            // Terrain hit check (Not fauna/resource, meaning we hit a solid planet surface)
@@ -901,6 +918,43 @@
       case 'KeyE':
         toggleRidingMode();
         break;
+      case 'KeyK':
+        if (!activeBoss && !isInsideDungeon) {
+            let closestPlanet = planets[0];
+            let minDist = Infinity;
+            for (let p of planets) {
+              const dist = yawObject.position.distanceTo(p.position);
+              if (dist < minDist) { minDist = dist; closestPlanet = p; }
+            }
+            if (minDist < closestPlanet.radius + 600) {
+                activeBoss = { segments: [], health: 500, planet: closestPlanet };
+                const bossMaterial = new THREE.MeshStandardMaterial({color: 0x8b4513, roughness: 0.9});
+                
+                const headGeo = new THREE.CylinderGeometry(8, 6, 20, 16);
+                headGeo.rotateX(Math.PI / 2); // point forward
+                
+                const dir = new THREE.Vector3();
+                camera.getWorldDirection(dir);
+                let headPos = yawObject.position.clone().add(dir.multiplyScalar(400));
+                
+                const headMesh = new THREE.Mesh(headGeo, bossMaterial);
+                headMesh.position.copy(headPos);
+                headMesh.userData.isBoss = true; // For raycaster hits
+                scene.add(headMesh);
+                activeBoss.segments.push(headMesh);
+                
+                const bodyGeo = new THREE.SphereGeometry(6, 12, 12);
+                for (let i = 1; i <= 20; i++) {
+                    const bodyMesh = new THREE.Mesh(bodyGeo, bossMaterial);
+                    bodyMesh.position.copy(headPos);
+                    scene.add(bodyMesh);
+                    activeBoss.segments.push(bodyMesh);
+                }
+                const scoreEl = document.getElementById('obj-progress');
+                if (scoreEl) scoreEl.innerText = '[⚠️] SEISMIC WORM ANOMALY DETECTED!';
+            }
+        }
+        break;
       case 'KeyP':
         // Manual Pirate Spawn
         if (pirates.length < 5) {
@@ -1053,6 +1107,65 @@
         }
     }
     
+    // Boss Sandworm Slithering & Combat
+    if (activeBoss) {
+        let head = activeBoss.segments[0];
+        const wormDist = head.position.distanceTo(yawObject.position);
+        const center = activeBoss.planet.position;
+        
+        // 1. Move head
+        const headDir = yawObject.position.clone().sub(head.position).normalize();
+        const wave = Math.sin(Date.now() * 0.002) * 50; 
+        const upVec = head.position.clone().sub(center).normalize();
+        
+        const terrainRadius = getTerrainHeight(activeBoss.planet, upVec);
+        const surfaceRadius = terrainRadius + 10 + wave; // Dive in and out of sand
+        
+        head.position.add(headDir.multiplyScalar(60 * dt));
+        head.lookAt(yawObject.position);
+        
+        // Terrain Snap Head
+        const currentDistCenter = head.position.distanceTo(center);
+        const targetRadius = activeBoss.planet.radius + surfaceRadius;
+        if (currentDistCenter !== targetRadius) {
+            const deficit = targetRadius - currentDistCenter;
+            head.position.add(upVec.multiplyScalar(deficit * dt * 5)); // smooth snap
+        }
+
+        // Damage the player
+        if (wormDist < 25) {
+             playerHealth -= 20 * dt;
+             const hpBar = document.getElementById('nms-health-bar');
+             if(hpBar) hpBar.style.width = Math.max(0, playerHealth) + '%';
+             
+             if (Math.random() > 0.8) {
+                 document.body.style.backgroundColor = "rgba(255, 0, 0, 0.5)";
+                 setTimeout(() => { document.body.style.backgroundColor = "transparent"; }, 50);
+             }
+
+             if (playerHealth <= 0) {
+                 const scoreEl = document.getElementById('obj-progress');
+                 if (scoreEl) scoreEl.innerText = '[☠️] EATEN BY SANDWORM!';
+                 yawObject.position.set(0, 150, 0); // Origin respawn
+                 playerHealth = 100;
+                 if (!isFlying) toggleFlightMode();
+             }
+        }
+
+        // 2. Chaining segments
+        for (let i = 1; i < activeBoss.segments.length; i++) {
+            let seg = activeBoss.segments[i];
+            let leader = activeBoss.segments[i-1];
+            
+            const segDist = seg.position.distanceTo(leader.position);
+            if (segDist > 10) { // Keep segments glued smoothly
+                const dirToLeader = leader.position.clone().sub(seg.position).normalize();
+                seg.position.copy(leader.position.clone().sub(dirToLeader.multiplyScalar(10)));
+                seg.lookAt(leader.position);
+            }
+        }
+    }
+
     // Evaluate Asteroid Collisions
     if (isFlying && asteroidPositions.length > 0) {
         for (let i = 0; i < asteroidPositions.length; i++) {
@@ -1084,9 +1197,32 @@
         let l = lasers[i];
         l.mesh.position.add(l.dir.clone().multiplyScalar(1000 * dt)); // Fast lasers
         l.life -= 100 * dt;
+        
+        let removed = false;
         if (l.life <= 0) {
             scene.remove(l.mesh);
             lasers.splice(i, 1);
+            removed = true;
+        }
+        
+        if (!removed && activeBoss) {
+            if (l.mesh.position.distanceTo(activeBoss.segments[0].position) < 25) {
+                scene.remove(l.mesh);
+                lasers.splice(i, 1);
+                
+                activeBoss.health -= 25;
+                if (activeBoss.health <= 0) {
+                     for(let seg of activeBoss.segments) scene.remove(seg);
+                     activeBoss = null;
+                     credits += 10000;
+                     document.getElementById('trade-credits').innerText = credits + ' ¢';
+                     const scoreEl = document.getElementById('obj-progress');
+                     if (scoreEl) scoreEl.innerText = '[$$$] SLAIN THE PLANETARY TITAN!';
+                } else {
+                     const scoreEl = document.getElementById('obj-progress');
+                     if (scoreEl) scoreEl.innerText = `[⚠️] Boss HP: ${activeBoss.health}`;
+                }
+            }
         }
     }
 
