@@ -26,6 +26,10 @@
   let credits = 0;
   let engineMultiplier = 1;
   let sunLight;
+  
+  let dungeon = null;
+  let isInsideDungeon = false;
+  let dungeonDrones = [];
 
   let isLocked = false;
   let lastTime = performance.now();
@@ -540,8 +544,49 @@
      createPlanet(-400, 500, -300, 30, 'seed_moon', [0x1c1917, 0x292524, 0x44403c, 0x57534e, 0x78716c], 'Coppelius IV (Desolate Moon)', 'Copper');
      
      createSpaceStation();
+     createDungeon(-2000, 2000, -2000);
   }
   
+  function createDungeon(x, y, z) {
+     const group = new THREE.Group();
+     
+     // Exterior Hull
+     const hullGeo = new THREE.BoxGeometry(60, 40, 200);
+     const hullMat = new THREE.MeshStandardMaterial({color: 0x333333, roughness: 0.9, metalness: 0.5});
+     const hull = new THREE.Mesh(hullGeo, hullMat);
+     group.add(hull);
+     
+     // Interior Corridor (BackSide)
+     const corridorGeo = new THREE.BoxGeometry(20, 20, 180);
+     const corridorMat = new THREE.MeshStandardMaterial({color: 0x1a1a24, side: THREE.BackSide});
+     const corridor = new THREE.Mesh(corridorGeo, corridorMat);
+     group.add(corridor);
+     
+     // Treasure (Artifact Vault)
+     const tGeo = new THREE.OctahedronGeometry(5, 0);
+     const tMat = new THREE.MeshStandardMaterial({color: 0xffd700, emissive: 0xffaa00, emissiveIntensity: 0.5});
+     const treasure = new THREE.Mesh(tGeo, tMat);
+     treasure.position.set(0, -3, -80);
+     treasure.userData.isTreasure = true;
+     group.add(treasure);
+     
+     // Enemies (Alien Drones) inside corridor
+     for (let i=0; i<8; i++) {
+         const dGeo = new THREE.SphereGeometry(2, 8, 8);
+         const dMat = new THREE.MeshStandardMaterial({color: 0xff00cc, emissive: 0xff00cc, emissiveIntensity: 0.8});
+         const drone = new THREE.Mesh(dGeo, dMat);
+         drone.userData.isDrone = true;
+         // scatter between Z -70 to 70
+         drone.position.set((Math.random()-0.5)*15, (Math.random()-0.5)*10, (Math.random()-0.5)*140);
+         dungeonDrones.push({ mesh: drone, nextFire: Math.random()*2 });
+         group.add(drone);
+     }
+     
+     group.position.set(x, y, z);
+     scene.add(group);
+     dungeon = group;
+  }
+
   function createSpaceStation() {
      const stGeo = new THREE.TorusGeometry(80, 15, 16, 100);
      const stMat = new THREE.MeshStandardMaterial({color: 0x8888aa, metalness: 0.8, roughness: 0.2});
@@ -606,7 +651,7 @@
        if (pt.distance < 45) { // Range of handheld Multi-Tool
            
            // Handle specific interactable elements
-           if (pt.object.userData && (pt.object.userData.isResource || pt.object.userData.isFauna)) {
+           if (pt.object.userData && (pt.object.userData.isResource || pt.object.userData.isFauna || pt.object.userData.isTreasure || pt.object.userData.isDrone)) {
                if (pt.object.userData.isResource) {
                    pt.object.parent.remove(pt.object);
                    minedCrystals++;
@@ -623,6 +668,18 @@
                    pt.object.parent.remove(pt.object);
                    const scoreEl = document.getElementById('obj-progress');
                    if (scoreEl) scoreEl.innerText = '[-] Culled Biological Entity!';
+               }
+               else if (pt.object.userData.isTreasure) {
+                   pt.object.parent.remove(pt.object);
+                   credits += 5000;
+                   const scoreEl = document.getElementById('obj-progress');
+                   if (scoreEl) scoreEl.innerText = '[$$$] LOOTED FREIGHTER VAULT!';
+                   document.getElementById('trade-credits').innerText = credits + ' ¢';
+               }
+               else if (pt.object.userData.isDrone) {
+                   pt.object.parent.remove(pt.object);
+                   const scoreEl = document.getElementById('obj-progress');
+                   if (scoreEl) scoreEl.innerText = '[-] Destroyed Alien Drone!';
                }
                break;
            }
@@ -728,6 +785,33 @@
     if (code === 'Space' || key === ' ') keys.space = true;
     
     switch(code) {
+      case 'KeyG':
+        if (dungeon && !isInsideDungeon && yawObject.position.distanceTo(dungeon.position) < 300 && isFlying) {
+            isFlying = false;
+            isRiding = false;
+            isInsideDungeon = true;
+            window.spaceshipGroup.visible = false;
+            window.astronautGroup.visible = true;
+            
+            yawObject.position.copy(dungeon.position).add(new THREE.Vector3(0, 0, 80));
+            camera.rotation.x = 0;
+            yawObject.rotation.y = Math.PI; // Face inward (-Z)
+        } else if (dungeon && isInsideDungeon) {
+            const relPos = yawObject.position.clone().sub(dungeon.position);
+            if (relPos.z > 70) { // Near the airlock
+                isInsideDungeon = false;
+                isFlying = true;
+                window.spaceshipGroup.visible = true;
+                window.astronautGroup.visible = false;
+                
+                yawObject.position.copy(dungeon.position).add(new THREE.Vector3(0, 0, 150));
+                yawObject.rotation.y = 0;
+                
+                const promptEl = document.getElementById('nms-planet-info');
+                if (promptEl) promptEl.style.opacity = '0';
+            }
+        }
+        break;
       case 'KeyT':
         if (spaceStation && yawObject.position.distanceTo(spaceStation.position) < 300 && isFlying) {
             document.exitPointerLock();
@@ -1073,8 +1157,39 @@
     // Planet Proximity UI updates
     const distToSurface = minDist - closestPlanet.radius;
     
+    // Dungeon Docking & Escape UI
+    if (dungeon) {
+        const distToDung = yawObject.position.distanceTo(dungeon.position);
+        let promptEl = document.getElementById('nms-planet-info');
+        if (!isInsideDungeon && distToDung < 300) {
+             if (promptEl) {
+                 promptEl.style.display = 'block';
+                 promptEl.style.opacity = '1';
+                 document.getElementById('nms-planet-name').innerText = 'Derelict Freighter';
+                 document.getElementById('nms-planet-resource').innerText = 'Press G to Board';
+             }
+        } else if (isInsideDungeon) {
+            const relPos = yawObject.position.clone().sub(dungeon.position);
+            if (relPos.z > 70) { // Near airlock
+                if (promptEl) {
+                     promptEl.style.display = 'block';
+                     promptEl.style.opacity = '1';
+                     document.getElementById('nms-planet-name').innerText = 'Freighter Airlock';
+                     document.getElementById('nms-planet-resource').innerText = 'Press G to Return to Ship';
+                }
+            } else {
+                if (promptEl) promptEl.style.opacity = '0';
+            }
+        } else if (!isInsideDungeon && distToDung >= 300 && distToDung < 400) {
+             // Only clear if space station isn't active
+             if (!spaceStation || yawObject.position.distanceTo(spaceStation.position) >= 300) {
+                 if (promptEl) promptEl.style.opacity = '0';
+             }
+        }
+    }
+
     // Space Station Docking
-    if (spaceStation) {
+    if (spaceStation && !isInsideDungeon) {
         spaceStation.rotation.z += 0.1 * dt; // slow spin
         const distToStation = yawObject.position.distanceTo(spaceStation.position);
         
@@ -1091,7 +1206,7 @@
         }
     }
     
-    if (distToSurface < 600 && hudPlanetInfo && !isTrading && (!spaceStation || yawObject.position.distanceTo(spaceStation.position) > 350)) {
+    if (distToSurface < 600 && hudPlanetInfo && !isTrading && !isInsideDungeon && (!spaceStation || yawObject.position.distanceTo(spaceStation.position) > 350)) {
        hudPlanetInfo.style.display = 'block';
        hudPlanetInfo.style.opacity = '1';
        hudPlanetName.innerText = closestPlanet.name || 'Unknown Planet';
@@ -1211,7 +1326,74 @@
     // +3 allows the capsule mesh (-2 downward span) to rest precisely on the ground without clipping
     const surfaceRadius = terrainRadius + 3;
 
-    if (isFlying) {
+    if (isInsideDungeon) {
+        // Simple internal movement bypasses the sphere physics wrapper
+        direction.set(0,0,0);
+        if(keys.w) direction.z -= 1;
+        if(keys.s) direction.z += 1;
+        if(keys.a) direction.x -= 1;
+        if(keys.d) direction.x += 1;
+        direction.normalize();
+        
+        const camQuat = new THREE.Quaternion();
+        camera.getWorldQuaternion(camQuat);
+        // Cancel vertical flight in dungeon
+        const euler = new THREE.Euler().setFromQuaternion(camQuat, 'YXZ');
+        euler.x = 0; euler.z = 0;
+        const flatQuat = new THREE.Quaternion().setFromEuler(euler);
+        direction.applyQuaternion(flatQuat);
+        
+        yawObject.position.add(direction.multiplyScalar(40 * dt));
+        
+        // Corridor constraints
+        const relPos = yawObject.position.clone().sub(dungeon.position);
+        let constrain = false;
+        if (relPos.x > 9) { relPos.x = 9; constrain = true; }
+        if (relPos.x < -9) { relPos.x = -9; constrain = true; }
+        if (relPos.y > 9) { relPos.y = 9; constrain = true; }
+        if (relPos.y < -9) { relPos.y = -9; constrain = true; }
+        if (relPos.z > 85) { relPos.z = 85; constrain = true; }
+        if (relPos.z < -85) { relPos.z = -85; constrain = true; }
+        if (constrain) yawObject.position.copy(dungeon.position).add(relPos);
+        
+        // Drone AI combat inside the dungeon
+        for (let i = dungeonDrones.length - 1; i >= 0; i--) {
+            let droneObj = dungeonDrones[i];
+            let drone = droneObj.mesh;
+            
+            if (!drone.parent) {
+                dungeonDrones.splice(i, 1);
+                continue;
+            }
+            
+            let droneWP = new THREE.Vector3();
+            drone.getWorldPosition(droneWP);
+            const distToPlayer = droneWP.distanceTo(yawObject.position);
+            
+            if (distToPlayer < 50) {
+                 const dir = yawObject.position.clone().sub(droneWP).normalize();
+                 drone.position.add(dir.multiplyScalar(15 * dt)); 
+                 
+                 droneObj.nextFire -= dt;
+                 if (droneObj.nextFire <= 0 && distToPlayer < 20) {
+                     droneObj.nextFire = 1.0;
+                     playerHealth -= 10;
+                     const hpBar = document.getElementById('nms-health-bar');
+                     if(hpBar) hpBar.style.width = playerHealth + '%';
+                     document.body.style.backgroundColor = "rgba(255, 0, 0, 0.5)";
+                     setTimeout(() => { document.body.style.backgroundColor = "transparent"; }, 200);
+                     
+                     if (playerHealth <= 0) {
+                         const scoreEl = document.getElementById('obj-progress');
+                         if (scoreEl) scoreEl.innerText = '[☠️] DIED IN DUNGEON!';
+                         yawObject.position.copy(dungeon.position).add(new THREE.Vector3(0,0,80)); // Spawn airlock
+                         playerHealth = 100;
+                     }
+                 }
+            }
+        }
+        
+    } else if (isFlying) {
        direction.set(0,0,0);
        if(keys.w) direction.z -= 1;
        if(keys.s) direction.z += 1;
