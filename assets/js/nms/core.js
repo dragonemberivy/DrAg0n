@@ -1817,6 +1817,11 @@
     if (!isLocked && container) {
        container.requestPointerLock();
     }
+    const themeAudio = document.getElementById('game-audio');
+    if (themeAudio && themeAudio.paused) {
+        themeAudio.volume = 0.5;
+        themeAudio.play().catch(e => console.warn("Theme autoplay blocked:", e));
+    }
   };
 
   // Pre-initialize the massive planetary math so it doesn't block the play button Event Loop!
