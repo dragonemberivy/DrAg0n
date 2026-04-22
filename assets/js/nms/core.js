@@ -54,13 +54,16 @@
   let asteroidPositions = [];
   let asteroidMesh;
   window.persistedBaseParts = [];
+  let isThirdPerson = false;
+  let tradeFleets = [];
 
   window.saveGameState = function() {
       const state = {
           inventory: inventory,
           credits: credits,
           hasDualLasers: hasDualLasers,
-          bases: window.persistedBaseParts
+          bases: window.persistedBaseParts,
+          lastSaveTime: Date.now()
       };
       localStorage.setItem('nmsWeb_saveState', JSON.stringify(state));
   };
@@ -88,6 +91,19 @@
                       }
                       placedBasesGroup.add(newPart);
                   });
+                  
+                  if (state.lastSaveTime) {
+                      const now = Date.now();
+                      const deltaSeconds = (now - state.lastSaveTime) / 1000;
+                      let extractorCount = 0;
+                      state.bases.forEach(b => { if(b.type === 4) extractorCount++; });
+                      
+                      if (extractorCount > 0 && deltaSeconds > 0) {
+                          const extracted = Math.floor(deltaSeconds * extractorCount * 0.1); // 0.1 titanium per second per extractor
+                          inventory['Titanium'] = (inventory['Titanium'] || 0) + extracted;
+                          console.log(`Passive extractors generated ${extracted} Titanium while away.`);
+                      }
+                  }
               }
           } catch (e) {
               console.error("Save state corrupted: ", e);
@@ -277,7 +293,8 @@
         { name: "Iron Wall", geo: new THREE.BoxGeometry(10, 10, 1), mat: new THREE.MeshStandardMaterial({color: 0x444444, roughness: 0.8}) },
         { name: "Metal Floor", geo: new THREE.BoxGeometry(10, 1, 10), mat: new THREE.MeshStandardMaterial({color: 0x222222, roughness: 0.9}) },
         { name: "Glass Dome", geo: new THREE.SphereGeometry(15, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2), mat: new THREE.MeshStandardMaterial({color: 0x88ccaa, transparent: true, opacity: 0.4}) },
-        { name: "Sodium Light", geo: new THREE.CylinderGeometry(0.5, 0.5, 8), mat: new THREE.MeshStandardMaterial({color: 0xffffee, emissive: 0xffffaa, emissiveIntensity: 1.0}) }
+        { name: "Sodium Light", geo: new THREE.CylinderGeometry(0.5, 0.5, 8), mat: new THREE.MeshStandardMaterial({color: 0xffffee, emissive: 0xffffaa, emissiveIntensity: 1.0}) },
+        { name: "Mineral Extractor", geo: new THREE.CylinderGeometry(2, 3, 5, 8), mat: new THREE.MeshStandardMaterial({color: 0x884400, metalness: 0.8, roughness: 0.2}) }
     ];
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
@@ -333,6 +350,19 @@
     // Call loadGameState after base geometries are populated!
     window.loadGameState();
     setInterval(window.saveGameState, 5000); // Autosave periodically 
+    
+    // Live Mineral Extraction Loop
+    setInterval(() => {
+        let extCount = 0;
+        window.persistedBaseParts.forEach(b => { if(b.type === 4) extCount++; });
+        if(extCount > 0) {
+            inventory['Titanium'] = (inventory['Titanium'] || 0) + extCount;
+            const objEl = document.getElementById('obj-progress');
+            if (objEl) objEl.innerText = `[-] Extractors mined ${extCount} Titanium!`;
+            const mineObj = document.getElementById('obj-mine');
+            if (mineObj) mineObj.innerText = `[ ] Resources: ${inventory['Titanium']}x Titanium`;
+        }
+    }, 2000);
 
     spawnSolarSystem();
     const resizeObserver = new ResizeObserver(() => onResize());
@@ -407,14 +437,19 @@
 
          noiseVal -= 5 * (radius / 100); // Sink down for oceans
 
-         if (noiseVal <= 0) { 
-            noiseVal = 0; // Flat water
-            colorObj.setHex(colorSet[0]); 
-         } 
-         else if (noiseVal < 1.5 * (radius/100)) { colorObj.setHex(colorSet[1]); }
-         else if (noiseVal < 4 * (radius/100)) { colorObj.setHex(colorSet[2]); }
-         else if (noiseVal < 7 * (radius/100)) { colorObj.setHex(colorSet[3]); }
-         else { colorObj.setHex(colorSet[4]); }
+         if (seed === 'seed_blackhole') {
+            noiseVal = 0;
+            colorObj.setHex(0x000000); // Pure absorbing black
+         } else {
+             if (noiseVal <= 0) { 
+                noiseVal = 0; // Flat water
+                colorObj.setHex(colorSet[0]); 
+             } 
+             else if (noiseVal < 1.5 * (radius/100)) { colorObj.setHex(colorSet[1]); }
+             else if (noiseVal < 4 * (radius/100)) { colorObj.setHex(colorSet[2]); }
+             else if (noiseVal < 7 * (radius/100)) { colorObj.setHex(colorSet[3]); }
+             else { colorObj.setHex(colorSet[4]); }
+         }
          
          vertex.multiplyScalar(radius + noiseVal);
          positionAttribute.setXYZ(i, vertex.x, vertex.y, vertex.z);
@@ -648,26 +683,39 @@
     planets.push({ mesh: lod, radius, position: new THREE.Vector3(x, y, z), colorSet: colorSet, simplex: new SimplexNoise(seed), faunaGroup: faunaGroup, rideableGroup, name: name, resource: resource, floraMat: primaryLeavesMat });
   }
 
-  function spawnSolarSystem() {
+  function spawnSolarSystem(offX = 0, offY = 0, offZ = 0) {
+     planets.forEach(p => { 
+        scene.remove(p.mesh); 
+        if(p.faunaGroup) scene.remove(p.faunaGroup); 
+        if(p.rideableGroup) scene.remove(p.rideableGroup);
+     });
+     planets = []; // Required if we reset
+     tradeFleets.forEach(f => scene.remove(f.mesh));
+     tradeFleets = [];
+     
      // Earth-like (Origin)
-     createPlanet(0, 0, 0, 100, 'seed_earth', [0x1d4ed8, 0x3b82f6, 0x22c55e, 0x78716c, 0xf8fafc], 'Aethelgard IV (Origin World)', 'Iron');
+     createPlanet(0+offX, 0+offY, 0+offZ, 100, 'seed_earth', [0x1d4ed8, 0x3b82f6, 0x22c55e, 0x78716c, 0xf8fafc], 'Aethelgard IV (Origin World)', 'Iron');
      // Mars-like
-     createPlanet(800, 300, -1200, 150, 'seed_mars', [0x7f1d1d, 0x991b1b, 0xd97706, 0xfcd34d, 0xfef3c7], 'Cygnus Prime (Desert Planet)', 'Platinum');
+     createPlanet(800+offX, 300+offY, -1200+offZ, 150, 'seed_mars', [0x7f1d1d, 0x991b1b, 0xd97706, 0xfcd34d, 0xfef3c7], 'Cygnus Prime (Desert Planet)', 'Platinum');
      // Small Ice planet
-     createPlanet(-1000, -500, -500, 60, 'seed_ice', [0x0284c7, 0x38bdf8, 0xbae6fd, 0xf0f9ff, 0xffffff], 'Vespera Beta (Alien Ice World)', 'Gold');
+     createPlanet(-1000+offX, -500+offY, -500+offZ, 60, 'seed_ice', [0x0284c7, 0x38bdf8, 0xbae6fd, 0xf0f9ff, 0xffffff], 'Vespera Beta (Alien Ice World)', 'Gold');
      // Toxic gas giant
-     createPlanet(500, -800, 1500, 250, 'seed_gas', [0x064e3b, 0x166534, 0x65a30d, 0x84cc16, 0xd9f99d], 'Romulus II (Toxic Gas Giant)', 'Titanium');
+     createPlanet(500+offX, -800+offY, 1500+offZ, 250, 'seed_gas', [0x064e3b, 0x166534, 0x65a30d, 0x84cc16, 0xd9f99d], 'Romulus II (Toxic Gas Giant)', 'Titanium');
      
      // 6 New Planets
-     createPlanet(2500, 1000, 500, 120, 'seed_magma', [0x450a0a, 0x7f1d1d, 0xb91c1c, 0xef4444, 0xfca5a5], 'Tholian Colony (Lava World)', 'Dilithium');
-     createPlanet(-2500, 1500, 1000, 180, 'seed_pink', [0x831843, 0xbe185d, 0xdb2777, 0xf472b6, 0xfbcfe8], 'Qo\'noS Beta (Hostile Pink World)', 'Tritanium');
-     createPlanet(0, 2500, -2000, 200, 'seed_desert', [0x78350f, 0x92400e, 0xb45309, 0xd97706, 0xfcd34d], 'Audet IX (Arid Alien Planet)', 'Uranium');
-     createPlanet(-800, -2500, -1500, 90, 'seed_ocean', [0x1e3a8a, 0x1e40af, 0x1d4ed8, 0x2563eb, 0x3b82f6], 'Sarpeidon VII (Deep Ocean World)', 'Plutonium');
-     createPlanet(1800, -2000, -2500, 140, 'seed_purple', [0x4c1d95, 0x5b21b6, 0x6d28d9, 0x7c3aed, 0xa78bfa], 'Atrea Alpha (Mystic Purple Planet)', 'Silver');
-     createPlanet(-400, 500, -300, 30, 'seed_moon', [0x1c1917, 0x292524, 0x44403c, 0x57534e, 0x78716c], 'Coppelius IV (Desolate Moon)', 'Copper');
+     createPlanet(2500+offX, 1000+offY, 500+offZ, 120, 'seed_magma', [0x450a0a, 0x7f1d1d, 0xb91c1c, 0xef4444, 0xfca5a5], 'Tholian Colony (Lava World)', 'Dilithium');
+     createPlanet(-2500+offX, 1500+offY, 1000+offZ, 180, 'seed_pink', [0x831843, 0xbe185d, 0xdb2777, 0xf472b6, 0xfbcfe8], 'Qo\'noS Beta (Hostile Pink World)', 'Tritanium');
+     createPlanet(0+offX, 2500+offY, -2000+offZ, 200, 'seed_desert', [0x78350f, 0x92400e, 0xb45309, 0xd97706, 0xfcd34d], 'Audet IX (Arid Alien Planet)', 'Uranium');
+     createPlanet(-800+offX, -2500+offY, -1500+offZ, 90, 'seed_ocean', [0x1e3a8a, 0x1e40af, 0x1d4ed8, 0x2563eb, 0x3b82f6], 'Sarpeidon VII (Deep Ocean World)', 'Plutonium');
+     createPlanet(1800+offX, -2000+offY, -2500+offZ, 140, 'seed_purple', [0x4c1d95, 0x5b21b6, 0x6d28d9, 0x7c3aed, 0xa78bfa], 'Atrea Alpha (Mystic Purple Planet)', 'Silver');
+     createPlanet(-400+offX, 500+offY, -300+offZ, 30, 'seed_moon', [0x1c1917, 0x292524, 0x44403c, 0x57534e, 0x78716c], 'Coppelius IV (Desolate Moon)', 'Copper');
      
-     createSpaceStation();
-     createDungeon(-2000, 2000, -2000);
+     // Black Hole
+     createPlanet(5000+offX, -5000+offY, 5000+offZ, 300, 'seed_blackhole', [0x000000, 0x000000, 0x000000, 0x000000, 0x000000], 'Gargantua (Warp Singularity)', 'Antimatter');
+     
+     createSpaceStation(offX, offY, offZ);
+     createTradeFleet(offX, offY, offZ);
+     createDungeon(-2000+offX, 2000+offY, -2000+offZ);
   }
   
   function createDungeon(x, y, z) {
@@ -749,7 +797,7 @@
       scene.add(buildHologram);
   }
 
-  function createSpaceStation() {
+  function createSpaceStation(offX = 0, offY = 0, offZ = 0) {
      const stGeo = new THREE.TorusGeometry(80, 15, 16, 100);
      const stMat = new THREE.MeshStandardMaterial({color: 0x8888aa, metalness: 0.8, roughness: 0.2});
      spaceStation = new THREE.Mesh(stGeo, stMat);
@@ -759,17 +807,43 @@
      const coreMesh = new THREE.Mesh(coreGeo, coreMat);
      spaceStation.add(coreMesh);
      
-     spaceStation.position.set(0, 400, 0); // High orbit above origin
+     spaceStation.position.set(offX, 400 + offY, offZ); // High orbit above relative origin
      spaceStation.rotation.x = Math.PI / 2;
      scene.add(spaceStation);
+  }
+
+  function createTradeFleet(offX = 0, offY = 0, offZ = 0) {
+      for (let i = 0; i < 6; i++) {
+          const fleetGrp = new THREE.Group();
+          const hullGeo = new THREE.CylinderGeometry(5, 5, 40, 8);
+          hullGeo.rotateX(Math.PI / 2);
+          const hullMat = new THREE.MeshStandardMaterial({ color: 0x55aa55, metalness: 0.8 });
+          const hull = new THREE.Mesh(hullGeo, hullMat);
+          fleetGrp.add(hull);
+          
+          const podGeo = new THREE.BoxGeometry(15, 10, 20);
+          const podMat = new THREE.MeshStandardMaterial({ color: 0xffaa00 });
+          const pod = new THREE.Mesh(podGeo, podMat);
+          fleetGrp.add(pod);
+          
+          fleetGrp.position.set(offX + (Math.random() - 0.5) * 4000, 400 + offY + (Math.random() - 0.5) * 1000, offZ + (Math.random() - 0.5) * 4000);
+          const target = new THREE.Vector3(offX + (Math.random() - 0.5) * 10000, offY + (Math.random() - 0.5) * 2000, offZ + (Math.random() - 0.5) * 10000);
+          fleetGrp.lookAt(target);
+          
+          scene.add(fleetGrp);
+          tradeFleets.push({ mesh: fleetGrp, speed: 25 + Math.random() * 20 });
+      }
   }
 
   function onMouseDown(e) {
     if (!isLocked) return;
     
     if (isBuildMode && buildHologram && buildHologram.visible) {
-        if (credits >= 10) {
-            credits -= 10;
+        let partCost = 10;
+        if (buildPartIndex === 4) partCost = 500; // Mineral Extractor is expensive!
+        
+        if (credits >= partCost) {
+            credits -= partCost;
             document.getElementById('trade-credits').innerText = credits + ' ¢';
             
             const part = baseParts[buildPartIndex];
@@ -794,12 +868,12 @@
             window.saveGameState();
             
             const scoreEl = document.getElementById('obj-progress');
-            if (scoreEl) scoreEl.innerText = '[-10 ¢] Constructed Base Element!';
+            if (scoreEl) scoreEl.innerText = `[-${partCost} ¢] Constructed Base Element!`;
         } else {
             document.body.style.backgroundColor = "rgba(255, 0, 0, 0.3)";
             setTimeout(() => { document.body.style.backgroundColor = "transparent"; }, 150);
             const scoreEl = document.getElementById('obj-progress');
-            if (scoreEl) scoreEl.innerText = '[!] NEED 10 CREDITS TO BUILD!';
+            if (scoreEl) scoreEl.innerText = `[!] NEED ${partCost} CREDITS TO BUILD!`;
         }
         return; // Prevents normal shooting raycaster code from running
     }
@@ -1094,6 +1168,9 @@
             isTrading = true;
         }
         break;
+      case 'KeyV':
+        isThirdPerson = !isThirdPerson;
+        break;
       case 'KeyF': 
         toggleFlightMode();
         break;
@@ -1296,8 +1373,55 @@
     }
   }
 
+  let globalOffsetX = 0;
+  let globalOffsetY = 0;
+  let globalOffsetZ = 0;
+  let isWarping = false;
+
+  function warpToNewGalaxy() {
+      if (isWarping) return;
+      isWarping = true;
+      document.body.style.backgroundColor = "white";
+      const scoreEl = document.getElementById('obj-progress');
+      if (scoreEl) scoreEl.innerText = "[WARP] ANOMALY DETECTED! INITIATING GALAXY JUMP...";
+      
+      setTimeout(() => { 
+          document.body.style.backgroundColor = "transparent"; 
+          
+          globalOffsetX += (Math.random() - 0.5) * 50000;
+          globalOffsetY += (Math.random() - 0.5) * 50000;
+          globalOffsetZ += (Math.random() - 0.5) * 50000;
+          
+          // Move Player
+          yawObject.position.set(globalOffsetX, 102 + globalOffsetY, globalOffsetZ);
+          
+          spawnSolarSystem(globalOffsetX, globalOffsetY, globalOffsetZ);
+          
+          if (scoreEl) scoreEl.innerText = "ARRIVED IN UNCHARTED SPACE (NEW SEED)";
+          setTimeout(() => { isWarping = false; }, 2000);
+      }, 1500);
+  }
+
   function updatePhysics(dt) {
     if (!isLocked) return;
+    
+    // Check Warp Core Anomaly (Black Hole) distance
+    if (isFlying && !isWarping) {
+        const bh = planets.find(p => p.simplex.seed === 'seed_blackhole');
+        if (bh && yawObject.position.distanceTo(bh.position) < bh.radius * 2.0) {
+            warpToNewGalaxy();
+        }
+        
+        // Update Trade Fleets
+        tradeFleets.forEach(fleet => {
+            const dir = new THREE.Vector3();
+            fleet.mesh.getWorldDirection(dir);
+            fleet.mesh.position.add(dir.multiplyScalar(fleet.speed * dt));
+            if (Math.random() < 0.05) {
+                fleet.mesh.rotateY((Math.random() - 0.5) * 0.05);
+            }
+        });
+    }
     
     // Natural Pirate Spawns in Space
     if (isFlying && Math.random() < 0.002) {
@@ -1943,6 +2067,8 @@
     // Dynamic Camera FOV, Zoom & Collision Avoidance
     let targetZ = isFlying ? 15 : 7;
     let targetY = isFlying ? 4 : 2;
+    if (isFlying && isThirdPerson) { targetZ = 35; targetY = 12; }
+    
     let targetFOV = isFlying ? 85 : 55; // Lower FOV compresses and flattens the landscape!
     camera.position.z += (targetZ - camera.position.z) * 5 * dt;
     camera.position.y += (targetY - camera.position.y) * 5 * dt;
