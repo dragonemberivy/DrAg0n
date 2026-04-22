@@ -53,6 +53,50 @@
   let pirates = [];
   let asteroidPositions = [];
   let asteroidMesh;
+  window.persistedBaseParts = [];
+
+  window.saveGameState = function() {
+      const state = {
+          inventory: inventory,
+          credits: credits,
+          hasDualLasers: hasDualLasers,
+          bases: window.persistedBaseParts
+      };
+      localStorage.setItem('nmsWeb_saveState', JSON.stringify(state));
+  };
+  
+  window.loadGameState = function() {
+      const raw = localStorage.getItem('nmsWeb_saveState');
+      if (raw) {
+          try {
+              const state = JSON.parse(raw);
+              inventory = state.inventory || {};
+              credits = state.credits || 0;
+              hasDualLasers = !!state.hasDualLasers;
+              if (state.bases) {
+                  window.persistedBaseParts = state.bases;
+                  state.bases.forEach(b => {
+                      const part = baseParts[b.type];
+                      if (!part) return;
+                      const newPart = new THREE.Mesh(part.geo, part.mat);
+                      newPart.position.set(b.pos.x, b.pos.y, b.pos.z);
+                      newPart.quaternion.set(b.quat.x, b.quat.y, b.quat.z, b.quat.w);
+                      if (b.type === 3) {
+                          const pl = new THREE.PointLight(0xffffaa, 1.5, 100);
+                          pl.position.set(0, 3, 0);
+                          newPart.add(pl);
+                      }
+                      placedBasesGroup.add(newPart);
+                  });
+              }
+          } catch (e) {
+              console.error("Save state corrupted: ", e);
+          }
+      }
+      
+      const crObj = document.getElementById('trade-credits');
+      if(crObj) crObj.innerText = credits + ' ¢';
+  };
 
   function init() {
     if (!container) return;
@@ -286,6 +330,10 @@
     }
     scene.add(asteroidMesh);
 
+    // Call loadGameState after base geometries are populated!
+    window.loadGameState();
+    setInterval(window.saveGameState, 5000); // Autosave periodically 
+
     spawnSolarSystem();
     const resizeObserver = new ResizeObserver(() => onResize());
     resizeObserver.observe(container);
@@ -470,6 +518,13 @@
          imLeaves.count = validTrees;
          mesh.add(imTrunk);
          mesh.add(imLeaves);
+         
+         // Add glowing lava core just beneath surface if Magma planet
+         if (seed === 'seed_magma') {
+             const coreGeo = new THREE.SphereGeometry(radius - 0.2, 32, 32);
+             const coreMat = new THREE.MeshStandardMaterial({ color: 0xff4400, emissive: 0xff2200, roughness: 0.1 });
+             mesh.add(new THREE.Mesh(coreGeo, coreMat));
+         }
       }
 
       lod.addLevel(mesh, level.dist);
@@ -491,6 +546,17 @@
     const auraMesh = new THREE.Mesh(auraGeo, auraMat);
     auraMesh.position.set(x, y, z);
     scene.add(auraMesh);
+
+    // Planetary Rings
+    if (seed === 'seed_gas' || seed === 'seed_magma' || seed === 'seed_desert') {
+        const ringGeo = new THREE.RingGeometry(radius * 1.5, radius * 2.5, 64);
+        const ringMat = new THREE.MeshBasicMaterial({ color: colorSet[2], side: THREE.DoubleSide, transparent: true, opacity: 0.8 });
+        const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+        ringMesh.position.set(x, y, z);
+        ringMesh.rotation.x = Math.PI / 2 + Math.random() * 0.4;
+        ringMesh.rotation.y = Math.random() * 0.4;
+        scene.add(ringMesh);
+    }
 
     // Fauna (Circling abstract birds/creatures or fish/sharks for ocean)
     const faunaGroup = new THREE.Group();
@@ -540,6 +606,44 @@
     }
     rideableGroup.position.set(x, y, z);
     scene.add(rideableGroup);
+
+    // Surface Outpost (NPC Settlement)
+    const outGroup = new THREE.Group();
+    const outPos = new THREE.Vector3(
+         (Math.random()-0.5), (Math.random()-0.5), (Math.random()-0.5)
+    ).normalize();
+    
+    // Evaluate procedural height 
+    let tHeight = radius;
+    let nVal = 0; let nAmp = 8 * (radius/100); let nFreq = 0.05 * (100/radius);
+    for(let oct=0; oct<3; oct++) {
+       let n = simplex.noise3D(outPos.x * nFreq, outPos.y * nFreq, outPos.z * nFreq);
+       nVal += (1.0 - Math.abs(n)) * nAmp;
+       nAmp *= 0.5; nFreq *= 2.0;
+    }
+    nVal -= 5 * (radius/100);
+    if(nVal <= 0) nVal = 0;
+    tHeight += nVal;
+    
+    outPos.multiplyScalar(tHeight);
+    
+    const domeGeo = new THREE.SphereGeometry(6, 16, 16, 0, Math.PI*2, 0, Math.PI/2);
+    const domeMat = new THREE.MeshStandardMaterial({color: 0xcccccc, metalness: 0.8, transparent: true, opacity: 0.5});
+    const dome = new THREE.Mesh(domeGeo, domeMat);
+    dome.position.copy(outPos);
+    dome.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), outPos.clone().normalize());
+    outGroup.add(dome);
+
+    const termGeo = new THREE.BoxGeometry(1.5, 2.5, 1.5);
+    const termMat = new THREE.MeshStandardMaterial({color: 0x111111, emissive: 0x00bbff, emissiveIntensity: 0.8});
+    const terminal = new THREE.Mesh(termGeo, termMat);
+    terminal.position.copy(outPos);
+    terminal.quaternion.copy(dome.quaternion);
+    terminal.userData.isLoreTerminal = true;
+    outGroup.add(terminal);
+
+    outGroup.position.set(x, y, z);
+    scene.add(outGroup);
 
     planets.push({ mesh: lod, radius, position: new THREE.Vector3(x, y, z), colorSet: colorSet, simplex: new SimplexNoise(seed), faunaGroup: faunaGroup, rideableGroup, name: name, resource: resource, floraMat: primaryLeavesMat });
   }
@@ -681,6 +785,14 @@
             
             placedBasesGroup.add(newPart);
             
+            // Persist the array representation and autosave
+            window.persistedBaseParts.push({
+                type: buildPartIndex,
+                pos: { x: newPart.position.x, y: newPart.position.y, z: newPart.position.z },
+                quat: { x: newPart.quaternion.x, y: newPart.quaternion.y, z: newPart.quaternion.z, w: newPart.quaternion.w }
+            });
+            window.saveGameState();
+            
             const scoreEl = document.getElementById('obj-progress');
             if (scoreEl) scoreEl.innerText = '[-10 ¢] Constructed Base Element!';
         } else {
@@ -690,6 +802,31 @@
             if (scoreEl) scoreEl.innerText = '[!] NEED 10 CREDITS TO BUILD!';
         }
         return; // Prevents normal shooting raycaster code from running
+    }
+    
+    // NPC Surface Outposts Interaction
+    if (!isFlying && !isInsideDungeon) {
+        raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
+        const hits = raycaster.intersectObjects(scene.children, true);
+        if (hits.length > 0) {
+            for (let point of hits) {
+                if (point.object.userData.isLoreTerminal && point.distance < 80) {
+                    const msgs = [
+                        "The Atlas fell... we are all that remains...",
+                        "16 / 16 / 16 / 16 / 16 / 16",
+                        "Warning: Sentinels are scanning the sector.",
+                        "It said there would be no glass..."
+                    ];
+                    const msg = msgs[Math.floor(Math.random() * msgs.length)];
+                    const objEl = document.getElementById('obj-progress');
+                    if(objEl) objEl.innerText = `[LOG] ${msg}`;
+                    
+                    document.body.style.backgroundColor = "rgba(0, 150, 255, 0.3)";
+                    setTimeout(() => { document.body.style.backgroundColor = "transparent"; }, 200);
+                    return; // intercept interaction
+                }
+            }
+        }
     }
     
     if (isFlying) {
