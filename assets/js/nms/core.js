@@ -56,6 +56,11 @@
   window.persistedBaseParts = [];
   let isThirdPerson = false;
   let tradeFleets = [];
+  let boids = [];
+  
+  let ownsFreighter = false;
+  let capitalFreighter = null;
+  let isInsideFreighter = false;
 
   window.saveGameState = function() {
       const state = {
@@ -398,6 +403,16 @@
   function createPlanet(x, y, z, radius, seed, colorSet, name, resource) {
     const lod = new THREE.LOD();
     
+    // Generate Complementary Biome Colors
+    const colorSet2 = colorSet.map(hex => {
+        const c = new THREE.Color(hex);
+        const hsl = { h:0, s:0, l:0 };
+        c.getHSL(hsl);
+        hsl.h = (hsl.h + 0.3) % 1.0; 
+        c.setHSL(hsl.h, hsl.s, hsl.l);
+        return c.getHex();
+    });
+    
     // Creating different levels of detail
     const levels = [
       { res: 128, dist: 0 },
@@ -414,6 +429,7 @@
       });
       
       const simplex = new SimplexNoise(seed);
+      const biomeSimplex = new SimplexNoise(seed + "_biome2");
       const positionAttribute = geometry.attributes.position;
       const vertex = new THREE.Vector3();
       const colors = [];
@@ -441,14 +457,23 @@
             noiseVal = 0;
             colorObj.setHex(0x000000); // Pure absorbing black
          } else {
-             if (noiseVal <= 0) { 
-                noiseVal = 0; // Flat water
-                colorObj.setHex(colorSet[0]); 
-             } 
-             else if (noiseVal < 1.5 * (radius/100)) { colorObj.setHex(colorSet[1]); }
-             else if (noiseVal < 4 * (radius/100)) { colorObj.setHex(colorSet[2]); }
-             else if (noiseVal < 7 * (radius/100)) { colorObj.setHex(colorSet[3]); }
-             else { colorObj.setHex(colorSet[4]); }
+             let bNoise = biomeSimplex.noise3D(vertex.x * 0.015, vertex.y * 0.015, vertex.z * 0.015);
+             let blendWeight = (bNoise + 1) / 2; // 0 to 1
+             blendWeight = Math.min(Math.max((blendWeight - 0.4) * 5, 0), 1); // Sharpen transitions
+    
+             const getSetColor = (set, nVal, rad) => {
+                 if (nVal <= 0) return set[0];
+                 if (nVal < 1.5 * (rad/100)) return set[1];
+                 if (nVal < 4 * (rad/100)) return set[2];
+                 if (nVal < 7 * (rad/100)) return set[3];
+                 return set[4];
+             };
+    
+             const c1 = new THREE.Color(getSetColor(colorSet, noiseVal, radius));
+             const c2 = new THREE.Color(getSetColor(colorSet2, noiseVal, radius));
+             colorObj.copy(c1).lerp(c2, blendWeight);
+             
+             if (noiseVal <= 0) noiseVal = 0; // Flat water
          }
          
          vertex.multiplyScalar(radius + noiseVal);
@@ -493,6 +518,29 @@
          // Procedural Flora (Instanced Mesh for Extreme Performance)
          const treeCount = Math.floor(radius * 1.5);
          let trunkGeo, leavesGeo, trunkMat, leavesMat;
+         
+         // Organic Swarming Boids Fauna!
+         if (seed !== 'seed_moon' && seed !== 'seed_blackhole' && Math.random() > 0.1) {
+             const critGeo = new THREE.ConeGeometry(0.8, 3, 4);
+             critGeo.rotateX(Math.PI / 2);
+             const critMat = new THREE.MeshStandardMaterial({ color: colorSet[4], metalness: 0.1, roughness: 0.8 });
+             const fakePlanetObj = { radius: radius, simplex: simplex };
+             
+             for(let f = 0; f < 30; f++) {
+                 const cMesh = new THREE.Mesh(critGeo, critMat);
+                 const rVec = new THREE.Vector3(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).normalize();
+                 const tRad = getTerrainHeight(fakePlanetObj, rVec) + 1.0;
+                 cMesh.position.copy(rVec).multiplyScalar(tRad);
+                 mesh.add(cMesh); // Child of LOD 0 level
+                 
+                 boids.push({
+                     mesh: cMesh,
+                     velocity: new THREE.Vector3(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).normalize().multiplyScalar(5),
+                     planetRad: radius,
+                     simplex: simplex
+                 });
+             }
+         }
          
          if (seed === 'seed_ocean') {
             trunkGeo = new THREE.CylinderGeometry(0.2, 0.2, 3, 5); // Kelp
@@ -692,6 +740,7 @@
      planets = []; // Required if we reset
      tradeFleets.forEach(f => scene.remove(f.mesh));
      tradeFleets = [];
+     boids = [];
      
      // Earth-like (Origin)
      createPlanet(0+offX, 0+offY, 0+offZ, 100, 'seed_earth', [0x1d4ed8, 0x3b82f6, 0x22c55e, 0x78716c, 0xf8fafc], 'Aethelgard IV (Origin World)', 'Iron');
@@ -904,6 +953,48 @@
     }
     
     if (isFlying) {
+       // Starship Trading Intercept
+       raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
+       const fleetHits = raycaster.intersectObjects(tradeFleets.map(f => f.mesh), true);
+       if (fleetHits.length > 0 && fleetHits[0].distance < 300) {
+           const shipCost = 15000;
+           if (credits >= shipCost) {
+               credits -= shipCost;
+               document.getElementById('trade-credits').innerText = credits + ' ¢';
+               
+               while(window.spaceshipGroup.children.length > 0) {
+                   window.spaceshipGroup.remove(window.spaceshipGroup.children[0]);
+               }
+               
+               let fleetParent = fleetHits[0].object;
+               while(fleetParent.parent && fleetParent.parent.type === "Group") {
+                   fleetParent = fleetParent.parent;
+               }
+               
+               fleetParent.children.forEach(child => {
+                   const clone = child.clone();
+                   clone.scale.set(0.1, 0.1, 0.1); 
+                   clone.position.multiplyScalar(0.1);
+                   window.spaceshipGroup.add(clone);
+               });
+               
+               const glowGeo = new THREE.SphereGeometry(0.4, 8, 8);
+               const glowMat = new THREE.MeshBasicMaterial({ color: 0xff00ff });
+               const glow = new THREE.Mesh(glowGeo, glowMat);
+               glow.position.set(0, 0, 2);
+               window.spaceshipGroup.add(glow);
+               
+               const scoreEl = document.getElementById('obj-progress');
+               if (scoreEl) scoreEl.innerText = `[-${shipCost} ¢] NEW STARSHIP ACQUIRED!`;
+           } else {
+               document.body.style.backgroundColor = "rgba(255, 0, 0, 0.3)";
+               setTimeout(() => { document.body.style.backgroundColor = "transparent"; }, 150);
+               const scoreEl = document.getElementById('obj-progress');
+               if (scoreEl) scoreEl.innerText = `[!] NEED ${shipCost} CREDITS FOR THIS SHIP!`;
+           }
+           return; // intercept interaction
+       }
+
        // Space Laser Shoot
        const laserGeo = new THREE.CylinderGeometry(0.2, 0.2, 4, 8);
        laserGeo.rotateX(Math.PI / 2);
@@ -1131,6 +1222,42 @@
       case 'Digit2': if(isBuildMode) { buildPartIndex = 1; updateBuildHologram(); } break;
       case 'Digit3': if(isBuildMode) { buildPartIndex = 2; updateBuildHologram(); } break;
       case 'Digit4': if(isBuildMode) { buildPartIndex = 3; updateBuildHologram(); } break;
+      case 'KeyH':
+        if (isFlying) {
+           if (!ownsFreighter) {
+               if (credits >= 50000) {
+                   credits -= 50000;
+                   document.getElementById('trade-credits').innerText = credits + ' ¢';
+                   ownsFreighter = true;
+                   
+                   const scoreEl = document.getElementById('obj-progress');
+                   if (scoreEl) scoreEl.innerText = "[-50000 ¢] CAPITAL FREIGHTER PURCHASED!";
+               } else {
+                   document.body.style.backgroundColor = "rgba(255, 0, 0, 0.3)";
+                   setTimeout(() => { document.body.style.backgroundColor = "transparent"; }, 150);
+                   const scoreEl = document.getElementById('obj-progress');
+                   if (scoreEl) scoreEl.innerText = "[!] 50000 CREDITS REQUIRED FOR FREIGHTER!";
+                   break;
+               }
+           }
+           
+           if (ownsFreighter) {
+               if (!capitalFreighter) {
+                   createCapitalFreighter();
+               }
+               
+               const dir = new THREE.Vector3();
+               camera.getWorldDirection(dir);
+               const spawnPos = yawObject.position.clone().add(dir.multiplyScalar(400)); 
+               
+               capitalFreighter.position.copy(spawnPos);
+               capitalFreighter.lookAt(yawObject.position);
+               
+               const scoreEl = document.getElementById('obj-progress');
+               if (scoreEl) scoreEl.innerText = "[+] CAPITAL FREIGHTER HAS ARRIVED IN SYSTEM.";
+           }
+        }
+        break;
       case 'KeyG':
         if (dungeon && !isInsideDungeon && yawObject.position.distanceTo(dungeon.position) < 300 && isFlying) {
             isFlying = false;
@@ -1139,12 +1266,26 @@
             window.spaceshipGroup.visible = false;
             window.astronautGroup.visible = true;
             
-            // Flatten spatial rotation so dungeon Euclidean movement physics work correctly!
             yawObject.quaternion.identity();
-            
             yawObject.position.copy(dungeon.position).add(new THREE.Vector3(0, 0, 80));
             camera.rotation.x = 0;
             yawObject.rotation.y = Math.PI; // Face inward (-Z)
+        } else if (capitalFreighter && !isInsideFreighter && yawObject.position.distanceTo(capitalFreighter.position) < 300 && isFlying) {
+            isFlying = false;
+            isRiding = false;
+            isInsideFreighter = true;
+            window.spaceshipGroup.visible = false;
+            window.astronautGroup.visible = true;
+            
+            yawObject.quaternion.identity();
+            const entrance = new THREE.Vector3(0, -40, 100);
+            entrance.applyQuaternion(capitalFreighter.quaternion); 
+            yawObject.position.copy(capitalFreighter.position).add(entrance);
+            camera.rotation.x = 0;
+            yawObject.rotation.y = capitalFreighter.rotation.y + Math.PI; 
+            
+            const scoreEl = document.getElementById('obj-progress');
+            if (scoreEl) scoreEl.innerText = "[+] BOARDED CAPITAL FREIGHTER. FEEL FREE TO BUILD!";
         } else if (dungeon && isInsideDungeon) {
             const relPos = yawObject.position.clone().sub(dungeon.position);
             if (relPos.z > 70) { // Near the airlock
@@ -1155,9 +1296,19 @@
                 
                 yawObject.position.copy(dungeon.position).add(new THREE.Vector3(0, 0, 150));
                 yawObject.rotation.y = 0;
+            }
+        } else if (capitalFreighter && isInsideFreighter) {
+            const localPos = yawObject.position.clone().sub(capitalFreighter.position);
+            localPos.applyQuaternion(capitalFreighter.quaternion.clone().invert());
+            if (localPos.z > 95) {
+                isInsideFreighter = false;
+                isFlying = true;
+                window.spaceshipGroup.visible = true;
+                window.astronautGroup.visible = false;
                 
-                const promptEl = document.getElementById('nms-planet-info');
-                if (promptEl) promptEl.style.opacity = '0';
+                const exitVec = new THREE.Vector3(0, -100, 200).applyQuaternion(capitalFreighter.quaternion);
+                yawObject.position.copy(capitalFreighter.position).add(exitVec);
+                yawObject.quaternion.copy(capitalFreighter.quaternion);
             }
         }
         break;
@@ -1404,6 +1555,25 @@
 
   function updatePhysics(dt) {
     if (!isLocked) return;
+    
+    // Boid Flocking / Roaming Fauna
+    boids.forEach(b => {
+        let wander = new THREE.Vector3((Math.random()-0.5)*2, (Math.random()-0.5)*2, (Math.random()-0.5)*2);
+        b.velocity.add(wander).normalize().multiplyScalar(8); // Movement speed
+        
+        b.mesh.position.add(b.velocity.clone().multiplyScalar(dt));
+        
+        // Snap strictly to procedural terrain altitude
+        const upVec = b.mesh.position.clone().normalize();
+        const targetRad = getTerrainHeight({radius: b.planetRad, simplex: b.simplex}, upVec) + 0.8;
+        
+        b.mesh.position.copy(upVec.multiplyScalar(targetRad));
+        
+        // Orient creature to face its own velocity projected on surface normal
+        const lookTarget = b.mesh.position.clone().add(b.velocity.clone().projectOnPlane(upVec));
+        b.mesh.up.copy(upVec);
+        b.mesh.lookAt(lookTarget);
+    });
     
     // Check Warp Core Anomaly (Black Hole) distance
     if (isFlying && !isWarping) {
