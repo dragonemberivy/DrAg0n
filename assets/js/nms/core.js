@@ -1841,6 +1841,17 @@
     }
   };
 
+  document.addEventListener('fullscreenchange', () => {
+      const themeAudio = document.getElementById('game-audio');
+      if (themeAudio) {
+          if (document.fullscreenElement) {
+              themeAudio.play().catch(e => console.warn("Audio blocked", e));
+          } else {
+              themeAudio.pause();
+          }
+      }
+  });
+
   window.tradeSellScrap = function() {
       if (inventory['Pirate Scrap'] > 0) {
           credits += inventory['Pirate Scrap'] * 50;

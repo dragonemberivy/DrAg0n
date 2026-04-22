@@ -303,6 +303,9 @@ const sfxDarkness = new Audio("./506_The_Verdant_Dark.mp3");
 const sfxLore = new Audio("./502_Sentient_Eye.mp3");
 
 function playSoundEffect(type = "darkness") {
+  if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+      return; 
+  }
   let trackToPlay;
   
   if (type === "companion") trackToPlay = sfxCompanion;
