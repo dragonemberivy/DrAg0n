@@ -926,6 +926,9 @@
             window.spaceshipGroup.visible = false;
             window.astronautGroup.visible = true;
             
+            // Flatten spatial rotation so dungeon Euclidean movement physics work correctly!
+            yawObject.quaternion.identity();
+            
             yawObject.position.copy(dungeon.position).add(new THREE.Vector3(0, 0, 80));
             camera.rotation.x = 0;
             yawObject.rotation.y = Math.PI; // Face inward (-Z)
