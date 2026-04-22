@@ -52,6 +52,7 @@
   let enemyLasers = [];
   let pirates = [];
   let asteroidPositions = [];
+  let asteroidMesh;
 
   function init() {
     if (!container) return;
@@ -266,7 +267,8 @@
     astGeo.computeVertexNormals();
 
     const astMat = new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.9, metalness: 0.1, flatShading: true });
-    const astMesh = new THREE.InstancedMesh(astGeo, astMat, astCount);
+    asteroidMesh = new THREE.InstancedMesh(astGeo, astMat, astCount);
+    asteroidMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     
     const dummy = new THREE.Object3D();
     for (let i = 0; i < astCount; i++) {
@@ -279,10 +281,10 @@
         const sz = 0.5 + Math.random() * 3.0;
         dummy.scale.set(sx, sy, sz);
         dummy.updateMatrix();
-        astMesh.setMatrixAt(i, dummy.matrix);
-        asteroidPositions.push(pos.clone());
+        asteroidMesh.setMatrixAt(i, dummy.matrix);
+        asteroidPositions.push({ pos: pos.clone(), active: true, scale: new THREE.Vector3(sx, sy, sz) });
     }
-    scene.add(astMesh);
+    scene.add(asteroidMesh);
 
     spawnSolarSystem();
     const resizeObserver = new ResizeObserver(() => onResize());
@@ -1243,9 +1245,9 @@
     // Evaluate Asteroid Collisions
     if (isFlying && asteroidPositions.length > 0) {
         for (let i = 0; i < asteroidPositions.length; i++) {
-            if (yawObject.position.distanceTo(asteroidPositions[i]) < 18) {
-                // Hard Bounce Calculation
-                const bounceDir = yawObject.position.clone().sub(asteroidPositions[i]).normalize();
+            if (!asteroidPositions[i].active) continue;
+            if (yawObject.position.distanceToSquared(asteroidPositions[i].pos) < 324) { // 18*18
+                const bounceDir = yawObject.position.clone().sub(asteroidPositions[i].pos).normalize();
                 yawObject.position.add(bounceDir.multiplyScalar(30));
                 
                 // Damage Ship
@@ -1377,7 +1379,7 @@
         // Check hits against player's lasers
         let hit = false;
         for (let j = lasers.length - 1; j >= 0; j--) {
-            if (p.position.distanceTo(lasers[j].mesh.position) < 25) {
+            if (p.position.distanceToSquared(lasers[j].mesh.position) < 625) { // 25*25
                 scene.remove(lasers[j].mesh);
                 lasers.splice(j, 1);
                 hit = true;
@@ -1411,6 +1413,40 @@
         if (hit) {
             scene.remove(p);
             pirates.splice(i, 1);
+        }
+    }
+    
+    // Check hits for Asteroid Mining
+    if (lasers.length > 0 && asteroidPositions.length > 0 && asteroidMesh) {
+        const dummyMatrix = new THREE.Matrix4();
+        for (let j = lasers.length - 1; j >= 0; j--) {
+            let laserHit = false;
+            for (let i = 0; i < asteroidPositions.length; i++) {
+                if (!asteroidPositions[i].active) continue;
+                
+                const distSq = lasers[j].mesh.position.distanceToSquared(asteroidPositions[i].pos);
+                if (distSq < 400) { // roughly 20 unit hit radius
+                    laserHit = true;
+                    asteroidPositions[i].active = false;
+                    
+                    // Shrink matrix to zero to "destroy" fragment
+                    dummyMatrix.makeScale(0, 0, 0);
+                    asteroidMesh.setMatrixAt(i, dummyMatrix);
+                    asteroidMesh.instanceMatrix.needsUpdate = true;
+                    
+                    inventory['Titanium'] = (inventory['Titanium'] || 0) + 3;
+                    const objEl = document.getElementById('obj-progress');
+                    if (objEl) objEl.innerText = '[-] Escaped Asteroid Mined! (+3 Titanium)';
+                    const mineObj = document.getElementById('obj-mine');
+                    if (mineObj) mineObj.innerText = `[ ] Resources: ${inventory['Titanium']}x Titanium`;
+                    
+                    break;
+                }
+            }
+            if (laserHit) {
+                scene.remove(lasers[j].mesh);
+                lasers.splice(j, 1);
+            }
         }
     }
     
