@@ -62,6 +62,10 @@
   let capitalFreighter = null;
   let isInsideFreighter = false;
 
+  let wantedLevel = 0;
+  let gpfDrones = [];
+  let gpfSpawnTimer = 0;
+
   window.saveGameState = function() {
       const state = {
           inventory: inventory,
@@ -245,6 +249,19 @@
     const hullMat = new THREE.MeshStandardMaterial({ color: 0xaa3333, metalness: 0.5 });
     const hullMesh = new THREE.Mesh(hullGeo, hullMat);
     window.spaceshipGroup.add(hullMesh);
+    
+    const fireGeo = new THREE.ConeGeometry(2, 6, 8, 1, true);
+    fireGeo.rotateX(Math.PI);
+    const fireMat = new THREE.MeshBasicMaterial({ 
+        color: 0xff4400, 
+        transparent: true, 
+        opacity: 0, 
+        blending: THREE.AdditiveBlending,
+        side: THREE.DoubleSide
+    });
+    window.reentryMesh = new THREE.Mesh(fireGeo, fireMat);
+    window.reentryMesh.position.z = -3;
+    window.spaceshipGroup.add(window.reentryMesh);
 
     // Cockpit
     const shipVisorGeo = new THREE.SphereGeometry(1, 16, 16);
@@ -510,14 +527,34 @@
             if (noiseV <= 0) noiseV = 0;
             tHeight += noiseV;
             
-            resMesh.position.copy(randVec).multiplyScalar(tHeight + 1.2); 
-            resMesh.lookAt(new THREE.Vector3(0,0,0));
+            resMesh.position.copy(randVec).multiplyScalar(tHeight + 0.5);
+            resMesh.lookAt(randVec.clone().multiplyScalar(tHeight + 5));
             mesh.add(resMesh);
          }
          
-         // Procedural Flora (Instanced Mesh for Extreme Performance)
-         const treeCount = Math.floor(radius * 1.5);
-         let trunkGeo, leavesGeo, trunkMat, leavesMat;
+         // Spawn Procedural Flora
+         for(let fl=0; fl<60; fl++) {
+             const tree = createFlora(colorSet);
+             const randVec = new THREE.Vector3(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).normalize();
+             
+             let tHeight = radius;
+             let noiseV = 0;
+             let amp = 8 * (radius/100);
+             let freq = 0.05 * (100/radius);
+             for(let oct=0; oct<3; oct++) {
+                let v = simplex.noise3D(randVec.x * freq, randVec.y * freq, randVec.z * freq);
+                v = 1.0 - Math.abs(v);
+                noiseV += v * amp;
+                freq *= 2.0; amp *= 0.5;
+             }
+             noiseV -= 5 * (radius/100);
+             if (noiseV <= 0) { fl--; continue; } // Don't spawn trees in water
+             tHeight += noiseV;
+             
+             tree.position.copy(randVec).multiplyScalar(tHeight);
+             tree.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), randVec);
+             mesh.add(tree);
+         }
          
          // Organic Swarming Boids Fauna!
          if (seed !== 'seed_moon' && seed !== 'seed_blackhole' && Math.random() > 0.1) {
@@ -861,6 +898,69 @@
      scene.add(spaceStation);
   }
 
+  function createCapitalFreighter() {
+      capitalFreighter = new THREE.Group();
+      
+      const hullGeo = new THREE.CylinderGeometry(80, 80, 400, 16);
+      hullGeo.rotateX(Math.PI / 2);
+      const hullMat = new THREE.MeshStandardMaterial({ color: 0x222233, roughness: 0.7, metalness: 0.6 });
+      const hull = new THREE.Mesh(hullGeo, hullMat);
+      capitalFreighter.add(hull);
+      
+      const bayGeo = new THREE.BoxGeometry(60, 40, 100);
+      const bayMat = new THREE.MeshStandardMaterial({ color: 0x111122, side: THREE.BackSide });
+      const bay = new THREE.Mesh(bayGeo, bayMat);
+      bay.position.set(0, -40, 100); 
+      capitalFreighter.add(bay);
+      
+      scene.add(capitalFreighter);
+  }
+
+  function spawnGPFDrone() {
+      const droneGrp = new THREE.Group();
+      const bodyGeo = new THREE.SphereGeometry(1.5, 8, 8);
+      const bodyMat = new THREE.MeshStandardMaterial({ color: 0x444466, emissive: 0x0000ff, emissiveIntensity: 0.5 });
+      const body = new THREE.Mesh(bodyGeo, bodyMat);
+      droneGrp.add(body);
+      
+      const beamGeo = new THREE.CylinderGeometry(0.5, 0.5, 0.2, 8);
+      const beamMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
+      const beam = new THREE.Mesh(beamGeo, beamMat);
+      beam.position.y = -1.2;
+      droneGrp.add(beam);
+      
+      // Spawn slightly away from player but nearby
+      const dir = new THREE.Vector3(Math.random()-0.5, 0.5, Math.random()-0.5).normalize();
+      droneGrp.position.copy(yawObject.position).add(dir.multiplyScalar(150));
+      
+      droneGrp.userData.isDrone = true; // Targets for Multi-Tool
+      scene.add(droneGrp);
+      gpfDrones.push({ mesh: droneGrp, health: 50, shootTimer: Math.random() * 2000 });
+      
+      const scoreEl = document.getElementById('obj-progress');
+      if (scoreEl) scoreEl.innerText = '[!] GPF SENTINEL DRONE INBOUND!';
+      document.body.style.backgroundColor = "rgba(0, 0, 255, 0.1)";
+      setTimeout(() => { document.body.style.backgroundColor = "transparent"; }, 300);
+  }
+
+  function createFlora(colorSet) {
+      const treeGrp = new THREE.Group();
+      const trunkGeo = new THREE.CylinderGeometry(0.3, 0.8, 5, 8);
+      const trunkMat = new THREE.MeshStandardMaterial({ color: 0x5d4037 });
+      const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+      trunk.position.y = 2.5;
+      treeGrp.add(trunk);
+      
+      const leafGeo = new THREE.SphereGeometry(2.5, 8, 8);
+      const leafMat = new THREE.MeshStandardMaterial({ color: colorSet[2] || 0x228b22 });
+      const leaves = new THREE.Mesh(leafGeo, leafMat);
+      leaves.position.y = 5.5;
+      treeGrp.add(leaves);
+      
+      treeGrp.userData.isFlora = true;
+      return treeGrp;
+  }
+
   function createTradeFleet(offX = 0, offY = 0, offZ = 0) {
       for (let i = 0; i < 6; i++) {
           const fleetGrp = new THREE.Group();
@@ -1068,13 +1168,27 @@
                       
                       if(minedCrystals >= 10) scoreEl.innerText = '[x] Mine Crystals: 10/10';
                       else scoreEl.innerText = `[ ] Mined ${resName}: ${inventory[resName]} (Total: ${minedCrystals}/10)`;
+                      
+                      wantedLevel += 5; // Mining raises GPF suspicion
                    }
                }
                else if (pt.object.userData.isFauna) {
                    pt.object.parent.remove(pt.object);
+                   wantedLevel += 15; // Culling biologicals is a high offense!
                    const scoreEl = document.getElementById('obj-progress');
                    if (scoreEl) scoreEl.innerText = '[-] Culled Biological Entity!';
                }
+               else if (pt.object.userData.isFlora) {
+                    // Tree group is pt.object.parent
+                    const tree = pt.object.parent;
+                    if (tree) {
+                        scene.remove(tree);
+                        inventory['Carbon'] = (inventory['Carbon'] || 0) + 5;
+                        const scoreEl = document.getElementById('obj-progress');
+                        if (scoreEl) scoreEl.innerText = '[-] HARVESTED CARBON FROM FLORA (+5)';
+                        wantedLevel += 1; // Slight suspicion for deforestation
+                    }
+                }
                else if (pt.object.userData.isTreasure) {
                    pt.object.parent.remove(pt.object);
                    credits += 5000;
@@ -1083,10 +1197,23 @@
                    document.getElementById('trade-credits').innerText = credits + ' ¢';
                }
                else if (pt.object.userData.isDrone) {
-                   pt.object.parent.remove(pt.object);
-                   const scoreEl = document.getElementById('obj-progress');
-                   if (scoreEl) scoreEl.innerText = '[-] Destroyed Alien Drone!';
-               }
+                    // Find actual drone object in array
+                    const droneIdx = gpfDrones.findIndex(d => d.mesh === pt.object || d.mesh.children.includes(pt.object));
+                    if (droneIdx !== -1) {
+                        gpfDrones[droneIdx].health -= 20;
+                        if (gpfDrones[droneIdx].health <= 0) {
+                            scene.remove(gpfDrones[droneIdx].mesh);
+                            gpfDrones.splice(droneIdx, 1);
+                            credits += 500;
+                            wantedLevel -= 10; // Killing them reduces local presence but might trigger backup? For now just kill.
+                            const scoreEl = document.getElementById('obj-progress');
+                            if (scoreEl) scoreEl.innerText = '[-] GPF DRONE NEUTRALIZED!';
+                        }
+                    } else {
+                        // Fallback if not in array but tagged
+                        scene.remove(pt.object.parent || pt.object);
+                    }
+                }
                else if (pt.object.userData.isBoss) {
                    if (activeBoss) {
                        activeBoss.health -= 25;
@@ -1595,24 +1722,61 @@
     
     // Natural Pirate Spawns in Space
     if (isFlying && Math.random() < 0.002) {
-        if (pirates.length < 3) { // Limit number of active pirates
-            const pirate = createPirateShip();
-            
-            const camDir = new THREE.Vector3();
-            camera.getWorldDirection(camDir);
-            
-            const spawnPos = yawObject.position.clone().add(camDir.multiplyScalar(800));
-            
-            pirate.position.copy(spawnPos);
-            pirate.lookAt(yawObject.position);
-            scene.add(pirate);
-            const offset = new THREE.Vector3((Math.random() - 0.5) * 300, (Math.random() - 0.5) * 150, 0);
-            pirates.push({ mesh: pirate, offset: offset, nextFire: Math.random() * 2 });
-            
-            const scoreEl = document.getElementById('obj-progress');
-            if (scoreEl) scoreEl.innerText = '[!] SPACE PIRATE INTERCEPTED!';
+        if (pirates.length < 3) {
+            spawnPirate();
         }
     }
+    
+    // --- GPF (Galactic Police Force) Logic ---
+    if (wantedLevel > 0) wantedLevel -= 0.05 * dt; // Slow decay
+    if (wantedLevel < 0) wantedLevel = 0;
+    
+    if (wantedLevel > 50) {
+        gpfSpawnTimer -= dt * 1000;
+        if (gpfSpawnTimer <= 0 && gpfDrones.length < (wantedLevel / 50)) {
+            spawnGPFDrone();
+            gpfSpawnTimer = 5000; // 5 seconds between spawns
+        }
+    }
+    
+    for (let i = gpfDrones.length - 1; i >= 0; i--) {
+        const d = gpfDrones[i];
+        
+        // Follow Player
+        const distToPlayer = d.mesh.position.distanceTo(yawObject.position);
+        const targetPos = yawObject.position.clone();
+        if (distToPlayer > 30) {
+            const moveDir = targetPos.sub(d.mesh.position).normalize();
+            d.mesh.position.add(moveDir.multiplyScalar(40 * dt));
+        }
+        d.mesh.lookAt(yawObject.position);
+        
+        // Shoot Player
+        if (!isWarping) {
+            d.shootTimer -= dt * 1000;
+            if (d.shootTimer <= 0 && distToPlayer < 200) {
+                // Fire Red Laser
+                const lDir = yawObject.position.clone().sub(d.mesh.position).normalize();
+                const lGeo = new THREE.CylinderGeometry(0.1, 0.1, 5, 8);
+                lGeo.rotateX(Math.PI/2);
+                const lMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+                const lMesh = new THREE.Mesh(lGeo, lMat);
+                lMesh.position.copy(d.mesh.position);
+                lMesh.lookAt(yawObject.position);
+                scene.add(lMesh);
+                lasers.push({ mesh: lMesh, dir: lDir, life: 60 });
+                d.shootTimer = 2000 + Math.random() * 2000;
+                
+                // Damage Player
+                if (distToPlayer < 50) {
+                   health -= 2; // GPF is dangerous!
+                   updateHUD();
+                }
+            }
+        }
+    }
+    // -----------------------------------------
+
     
     // Boss Sandworm Slithering & Combat
     if (activeBoss) {
@@ -1881,6 +2045,34 @@
         }
     }
     
+    // Check hits for GPF Drones
+    if (lasers.length > 0 && gpfDrones.length > 0) {
+        for (let j = lasers.length - 1; j >= 0; j--) {
+            let laserHit = false;
+            for (let i = gpfDrones.length - 1; i >= 0; i--) {
+                const drone = gpfDrones[i];
+                const distSq = lasers[j].mesh.position.distanceToSquared(drone.mesh.position);
+                if (distSq < 150) { // hit radius
+                    laserHit = true;
+                    drone.health -= 25;
+                    if (drone.health <= 0) {
+                        scene.remove(drone.mesh);
+                        gpfDrones.splice(i, 1);
+                        credits += 500;
+                        wantedLevel -= 5;
+                        const scoreEl = document.getElementById('obj-progress');
+                        if (scoreEl) scoreEl.innerText = '[-] GPF DRONE NEUTRALIZED!';
+                    }
+                    break;
+                }
+            }
+            if (laserHit) {
+                scene.remove(lasers[j].mesh);
+                lasers.splice(j, 1);
+            }
+        }
+    }
+    
     const direction = new THREE.Vector3(0,0,0);
     if(keys.w) direction.z -= 1;
     if(keys.s) direction.z += 1;
@@ -1905,6 +2097,18 @@
          closestIdx = planetIndex;
       }
       planetIndex++;
+    }
+    
+    // Atmospheric Re-entry Logic
+    if (isFlying && window.reentryMesh) {
+       const distToSurface = minDist - closestPlanet.radius;
+       if (distToSurface < 100 && distToSurface > 0) {
+           const intensity = Math.max(0, 1.0 - (distToSurface / 100));
+           window.reentryMesh.material.opacity = intensity * (0.4 + Math.sin(Date.now() * 0.02) * 0.2);
+           window.reentryMesh.scale.set(1 + intensity, 1 + intensity, 1);
+       } else {
+           window.reentryMesh.material.opacity = 0;
+       }
     }
 
     if (isBuildMode && buildHologram) {
