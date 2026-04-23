@@ -79,8 +79,29 @@
         <!-- Game 0: No Man's Sky Demo -->
         <div class="glass-card" style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem;">
           <h3 style="font-size: 2rem; margin-bottom: 0.5rem; text-align: center;">🚀 Procedural Universe Explorers 🌌</h3>
-          <p style="margin-bottom: 1rem; color: var(--text-muted); text-align: center;">A web-based No Man's Sky experience!<br>Click to lock mouse. Arrow Keys to move. 'F' to toggle Spaceship Flight.</p>
-          
+          <div style="width: 100%; max-width: 800px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; color: #ddd; font-family: monospace; line-height: 1.6;">
+             <h4 style="color: var(--accent); margin-top: 0; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.1);">PILOT'S MANUAL</h4>
+             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                  <strong style="color: #fff;">Navigation & Combat</strong><br>
+                  <span style="color: #60a5fa;">WASD / Arrows</span>: Move & Pilot<br>
+                  <span style="color: #60a5fa;">Left Click</span>: Mine Crystals / Buy Ships / Shoot Lasers<br>
+                  <span style="color: #60a5fa;">Press F</span>: Mount/Dismount Starship<br>
+                  <span style="color: #60a5fa;">Press V</span>: Third/First Person Camera<br>
+                </div>
+                <div>
+                  <strong style="color: #fff;">Systems & Command</strong><br>
+                  <span style="color: #fbbf24;">Press T</span>: Open Trade Menu (Near Space Stations)<br>
+                  <span style="color: #fbbf24;">Press B</span>: Toggle Holographic Build Mode<br>
+                  <span style="color: #fbbf24;">Keys 1-4</span>: Select Constructible Base Parts<br>
+                  <span style="color: #fbbf24;">Press H</span>: Summon Capital Freighter (50k ¢)<br>
+                  <span style="color: #fbbf24;">Press G</span>: Board Dungeon or Freighter Hangar<br>
+                </div>
+             </div>
+             <div style="margin-top: 1rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem; color: #aaa;">
+               *Tip: Fly into Black Holes to warp across the universe! Left-click ambient AI Trade fleets to purchase their procedural hulls for 15k!
+             </div>
+          </div>
           <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
               <button onclick="startNMS()" style="font-size: 1.5rem; padding: 0.5rem 2rem; border-radius: 50px; cursor: pointer;">Launch Universe</button>
               <button onclick="toggleFullscreenNMS()" style="font-size: 1.5rem; padding: 0.5rem 2rem; border-radius: 50px; background: rgba(255,255,255,0.2); cursor: pointer;">⛶ Fullscreen</button>
