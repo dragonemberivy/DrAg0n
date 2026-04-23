@@ -402,6 +402,8 @@
 
   function createPlanet(x, y, z, radius, seed, colorSet, name, resource) {
     const lod = new THREE.LOD();
+    const simplex = new SimplexNoise(seed);
+    const biomeSimplex = new SimplexNoise(seed + "_biome2");
     
     // Generate Complementary Biome Colors
     const colorSet2 = colorSet.map(hex => {
@@ -428,8 +430,6 @@
         wireframe: false, roughness: 0.8, metalness: 0.1
       });
       
-      const simplex = new SimplexNoise(seed);
-      const biomeSimplex = new SimplexNoise(seed + "_biome2");
       const positionAttribute = geometry.attributes.position;
       const vertex = new THREE.Vector3();
       const colors = [];
