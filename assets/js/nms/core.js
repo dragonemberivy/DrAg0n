@@ -1213,7 +1213,7 @@
             updateBuildHologram();
             const progressObj = document.getElementById('obj-progress');
             if (progressObj) {
-                if (isBuildMode) progressObj.innerText = `[BUILD] Mode Active! Press 1-4 to switch.`;
+                if (isBuildMode) progressObj.innerText = `[BUILD] Mode Active! Press 'B' to cancel, 1-4 to switch.`;
                 else progressObj.innerText = ``;
             }
         }
