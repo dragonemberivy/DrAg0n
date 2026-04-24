@@ -1769,8 +1769,9 @@
                 
                 // Damage Player
                 if (distToPlayer < 50) {
-                   health -= 2; // GPF is dangerous!
-                   updateHUD();
+                   playerHealth -= 2; // GPF is dangerous!
+                   const hpBar = document.getElementById('nms-health-bar');
+                   if(hpBar) hpBar.style.width = Math.max(0, playerHealth) + '%';
                 }
             }
         }
