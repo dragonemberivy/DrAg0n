@@ -84,6 +84,15 @@
   // Phase 6: Day/Night
   let dayTime = 0; // 0-1 full day cycle
 
+  // Phase 7: Survival & Sentinels
+  let hazardProtection = 100;
+  let currentHazardType = "None"; // "Toxic", "Heat", "Cold", "None"
+  let naniteClusters = 0;
+  let sentinels = []; // { mesh, state: 'idle'|'scanning'|'attacking', lastFire: 0 }
+  let sentinelSpawnTimer = 0;
+  let groundWantedLevel = 0;
+
+
   window.saveGameState = function() {
       const state = {
           inventory: inventory,
@@ -627,9 +636,14 @@
     scene.add(lod);
 
     // Planet Aura / Atmosphere
+    let auraColor = colorSet[1];
+    if (hType === "Toxic") auraColor = 0x00ff00;
+    else if (hType === "Heat") auraColor = 0xff4400;
+    else if (hType === "Cold") auraColor = 0x60a5fa;
+
     const auraGeo = new THREE.SphereGeometry(radius * 1.15, 64, 64);
     const auraMat = new THREE.MeshBasicMaterial({
-      color: colorSet[1], 
+      color: auraColor, 
       transparent: true,
       opacity: 0.15,
       blending: THREE.AdditiveBlending,
@@ -738,7 +752,32 @@
     outGroup.position.set(x, y, z);
     scene.add(outGroup);
 
-    planets.push({ mesh: lod, radius, position: new THREE.Vector3(x, y, z), colorSet: colorSet, simplex: new SimplexNoise(seed), faunaGroup: faunaGroup, rideableGroup, name: name, resource: resource, floraMat: primaryLeavesMat });
+    // Determine Hazard Type
+    let hType = "None";
+    let hIntensity = 0;
+    if (seed === 'seed_gas' || name.toLowerCase().includes('toxic')) { hType = "Toxic"; hIntensity = 12; }
+    else if (seed === 'seed_magma' || name.toLowerCase().includes('lava')) { hType = "Heat"; hIntensity = 15; }
+    else if (seed === 'seed_ice' || name.toLowerCase().includes('ice')) { hType = "Cold"; hIntensity = 10; }
+    else if (Math.random() < 0.2) { 
+        const types = ["Toxic", "Heat", "Cold"];
+        hType = types[Math.floor(Math.random()*types.length)];
+        hIntensity = 8 + Math.random() * 8;
+    }
+
+    planets.push({ 
+        mesh: lod, 
+        radius, 
+        position: new THREE.Vector3(x, y, z), 
+        colorSet: colorSet, 
+        simplex: new SimplexNoise(seed), 
+        faunaGroup: faunaGroup, 
+        rideableGroup, 
+        name: name, 
+        resource: resource, 
+        floraMat: primaryLeavesMat,
+        hazardType: hType,
+        hazardIntensity: hIntensity
+    });
   }
 
   function spawnSolarSystem(offX = 0, offY = 0, offZ = 0) {
@@ -1011,6 +1050,41 @@
       }
   };
 
+  function spawnSentinel(pos) {
+      const droneGrp = new THREE.Group();
+      
+      // Body
+      const bodyGeo = new THREE.SphereGeometry(0.8, 12, 12);
+      const bodyMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.9, roughness: 0.2 });
+      const body = new THREE.Mesh(bodyGeo, bodyMat);
+      droneGrp.add(body);
+      
+      // Eye
+      const eyeGeo = new THREE.SphereGeometry(0.3, 8, 8);
+      const eyeMat = new THREE.MeshBasicMaterial({ color: 0x00f3ff });
+      const eye = new THREE.Mesh(eyeGeo, eyeMat);
+      eye.position.set(0, 0, 0.6);
+      droneGrp.add(eye);
+      
+      // Light
+      const eyeLight = new THREE.PointLight(0x00f3ff, 1, 10);
+      eyeLight.position.set(0, 0, 0.6);
+      droneGrp.add(eyeLight);
+      
+      droneGrp.position.copy(pos);
+      scene.add(droneGrp);
+      
+      sentinels.push({
+          mesh: droneGrp,
+          eye: eye,
+          light: eyeLight,
+          state: 'idle', // 'idle', 'scanning', 'attacking'
+          lastFire: 0,
+          health: 50,
+          targetPos: pos.clone()
+      });
+  }
+
   function createTradeFleet(offX = 0, offY = 0, offZ = 0) {
       for (let i = 0; i < 6; i++) {
           const fleetGrp = new THREE.Group();
@@ -1220,11 +1294,24 @@
                       else scoreEl.innerText = `[ ] Mined ${resName}: ${inventory[resName]} (Total: ${minedCrystals}/10)`;
                       
                       wantedLevel += 5; // Mining raises GPF suspicion
+                      
+                      // Phase 7: Alert Ground Sentinels
+                      groundWantedLevel = Math.min(5, groundWantedLevel + 1);
+                      sentinels.forEach(s => {
+                          if (s.mesh.position.distanceTo(yawObject.position) < 150 && s.state === 'idle') {
+                              s.state = 'scanning';
+                          }
+                      });
                    }
                }
                else if (pt.object.userData.isFauna) {
                    pt.object.parent.remove(pt.object);
                    wantedLevel += 15; // Culling biologicals is a high offense!
+                   
+                   // Phase 7: Aggravate Sentinels
+                   groundWantedLevel = 5; // Immediate high alert
+                   sentinels.forEach(s => s.state = 'attacking');
+                   
                    const scoreEl = document.getElementById('obj-progress');
                    if (scoreEl) scoreEl.innerText = '[-] Culled Biological Entity!';
                }
@@ -1495,6 +1582,22 @@
             document.exitPointerLock();
             document.getElementById('nms-trade-overlay').style.display = 'flex';
             isTrading = true;
+        }
+        break;
+      case 'KeyX':
+        // Quick Recharge Shortcut
+        if (!isFlying && !isInsideCave) {
+            if (inventory['Carbon'] >= 20) {
+                inventory['Carbon'] -= 20;
+                hazardProtection = Math.min(100, hazardProtection + 50);
+                const scoreEl = document.getElementById('obj-progress');
+                if (scoreEl) scoreEl.innerText = "[+] Hazard Protection Recharged! (Used 20 Carbon)";
+                document.body.style.backgroundColor = "rgba(251, 191, 36, 0.2)";
+                setTimeout(() => { document.body.style.backgroundColor = "transparent"; }, 200);
+            } else {
+                const scoreEl = document.getElementById('obj-progress');
+                if (scoreEl) scoreEl.innerText = "[!] NOT ENOUGH CARBON TO RECHARGE.";
+            }
         }
         break;
       case 'KeyV':
@@ -2237,6 +2340,41 @@
       }
       planetIndex++;
     }
+
+    // --- Phase 7: Hazard Drain Logic ---
+    const hBarCont = document.getElementById('nms-hazard-container');
+    const hBar = document.getElementById('nms-hazard-bar');
+    const hStatus = document.getElementById('nms-hazard-status');
+    
+    if (minDist < (closestPlanet.radius + 20) && !isFlying && closestPlanet.hazardType !== "None") {
+        currentHazardType = closestPlanet.hazardType;
+        if (hBarCont) hBarCont.style.display = 'block';
+        if (hStatus) {
+            hStatus.style.display = 'block';
+            hStatus.innerText = `Hazard detected: ${currentHazardType}`;
+        }
+        
+        // Drain protection
+        hazardProtection = Math.max(0, hazardProtection - closestPlanet.hazardIntensity * dt * 0.1);
+        if (hBar) hBar.style.width = hazardProtection + '%';
+        
+        // If protection is 0, drain health
+        if (hazardProtection <= 0) {
+            playerHealth = Math.max(0, playerHealth - 4 * dt);
+            const healthBar = document.getElementById('nms-health-bar');
+            if (healthBar) healthBar.style.width = playerHealth + '%';
+            if (Math.random() < 0.05) {
+                const scoreEl = document.getElementById('obj-progress');
+                if (scoreEl) scoreEl.innerText = "[!] EXOSUIT PROTECTION DEPLETED. Critical damage!";
+            }
+        }
+    } else {
+        if (hBarCont) hBarCont.style.display = 'none';
+        if (hStatus) hStatus.style.display = 'none';
+        // Slowly recharge hazard protection when in ship or on safe world
+        hazardProtection = Math.min(100, hazardProtection + 5 * dt);
+        if (hBar) hBar.style.width = hazardProtection + '%';
+    }
     
     // Atmospheric Re-entry Logic
     if (isFlying && window.reentryMesh) {
@@ -2644,6 +2782,83 @@
         if (distToExit < 25) {
             const objEl = document.getElementById('obj-progress');
             if (objEl) objEl.innerText = "[CAVE] Exit Portal. Press 'E' to return to space.";
+        }
+    }
+
+    // --- Phase 7: Sentinel AI & Ground Combat ---
+    sentinelSpawnTimer -= dt;
+    if (sentinelSpawnTimer <= 0 && !isFlying && !isInsideCave && closestPlanet && groundWantedLevel > 0) {
+        sentinelSpawnTimer = 15;
+        const sPos = yawObject.position.clone().add(new THREE.Vector3(
+            (Math.random()-0.5)*100,
+            20,
+            (Math.random()-0.5)*100
+        ));
+        spawnSentinel(sPos);
+    }
+
+    for (let i = sentinels.length - 1; i >= 0; i--) {
+        const s = sentinels[i];
+        const dist = s.mesh.position.distanceTo(yawObject.position);
+        
+        // 1. Movement AI (Smooth Follow/Patrol)
+        const target = yawObject.position.clone().add(new THREE.Vector3(0, 5, 0));
+        const dirToTarget = target.sub(s.mesh.position).normalize();
+        
+        if (s.state === 'idle') {
+            if (dist > 30) s.mesh.position.add(dirToTarget.multiplyScalar(15 * dt));
+            s.eye.material.color.set(0x00f3ff);
+            s.light.color.set(0x00f3ff);
+        } else if (s.state === 'scanning') {
+            s.mesh.position.add(dirToTarget.multiplyScalar(4 * dt));
+            s.eye.material.color.set(0xff7700);
+            s.light.color.set(0xff7700);
+            s.light.intensity = 2 + Math.sin(Date.now() * 0.01) * 2;
+            if (dist < 15) {
+                // Settle into attack mode
+                s.state = 'attacking';
+            }
+        } else if (s.state === 'attacking') {
+            s.eye.material.color.set(0xff0000);
+            s.light.color.set(0xff0000);
+            if (dist > 25) s.mesh.position.add(dirToTarget.multiplyScalar(25 * dt));
+            
+            s.lastFire -= dt;
+            if (s.lastFire <= 0 && dist < 60) {
+                s.lastFire = 2.0;
+                // Fire Ground Laser
+                const lGeo = new THREE.CylinderGeometry(0.2, 0.2, 10, 8);
+                lGeo.rotateX(Math.PI/2);
+                const lMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+                const lMesh = new THREE.Mesh(lGeo, lMat);
+                lMesh.position.copy(s.mesh.position);
+                lMesh.lookAt(yawObject.position);
+                scene.add(lMesh);
+                enemyLasers.push({ mesh: lMesh, dir: yawObject.position.clone().sub(s.mesh.position).normalize(), life: 100 });
+            }
+        }
+        
+        s.mesh.lookAt(yawObject.position);
+
+        // Check for hits from player lasers
+        for (let j = lasers.length - 1; j >= 0; j--) {
+            if (s.mesh.position.distanceTo(lasers[j].mesh.position) < 5) {
+                s.health -= 25;
+                s.state = 'attacking'; // Retaliate
+                scene.remove(lasers[j].mesh);
+                lasers.splice(j, 1);
+            }
+        }
+
+        if (s.health <= 0) {
+            naniteClusters += 15 + Math.floor(Math.random() * 20);
+            const naniteEl = document.getElementById('nms-nanites');
+            if (naniteEl) naniteEl.innerText = `Nanites: ${naniteClusters}`;
+            
+            const scoreEl = document.getElementById('obj-progress');
+            if (scoreEl) scoreEl.innerText = `[+] Sentinel Neutralized. Salvaged Nanite Clusters!`;
+            scene.remove(s.mesh);
+            sentinels.splice(i, 1);
         }
     }
 
