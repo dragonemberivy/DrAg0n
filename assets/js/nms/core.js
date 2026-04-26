@@ -31,6 +31,12 @@
   let isInsideDungeon = false;
   let dungeonDrones = [];
 
+  // Cave System (Phase 6)
+  let caveEntrances = []; // { mesh, position, planetPos }
+  let isInsideCave = false;
+  let activeCaveGroup = null;
+  let homeCavePos = JSON.parse(localStorage.getItem('nmsWeb_homeCave') || 'null');
+
   let isBuildMode = false;
   let buildPartIndex = 0;
   let buildHologram = null;
@@ -928,6 +934,83 @@
       return treeGrp;
   }
 
+  // --- Phase 6: Procedural Cave Interiors ---
+  function createCaveInterior() {
+      const group = new THREE.Group();
+      
+      const shellGeo = new THREE.SphereGeometry(200, 32, 24);
+      const shellMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, side: THREE.BackSide, roughness: 1.0 });
+      const shell = new THREE.Mesh(shellGeo, shellMat);
+      group.add(shell);
+      
+      const stalGeo = new THREE.ConeGeometry(4, 30, 6);
+      const stalMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
+      for(let i=0; i<30; i++) {
+          const stal = new THREE.Mesh(stalGeo, stalMat);
+          const rVec = new THREE.Vector3(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).normalize();
+          stal.position.copy(rVec).multiplyScalar(180);
+          stal.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), rVec.negate());
+          group.add(stal);
+      }
+      
+      const exitGeo = new THREE.TorusGeometry(10, 1.5, 8, 24);
+      const exitMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.6 });
+      const exit = new THREE.Mesh(exitGeo, exitMat);
+      exit.position.set(0, -180, 0);
+      exit.rotation.x = Math.PI/2;
+      exit.userData.isCaveExit = true;
+      group.add(exit);
+      
+      const light = new THREE.PointLight(0x60a5fa, 2, 400);
+      light.position.set(0,0,0);
+      group.add(light);
+      
+      return group;
+  }
+
+  function enterCave(entrance) {
+      if (isInsideCave) return;
+      isInsideCave = true;
+      
+      const pocketPos = new THREE.Vector3(100000, 100000, 100000);
+      yawObject.position.copy(pocketPos);
+      
+      activeCaveGroup = createCaveInterior();
+      activeCaveGroup.position.copy(pocketPos);
+      scene.add(activeCaveGroup);
+      
+      // Stop flying if was flying (though usually entered on foot)
+      if (isFlying) toggleFlightMode();
+      
+      const objEl = document.getElementById('obj-progress');
+      if (objEl) objEl.innerText = "[CAVE] Underworld. Press 'H' to claim as HOME.";
+  }
+
+  function exitCave() {
+      if (!isInsideCave) return;
+      isInsideCave = false;
+      
+      scene.remove(activeCaveGroup);
+      activeCaveGroup = null;
+      
+      // Return to safety in orbit or near the planet surface
+      yawObject.position.set(0, 0, 1500);
+      if (!isFlying) toggleFlightMode();
+      
+      const objEl = document.getElementById('obj-progress');
+      if (objEl) objEl.innerText = "[CAVE] Surface reached.";
+  }
+
+  window.returnToHomeCave = function() {
+      if (homeCavePos) {
+          if (!isInsideCave) {
+              enterCave(); // This actually spawns the cave interior at pocketPos
+              const objEl = document.getElementById('obj-progress');
+              if (objEl) objEl.innerText = "[HOME] Welcome back, Traveler.";
+          }
+      }
+  };
+
   function createTradeFleet(offX = 0, offY = 0, offZ = 0) {
       for (let i = 0; i < 6; i++) {
           const fleetGrp = new THREE.Group();
@@ -1421,9 +1504,34 @@
         toggleFlightMode();
         break;
       case 'KeyE':
+        // Cave Interaction
+        if (isInsideCave) {
+            const distToExit = yawObject.position.distanceTo(activeCaveGroup.position.clone().add(new THREE.Vector3(0, -180, 0)));
+            if (distToExit < 20) {
+                exitCave();
+                return;
+            }
+        } else {
+            // Check for nearby cave entrance
+            for (const entrance of caveEntrances) {
+                if (yawObject.position.distanceTo(entrance.worldPos) < 15) {
+                    enterCave(entrance);
+                    return;
+                }
+            }
+        }
         toggleRidingMode();
         break;
       case 'KeyH':
+        if (isInsideCave) {
+            homeCavePos = yawObject.position.clone();
+            localStorage.setItem('nmsWeb_homeCave', JSON.stringify(homeCavePos));
+            const objEl = document.getElementById('obj-progress');
+            if (objEl) objEl.innerText = "[HOME] CAVE SET AS HOME BASE. Fast travel active.";
+            const homeBtn = document.getElementById('nms-home-return');
+            if (homeBtn) homeBtn.style.display = 'block';
+            return;
+        }
         if (!isInsideDungeon) {
             const now = Date.now();
             if (now - lastFreighterSummonTime >= 30 * 1000) { // 30 sec cooldown for testing
@@ -2517,6 +2625,28 @@
       if (p.mesh && p.mesh.isLOD) p.mesh.update(camera);
     }
     
+    // --- Phase 6: Cave Interaction Prompt & Home Button ---
+    const homeBtn = document.getElementById('nms-home-return');
+    if (homeBtn) homeBtn.style.display = (homeCavePos && !isInsideCave) ? 'block' : 'none';
+    
+    if (!isInsideCave) {
+        let nearEntrance = false;
+        for (const entrance of caveEntrances) {
+            if (yawObject.position.distanceTo(entrance.worldPos) < 20) {
+                const objEl = document.getElementById('obj-progress');
+                if (objEl) objEl.innerText = "[CAVE] Entrance Detected. Press 'E' to enter the underworld.";
+                nearEntrance = true;
+                break;
+            }
+        }
+    } else {
+        const distToExit = yawObject.position.distanceTo(activeCaveGroup.position.clone().add(new THREE.Vector3(0, -180, 0)));
+        if (distToExit < 25) {
+            const objEl = document.getElementById('obj-progress');
+            if (objEl) objEl.innerText = "[CAVE] Exit Portal. Press 'E' to return to space.";
+        }
+    }
+
     if(renderer && scene && camera) renderer.render(scene, camera);
   }
 
