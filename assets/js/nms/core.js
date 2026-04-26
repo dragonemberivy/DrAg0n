@@ -579,65 +579,8 @@
              }
          }
          
-         if (seed === 'seed_ocean') {
-            trunkGeo = new THREE.CylinderGeometry(0.2, 0.2, 3, 5); // Kelp
-            leavesGeo = new THREE.DodecahedronGeometry(1.5, 0); // Coral
-            trunkMat = new THREE.MeshStandardMaterial({color: 0x228b22, roughness: 0.9, flatShading: true}); // Green kelp
-            leavesMat = new THREE.MeshStandardMaterial({color: 0xff7f50, roughness: 0.8, flatShading: true, emissive: 0xff7f50, emissiveIntensity: 0}); // Coral color
-         } else {
-            trunkGeo = new THREE.CylinderGeometry(0.3, 0.5, 3, 5);
-            leavesGeo = new THREE.ConeGeometry(1.5, 5, 5);
-            leavesGeo.translate(0, 3, 0);
-            trunkMat = new THREE.MeshStandardMaterial({color: 0x3d2817, roughness: 0.9, flatShading: true});
-            leavesMat = new THREE.MeshStandardMaterial({color: colorSet[2], roughness: 0.8, flatShading: true, emissive: colorSet[2], emissiveIntensity: 0});
-         }
-         if (level.dist === 0) primaryLeavesMat = leavesMat;
 
-         const imTrunk = new THREE.InstancedMesh(trunkGeo, trunkMat, treeCount);
-         const imLeaves = new THREE.InstancedMesh(leavesGeo, leavesMat, treeCount);
-         
-         const dummy = new THREE.Object3D();
-         let validTrees = 0;
-         
-         for(let r=0; r < treeCount * 5; r++) {
-            if (validTrees >= treeCount) break;
-            const u = Math.random();
-            const v = Math.random();
-            const theta = u * 2.0 * Math.PI;
-            const phi = Math.acos(2.0 * v - 1.0);
-            const rPos = new THREE.Vector3(
-               Math.sin(phi) * Math.cos(theta),
-               Math.sin(phi) * Math.sin(theta),
-               Math.cos(phi)
-            );
-            
-            let noiseVal = 0;
-            let freq = 0.05 * (100 / radius);
-            let amp = 8 * (radius / 100);
-            for(let o = 0; o < 3; o++) {
-                let n = simplex.noise3D(rPos.x * freq, rPos.y * freq, rPos.z * freq);
-                noiseVal += (1.0 - Math.abs(n)) * amp;
-                freq *= 2.0; amp *= 0.5;
-            }
-            noiseVal -= 5 * (radius / 100);
-            
-            // Only spawn trees/flora on solid land (above water!)
-            if (noiseVal > 0.5) {
-                dummy.position.copy(rPos).multiplyScalar(radius + noiseVal);
-                dummy.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), rPos);
-                const scale = 0.5 + Math.random() * 0.8;
-                dummy.scale.set(scale, scale, scale);
-                dummy.rotateY(Math.random() * Math.PI * 2);
-                dummy.updateMatrix();
-                imTrunk.setMatrixAt(validTrees, dummy.matrix);
-                imLeaves.setMatrixAt(validTrees, dummy.matrix);
-                validTrees++;
-            }
-         }
-         imTrunk.count = validTrees;
-         imLeaves.count = validTrees;
-         mesh.add(imTrunk);
-         mesh.add(imLeaves);
+
          
          // Add glowing lava core just beneath surface if Magma planet
          if (seed === 'seed_magma') {
