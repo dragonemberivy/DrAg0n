@@ -66,6 +66,18 @@
   let gpfDrones = [];
   let gpfSpawnTimer = 0;
 
+  // Phase 6: Jetpack
+  let jetpackFuel = 100;
+  let isJetpacking = false;
+  let jetpackVelocityY = 0;
+
+  // Phase 6: Pulse Drive
+  let pulseFuel = 100;
+  let pulseDriveActive = false;
+
+  // Phase 6: Day/Night
+  let dayTime = 0; // 0-1 full day cycle
+
   window.saveGameState = function() {
       const state = {
           inventory: inventory,
@@ -210,7 +222,19 @@
     ringMesh.position.set(0, 1.8, 0.85);
     window.astronautGroup.add(ringMesh);
 
+    // Jetpack exhaust nozzles (hidden until jetpack fires)
+    const exhaustGeo = new THREE.ConeGeometry(0.12, 0.6, 6);
+    exhaustGeo.rotateX(Math.PI);
+    const exhaustMat = new THREE.MeshBasicMaterial({ color: 0xff7700, transparent: true, opacity: 0, blending: THREE.AdditiveBlending });
+    window.jetpackExhaustL = new THREE.Mesh(exhaustGeo, exhaustMat.clone());
+    window.jetpackExhaustR = new THREE.Mesh(exhaustGeo, exhaustMat.clone());
+    window.jetpackExhaustL.position.set(-0.4, 0.6, 0.85);
+    window.jetpackExhaustR.position.set(0.4, 0.6, 0.85);
+    window.astronautGroup.add(window.jetpackExhaustL);
+    window.astronautGroup.add(window.jetpackExhaustR);
+
     yawObject.add(window.astronautGroup);
+
 
     // Alien Mount Group (Hidden until 'E' is pressed)
     window.alienMountGroup = new THREE.Group();
@@ -1275,6 +1299,7 @@
     if (code === 'ArrowDown' || code === 'KeyS' || key === 's') keys.s = true;
     if (code === 'ArrowRight' || code === 'KeyD' || key === 'd') keys.d = true;
     if (code === 'Space' || key === ' ') keys.space = true;
+    if (e.shiftKey || code === 'ShiftLeft' || code === 'ShiftRight') keys.shift = true;
     
     switch(code) {
       case 'KeyB':
@@ -1498,6 +1523,7 @@
     if (code === 'ArrowDown' || code === 'KeyS' || key === 's') keys.s = false;
     if (code === 'ArrowRight' || code === 'KeyD' || key === 'd') keys.d = false;
     if (code === 'Space' || key === ' ') keys.space = false;
+    if (code === 'ShiftLeft' || code === 'ShiftRight') keys.shift = false;
   }
 
   function toggleFlightMode() {
@@ -2030,8 +2056,64 @@
     direction.normalize();
     direction.normalize();
 
+    // --- Phase 6: Jetpack ---
+    if (!isFlying && !isRiding) {
+        if (keys.space && jetpackFuel > 0) {
+            isJetpacking = true;
+            jetpackVelocityY += 80 * dt;
+            jetpackFuel = Math.max(0, jetpackFuel - 35 * dt);
+        } else {
+            isJetpacking = false;
+            jetpackVelocityY = Math.max(0, jetpackVelocityY - 60 * dt); // gravity drain
+        }
+        if (!keys.space) {
+            jetpackFuel = Math.min(100, jetpackFuel + 20 * dt); // recharge on ground
+        }
+        yawObject.position.y += jetpackVelocityY * dt;
+
+        // Exhaust VFX
+        const exOpacity = isJetpacking ? (0.6 + Math.sin(Date.now() * 0.05) * 0.3) : 0;
+        if (window.jetpackExhaustL) window.jetpackExhaustL.material.opacity = exOpacity;
+        if (window.jetpackExhaustR) window.jetpackExhaustR.material.opacity = exOpacity;
+
+        // Update HUD fuel bar
+        const jBar = document.getElementById('nms-jetpack-bar');
+        if (jBar) jBar.style.width = jetpackFuel + '%';
+    }
+
+    // --- Phase 6: Pulse Drive ---
+    if (isFlying) {
+        pulseDriveActive = keys.shift && pulseFuel > 0;
+        if (pulseDriveActive) {
+            pulseFuel = Math.max(0, pulseFuel - 25 * dt);
+        } else {
+            pulseFuel = Math.min(100, pulseFuel + 10 * dt);
+        }
+        // Cyan tint on re-entry mesh during pulse
+        if (window.reentryMesh) {
+            if (pulseDriveActive) window.reentryMesh.material.color.set(0x00ffff);
+            else window.reentryMesh.material.color.set(0xff4400);
+        }
+        const pBar = document.getElementById('nms-pulse-bar');
+        if (pBar) pBar.style.width = pulseFuel + '%';
+    }
+
+    // --- Phase 6: Day/Night Cycle ---
+    dayTime = (dayTime + dt * 0.008) % 1.0;
+    if (sunLight) {
+        const angle = dayTime * Math.PI * 2;
+        sunLight.position.set(Math.cos(angle) * 5000, Math.sin(angle) * 5000, 2000);
+        sunLight.intensity = Math.max(0.1, Math.sin(angle));
+    }
+    if (scene.background instanceof THREE.Color) {
+        const nightBlend = 1.0 - Math.max(0, Math.sin(dayTime * Math.PI * 2));
+        scene.background.setRGB(nightBlend * 0.03, nightBlend * 0.03, nightBlend * 0.07 + 0.01);
+    }
+
     // Flight mode travels 10x faster, Riding travels 6x faster
-    const speed = isFlying ? (400 * engineMultiplier) : (isRiding ? 120 : 20);
+    const pulseMultiplier = (isFlying && pulseDriveActive) ? 4 : 1;
+    const speed = isFlying ? (400 * engineMultiplier * pulseMultiplier) : (isRiding ? 120 : 20);
+
 
     // Calculate closest planet
     let closestPlanet = planets[0];
