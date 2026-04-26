@@ -1682,7 +1682,12 @@
         }
     }
     
+    // Show/hide bribe button based on active drones
+    const bribeBtn = document.getElementById('nms-gpf-bribe');
+    if (bribeBtn) bribeBtn.style.display = gpfDrones.length > 0 ? 'block' : 'none';
+
     for (let i = gpfDrones.length - 1; i >= 0; i--) {
+
         const d = gpfDrones[i];
         
         // Follow Player
@@ -2432,6 +2437,26 @@
     
     if(renderer && scene && camera) renderer.render(scene, camera);
   }
+
+  window.bribeGPF = function() {
+      if (credits >= 200) {
+          credits -= 200;
+          // Despawn all GPF drones
+          for (const d of gpfDrones) {
+              scene.remove(d.mesh);
+          }
+          gpfDrones.length = 0;
+          wantedLevel = 0;
+          gpfSpawnTimer = 0;
+          const scoreEl = document.getElementById('obj-progress');
+          if (scoreEl) scoreEl.innerText = '[✓] GPF BRIBED — CHARGES DROPPED. STAY CLEAN.';
+          const bribeBtn = document.getElementById('nms-gpf-bribe');
+          if (bribeBtn) bribeBtn.style.display = 'none';
+      } else {
+          const scoreEl = document.getElementById('obj-progress');
+          if (scoreEl) scoreEl.innerText = '[!] NOT ENOUGH CREDITS — GPF requires 200¢!';
+      }
+  };
 
   window.startNMS = function() {
     if (!isLocked && container) {
