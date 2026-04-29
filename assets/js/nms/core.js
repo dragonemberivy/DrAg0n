@@ -105,6 +105,13 @@
   let sentinelSpawnTimer = 0;
   let groundWantedLevel = 0;
   let closestPlanet = null;
+  
+  // Phase 11: Dynamic Storms
+  let activeStorm = false;
+  let stormTimer = 0;
+  let nextStormIn = 45; // Starts soon for testing
+
+  window.saveGameState = function() {
       const state = {
           inventory: inventory,
           credits: credits,
@@ -2586,9 +2593,9 @@
             hStatus.innerText = `Hazard detected: ${currentHazardType}`;
         }
         
-        // Drain protection (Phase 8: Hazard Immunity check)
+        // Drain protection (Phase 8: Hazard Immunity check, Phase 11: Storm modifier)
         if (hazardImmunityTimer <= 0) {
-            hazardProtection = Math.max(0, hazardProtection - closestPlanet.hazardIntensity * dt * 0.1);
+            hazardProtection = Math.max(0, hazardProtection - closestPlanet.hazardIntensity * dt * 0.1 * (activeStorm ? 5.0 : 1.0));
         }
         if (hBar) hBar.style.width = hazardProtection + '%';
         
@@ -2795,11 +2802,34 @@
     if (distToSurface < 180) {
        let intensity = Math.max(0, 1.0 - (distToSurface / 180));
        
+       // Phase 11: Dynamic Storm Processing
+       if (closestPlanet.hazardType !== "None" && !isInsideCave) {
+           if (!activeStorm) {
+               nextStormIn -= dt;
+               if (nextStormIn <= 0) {
+                   activeStorm = true;
+                   stormTimer = Math.random() * 30 + 20; // 20-50 second storm
+                   const objEl = document.getElementById('obj-progress');
+                   if (objEl) objEl.innerText = `[WARNING] EXTREME ${closestPlanet.hazardType.toUpperCase()} STORM DETECTED!`;
+               }
+           } else {
+               stormTimer -= dt;
+               if (stormTimer <= 0) {
+                   activeStorm = false;
+                   nextStormIn = Math.random() * 60 + 60; // Next storm in 60-120 seconds
+                   const objEl = document.getElementById('obj-progress');
+                   if (objEl) objEl.innerText = `[WEATHER] Extreme storm clearing...`;
+               }
+           }
+       } else {
+           activeStorm = false;
+       }
+       
        if (weatherSystem) {
-          weatherSystem.material.opacity = Math.min(0.6, intensity);
+          weatherSystem.material.opacity = Math.min(0.6, intensity) * (activeStorm ? 1.5 : 1.0);
           weatherSystem.material.color.setHex(closestPlanet.colorSet[4] || 0xffffff); // Use planet's lightest color 
-          weatherSystem.rotation.y += 0.1 * dt;
-          weatherSystem.rotation.x -= 0.05 * dt;
+          weatherSystem.rotation.y += (activeStorm ? 1.0 : 0.1) * dt;
+          weatherSystem.rotation.x -= (activeStorm ? 0.5 : 0.05) * dt;
        }
        
        // Dynamic volumetric fog to hide planet curvature
@@ -2809,7 +2839,7 @@
           
           scene.fog.color = spaceColor.lerp(targetColor, Math.pow(intensity, 2));
           scene.background = scene.fog.color; // Sky MUST match fog color to complete flat illusion
-          scene.fog.density = intensity * (0.06 * Math.sqrt(100 / closestPlanet.radius)); 
+          scene.fog.density = intensity * (0.06 * Math.sqrt(100 / closestPlanet.radius)) * (activeStorm ? 3.0 : 1.0); 
        }
     } else {
        if (weatherSystem) weatherSystem.material.opacity = 0;
