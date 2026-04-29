@@ -104,9 +104,7 @@
   let sentinels = []; // { mesh, state: 'idle'|'scanning'|'attacking', lastFire: 0 }
   let sentinelSpawnTimer = 0;
   let groundWantedLevel = 0;
-
-
-  window.saveGameState = function() {
+  let closestPlanet = null;
       const state = {
           inventory: inventory,
           credits: credits,
@@ -1791,7 +1789,7 @@
         break;
       case 'KeyK':
         if (!activeBoss && !isInsideDungeon) {
-            let closestPlanet = planets[0];
+            closestPlanet = planets[0];
             let minDist = Infinity;
             for (let p of planets) {
               const dist = yawObject.position.distanceTo(p.position);
@@ -1891,7 +1889,7 @@
     }
     
     // Find closest planet
-    let closestPlanet = planets[0];
+    closestPlanet = planets[0];
     let minDist = Infinity;
     for (let p of planets) {
        const dist = yawObject.position.distanceTo(p.position);
@@ -2479,7 +2477,7 @@
 
 
     // Calculate closest planet
-    let closestPlanet = planets[0];
+    closestPlanet = planets[0];
     let minDist = Infinity;
     let planetIndex = 0;
     let closestIdx = 0;
