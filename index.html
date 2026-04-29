@@ -81,25 +81,36 @@
           <h3 style="font-size: 2rem; margin-bottom: 0.5rem; text-align: center;">🚀 Procedural Universe Explorers 🌌</h3>
           <div style="width: 100%; max-width: 800px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; color: #ddd; font-family: monospace; line-height: 1.6;">
              <h4 style="color: var(--accent); margin-top: 0; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.1);">PILOT'S MANUAL</h4>
-             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
                 <div>
                   <strong style="color: #fff;">Navigation & Combat</strong><br>
                   <span style="color: #60a5fa;">WASD / Arrows</span>: Move & Pilot<br>
-                  <span style="color: #60a5fa;">Left Click</span>: Mine Crystals / Buy Ships / Shoot Lasers<br>
+                  <span style="color: #60a5fa;">Space</span>: Jetpack / Sub Ascend<br>
+                  <span style="color: #60a5fa;">Shift</span>: Sprint / Sub Dive<br>
+                  <span style="color: #60a5fa;">Left Click</span>: Mine / Shoot Laser<br>
                   <span style="color: #60a5fa;">Press F</span>: Mount/Dismount Starship<br>
                   <span style="color: #60a5fa;">Press V</span>: Third/First Person Camera<br>
                 </div>
                 <div>
+                  <strong style="color: #fff;">Interaction & Exploration</strong><br>
+                  <span style="color: #34d399;">Press E</span>: Board Beast / Sub / Enter Cave<br>
+                  <span style="color: #34d399;">Press Q</span>: Summon Nautilon Sub 🌊<br>
+                  <span style="color: #34d399;">Press G</span>: Board Dungeon / Freighter<br>
+                  <span style="color: #34d399;">Press X</span>: Recharge Hazard Shield (20 Carbon)<br>
+                  <span style="color: #34d399;">Keys 1-3</span>: Consume Meals (on foot)<br>
+                </div>
+                <div>
                   <strong style="color: #fff;">Systems & Command</strong><br>
-                  <span style="color: #fbbf24;">Press T</span>: Open Trade Menu (Near Space Stations)<br>
-                  <span style="color: #fbbf24;">Press B</span>: Toggle Holographic Build Mode<br>
-                  <span style="color: #fbbf24;">Keys 1-4</span>: Select Constructible Base Parts<br>
-                  <span style="color: #fbbf24;">Press H</span>: Summon Capital Freighter (50k ¢)<br>
-                  <span style="color: #fbbf24;">Press G</span>: Board Dungeon or Freighter Hangar<br>
+                  <span style="color: #fbbf24;">Press T</span>: Trade Menu (Near Stations)<br>
+                  <span style="color: #fbbf24;">Press B</span>: Toggle Build Mode<br>
+                  <span style="color: #fbbf24;">Keys 1-6</span>: Select Base Parts (Build)<br>
+                  <span style="color: #fbbf24;">Press H</span>: Summon Freighter (50k ¢) / Set Cave Home<br>
+                  <span style="color: #f87171;">Press K</span>: Spawn Seismic Worm Boss 🪱<br>
+                  <span style="color: #f87171;">Press P</span>: Spawn Pirate Raider 🏴‍☠️<br>
                 </div>
              </div>
              <div style="margin-top: 1rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem; color: #aaa;">
-               *Tip: Fly into Black Holes to warp across the universe! Left-click ambient AI Trade fleets to purchase their procedural hulls for 15k!
+               *Tips: Fly into Black Holes to warp the universe! Left-click AI Trade Fleets to buy ships (15k ¢). Summon the Nautilon near water and dive into deep lake basins!
              </div>
           </div>
           <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
@@ -195,6 +206,26 @@
                
                <button onclick="window.undockStation()" style="margin-top: 2rem; padding: 10px 30px; font-size: 1.2rem; background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: white; border-radius: 8px; cursor: pointer;">Undock & Leave</button>
                <div id="trade-feedback" style="margin-top: 1rem; color: #a855f7; font-weight: bold; height: 20px;"></div>
+            </div>
+
+
+            <!-- Culinary / Cooking Overlay -->
+            <div id="nms-cooking-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 200; color: white; font-family: monospace;">
+                <div style="background: rgba(30, 41, 59, 0.9); padding: 30px; border: 2px solid #3b82f6; border-radius: 10px; text-align: center; max-width: 400px; backdrop-filter: blur(10px);">
+                    <h2 style="color: #60a5fa; margin-top: 0;">NUTRIENT PROCESSOR</h2>
+                    <p>Combine biological ingredients to create survival consumables.</p>
+                    <div id="cooking-inventory" style="margin: 20px 0; font-size: 14px; text-align: left; height: 120px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); padding: 10px;">
+                        <!-- Inventory list populated via JS -->
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button onclick="window.cookMeal('Nutrient Paste')" class="nms-btn" style="flex: 1; padding: 10px; background: #e11d48; border: none; cursor: pointer; color: white;">Cook Paste (Meat+C)</button>
+                        <button onclick="window.cookMeal('Sweet Jam')" class="nms-btn" style="flex: 1; padding: 10px; background: #ea580c; border: none; cursor: pointer; color: white;">Cook Jam (Berry+C)</button>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <button onclick="window.cookMeal('Hazard Gulp')" class="nms-btn" style="flex: 1; padding: 10px; background: #ca8a04; border: none; cursor: pointer; color: white;">Cook Gulp (Berry+Salt)</button>
+                        <button onclick="document.getElementById('nms-cooking-overlay').style.display='none'; document.body.requestPointerLock();" style="flex: 1; background: #4b5563; padding: 10px; border: none; cursor: pointer; color: white;">Exit</button>
+                    </div>
+                </div>
             </div>
 
             <!-- OBJECTIVES PANEL -->

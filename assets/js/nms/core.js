@@ -88,6 +88,19 @@
   let hazardProtection = 100;
   let currentHazardType = "None"; // "Toxic", "Heat", "Cold", "None"
   let naniteClusters = 0;
+  
+  // Phase 8 Buff States
+  let speedMultiplier = 1.0;
+  let speedBuffTimer = 0;
+  let hazardImmunityTimer = 0;
+  let resourceHighlightTimer = 0;
+  let regenTimer = 0;
+  let ironSkinTimer = 0;
+  
+  // Phase 9: Aquatic States
+  let isSubmerged = false;
+  let subDivingVelocity = 0;
+  let underwaterFogColor = new THREE.Color(0x001133);
   let sentinels = []; // { mesh, state: 'idle'|'scanning'|'attacking', lastFire: 0 }
   let sentinelSpawnTimer = 0;
   let groundWantedLevel = 0;
@@ -355,7 +368,8 @@
         { name: "Metal Floor", geo: new THREE.BoxGeometry(10, 1, 10), mat: new THREE.MeshStandardMaterial({color: 0x222222, roughness: 0.9}) },
         { name: "Glass Dome", geo: new THREE.SphereGeometry(15, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2), mat: new THREE.MeshStandardMaterial({color: 0x88ccaa, transparent: true, opacity: 0.4}) },
         { name: "Sodium Light", geo: new THREE.CylinderGeometry(0.5, 0.5, 8), mat: new THREE.MeshStandardMaterial({color: 0xffffee, emissive: 0xffffaa, emissiveIntensity: 1.0}) },
-        { name: "Mineral Extractor", geo: new THREE.CylinderGeometry(2, 3, 5, 8), mat: new THREE.MeshStandardMaterial({color: 0x884400, metalness: 0.8, roughness: 0.2}) }
+        { name: "Mineral Extractor", geo: new THREE.CylinderGeometry(2, 3, 5, 8), mat: new THREE.MeshStandardMaterial({color: 0x884400, metalness: 0.8, roughness: 0.2}) },
+        { name: "Nutrient Processor", geo: new THREE.CylinderGeometry(1.5, 2, 4, 16), mat: new THREE.MeshStandardMaterial({color: 0x475569, metalness: 0.8}) }
     ];
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
@@ -434,7 +448,9 @@
     document.addEventListener('keyup', onKeyUp);
     
     overlay.addEventListener('click', () => {
-      if (!isLocked) container.requestPointerLock();
+      if (!isLocked) {
+          container.requestPointerLock();
+      }
     });
 
     document.addEventListener('mousedown', onMouseDown);
@@ -446,7 +462,10 @@
         hud.style.display = 'block';
         if (objectivesPanel) objectivesPanel.style.display = 'block';
       } else {
-        overlay.style.display = 'flex';
+        // Only show overlay if we aren't in a menu
+        if (!isTrading && !document.getElementById('nms-cooking-overlay').style.display.includes('flex')) {
+           overlay.style.display = 'flex';
+        }
         crosshair.style.display = 'none';
         hud.style.display = 'none';
         if (objectivesPanel) objectivesPanel.style.display = 'none';
@@ -460,6 +479,18 @@
     const lod = new THREE.LOD();
     const simplex = new SimplexNoise(seed);
     const biomeSimplex = new SimplexNoise(seed + "_biome2");
+
+    // Determine Hazard Type (Moved up for use in atmosphere/fog)
+    let hType = "None";
+    let hIntensity = 0;
+    if (seed === 'seed_gas' || name.toLowerCase().includes('toxic')) { hType = "Toxic"; hIntensity = 12; }
+    else if (seed === 'seed_magma' || name.toLowerCase().includes('lava')) { hType = "Heat"; hIntensity = 15; }
+    else if (seed === 'seed_ice' || name.toLowerCase().includes('ice')) { hType = "Cold"; hIntensity = 10; }
+    else if (Math.random() < 0.2) { 
+        const types = ["Toxic", "Heat", "Cold"];
+        hType = types[Math.floor(Math.random()*types.length)];
+        hIntensity = 8 + Math.random() * 8;
+    }
     
     // Generate Complementary Biome Colors
     const colorSet2 = colorSet.map(hex => {
@@ -509,6 +540,13 @@
 
          noiseVal -= 5 * (radius / 100); // Sink down for oceans
 
+         if (noiseVal < 0 && seed !== 'seed_blackhole') {
+             // Create deep basins matching getTerrainHeight logic
+             if (!name?.includes('Deep Ocean')) {
+                 noiseVal *= 15; 
+             }
+         }
+
          if (seed === 'seed_blackhole') {
             noiseVal = 0;
             colorObj.setHex(0x000000); // Pure absorbing black
@@ -518,18 +556,17 @@
              blendWeight = Math.min(Math.max((blendWeight - 0.4) * 5, 0), 1); // Sharpen transitions
     
              const getSetColor = (set, nVal, rad) => {
-                 if (nVal <= 0) return set[0];
+                 if (nVal < -10) return 0x000033; // Ultra Deep
+                 if (nVal < -2) return 0x001144; // Deep
+                 if (nVal <= 0) return set[0];   // Water level
                  if (nVal < 1.5 * (rad/100)) return set[1];
                  if (nVal < 4 * (rad/100)) return set[2];
                  if (nVal < 7 * (rad/100)) return set[3];
                  return set[4];
              };
-    
              const c1 = new THREE.Color(getSetColor(colorSet, noiseVal, radius));
              const c2 = new THREE.Color(getSetColor(colorSet2, noiseVal, radius));
              colorObj.copy(c1).lerp(c2, blendWeight);
-             
-             if (noiseVal <= 0) noiseVal = 0; // Flat water
          }
          
          vertex.multiplyScalar(radius + noiseVal);
@@ -587,9 +624,16 @@
                 freq *= 2.0; amp *= 0.5;
              }
              noiseV -= 5 * (radius/100);
-             if (noiseV <= 0) { fl--; continue; } // Don't spawn trees in water
-             tHeight += noiseV;
              
+             if (noiseV <= 0) { 
+                 const flora = createAquaticFlora();
+                 flora.position.copy(randVec).multiplyScalar(radius + noiseV * 15); // Use deeper radius
+                 flora.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), randVec);
+                 mesh.add(flora);
+                 continue; 
+             }
+             
+             tHeight += noiseV;
              tree.position.copy(randVec).multiplyScalar(tHeight);
              tree.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), randVec);
              mesh.add(tree);
@@ -600,7 +644,7 @@
              const critGeo = new THREE.ConeGeometry(0.8, 3, 4);
              critGeo.rotateX(Math.PI / 2);
              const critMat = new THREE.MeshStandardMaterial({ color: colorSet[4], metalness: 0.1, roughness: 0.8 });
-             const fakePlanetObj = { radius: radius, simplex: simplex };
+             const fakePlanetObj = { radius: radius, simplex: simplex, name: name };
              
              for(let f = 0; f < 30; f++) {
                  const cMesh = new THREE.Mesh(critGeo, critMat);
@@ -663,6 +707,21 @@
         ringMesh.rotation.x = Math.PI / 2 + Math.random() * 0.4;
         ringMesh.rotation.y = Math.random() * 0.4;
         scene.add(ringMesh);
+    }
+
+    // Add Water Surface Mesh (Phase 9)
+    if (seed !== 'seed_moon' && seed !== 'seed_blackhole' && seed !== 'seed_magma') {
+        const waterGeo = new THREE.SphereGeometry(radius, 64, 64);
+        const waterMat = new THREE.MeshStandardMaterial({
+            color: 0x0044ff,
+            transparent: true,
+            opacity: 0.6,
+            roughness: 0.1,
+            metalness: 0.3
+        });
+        const waterMesh = new THREE.Mesh(waterGeo, waterMat);
+        waterMesh.position.set(x, y, z);
+        scene.add(waterMesh);
     }
 
     // Fauna (Circling abstract birds/creatures or fish/sharks for ocean)
@@ -752,17 +811,6 @@
     outGroup.position.set(x, y, z);
     scene.add(outGroup);
 
-    // Determine Hazard Type
-    let hType = "None";
-    let hIntensity = 0;
-    if (seed === 'seed_gas' || name.toLowerCase().includes('toxic')) { hType = "Toxic"; hIntensity = 12; }
-    else if (seed === 'seed_magma' || name.toLowerCase().includes('lava')) { hType = "Heat"; hIntensity = 15; }
-    else if (seed === 'seed_ice' || name.toLowerCase().includes('ice')) { hType = "Cold"; hIntensity = 10; }
-    else if (Math.random() < 0.2) { 
-        const types = ["Toxic", "Heat", "Cold"];
-        hType = types[Math.floor(Math.random()*types.length)];
-        hIntensity = 8 + Math.random() * 8;
-    }
 
     planets.push({ 
         mesh: lod, 
@@ -973,6 +1021,37 @@
       return treeGrp;
   }
 
+  function createAquaticFlora() {
+      const group = new THREE.Group();
+      const type = Math.random() > 0.5 ? 'kelp' : 'coral';
+      
+      if (type === 'kelp') {
+          const stemGeo = new THREE.CylinderGeometry(0.1, 0.2, 8, 8);
+          const stemMat = new THREE.MeshStandardMaterial({ color: 0x2d5a27, transparent: true, opacity: 0.8 });
+          for(let i=0; i<3; i++) {
+              const stem = new THREE.Mesh(stemGeo, stemMat);
+              stem.position.set((Math.random()-0.5)*2, 4, (Math.random()-0.5)*2);
+              stem.rotation.z = (Math.random()-0.5)*0.5;
+              group.add(stem);
+          }
+      } else {
+          const baseGeo = new THREE.SphereGeometry(1, 8, 8);
+          const baseMat = new THREE.MeshStandardMaterial({ color: 0xff6b6b });
+          const base = new THREE.Mesh(baseGeo, baseMat);
+          group.add(base);
+          
+          const branchGeo = new THREE.CylinderGeometry(0.2, 0.4, 3, 8);
+          for(let i=0; i<5; i++) {
+              const branch = new THREE.Mesh(branchGeo, baseMat);
+              branch.position.y = 1.5;
+              branch.rotation.set(Math.random()*2, Math.random()*2, Math.random()*2);
+              group.add(branch);
+          }
+      }
+      group.userData.isFlora = true;
+      return group;
+  }
+
   // --- Phase 6: Procedural Cave Interiors ---
   function createCaveInterior() {
       const group = new THREE.Group();
@@ -989,6 +1068,7 @@
           const rVec = new THREE.Vector3(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).normalize();
           stal.position.copy(rVec).multiplyScalar(180);
           stal.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), rVec.negate());
+          stal.userData.isStalactite = true; // Phase 8 harvesting
           group.add(stal);
       }
       
@@ -1127,6 +1207,12 @@
             if (buildPartIndex === 3) { // Sodium Light logic
                 const pl = new THREE.PointLight(0xffffaa, 1.5, 100);
                 pl.position.set(0, 3, 0);
+                newPart.add(pl);
+            }
+            if (buildPartIndex === 5) { // Nutrient Processor logic
+                newPart.userData.isProcessor = true;
+                const pl = new THREE.PointLight(0x00ff88, 1, 10);
+                pl.position.set(0, 2, 0);
                 newPart.add(pl);
             }
             
@@ -1306,26 +1392,54 @@
                }
                else if (pt.object.userData.isFauna) {
                    pt.object.parent.remove(pt.object);
-                   wantedLevel += 15; // Culling biologicals is a high offense!
-                   
-                   // Phase 7: Aggravate Sentinels
-                   groundWantedLevel = 5; // Immediate high alert
+                   wantedLevel += 15; 
+                   groundWantedLevel = 5; 
                    sentinels.forEach(s => s.state = 'attacking');
                    
+                   inventory['Raw Meat'] = (inventory['Raw Meat'] || 0) + 1;
+                   if (Math.random() < 0.2) inventory['Bone Shards'] = (inventory['Bone Shards'] || 0) + 1;
+                   
                    const scoreEl = document.getElementById('obj-progress');
-                   if (scoreEl) scoreEl.innerText = '[-] Culled Biological Entity!';
+                   if (scoreEl) scoreEl.innerText = '[-] Culled Biological Entity! (+Meat/Bones)';
                }
                else if (pt.object.userData.isFlora) {
-                    // Tree group is pt.object.parent
-                    const tree = pt.object.parent;
-                    if (tree) {
-                        scene.remove(tree);
-                        inventory['Carbon'] = (inventory['Carbon'] || 0) + 5;
-                        const scoreEl = document.getElementById('obj-progress');
-                        if (scoreEl) scoreEl.innerText = '[-] HARVESTED CARBON FROM FLORA (+5)';
-                        wantedLevel += 1; // Slight suspicion for deforestation
-                    }
-                }
+                   const tree = pt.object.parent;
+                   if (tree) {
+                       scene.remove(tree);
+                       inventory['Carbon'] = (inventory['Carbon'] || 0) + 5;
+                       
+                       if (Math.random() < 0.3) inventory['Sweet Berries'] = (inventory['Sweet Berries'] || 0) + 1;
+                       if (Math.random() < 0.05) inventory['Wild Yeast'] = (inventory['Wild Yeast'] || 0) + 1;
+                       
+                       let closestP = planets[0];
+                       let minDist = Infinity;
+                       planets.forEach(p => {
+                           const d = yawObject.position.distanceTo(p.position);
+                           if (d < minDist) { minDist = d; closestP = p; }
+                       });
+                       
+                       if (minDist < closestP.radius + 500 && closestP.hazardType) {
+                           const ht = closestP.hazardType;
+                           if (ht === 'Toxic' && Math.random() < 0.4) inventory['Toxic Fungus'] = (inventory['Toxic Fungus'] || 0) + 1;
+                           if (ht === 'Inferno' && Math.random() < 0.4) inventory['Spicy Bulbs'] = (inventory['Spicy Bulbs'] || 0) + 1;
+                           if (ht === 'Frozen' && Math.random() < 0.4) inventory['Crystalized Sap'] = (inventory['Crystalized Sap'] || 0) + 1;
+                       }
+                       
+                       const scoreEl = document.getElementById('obj-progress');
+                       if (scoreEl) scoreEl.innerText = '[-] HARVESTED FLORA SAMPLES';
+                       wantedLevel += 1;
+                   }
+               }
+               else if (pt.object.userData.isStalactite) {
+                   pt.object.parent.remove(pt.object);
+                   inventory['Cave Salts'] = (inventory['Cave Salts'] || 0) + 2;
+                   if (Math.random() < 0.4) inventory['Glowing Moss'] = (inventory['Glowing Moss'] || 0) + 1;
+                   const scoreEl = document.getElementById('obj-progress');
+                   if (scoreEl) scoreEl.innerText = '[+] Harvested Cave Biologicals!';
+               }
+               else if (pt.object.userData.isProcessor) {
+                   window.openCookingUI();
+               }
                else if (pt.object.userData.isTreasure) {
                    pt.object.parent.remove(pt.object);
                    credits += 5000;
@@ -1483,10 +1597,12 @@
             }
         }
         break;
-      case 'Digit1': if(isBuildMode) { buildPartIndex = 0; updateBuildHologram(); } break;
-      case 'Digit2': if(isBuildMode) { buildPartIndex = 1; updateBuildHologram(); } break;
-      case 'Digit3': if(isBuildMode) { buildPartIndex = 2; updateBuildHologram(); } break;
+      case 'Digit1': if(isBuildMode) { buildPartIndex = 0; updateBuildHologram(); } else if(!isFlying) window.consumeMeal('Nutrient Paste'); break;
+      case 'Digit2': if(isBuildMode) { buildPartIndex = 1; updateBuildHologram(); } else if(!isFlying) window.consumeMeal('Sweet Jam'); break;
+      case 'Digit3': if(isBuildMode) { buildPartIndex = 2; updateBuildHologram(); } else if(!isFlying) window.consumeMeal('Hazard Gulp'); break;
       case 'Digit4': if(isBuildMode) { buildPartIndex = 3; updateBuildHologram(); } break;
+      case 'Digit5': if(isBuildMode) { buildPartIndex = 4; updateBuildHologram(); } break;
+      case 'Digit6': if(isBuildMode) { buildPartIndex = 5; updateBuildHologram(); } break;
       case 'KeyH':
         if (isFlying) {
            if (!ownsFreighter) {
@@ -1604,7 +1720,8 @@
         isThirdPerson = !isThirdPerson;
         break;
       case 'KeyF': 
-        toggleFlightMode();
+        if (isRidingSub) toggleSubmarineMode();
+        else toggleFlightMode();
         break;
       case 'KeyE':
         // Cave Interaction
@@ -1623,7 +1740,14 @@
                 }
             }
         }
-        toggleRidingMode();
+        if (submarineMesh && yawObject.position.distanceTo(submarineMesh.position) < 15) {
+            toggleSubmarineMode();
+        } else {
+            toggleRidingMode();
+        }
+        break;
+      case 'KeyQ':
+        if (!isFlying && !isRiding && !isRidingSub) window.summonSubmarine();
         break;
       case 'KeyH':
         if (isInsideCave) {
@@ -1812,8 +1936,17 @@
            freq *= 2.0;
         }
      }
-     noiseVal -= 5 * (planet.radius / 100); // Ocean depth modifier
-     if (noiseVal <= 0) noiseVal = 0; // Flat water
+     const isOceanWorld = planet.name.includes('Deep Ocean') || planet.simplex.seed === 'seed_ocean';
+     noiseVal -= 5 * (planet.radius / 100); // Base sea level offset
+
+     if (noiseVal < 0 && !isOceanWorld) {
+        // Create very very deep lakes
+        noiseVal *= 15; 
+     }
+     
+     // Only ocean world and black hole should be strictly flat at water level
+     if (noiseVal <= 0 && (isOceanWorld || planet.name.includes('Singularity'))) noiseVal = 0; 
+     
      return planet.radius + noiseVal;
   }
   function onMouseMove(event) {
@@ -1881,6 +2014,25 @@
         b.mesh.up.copy(upVec);
         b.mesh.lookAt(lookTarget);
     });
+    
+    // --- Phase 8: Buff Timers ---
+    if (speedBuffTimer > 0) {
+        speedBuffTimer -= dt * 1000;
+        speedMultiplier = 1.5;
+        if (speedBuffTimer <= 0) speedMultiplier = 1.0;
+    }
+    if (hazardImmunityTimer > 0) hazardImmunityTimer -= dt * 1000;
+    if (resourceHighlightTimer > 0) {
+        resourceHighlightTimer -= dt * 1000;
+    }
+    if (regenTimer > 0) {
+        regenTimer -= dt * 1000;
+        playerHealth = Math.min(100, playerHealth + 5 * dt);
+        const hpBar = document.getElementById('nms-health-bar');
+        if (hpBar) hpBar.style.width = playerHealth + '%';
+    }
+    if (ironSkinTimer > 0) ironSkinTimer -= dt * 1000;
+    // ----------------------------
     
     // Check Warp Core Anomaly (Black Hole) distance
     if (isFlying && !isWarping) {
@@ -1952,8 +2104,8 @@
                 lasers.push({ mesh: lMesh, dir: lDir, life: 60 });
                 d.shootTimer = 2000 + Math.random() * 2000;
                 
-                // Damage Player
-                if (distToPlayer < 50) {
+                // Damage Player (Iron Skin check)
+                if (distToPlayer < 50 && ironSkinTimer <= 0) {
                    playerHealth -= 2; // GPF is dangerous!
                    const hpBar = document.getElementById('nms-health-bar');
                    if(hpBar) hpBar.style.width = Math.max(0, playerHealth) + '%';
@@ -1989,8 +2141,8 @@
             head.position.add(upVec.multiplyScalar(deficit * dt * 5)); // smooth snap
         }
 
-        // Damage the player
-        if (wormDist < 25) {
+        // Damage the player (Iron Skin check)
+        if (wormDist < 25 && ironSkinTimer <= 0) {
              playerHealth -= 20 * dt;
              const hpBar = document.getElementById('nms-health-bar');
              if(hpBar) hpBar.style.width = Math.max(0, playerHealth) + '%';
@@ -2090,7 +2242,7 @@
         l.life -= 100 * dt;
         
         if (l.mesh.position.distanceTo(yawObject.position) < 20) {
-            playerHealth -= 5;
+            if (ironSkinTimer <= 0) playerHealth -= 5;
             const hpBar = document.getElementById('nms-health-bar');
             if(hpBar) hpBar.style.width = Math.max(0, playerHealth) + '%';
             
@@ -2323,7 +2475,7 @@
 
     // Flight mode travels 10x faster, Riding travels 6x faster
     const pulseMultiplier = (isFlying && pulseDriveActive) ? 4 : 1;
-    const speed = isFlying ? (400 * engineMultiplier * pulseMultiplier) : (isRiding ? 120 : 20);
+    const speed = isFlying ? (400 * engineMultiplier * pulseMultiplier) : (isRiding ? 120 : 20 * speedMultiplier);
 
 
     // Calculate closest planet
@@ -2354,8 +2506,10 @@
             hStatus.innerText = `Hazard detected: ${currentHazardType}`;
         }
         
-        // Drain protection
-        hazardProtection = Math.max(0, hazardProtection - closestPlanet.hazardIntensity * dt * 0.1);
+        // Drain protection (Phase 8: Hazard Immunity check)
+        if (hazardImmunityTimer <= 0) {
+            hazardProtection = Math.max(0, hazardProtection - closestPlanet.hazardIntensity * dt * 0.1);
+        }
         if (hBar) hBar.style.width = hazardProtection + '%';
         
         // If protection is 0, drain health
@@ -2453,6 +2607,80 @@
              }
         }
     }
+    // --- Phase 9: Aquatic System (Submarine & Submerged Survival) ---
+    isSubmerged = (minDist < closestPlanet.radius);
+    
+    if (isSubmerged) {
+        if (scene.fog) {
+            scene.fog.color.set(0x002244);
+            scene.fog.density = 0.08;
+            scene.background = scene.fog.color;
+        }
+        
+        // Hazard Bar as Oxygen Bar
+        if (!isRidingSub && !isFlying) {
+            hazardProtection = Math.max(0, hazardProtection - 5 * dt);
+            const hBar = document.getElementById('nms-hazard-bar');
+            if (hBar) hBar.style.width = hazardProtection + '%';
+            
+            const hStatus = document.getElementById('nms-hazard-status');
+            if (hStatus) {
+                hStatus.style.display = 'block';
+                hStatus.innerText = "CRITICAL: OXYGEN DEPLETING";
+                hStatus.style.color = "#ff4444";
+            }
+        }
+    } else {
+        // Restore standard fog
+        if (scene.fog) {
+            scene.fog.color.set(0x050510);
+            scene.fog.density = 0;
+            scene.background = scene.fog.color;
+        }
+        
+        // Oxygen Recharge at surface or in sub
+        if (isRidingSub || !isSubmerged) {
+            hazardProtection = Math.min(100, hazardProtection + 10 * dt);
+            const hStatus = document.getElementById('nms-hazard-status');
+            if (hStatus && !isSubmerged) hStatus.style.display = 'none';
+        }
+    }
+
+    if (isRidingSub && submarineMesh) {
+        // Submarine Vertical Control
+        if (keys.space) subDivingVelocity = 40;
+        else if (keys.shift) subDivingVelocity = -40;
+        else subDivingVelocity = 0;
+        
+        const upVec = submarineMesh.position.clone().sub(closestPlanet.position).normalize();
+        submarineMesh.position.add(upVec.clone().multiplyScalar(subDivingVelocity * dt));
+        
+        // Snap Horizontal movement
+        const subDir = new THREE.Vector3();
+        submarineMesh.getWorldDirection(subDir);
+        if (keys.w) submarineMesh.position.add(subDir.clone().multiplyScalar(80 * dt));
+        if (keys.s) submarineMesh.position.add(subDir.clone().multiplyScalar(-80 * dt));
+        if (keys.a) submarineMesh.rotateOnAxis(new THREE.Vector3(0,1,0), 2 * dt);
+        if (keys.d) submarineMesh.rotateOnAxis(new THREE.Vector3(0,1,0), -2 * dt);
+        
+        // Terrain & Surface Clipping
+        const currentRadius = submarineMesh.position.distanceTo(closestPlanet.position);
+        const terrH = getTerrainHeight(closestPlanet, upVec);
+        
+        if (currentRadius > closestPlanet.radius) {
+            submarineMesh.position.copy(closestPlanet.position.clone().add(upVec.multiplyScalar(closestPlanet.radius)));
+        } else if (currentRadius < terrH + 2) {
+            submarineMesh.position.copy(closestPlanet.position.clone().add(upVec.multiplyScalar(terrH + 2)));
+        }
+        
+        yawObject.position.copy(submarineMesh.position);
+        
+        // Fix Orientation: Align with surface but allow yaw
+        const currentYaw = submarineMesh.rotation.y; 
+        submarineMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), upVec);
+        submarineMesh.rotateOnAxis(new THREE.Vector3(0, 1, 0), currentYaw);
+    }
+    // -----------------------------------------------------------------
 
     // Space Station Docking
     if (spaceStation && !isInsideDungeon) {
@@ -2886,9 +3114,18 @@
   };
 
   window.startNMS = function() {
+    if (!scene) {
+        init();
+        animate();
+    }
+    
+    if (overlay) overlay.style.display = 'none';
+    if (hud) hud.style.display = 'block';
+    
     if (!isLocked && container) {
        container.requestPointerLock();
     }
+    
     const themeAudio = document.getElementById('game-audio');
     if (themeAudio && themeAudio.paused) {
         themeAudio.volume = 0.5;
@@ -2898,7 +3135,7 @@
 
   // Pre-initialize the massive planetary math so it doesn't block the play button Event Loop!
   setTimeout(() => {
-    if (!scene) {
+    if (!scene && container) {
       init();
       animate();
     }
@@ -2993,4 +3230,215 @@
       const mineObj = document.getElementById('obj-mine');
       if (mineObj) mineObj.innerText = `[ ] Cargo Empty`;
   }
+
+
+  // --- Phase 8: Culinary Arts Functions ---
+  window.openCookingUI = function() {
+      document.exitPointerLock();
+      const overlay = document.getElementById('nms-cooking-overlay');
+      if (overlay) overlay.style.display = 'flex';
+      
+      const invList = document.getElementById('cooking-inventory');
+      if (invList) {
+          invList.innerHTML = '<b>Your Ingredients:</b><br>';
+          for (let item in inventory) {
+              if (inventory[item] > 0) invList.innerHTML += `${item}: ${inventory[item]}<br>`;
+          }
+      }
+  };
+
+  window.cookMeal = function(mealName) {
+      const recipes = {
+          'Nutrient Paste': { ingredients: { 'Raw Meat': 1, 'Carbon': 1 }, effect: 'Heal 30' },
+          'Sweet Jam': { ingredients: { 'Sweet Berries': 1, 'Carbon': 1 }, effect: 'Jetpack Refill' },
+          'Hazard Gulp': { ingredients: { 'Sweet Berries': 1, 'Cave Salts': 1 }, effect: 'Hazard Refill' },
+          'Spicy Stew': { ingredients: { 'Raw Meat': 1, 'Spicy Bulbs': 1 }, effect: 'Speed Boost' },
+          'Frozen Sorbet': { ingredients: { 'Sweet Berries': 1, 'Crystalized Sap': 1 }, effect: 'Hazard Immunity' },
+          'Fungal Risotto': { ingredients: { 'Raw Meat': 1, 'Toxic Fungus': 1 }, effect: 'Big Heal' },
+          'Glowing Salad': { ingredients: { 'Glowing Moss': 1, 'Wild Yeast': 1 }, effect: 'Resource Highlight' },
+          'Bone Broth': { ingredients: { 'Bone Shards': 1, 'Cave Salts': 1 }, effect: 'Health Regen' },
+          'Wild Cake': { ingredients: { 'Sweet Berries': 1, 'Wild Yeast': 1, 'Carbon': 5 }, effect: 'Full Restore' },
+          'Nanite Infusion': { ingredients: { 'Raw Meat': 1, 'Nanites': 50 }, effect: 'Iron Skin' }
+      };
+
+      const recipe = recipes[mealName];
+      if (!recipe) return;
+
+      // Check Ingredients
+      for (let ing in recipe.ingredients) {
+          if ((inventory[ing] || 0) < recipe.ingredients[ing]) {
+              const fb = document.getElementById('obj-progress');
+              if (fb) fb.innerText = `[!] Missing: ${ing}`;
+              return;
+          }
+      }
+
+      // Consume Ingredients
+      for (let ing in recipe.ingredients) {
+          inventory[ing] -= recipe.ingredients[ing];
+      }
+
+      // Special case for Nanites if they are a separate var
+      if (recipe.ingredients['Nanites']) {
+          if (window.naniteClusters >= recipe.ingredients['Nanites']) {
+              window.naniteClusters -= recipe.ingredients['Nanites'];
+              const nEl = document.getElementById('nms-nanites');
+              if (nEl) nEl.innerText = `Nanites: ${window.naniteClusters}`;
+          } else {
+              return; // Should have been caught by general check if nanites were in inventory, but handle for safety
+          }
+      }
+
+      // Add to inventory
+      inventory[mealName] = (inventory[mealName] || 0) + 1;
+      
+      const scoreEl = document.getElementById('obj-progress');
+      if (scoreEl) scoreEl.innerText = `[+] COOKED: ${mealName}!`;
+      window.openCookingUI(); // Refresh list
+  };
+
+  window.consumeMeal = function(mealName) {
+      if (!inventory[mealName] || inventory[mealName] <= 0) return;
+      inventory[mealName]--;
+      
+      const scoreEl = document.getElementById('obj-progress');
+      if (scoreEl) scoreEl.innerText = `[MEAL] Consumed ${mealName}!`;
+      
+      document.body.style.backgroundColor = "rgba(34, 197, 94, 0.3)";
+      setTimeout(() => { document.body.style.backgroundColor = "transparent"; }, 300);
+
+      if (mealName === 'Nutrient Paste') playerHealth = Math.min(100, playerHealth + 30);
+      if (mealName === 'Sweet Jam') jetpackFuel = 100;
+      if (mealName === 'Hazard Gulp') hazardProtection = Math.min(100, hazardProtection + 50);
+      if (mealName === 'Spicy Stew') { /* Speed boost handled in physics */ }
+      if (mealName === 'Frozen Sorbet') { /* Immunity handled in hazard drain */ }
+      if (mealName === 'Fungal Risotto') { 
+          playerHealth = Math.min(100, playerHealth + 60);
+          document.body.style.filter = "hue-rotate(90deg) saturate(2)";
+          setTimeout(() => { document.body.style.filter = "none"; }, 5000);
+      }
+      if (mealName === 'Glowing Salad') { /* Resource highlight handled in physics */ }
+      if (mealName === 'Bone Broth') { /* Regen handled in update */ }
+      if (mealName === 'Wild Cake') { playerHealth = 100; hazardProtection = 100; }
+      if (mealName === 'Nanite Infusion') { /* Iron Skin handled in damage logic */ }
+
+      // Update HUD
+      const hpBar = document.getElementById('nms-health-bar');
+      if (hpBar) hpBar.style.width = playerHealth + '%';
+  };
+
+  // Refine consumeMeal with durations
+  const originalConsumeMeal = window.consumeMeal;
+  window.consumeMeal = function(mealName) {
+      originalConsumeMeal(mealName);
+      // Add durations
+      if (mealName === 'Spicy Stew') speedBuffTimer = 30000;
+      if (mealName === 'Frozen Sorbet') hazardImmunityTimer = 20000;
+      if (mealName === 'Fungal Risotto') { /* vision already handled */ }
+      if (mealName === 'Glowing Salad') resourceHighlightTimer = 45000;
+      if (mealName === 'Bone Broth') regenTimer = 60000;
+      if (mealName === 'Nanite Infusion') ironSkinTimer = 5000;
+  };
+
+  // --- Phase 9: The Nautilon (Submarine) ---
+  let isRidingSub = false;
+  let submarineMesh = null;
+  let oxygenLevel = 100;
+  
+  window.createSubmarineMesh = function() {
+      const group = new THREE.Group();
+      
+      // Main Hull (sleek sub shape)
+      const hullGeo = new THREE.CapsuleGeometry(1.5, 4, 16, 16);
+      hullGeo.rotateZ(Math.PI/2);
+      const hullMat = new THREE.MeshStandardMaterial({color: 0x3b82f6, metalness: 0.8, roughness: 0.2});
+      const hull = new THREE.Mesh(hullGeo, hullMat);
+      group.add(hull);
+      
+      // Cockpit Window
+      const cockGeo = new THREE.SphereGeometry(1.2, 16, 16, 0, Math.PI*2, 0, Math.PI/2);
+      const cockMat = new THREE.MeshStandardMaterial({color: 0x00ffff, transparent: true, opacity: 0.6});
+      const cock = new THREE.Mesh(cockGeo, cockMat);
+      cock.position.set(2, 0.5, 0);
+      cock.rotateZ(-Math.PI/2);
+      group.add(cock);
+      
+      // Horizontal Fins
+      const finGeo = new THREE.BoxGeometry(2, 0.2, 4);
+      const finMat = new THREE.MeshStandardMaterial({color: 0x1e3a8a});
+      const fins = new THREE.Mesh(finGeo, finMat);
+      group.add(fins);
+      
+      // Propeller Housing
+      const propGeo = new THREE.TorusGeometry(0.8, 0.1, 8, 16);
+      const propMat = new THREE.MeshStandardMaterial({color: 0x111111});
+      const prop = new THREE.Mesh(propGeo, propMat);
+      prop.position.set(-3.5, 0, 0);
+      prop.rotateY(Math.PI/2);
+      group.add(prop);
+      
+      // Headlights
+      const lightGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.5, 16);
+      lightGeo.rotateZ(Math.PI/2);
+      const lightMat = new THREE.MeshBasicMaterial({color: 0xffffff});
+      const headlight = new THREE.Mesh(lightGeo, lightMat);
+      headlight.position.set(3.2, -0.5, 0);
+      group.add(headlight);
+      
+      const spotlight = new THREE.SpotLight(0xffffff, 5, 200, Math.PI/6, 0.5);
+      spotlight.position.set(3.5, -0.5, 0);
+      spotlight.target.position.set(10, -0.5, 0);
+      group.add(spotlight);
+      group.add(spotlight.target);
+      
+      return group;
+  };
+
+  window.summonSubmarine = function() {
+      if (isFlying || isRiding) {
+          const scoreEl = document.getElementById('obj-progress');
+          if (scoreEl) scoreEl.innerText = "[!] Cannot summon Nautilon while in another vehicle.";
+          return;
+      }
+      
+      if (submarineMesh) scene.remove(submarineMesh);
+      
+      submarineMesh = createSubmarineMesh();
+      
+      // Place near player on the water level
+      let closestP = planets[0];
+      let minDist = Infinity;
+      planets.forEach(p => {
+          const d = yawObject.position.distanceTo(p.position);
+          if (d < minDist) { minDist = d; closestP = p; }
+      });
+      
+      // Water level is basically planet.radius
+      const toPlayer = yawObject.position.clone().sub(closestP.position).normalize();
+      submarineMesh.position.copy(closestP.position.clone().add(toPlayer.multiplyScalar(closestP.radius)));
+      submarineMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), toPlayer);
+      
+      scene.add(submarineMesh);
+      
+      const scoreEl = document.getElementById('obj-progress');
+      if (scoreEl) scoreEl.innerText = "[⚓] NAUTILON SUMMONED. Press E to board!";
+  };
+
+  window.toggleSubmarineMode = function() {
+      if (!submarineMesh) return;
+      
+      const dist = yawObject.position.distanceTo(submarineMesh.position);
+      if (dist < 15 && !isRidingSub) {
+          isRidingSub = true;
+          yawObject.add(camera);
+          camera.position.set(0, 1.5, 0); // Position inside the sub
+          
+          const scoreEl = document.getElementById('obj-progress');
+          if (scoreEl) scoreEl.innerText = "[⚓] NAUTILON CONTROLS ACTIVE. WASD: Propel, SPACE: Ascend, SHIFT: Descend.";
+      } else if (isRidingSub) {
+          isRidingSub = false;
+          const scoreEl = document.getElementById('obj-progress');
+          if (scoreEl) scoreEl.innerText = "[⚓] EXITING NAUTILON.";
+      }
+  };
 })();
