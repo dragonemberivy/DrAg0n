@@ -1747,6 +1747,88 @@
       case 'KeyQ':
         if (!isFlying && !isRiding && !isRidingSub) window.summonSubmarine();
         break;
+      case 'KeyC':
+        // --- Phase 10: Discovery Scanner ---
+        if (!isFlying && !isInsideCave) {
+            let newlyScanned = 0;
+            let scanReward = 0;
+            
+            // Perform a spherical scan around player
+            const scanRadius = 150;
+            
+            // Define a recursive function to check all children in scene
+            scene.traverse((obj) => {
+                if (obj.userData && !obj.userData.scanned) {
+                    if (obj.userData.isFlora || obj.userData.isFauna || obj.userData.isResource || obj.userData.isStalactite) {
+                        const dist = yawObject.position.distanceTo(obj.getWorldPosition(new THREE.Vector3()));
+                        if (dist < scanRadius) {
+                            obj.userData.scanned = true;
+                            newlyScanned++;
+                            
+                            // Visual feedback - brief flash
+                            if (obj.material) {
+                                const origEmissive = obj.material.emissive ? obj.material.emissive.clone() : new THREE.Color(0x000000);
+                                const origIntensity = obj.material.emissiveIntensity || 0;
+                                obj.material.emissive = new THREE.Color(0x00ffff);
+                                obj.material.emissiveIntensity = 1.0;
+                                setTimeout(() => {
+                                    if (obj.material) {
+                                        obj.material.emissive = origEmissive;
+                                        obj.material.emissiveIntensity = origIntensity;
+                                    }
+                                }, 500);
+                            } else if (obj.children) {
+                                obj.children.forEach(child => {
+                                    if (child.material) {
+                                        const origEmissive = child.material.emissive ? child.material.emissive.clone() : new THREE.Color(0x000000);
+                                        const origIntensity = child.material.emissiveIntensity || 0;
+                                        child.material.emissive = new THREE.Color(0x00ffff);
+                                        child.material.emissiveIntensity = 1.0;
+                                        setTimeout(() => {
+                                            if (child.material) {
+                                                child.material.emissive = origEmissive;
+                                                child.material.emissiveIntensity = origIntensity;
+                                            }
+                                        }, 500);
+                                    }
+                                });
+                            }
+                        }
+                    }
+                }
+            });
+            
+            const objEl = document.getElementById('obj-progress');
+            if (newlyScanned > 0) {
+                scanReward = newlyScanned * 15;
+                credits += scanReward;
+                const crObj = document.getElementById('trade-credits');
+                if(crObj) crObj.innerText = credits + ' ¢';
+                
+                if (objEl) objEl.innerText = `[SCAN] Discovered ${newlyScanned} new lifeforms/minerals! +${scanReward} ¢`;
+                
+                // Scanner pulse visual effect
+                const pulseGeo = new THREE.SphereGeometry(scanRadius, 32, 32);
+                const pulseMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.5, wireframe: true });
+                const pulseMesh = new THREE.Mesh(pulseGeo, pulseMat);
+                pulseMesh.position.copy(yawObject.position);
+                scene.add(pulseMesh);
+                
+                let scale = 0.1;
+                const pulseAnim = setInterval(() => {
+                    scale += 0.1;
+                    pulseMesh.scale.set(scale, scale, scale);
+                    pulseMat.opacity -= 0.05;
+                    if (scale >= 1.0) {
+                        clearInterval(pulseAnim);
+                        scene.remove(pulseMesh);
+                    }
+                }, 30);
+            } else {
+                if (objEl) objEl.innerText = `[SCAN] No new discoveries nearby.`;
+            }
+        }
+        break;
       case 'KeyH':
         if (isInsideCave) {
             homeCavePos = yawObject.position.clone();
