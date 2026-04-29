@@ -3343,6 +3343,20 @@
 
 
   // --- Phase 8: Culinary Arts Functions ---
+  // Define recipes globally so UI can access them
+  window.cookingRecipes = {
+      'Nutrient Paste': { ingredients: { 'Raw Meat': 1, 'Carbon': 1 }, effect: 'Heal 30', desc: 'Basic survival food.' },
+      'Sweet Jam': { ingredients: { 'Sweet Berries': 1, 'Carbon': 1 }, effect: 'Jetpack Refill', desc: 'Provides a burst of energy.' },
+      'Hazard Gulp': { ingredients: { 'Sweet Berries': 1, 'Cave Salts': 1 }, effect: 'Hazard Refill', desc: 'Restores environmental shielding.' },
+      'Spicy Stew': { ingredients: { 'Raw Meat': 1, 'Spicy Bulbs': 1 }, effect: 'Speed Boost', desc: 'Increases movement speed.' },
+      'Frozen Sorbet': { ingredients: { 'Sweet Berries': 1, 'Crystalized Sap': 1 }, effect: 'Hazard Immunity', desc: 'Prevents hazard drain.' },
+      'Fungal Risotto': { ingredients: { 'Raw Meat': 1, 'Toxic Fungus': 1 }, effect: 'Big Heal', desc: 'Significantly restores health.' },
+      'Glowing Salad': { ingredients: { 'Glowing Moss': 1, 'Wild Yeast': 1 }, effect: 'Resource Highlight', desc: 'Reveals nearby resources.' },
+      'Bone Broth': { ingredients: { 'Bone Shards': 1, 'Cave Salts': 1 }, effect: 'Health Regen', desc: 'Heals over time.' },
+      'Wild Cake': { ingredients: { 'Sweet Berries': 1, 'Wild Yeast': 1, 'Carbon': 5 }, effect: 'Full Restore', desc: 'Restores all vitals.' },
+      'Nanite Infusion': { ingredients: { 'Raw Meat': 1, 'Nanites': 50 }, effect: 'Iron Skin', desc: 'Reduces all incoming damage.' }
+  };
+
   window.openCookingUI = function() {
       document.exitPointerLock();
       const overlay = document.getElementById('nms-cooking-overlay');
@@ -3350,33 +3364,52 @@
       
       const invList = document.getElementById('cooking-inventory');
       if (invList) {
-          invList.innerHTML = '<b>Your Ingredients:</b><br>';
+          invList.innerHTML = '';
           for (let item in inventory) {
-              if (inventory[item] > 0) invList.innerHTML += `${item}: ${inventory[item]}<br>`;
+              if (inventory[item] > 0) invList.innerHTML += `<div style="padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">${item}: <span style="color: #fbbf24">${inventory[item]}</span></div>`;
+          }
+          if (invList.innerHTML === '') invList.innerHTML = '<div style="color: #6b7280; font-style: italic;">No ingredients found.</div>';
+      }
+
+      const recList = document.getElementById('cooking-recipes');
+      if (recList) {
+          recList.innerHTML = '';
+          for (let mealName in window.cookingRecipes) {
+              const rec = window.cookingRecipes[mealName];
+              
+              // Check if user has ingredients
+              let canCook = true;
+              let ingHTML = '';
+              for (let ing in rec.ingredients) {
+                  const req = rec.ingredients[ing];
+                  const has = (ing === 'Nanites') ? naniteClusters : (inventory[ing] || 0);
+                  const color = has >= req ? '#34d399' : '#ef4444';
+                  if (has < req) canCook = false;
+                  ingHTML += `<span style="color: ${color}; margin-right: 8px;">${req}x ${ing}</span>`;
+              }
+              
+              recList.innerHTML += `
+                  <div style="background: rgba(255,255,255,0.05); padding: 8px; border-radius: 4px; display: flex; flex-direction: column; gap: 5px;">
+                      <div style="display: flex; justify-content: space-between; align-items: center;">
+                          <strong style="color: #60a5fa">${mealName}</strong>
+                          <span style="color: #a78bfa; font-size: 11px;">[${rec.effect}]</span>
+                      </div>
+                      <div style="font-size: 11px; display: flex; flex-wrap: wrap;">${ingHTML}</div>
+                      <button onclick="window.cookMeal('${mealName}')" ${canCook ? '' : 'disabled'} style="margin-top: 5px; padding: 6px; background: ${canCook ? '#2563eb' : '#374151'}; color: ${canCook ? '#fff' : '#9ca3af'}; border: none; border-radius: 4px; cursor: ${canCook ? 'pointer' : 'not-allowed'}; font-family: monospace;">Cook</button>
+                  </div>
+              `;
           }
       }
   };
 
   window.cookMeal = function(mealName) {
-      const recipes = {
-          'Nutrient Paste': { ingredients: { 'Raw Meat': 1, 'Carbon': 1 }, effect: 'Heal 30' },
-          'Sweet Jam': { ingredients: { 'Sweet Berries': 1, 'Carbon': 1 }, effect: 'Jetpack Refill' },
-          'Hazard Gulp': { ingredients: { 'Sweet Berries': 1, 'Cave Salts': 1 }, effect: 'Hazard Refill' },
-          'Spicy Stew': { ingredients: { 'Raw Meat': 1, 'Spicy Bulbs': 1 }, effect: 'Speed Boost' },
-          'Frozen Sorbet': { ingredients: { 'Sweet Berries': 1, 'Crystalized Sap': 1 }, effect: 'Hazard Immunity' },
-          'Fungal Risotto': { ingredients: { 'Raw Meat': 1, 'Toxic Fungus': 1 }, effect: 'Big Heal' },
-          'Glowing Salad': { ingredients: { 'Glowing Moss': 1, 'Wild Yeast': 1 }, effect: 'Resource Highlight' },
-          'Bone Broth': { ingredients: { 'Bone Shards': 1, 'Cave Salts': 1 }, effect: 'Health Regen' },
-          'Wild Cake': { ingredients: { 'Sweet Berries': 1, 'Wild Yeast': 1, 'Carbon': 5 }, effect: 'Full Restore' },
-          'Nanite Infusion': { ingredients: { 'Raw Meat': 1, 'Nanites': 50 }, effect: 'Iron Skin' }
-      };
-
-      const recipe = recipes[mealName];
+      const recipe = window.cookingRecipes[mealName];
       if (!recipe) return;
 
       // Check Ingredients
       for (let ing in recipe.ingredients) {
-          if ((inventory[ing] || 0) < recipe.ingredients[ing]) {
+          const has = (ing === 'Nanites') ? naniteClusters : (inventory[ing] || 0);
+          if (has < recipe.ingredients[ing]) {
               const fb = document.getElementById('obj-progress');
               if (fb) fb.innerText = `[!] Missing: ${ing}`;
               return;
@@ -3385,15 +3418,19 @@
 
       // Consume Ingredients
       for (let ing in recipe.ingredients) {
-          inventory[ing] -= recipe.ingredients[ing];
+          if (ing === 'Nanites') {
+              // Handled below
+          } else {
+              inventory[ing] -= recipe.ingredients[ing];
+          }
       }
 
       // Special case for Nanites if they are a separate var
       if (recipe.ingredients['Nanites']) {
-          if (window.naniteClusters >= recipe.ingredients['Nanites']) {
-              window.naniteClusters -= recipe.ingredients['Nanites'];
+          if (naniteClusters >= recipe.ingredients['Nanites']) {
+              naniteClusters -= recipe.ingredients['Nanites'];
               const nEl = document.getElementById('nms-nanites');
-              if (nEl) nEl.innerText = `Nanites: ${window.naniteClusters}`;
+              if (nEl) nEl.innerText = `Nanites: ${naniteClusters}`;
           } else {
               return; // Should have been caught by general check if nanites were in inventory, but handle for safety
           }
