@@ -3249,6 +3249,12 @@
   };
 
   window.resetNMS = function() {
+      if (!document.fullscreenElement) {
+          const scoreEl = document.getElementById('obj-progress');
+          if (scoreEl) scoreEl.innerText = "[!] YOU MUST BE IN FULLSCREEN TO RESET UNIVERSE.";
+          return;
+      }
+      
       if (document.pointerLockElement) {
           document.exitPointerLock();
       }
