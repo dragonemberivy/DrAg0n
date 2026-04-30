@@ -3249,11 +3249,16 @@
   };
 
   window.resetNMS = function() {
-      if(confirm("Are you sure you want to reset your universe? This will clear all inventory, credits, and bases!")) {
-          localStorage.removeItem('nmsWeb_saveState');
-          localStorage.removeItem('nmsWeb_homeCave');
-          window.location.reload();
+      if (document.pointerLockElement) {
+          document.exitPointerLock();
       }
+      setTimeout(() => {
+          if(confirm("Are you sure you want to reset your universe? This will clear all inventory, credits, and bases!")) {
+              localStorage.removeItem('nmsWeb_saveState');
+              localStorage.removeItem('nmsWeb_homeCave');
+              window.location.reload();
+          }
+      }, 100);
   };
 
   // Pre-initialize the massive planetary math so it doesn't block the play button Event Loop!
