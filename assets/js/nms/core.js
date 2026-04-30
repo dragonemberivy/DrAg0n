@@ -1591,6 +1591,9 @@
     if (e.shiftKey || code === 'ShiftLeft' || code === 'ShiftRight') keys.shift = true;
     
     switch(code) {
+      case 'KeyR':
+        if(window.resetNMS) window.resetNMS();
+        break;
       case 'KeyB':
         if (!isFlying && !isRiding && !isInsideDungeon) {
             isBuildMode = !isBuildMode;
