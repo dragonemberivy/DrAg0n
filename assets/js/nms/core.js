@@ -1580,8 +1580,7 @@
   }
 
   function onKeyDown(e) {
-    const activeTagName = document.activeElement ? document.activeElement.tagName : '';
-    if (activeTagName === 'INPUT' || activeTagName === 'TEXTAREA') return;
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
     let code = e.code || "";
     let key = (e.key || "").toLowerCase();
     
@@ -1942,8 +1941,7 @@
   }
 
   function onKeyUp(e) {
-    const activeTagName = document.activeElement ? document.activeElement.tagName : '';
-    if (activeTagName === 'INPUT' || activeTagName === 'TEXTAREA') return;
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
     let code = e.code || "";
     let key = (e.key || "").toLowerCase();
     
