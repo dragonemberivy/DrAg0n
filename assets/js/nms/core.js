@@ -3230,6 +3230,8 @@
     }
     
     if (overlay) overlay.style.display = 'none';
+    const startUI = document.getElementById('nms-start-ui');
+    if (startUI) startUI.style.display = 'none';
     if (hud) hud.style.display = 'block';
     
     if (!isLocked && container) {
@@ -3241,6 +3243,14 @@
         themeAudio.volume = 0.5;
         themeAudio.play().catch(e => console.warn("Theme autoplay blocked:", e));
     }
+  };
+
+  window.resetNMS = function() {
+      if(confirm("Are you sure you want to reset your universe? This will clear all inventory, credits, and bases!")) {
+          localStorage.removeItem('nmsWeb_saveState');
+          localStorage.removeItem('nmsWeb_homeCave');
+          window.location.reload();
+      }
   };
 
   // Pre-initialize the massive planetary math so it doesn't block the play button Event Loop!
