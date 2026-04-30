@@ -1580,6 +1580,7 @@
   }
 
   function onKeyDown(e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
     let code = e.code || "";
     let key = (e.key || "").toLowerCase();
     
@@ -1940,6 +1941,7 @@
   }
 
   function onKeyUp(e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
     let code = e.code || "";
     let key = (e.key || "").toLowerCase();
     
