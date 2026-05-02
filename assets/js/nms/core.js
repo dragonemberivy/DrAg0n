@@ -133,17 +133,21 @@
               if (state.bases) {
                   window.persistedBaseParts = state.bases;
                   state.bases.forEach(b => {
-                      const part = baseParts[b.type];
-                      if (!part) return;
-                      const newPart = new THREE.Mesh(part.geo, part.mat);
-                      newPart.position.set(b.pos.x, b.pos.y, b.pos.z);
-                      newPart.quaternion.set(b.quat.x, b.quat.y, b.quat.z, b.quat.w);
-                      if (b.type === 3) {
-                          const pl = new THREE.PointLight(0xffffaa, 1.5, 100);
-                          pl.position.set(0, 3, 0);
-                          newPart.add(pl);
+                      try {
+                          const part = baseParts[b.type];
+                          if (!part) return;
+                          const newPart = new THREE.Mesh(part.geo, part.mat);
+                          if (b.pos) newPart.position.set(b.pos.x, b.pos.y, b.pos.z);
+                          if (b.quat) newPart.quaternion.set(b.quat.x, b.quat.y, b.quat.z, b.quat.w);
+                          if (b.type === 3) {
+                              const pl = new THREE.PointLight(0xffffaa, 1.5, 100);
+                              pl.position.set(0, 3, 0);
+                              newPart.add(pl);
+                          }
+                          placedBasesGroup.add(newPart);
+                      } catch (err) {
+                          console.warn("Skipping corrupted base part:", b, err);
                       }
-                      placedBasesGroup.add(newPart);
                   });
                   
                   if (state.lastSaveTime) {
@@ -462,6 +466,10 @@
     document.addEventListener('pointerlockchange', () => {
       isLocked = document.pointerLockElement === container;
       if (isLocked) {
+        // Force blur any active input so key commands aren't incorrectly blocked
+        if (document.activeElement && document.activeElement.blur) {
+            document.activeElement.blur();
+        }
         overlay.style.display = 'none';
         crosshair.style.display = 'block';
         hud.style.display = 'block';
@@ -1580,7 +1588,14 @@
   }
 
   function onKeyDown(e) {
-    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+    const targetTag = (e.target && e.target.tagName) ? e.target.tagName.toUpperCase() : "";
+    if (targetTag === 'INPUT' || targetTag === 'TEXTAREA' || targetTag === 'SELECT' || targetTag === 'BUTTON' || (e.target && e.target.isContentEditable)) return;
+    
+    // Safety check for activeElement
+    const active = document.activeElement;
+    const activeTag = active ? active.tagName.toUpperCase() : "";
+    if (activeTag === 'INPUT' || activeTag === 'TEXTAREA' || activeTag === 'SELECT' || (active && active.isContentEditable)) return;
+
     let code = e.code || "";
     let key = (e.key || "").toLowerCase();
     
@@ -1941,7 +1956,8 @@
   }
 
   function onKeyUp(e) {
-    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+    const targetTag = (e.target && e.target.tagName) ? e.target.tagName.toUpperCase() : "";
+    if (targetTag === 'INPUT' || targetTag === 'TEXTAREA' || targetTag === 'SELECT' || (e.target && e.target.isContentEditable)) return;
     let code = e.code || "";
     let key = (e.key || "").toLowerCase();
     
@@ -2028,7 +2044,7 @@
            freq *= 2.0;
         }
      }
-     const isOceanWorld = planet.name.includes('Deep Ocean') || planet.simplex.seed === 'seed_ocean';
+     const isOceanWorld = (planet.name && planet.name.includes('Deep Ocean')) || (planet.simplex && planet.simplex.seed === 'seed_ocean');
      noiseVal -= 5 * (planet.radius / 100); // Base sea level offset
 
      if (noiseVal < 0 && !isOceanWorld) {
@@ -2085,8 +2101,22 @@
       }, 1500);
   }
 
-  function updatePhysics(dt) {
-    if (!isLocked) return;
+  function innerUpdatePhysics(dt) {
+    if(!camera || !renderer || !planets.length || !isLocked) return;
+    
+    // Ensure we have a valid closest planet and center at the start of the frame
+    window.closestIdx = 0;
+    window.minDist = Infinity;
+    for (let i = 0; i < planets.length; i++) {
+        const d = yawObject.position.distanceTo(planets[i].position);
+        if (d < window.minDist) { window.minDist = d; window.closestIdx = i; }
+    }
+    closestPlanet = planets[window.closestIdx];
+    const center = closestPlanet.position.clone();
+    
+    // Alias for local scope compatibility
+    let closestIdx = window.closestIdx;
+    let minDist = window.minDist;
     
     // Boid Flocking / Roaming Fauna
     boids.forEach(b => {
@@ -2502,7 +2532,7 @@
             }
         }
     }
-    
+
     const direction = new THREE.Vector3(0,0,0);
     if(keys.w) direction.z -= 1;
     if(keys.s) direction.z += 1;
@@ -2570,20 +2600,6 @@
     const speed = isFlying ? (400 * engineMultiplier * pulseMultiplier) : (isRiding ? 120 : 20 * speedMultiplier);
 
 
-    // Calculate closest planet
-    closestPlanet = planets[0];
-    let minDist = Infinity;
-    let planetIndex = 0;
-    let closestIdx = 0;
-    for (let p of planets) {
-      const dist = yawObject.position.distanceTo(p.position);
-      if (dist < minDist) {
-         minDist = dist;
-         closestPlanet = p;
-         closestIdx = planetIndex;
-      }
-      planetIndex++;
-    }
 
     // --- Phase 7: Hazard Drain Logic ---
     const hBarCont = document.getElementById('nms-hazard-container');
@@ -2864,7 +2880,6 @@
        });
     }
 
-    const center = closestPlanet.position;
     
     // Day/Night Orbit
     if (sunLight) {
@@ -2927,7 +2942,9 @@
             }
         });
     }
+    // Calculate up vector for gravity and orientation
     const up = yawObject.position.clone().sub(center).normalize();
+    if (up.lengthSq() < 0.1) up.set(0, 1, 0); 
     const currentDistCenter = yawObject.position.distanceTo(center);
     
     // Evaluate procedural noise exactly at player's latitude/longitude
@@ -3092,6 +3109,20 @@
     }
   }
 
+  function updatePhysics(dt) {
+    if(!camera || !renderer) return;
+    try {
+        innerUpdatePhysics(dt);
+    } catch (e) {
+        console.error("Physics Crash Prevented:", e);
+        const debugPos = document.getElementById('nms-debug-pos');
+        if (debugPos) {
+            debugPos.innerText = "CRASH: " + e.message;
+            debugPos.style.color = "red";
+        }
+    }
+  }
+
   function animate() {
     nmsLoopId = requestAnimationFrame(animate);
     const now = performance.now();
@@ -3101,6 +3132,8 @@
     lastTime = now;
     
     updatePhysics(dt);
+    
+    if (!scene || !camera || !renderer) return;
     
     for (let p of planets) {
       if (p.mesh && p.mesh.isLOD) p.mesh.update(camera);
