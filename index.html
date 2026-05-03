@@ -109,6 +109,7 @@
                       <span style="color: #fbbf24;">Press B</span>: Toggle Build Mode<br>
                       <span style="color: #fbbf24;">Keys 1-6</span>: Select Base Parts (Build)<br>
                       <span style="color: #fbbf24;">Press H</span>: Summon Freighter (50k ¢) / Set Cave Home<br>
+                      <span style="color: #fbbf24;">Press M</span>: Open Galactic Map / Teleporter 🗺️<br>
                       <span style="color: #f87171;">Press K</span>: Spawn Seismic Worm Boss 🪱<br>
                       <span style="color: #f87171;">Press P</span>: Spawn Pirate Raider 🏴‍☠️<br>
                       <span style="color: #f87171;">Press R</span>: Reset Universe (Deletes Save)<br>
@@ -247,6 +248,22 @@
                     
                     <div style="margin-top: 20px;">
                         <button onclick="document.getElementById('nms-cooking-overlay').style.display='none'; document.body.requestPointerLock();" style="width: 100%; background: #4b5563; padding: 12px; border: none; border-radius: 6px; cursor: pointer; color: white; font-weight: bold; font-size: 1.1rem; transition: background 0.2s;">Exit Processor</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GALACTIC MAP OVERLAY -->
+            <div id="nms-map-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 200; color: white; font-family: monospace;">
+                <div style="background: rgba(15, 23, 42, 0.95); padding: 30px; border: 2px solid #8b5cf6; border-radius: 10px; text-align: center; max-width: 800px; width: 90%; backdrop-filter: blur(10px); box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+                    <h2 style="color: #c4b5fd; margin-top: 0; font-size: 1.8rem; text-shadow: 0 0 10px #8b5cf6;">GALACTIC MAP & TELEPORT</h2>
+                    <p style="font-size: 0.9rem; color: #cbd5e1; margin-bottom: 20px;">Fast-travel to known locations.</p>
+                    
+                    <div id="map-locations-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: left; max-height: 400px; overflow-y: auto; padding: 10px;">
+                        <!-- Buttons populated by JS -->
+                    </div>
+                    
+                    <div style="margin-top: 25px;">
+                        <button onclick="document.getElementById('nms-map-overlay').style.display='none'; document.body.requestPointerLock();" style="width: 100%; background: #4b5563; padding: 12px; border: none; border-radius: 6px; cursor: pointer; color: white; font-weight: bold; font-size: 1.1rem; transition: background 0.2s;">Close Map</button>
                     </div>
                 </div>
             </div>
@@ -544,7 +561,7 @@
 
   <!-- ALL SCRIPTS (Consolidated) -->
   <script src="assets/js/main.js"></script>
-  <script src="assets/js/nms/core.js?v=22"></script>
+  <script src="assets/js/nms/core.js?v=24"></script>
 </body>
 
 </html>

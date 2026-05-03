@@ -551,7 +551,7 @@
            freq *= 2.0; amp *= 0.5;
          }
 
-         noiseVal -= 5 * (radius / 100); // Sink down for oceans
+         noiseVal -= 7.5 * (radius / 100); // Sink down for oceans
 
          if (noiseVal < 0 && seed !== 'seed_blackhole') {
              // Create deep basins matching getTerrainHeight logic
@@ -623,7 +623,7 @@
                noiseV += (1.0 - Math.abs(n)) * amp;
                amp *= 0.5; freq *= 2.0;
             }
-            noiseV -= 5 * (radius/100);
+            noiseV -= 7.5 * (radius/100);
             if (noiseV <= 0) noiseV = 0;
             tHeight += noiseV;
             
@@ -647,7 +647,7 @@
                 noiseV += v * amp;
                 freq *= 2.0; amp *= 0.5;
              }
-             noiseV -= 5 * (radius/100);
+             noiseV -= 7.5 * (radius/100);
              
              if (noiseV <= 0) { 
                  const flora = createAquaticFlora();
@@ -1678,6 +1678,9 @@
       case 'Digit4': if(isBuildMode) { buildPartIndex = 3; updateBuildHologram(); } break;
       case 'Digit5': if(isBuildMode) { buildPartIndex = 4; updateBuildHologram(); } break;
       case 'Digit6': if(isBuildMode) { buildPartIndex = 5; updateBuildHologram(); } break;
+      case 'KeyM':
+        if(window.openGalacticMap) window.openGalacticMap();
+        break;
       case 'Digit7':
         if (!isFlying) {
             const lightObj = new THREE.Group();
@@ -2137,7 +2140,7 @@
         }
      }
      const isOceanWorld = (planet.name && planet.name.includes('Deep Ocean')) || (planet.simplex && planet.simplex.seed === 'seed_ocean');
-     noiseVal -= 5 * (planet.radius / 100); // Base sea level offset
+     noiseVal -= 7.5 * (planet.radius / 100); // Base sea level offset
 
      if (noiseVal < 0 && !isOceanWorld) {
         // Create very very deep lakes
@@ -2867,10 +2870,18 @@
         const currentRadius = submarineMesh.position.distanceTo(closestPlanet.position);
         const terrH = getTerrainHeight(closestPlanet, upVec);
         
-        if (currentRadius > closestPlanet.radius) {
-            submarineMesh.position.copy(closestPlanet.position.clone().add(upVec.multiplyScalar(closestPlanet.radius)));
-        } else if (currentRadius < terrH + 2) {
-            submarineMesh.position.copy(closestPlanet.position.clone().add(upVec.multiplyScalar(terrH + 2)));
+        if (terrH < closestPlanet.radius) {
+            // Over water
+            if (currentRadius > closestPlanet.radius) {
+                submarineMesh.position.copy(closestPlanet.position.clone().add(upVec.multiplyScalar(closestPlanet.radius)));
+            } else if (currentRadius < terrH + 2) {
+                submarineMesh.position.copy(closestPlanet.position.clone().add(upVec.multiplyScalar(terrH + 2)));
+            }
+        } else {
+            // Over land - just prevent going underground
+            if (currentRadius < terrH + 2) {
+                submarineMesh.position.copy(closestPlanet.position.clone().add(upVec.multiplyScalar(terrH + 2)));
+            }
         }
         
         yawObject.position.copy(submarineMesh.position);
@@ -3747,6 +3758,84 @@
       return group;
   };
 
+  window.openGalacticMap = function() {
+      if (!document.pointerLockElement) return;
+      document.exitPointerLock();
+      isLocked = false;
+      
+      const container = document.getElementById('map-locations-container');
+      if (!container) return;
+      container.innerHTML = '';
+      
+      // Home Cave
+      if (window.homeCavePocketPos) {
+          const btn = document.createElement('button');
+          btn.innerText = `🏠 Cave Home`;
+          btn.style.cssText = 'background: rgba(96,165,250,0.2); border: 1px solid #60a5fa; color: white; padding: 10px; cursor: pointer; border-radius: 4px; font-family: monospace;';
+          btn.onclick = () => {
+              window.returnToHomeCave();
+              document.getElementById('nms-map-overlay').style.display = 'none';
+              document.body.requestPointerLock();
+          };
+          container.appendChild(btn);
+      }
+      
+      // Capital Freighter
+      if (ownsFreighter && typeof freighterMesh !== 'undefined' && freighterMesh) {
+          const btn = document.createElement('button');
+          btn.innerText = `🚀 Capital Freighter`;
+          btn.style.cssText = 'background: rgba(168,85,247,0.2); border: 1px solid #a855f7; color: white; padding: 10px; cursor: pointer; border-radius: 4px; font-family: monospace;';
+          btn.onclick = () => {
+              yawObject.position.copy(freighterMesh.position);
+              yawObject.position.y += 40;
+              if (isFlying) toggleFlightMode();
+              document.getElementById('nms-map-overlay').style.display = 'none';
+              document.body.requestPointerLock();
+          };
+          container.appendChild(btn);
+      }
+      
+      // Known Bases
+      if (window.persistedBaseParts && window.persistedBaseParts.length > 0) {
+          // Just list the first base part of each chunk, or just a generic "Base Outpost" button if bases exist.
+          // To make it simple, let's group by distance or just provide one button to the first base built.
+          const firstBase = window.persistedBaseParts[0];
+          const btn = document.createElement('button');
+          btn.innerText = `🏗️ Main Base Outpost`;
+          btn.style.cssText = 'background: rgba(34,197,94,0.2); border: 1px solid #22c55e; color: white; padding: 10px; cursor: pointer; border-radius: 4px; font-family: monospace;';
+          btn.onclick = () => {
+              yawObject.position.set(firstBase.pos.x, firstBase.pos.y + 10, firstBase.pos.z);
+              if (isFlying) toggleFlightMode(); // Teleporting to surface
+              document.getElementById('nms-map-overlay').style.display = 'none';
+              document.body.requestPointerLock();
+          };
+          container.appendChild(btn);
+      }
+      
+      // Known Planets
+      visitedPlanets.forEach(idx => {
+          const p = planets[idx];
+          if (!p) return;
+          const btn = document.createElement('button');
+          btn.innerText = `🪐 ${p.name || 'Planet ' + idx}`;
+          btn.style.cssText = 'background: rgba(59,130,246,0.2); border: 1px solid #3b82f6; color: white; padding: 10px; cursor: pointer; border-radius: 4px; font-family: monospace; text-shadow: 1px 1px 0 #000;';
+          btn.onclick = () => {
+              const up = p.position.clone().normalize();
+              yawObject.position.copy(p.position).add(up.multiplyScalar(p.radius + 1000));
+              if (!isFlying) toggleFlightMode(); // Teleport to space puts you in ship
+              document.getElementById('nms-map-overlay').style.display = 'none';
+              document.body.requestPointerLock();
+          };
+          container.appendChild(btn);
+      });
+      
+      if(container.childNodes.length === 0) {
+          container.innerHTML = '<div style="grid-column: span 2; text-align: center; color: #64748b;">No known locations to teleport to yet. Explore more!</div>';
+      }
+      
+      document.getElementById('nms-map-overlay').style.display = 'flex';
+  };
+
   window.summonSubmarine = function() {
       if (isFlying || isRiding) {
           const scoreEl = document.getElementById('obj-progress');
@@ -3766,9 +3855,9 @@
           if (d < minDist) { minDist = d; closestP = p; }
       });
       
-      // Water level is basically planet.radius
+      // Place at player
+      submarineMesh.position.copy(yawObject.position);
       const toPlayer = yawObject.position.clone().sub(closestP.position).normalize();
-      submarineMesh.position.copy(closestP.position.clone().add(toPlayer.multiplyScalar(closestP.radius)));
       submarineMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), toPlayer);
       
       scene.add(submarineMesh);
