@@ -824,6 +824,43 @@
     outGroup.position.set(x, y, z);
     scene.add(outGroup);
 
+    // Cave Entrance (Phase 6)
+    if (seed !== 'seed_ocean' && seed !== 'seed_gas' && seed !== 'seed_blackhole') {
+        const cavePos = new THREE.Vector3(
+            (Math.random()-0.5), (Math.random()-0.5), (Math.random()-0.5)
+        ).normalize();
+        
+        let cHeight = radius;
+        let cVal = 0; let cAmp = 8 * (radius/100); let cFreq = 0.05 * (100/radius);
+        for(let oct=0; oct<3; oct++) {
+           let n = simplex.noise3D(cavePos.x * cFreq, cavePos.y * cFreq, cavePos.z * cFreq);
+           cVal += (1.0 - Math.abs(n)) * cAmp;
+           cAmp *= 0.5; cFreq *= 2.0;
+        }
+        cVal -= 5 * (radius/100);
+        if(cVal <= 0) cVal = 0;
+        cHeight += cVal;
+        
+        cavePos.multiplyScalar(cHeight);
+        
+        const caveGeo = new THREE.TorusGeometry(3, 1.5, 16, 32);
+        const caveMat = new THREE.MeshStandardMaterial({color: 0x1a1a1a, emissive: 0x220033, roughness: 1.0});
+        const caveMesh = new THREE.Mesh(caveGeo, caveMat);
+        caveMesh.position.copy(cavePos);
+        caveMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1), cavePos.clone().normalize());
+        caveMesh.position.add(cavePos.clone().normalize().multiplyScalar(-1.0)); // Sink it slightly
+        
+        const cg = new THREE.Group();
+        cg.add(caveMesh);
+        cg.position.set(x, y, z);
+        scene.add(cg);
+        
+        caveEntrances.push({
+            mesh: caveMesh,
+            worldPos: new THREE.Vector3(x, y, z).add(cavePos),
+            planetPos: new THREE.Vector3(x, y, z)
+        });
+    }
 
     planets.push({ 
         mesh: lod, 
@@ -1069,26 +1106,26 @@
   function createCaveInterior() {
       const group = new THREE.Group();
       
-      const shellGeo = new THREE.SphereGeometry(200, 32, 24);
+      const shellGeo = new THREE.SphereGeometry(800, 32, 24);
       const shellMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, side: THREE.BackSide, roughness: 1.0 });
       const shell = new THREE.Mesh(shellGeo, shellMat);
       group.add(shell);
       
-      const stalGeo = new THREE.ConeGeometry(4, 30, 6);
+      const stalGeo = new THREE.ConeGeometry(16, 120, 6);
       const stalMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
-      for(let i=0; i<30; i++) {
+      for(let i=0; i<60; i++) {
           const stal = new THREE.Mesh(stalGeo, stalMat);
           const rVec = new THREE.Vector3(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).normalize();
-          stal.position.copy(rVec).multiplyScalar(180);
+          stal.position.copy(rVec).multiplyScalar(760);
           stal.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), rVec.negate());
           stal.userData.isStalactite = true; // Phase 8 harvesting
           group.add(stal);
       }
       
-      const exitGeo = new THREE.TorusGeometry(10, 1.5, 8, 24);
+      const exitGeo = new THREE.TorusGeometry(20, 3.0, 8, 24);
       const exitMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.6 });
       const exit = new THREE.Mesh(exitGeo, exitMat);
-      exit.position.set(0, -180, 0);
+      exit.position.set(0, -780, 0);
       exit.rotation.x = Math.PI/2;
       exit.userData.isCaveExit = true;
       group.add(exit);
@@ -1103,6 +1140,9 @@
   function enterCave(entrance) {
       if (isInsideCave) return;
       isInsideCave = true;
+      
+      inventory['Cave Salts'] = (inventory['Cave Salts'] || 0) + 10;
+      inventory['Glowing Moss'] = (inventory['Glowing Moss'] || 0) + 10;
       
       const pocketPos = new THREE.Vector3(100000, 100000, 100000);
       yawObject.position.copy(pocketPos);
@@ -1380,7 +1420,7 @@
        if (pt.distance < 45) { // Range of handheld Multi-Tool
            
            // Handle specific interactable elements
-           if (pt.object.userData && (pt.object.userData.isResource || pt.object.userData.isFauna || pt.object.userData.isTreasure || pt.object.userData.isDrone)) {
+           if (pt.object.userData && (pt.object.userData.isResource || pt.object.userData.isFauna || pt.object.userData.isTreasure || pt.object.userData.isDrone || pt.object.userData.isStalactite || pt.object.userData.isFlora || pt.object.userData.isProcessor || pt.object.userData.isBoss)) {
                if (pt.object.userData.isResource) {
                    pt.object.parent.remove(pt.object);
                    minedCrystals++;
@@ -1627,6 +1667,23 @@
       case 'Digit4': if(isBuildMode) { buildPartIndex = 3; updateBuildHologram(); } break;
       case 'Digit5': if(isBuildMode) { buildPartIndex = 4; updateBuildHologram(); } break;
       case 'Digit6': if(isBuildMode) { buildPartIndex = 5; updateBuildHologram(); } break;
+      case 'Digit7':
+        if (!isFlying) {
+            const lightObj = new THREE.Group();
+            const geo = new THREE.CylinderGeometry(0.2, 0.2, 2);
+            const mat = new THREE.MeshStandardMaterial({color: 0xffffee, emissive: 0xffffaa, emissiveIntensity: 1.0});
+            const mesh = new THREE.Mesh(geo, mat);
+            const pl = new THREE.PointLight(0xffffaa, 1.5, 100);
+            pl.position.set(0, 1, 0);
+            lightObj.add(mesh);
+            lightObj.add(pl);
+            lightObj.position.copy(yawObject.position);
+            lightObj.quaternion.copy(yawObject.quaternion);
+            scene.add(lightObj);
+            const scoreEl = document.getElementById('obj-progress');
+            if (scoreEl) scoreEl.innerText = "[+] Dropped a Light Flare!";
+        }
+        break;
       case 'KeyH':
         if (isFlying) {
            if (!ownsFreighter) {
@@ -1750,8 +1807,8 @@
       case 'KeyE':
         // Cave Interaction
         if (isInsideCave) {
-            const distToExit = yawObject.position.distanceTo(activeCaveGroup.position.clone().add(new THREE.Vector3(0, -180, 0)));
-            if (distToExit < 20) {
+            const distToExit = yawObject.position.distanceTo(activeCaveGroup.position.clone().add(new THREE.Vector3(0, -780, 0)));
+            if (distToExit < 40) {
                 exitCave();
                 return;
             }
@@ -1772,6 +1829,30 @@
         break;
       case 'KeyQ':
         if (!isFlying && !isRiding && !isRidingSub) window.summonSubmarine();
+        break;
+      case 'KeyU':
+        if (!isFlying && !isInsideCave && closestPlanet) {
+            const cavePos = yawObject.position.clone();
+            const caveGeo = new THREE.TorusGeometry(3, 1.5, 16, 32);
+            const caveMat = new THREE.MeshStandardMaterial({color: 0x1a1a1a, emissive: 0x220033, roughness: 1.0});
+            const caveMesh = new THREE.Mesh(caveGeo, caveMat);
+            
+            const upVec = cavePos.clone().sub(closestPlanet.position).normalize();
+            caveMesh.position.copy(cavePos);
+            caveMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1), upVec);
+            caveMesh.position.add(upVec.multiplyScalar(-1.0)); // Sink it slightly
+            
+            scene.add(caveMesh);
+            
+            caveEntrances.push({
+                mesh: caveMesh,
+                worldPos: cavePos.clone(),
+                planetPos: closestPlanet.position.clone()
+            });
+            
+            const scoreEl = document.getElementById('obj-progress');
+            if (scoreEl) scoreEl.innerText = "[+] CAVE ENTRANCE SUMMONED! Press 'E' to enter.";
+        }
         break;
       case 'KeyC':
         // --- Phase 10: Discovery Scanner ---
@@ -2053,7 +2134,7 @@
      }
      
      // Only ocean world and black hole should be strictly flat at water level
-     if (noiseVal <= 0 && (isOceanWorld || planet.name.includes('Singularity'))) noiseVal = 0; 
+     if (noiseVal <= 0 && (isOceanWorld || (planet.name && planet.name.includes('Singularity')))) noiseVal = 0; 
      
      return planet.radius + noiseVal;
   }
@@ -2121,7 +2202,7 @@
     // Boid Flocking / Roaming Fauna
     boids.forEach(b => {
         let wander = new THREE.Vector3((Math.random()-0.5)*2, (Math.random()-0.5)*2, (Math.random()-0.5)*2);
-        b.velocity.add(wander).normalize().multiplyScalar(8); // Movement speed
+        b.velocity.add(wander).normalize().multiplyScalar(2); // Movement speed
         
         b.mesh.position.add(b.velocity.clone().multiplyScalar(dt));
         
@@ -2912,7 +2993,7 @@
         const invRot = new THREE.Euler(0, -closestPlanet.faunaGroup.rotation.y, 0);
         const localPlayer = rawLocalPlayer.applyEuler(invRot);
 
-        closestPlanet.faunaGroup.rotation.y -= 0.6 * dt; // Entire flock orbits planet
+        closestPlanet.faunaGroup.rotation.y -= 0.1 * dt; // Entire flock orbits planet slowly
         
         closestPlanet.faunaGroup.children.forEach((boid, idx) => {
             const distToPlayer = boid.position.distanceTo(localPlayer);
@@ -2920,7 +3001,7 @@
             // Seek and Destroy Player (Aggro behavior)
             if (distToPlayer < 25 && !isFlying) {
                const dir = localPlayer.clone().sub(boid.position).normalize();
-               boid.position.add(dir.multiplyScalar(20 * dt)); // Rush player bounds
+               boid.position.add(dir.multiplyScalar(4 * dt)); // Rush player bounds (Slowed down)
                boid.lookAt(localPlayer); // Face victim
                
                if (distToPlayer < 4) { // Visceral Hit
@@ -2952,7 +3033,47 @@
     // +3 allows the capsule mesh (-2 downward span) to rest precisely on the ground without clipping
     const surfaceRadius = terrainRadius + 3;
 
-    if (isInsideDungeon) {
+    if (isInsideCave) {
+        // Flat movement bypasses planet wrapper
+        direction.set(0,0,0);
+        if(keys.w) direction.z -= 1;
+        if(keys.s) direction.z += 1;
+        if(keys.a) direction.x -= 1;
+        if(keys.d) direction.x += 1;
+        direction.normalize();
+        
+        const camQuat = new THREE.Quaternion();
+        camera.getWorldQuaternion(camQuat);
+        const euler = new THREE.Euler().setFromQuaternion(camQuat, 'YXZ');
+        euler.x = 0; euler.z = 0;
+        const flatQuat = new THREE.Quaternion().setFromEuler(euler);
+        direction.applyQuaternion(flatQuat);
+        
+        yawObject.position.add(direction.multiplyScalar(speed * dt));
+
+        const caveCenter = activeCaveGroup.position;
+        const caveRadius = 800; // 4x size
+        
+        // Gravity pulls to the bottom of the cave (local -Y, which is global -Y since no rotation was applied to activeCaveGroup)
+        yawObject.position.y -= 80 * dt; 
+        
+        // Constrain to the sphere's inner shell
+        const relPos = yawObject.position.clone().sub(caveCenter);
+        if (relPos.length() > caveRadius - 3) {
+             relPos.normalize().multiplyScalar(caveRadius - 3);
+             yawObject.position.copy(caveCenter).add(relPos);
+        }
+        
+        // Align upright (normal of inner shell points to center)
+        yawObject.quaternion.normalize();
+        const currentUp = new THREE.Vector3(0,1,0).applyQuaternion(yawObject.quaternion).normalize();
+        const targetUp = relPos.clone().normalize().negate(); 
+        
+        const alignQuat = new THREE.Quaternion().setFromUnitVectors(currentUp, targetUp);
+        yawObject.quaternion.premultiply(alignQuat);
+        yawObject.quaternion.normalize();
+        
+    } else if (isInsideDungeon) {
         // Simple internal movement bypasses the sphere physics wrapper
         direction.set(0,0,0);
         if(keys.w) direction.z -= 1;
@@ -3047,7 +3168,22 @@
 
        
        // Mission Objectives Tracker
-       visitedPlanets.add(closestIdx);
+       if (!visitedPlanets.has(closestIdx)) {
+           visitedPlanets.add(closestIdx);
+           
+           const resName = closestPlanet.resource || 'Crystal';
+           inventory[resName] = (inventory[resName] || 0) + 10;
+           
+           if (closestPlanet.hazardType) {
+               const ht = closestPlanet.hazardType;
+               if (ht === 'Toxic') inventory['Toxic Fungus'] = (inventory['Toxic Fungus'] || 0) + 10;
+               if (ht === 'Inferno') inventory['Spicy Bulbs'] = (inventory['Spicy Bulbs'] || 0) + 10;
+               if (ht === 'Frozen') inventory['Crystalized Sap'] = (inventory['Crystalized Sap'] || 0) + 10;
+           }
+           
+           const el = document.getElementById('obj-progress');
+           if(el) el.innerText = `[+] Discovered new biome! +10 ${resName}`;
+       }
        if (visitedPlanets.size > 1) { const el = document.getElementById('obj-leave'); if(el) el.innerText = '[x] Leave Origin\'s orbit'; }
        { const el = document.getElementById('obj-progress'); if(el) el.innerText = `[-] Visited ${visitedPlanets.size}/10 Planets`; }
        if (visitedPlanets.size === 10) { const el = document.getElementById('obj-all'); if(el) el.innerText = '[x] Explore ALL 10 Planets!'; }
@@ -3154,8 +3290,8 @@
             }
         }
     } else {
-        const distToExit = yawObject.position.distanceTo(activeCaveGroup.position.clone().add(new THREE.Vector3(0, -180, 0)));
-        if (distToExit < 25) {
+        const distToExit = yawObject.position.distanceTo(activeCaveGroup.position.clone().add(new THREE.Vector3(0, -780, 0)));
+        if (distToExit < 40) {
             const objEl = document.getElementById('obj-progress');
             if (objEl) objEl.innerText = "[CAVE] Exit Portal. Press 'E' to return to space.";
         }
