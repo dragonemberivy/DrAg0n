@@ -1082,12 +1082,14 @@
       const trunkMat = new THREE.MeshStandardMaterial({ color: 0x5d4037 });
       const trunk = new THREE.Mesh(trunkGeo, trunkMat);
       trunk.position.y = 2.5;
+      trunk.userData.isFlora = true;
       treeGrp.add(trunk);
       
       const leafGeo = new THREE.SphereGeometry(2.5, 8, 8);
       const leafMat = new THREE.MeshStandardMaterial({ color: colorSet[2] || 0x228b22 });
       const leaves = new THREE.Mesh(leafGeo, leafMat);
       leaves.position.y = 5.5;
+      leaves.userData.isFlora = true;
       treeGrp.add(leaves);
       
       treeGrp.userData.isFlora = true;
@@ -1105,12 +1107,14 @@
               const stem = new THREE.Mesh(stemGeo, stemMat);
               stem.position.set((Math.random()-0.5)*2, 4, (Math.random()-0.5)*2);
               stem.rotation.z = (Math.random()-0.5)*0.5;
+              stem.userData.isFlora = true;
               group.add(stem);
           }
       } else {
           const baseGeo = new THREE.SphereGeometry(1, 8, 8);
           const baseMat = new THREE.MeshStandardMaterial({ color: 0xff6b6b });
           const base = new THREE.Mesh(baseGeo, baseMat);
+          base.userData.isFlora = true;
           group.add(base);
           
           const branchGeo = new THREE.CylinderGeometry(0.2, 0.4, 3, 8);
@@ -1118,6 +1122,7 @@
               const branch = new THREE.Mesh(branchGeo, baseMat);
               branch.position.y = 1.5;
               branch.rotation.set(Math.random()*2, Math.random()*2, Math.random()*2);
+              branch.userData.isFlora = true;
               group.add(branch);
           }
       }
@@ -1481,7 +1486,7 @@
                else if (pt.object.userData.isFlora) {
                    const tree = pt.object.parent;
                    if (tree) {
-                       scene.remove(tree);
+                       if (tree.parent) tree.parent.remove(tree);
                        inventory['Carbon'] = (inventory['Carbon'] || 0) + 5;
                        
                        if (Math.random() < 0.3) inventory['Sweet Berries'] = (inventory['Sweet Berries'] || 0) + 1;
