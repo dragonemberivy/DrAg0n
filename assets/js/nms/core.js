@@ -144,6 +144,17 @@
                               pl.position.set(0, 3, 0);
                               newPart.add(pl);
                           }
+                          if (b.type === 5) {
+                              newPart.userData.isProcessor = true;
+                              const pl = new THREE.PointLight(0x00ff88, 1, 10);
+                              pl.position.set(0, 2, 0);
+                              newPart.add(pl);
+                          }
+                          if (b.type === 6) {
+                              const pl = new THREE.PointLight(0xffffaa, 1.5, 100);
+                              pl.position.set(0, 1, 0);
+                              newPart.add(pl);
+                          }
                           placedBasesGroup.add(newPart);
                       } catch (err) {
                           console.warn("Skipping corrupted base part:", b, err);
@@ -378,7 +389,8 @@
         { name: "Glass Dome", geo: new THREE.SphereGeometry(15, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2), mat: new THREE.MeshStandardMaterial({color: 0x88ccaa, transparent: true, opacity: 0.4}) },
         { name: "Sodium Light", geo: new THREE.CylinderGeometry(0.5, 0.5, 8), mat: new THREE.MeshStandardMaterial({color: 0xffffee, emissive: 0xffffaa, emissiveIntensity: 1.0}) },
         { name: "Mineral Extractor", geo: new THREE.CylinderGeometry(2, 3, 5, 8), mat: new THREE.MeshStandardMaterial({color: 0x884400, metalness: 0.8, roughness: 0.2}) },
-        { name: "Nutrient Processor", geo: new THREE.CylinderGeometry(1.5, 2, 4, 16), mat: new THREE.MeshStandardMaterial({color: 0x475569, metalness: 0.8}) }
+        { name: "Nutrient Processor", geo: new THREE.CylinderGeometry(1.5, 2, 4, 16), mat: new THREE.MeshStandardMaterial({color: 0x475569, metalness: 0.8}) },
+        { name: "Light Flare", geo: new THREE.CylinderGeometry(0.2, 0.2, 2), mat: new THREE.MeshStandardMaterial({color: 0xffffee, emissive: 0xffffaa, emissiveIntensity: 1.0}) }
     ];
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
@@ -1693,7 +1705,14 @@
             lightObj.add(pl);
             lightObj.position.copy(yawObject.position);
             lightObj.quaternion.copy(yawObject.quaternion);
-            scene.add(lightObj);
+            placedBasesGroup.add(lightObj);
+            
+            window.persistedBaseParts.push({
+                type: 6,
+                pos: { x: yawObject.position.x, y: yawObject.position.y, z: yawObject.position.z },
+                quat: { x: yawObject.quaternion.x, y: yawObject.quaternion.y, z: yawObject.quaternion.z, w: yawObject.quaternion.w }
+            });
+            if (window.saveGameState) window.saveGameState();
             const scoreEl = document.getElementById('obj-progress');
             if (scoreEl) scoreEl.innerText = "[+] Dropped a Light Flare!";
         }
