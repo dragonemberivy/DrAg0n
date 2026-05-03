@@ -593,6 +593,17 @@
       
       const mesh = new THREE.Mesh(geometry, material);
 
+      if (seed !== 'seed_blackhole' && seed !== 'seed_ocean' && (!name || !name.includes('Deep Ocean'))) {
+          const waterGeo = new THREE.SphereGeometry(radius - 1.0, level.res, level.res);
+          const waterMat = new THREE.MeshStandardMaterial({ 
+              color: colorSet[0] || 0x1e3a8a, 
+              transparent: true, opacity: 0.85, 
+              roughness: 0.1, metalness: 0.8 
+          });
+          const waterMesh = new THREE.Mesh(waterGeo, waterMat);
+          mesh.add(waterMesh);
+      }
+
       // Spawn Minable Crystals on Highest LOD (level.dist === 0)
       if (level.dist === 0) {
          for(let r=0; r<100; r++) {
