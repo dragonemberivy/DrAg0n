@@ -1729,6 +1729,30 @@
             if (scoreEl) scoreEl.innerText = "[+] Dropped a Light Flare!";
         }
         break;
+      case 'Digit8':
+        if (!isFlying) {
+            const animalGeo = new THREE.SphereGeometry(1.5, 16, 16);
+            const animalMat = new THREE.MeshStandardMaterial({color: 0xff8800, roughness: 0.8});
+            const animal = new THREE.Mesh(animalGeo, animalMat);
+            
+            const headGeo = new THREE.BoxGeometry(1.5, 1.5, 1.5);
+            const head = new THREE.Mesh(headGeo, animalMat);
+            head.position.set(0, 1.0, 1.2);
+            animal.add(head);
+
+            animal.userData.isFauna = true;
+            
+            const dir = new THREE.Vector3();
+            camera.getWorldDirection(dir);
+            dir.y = 0; dir.normalize();
+            
+            animal.position.copy(yawObject.position).add(dir.multiplyScalar(6));
+            scene.add(animal);
+            
+            const scoreEl = document.getElementById('obj-progress');
+            if (scoreEl) scoreEl.innerText = "[+] Summoned a Stationary Livestock!";
+        }
+        break;
       case 'KeyH':
         if (isFlying) {
            if (!ownsFreighter) {
