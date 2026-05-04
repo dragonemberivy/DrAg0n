@@ -1482,6 +1482,7 @@
                    
                    const scoreEl = document.getElementById('obj-progress');
                    if (scoreEl) scoreEl.innerText = '[-] Culled Biological Entity! (+Meat/Bones)';
+                   break;
                }
                else if (pt.object.userData.isFlora) {
                    const tree = pt.object.parent;
@@ -1507,9 +1508,10 @@
                        }
                        
                        const scoreEl = document.getElementById('obj-progress');
-                       if (scoreEl) scoreEl.innerText = '[-] HARVESTED FLORA SAMPLES';
+                       if (scoreEl) scoreEl.innerText = `[-] Harvested Flora: +5 Carbon (Total: ${inventory['Carbon']})`;
                        wantedLevel += 1;
                    }
+                   break;
                }
                else if (pt.object.userData.isStalactite) {
                    pt.object.parent.remove(pt.object);
@@ -1517,9 +1519,11 @@
                    if (Math.random() < 0.4) inventory['Glowing Moss'] = (inventory['Glowing Moss'] || 0) + 1;
                    const scoreEl = document.getElementById('obj-progress');
                    if (scoreEl) scoreEl.innerText = '[+] Harvested Cave Biologicals!';
+                   break;
                }
                else if (pt.object.userData.isProcessor) {
                    window.openCookingUI();
+                   break;
                }
                else if (pt.object.userData.isTreasure) {
                    pt.object.parent.remove(pt.object);
@@ -1527,6 +1531,7 @@
                    const scoreEl = document.getElementById('obj-progress');
                    if (scoreEl) scoreEl.innerText = '[$$$] LOOTED FREIGHTER VAULT!';
                    document.getElementById('trade-credits').innerText = credits + ' ¢';
+                   break;
                }
                else if (pt.object.userData.isDrone) {
                     // Find actual drone object in array
@@ -1545,6 +1550,7 @@
                         // Fallback if not in array but tagged
                         scene.remove(pt.object.parent || pt.object);
                     }
+                    break;
                 }
                else if (pt.object.userData.isBoss) {
                    if (activeBoss) {
@@ -1561,6 +1567,7 @@
                            if (scoreEl) scoreEl.innerText = `[⚠️] Boss HP: ${activeBoss.health}`;
                        }
                    }
+                   break;
                }
                break;
            }
