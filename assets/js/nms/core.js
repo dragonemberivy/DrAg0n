@@ -1472,7 +1472,8 @@
                    }
                }
                else if (pt.object.userData.isFauna) {
-                   pt.object.parent.remove(pt.object);
+                   const faunaObj = pt.object.parent && pt.object.parent.userData && pt.object.parent.userData.isFauna ? pt.object.parent : pt.object;
+                   if (faunaObj.parent) faunaObj.parent.remove(faunaObj);
                    wantedLevel += 15; 
                    groundWantedLevel = 5; 
                    sentinels.forEach(s => s.state = 'attacking');
@@ -1738,6 +1739,7 @@
             const headGeo = new THREE.BoxGeometry(1.5, 1.5, 1.5);
             const head = new THREE.Mesh(headGeo, animalMat);
             head.position.set(0, 1.0, 1.2);
+            head.userData.isFauna = true;
             animal.add(head);
 
             animal.userData.isFauna = true;
