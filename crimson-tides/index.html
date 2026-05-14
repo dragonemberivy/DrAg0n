@@ -24,9 +24,17 @@
             border: 150px solid black; border-radius: 50%; box-sizing: border-box;
             display: none; pointer-events: none; z-index: 500;
         }
-        #top-bar { display: flex; justify-content: space-between; font-size: 24px; }
-        #bottom-bar { display: flex; justify-content: space-between; font-size: 18px; align-items: flex-end;}
-        .hud-element { background: rgba(0, 0, 0, 0.4); padding: 10px 20px; border-radius: 8px; border: 1px solid #cda434; margin-bottom: 5px;}
+        #top-bar { display: flex; justify-content: space-between; font-size: 20px; }
+        #bottom-bar { display: flex; justify-content: space-between; font-size: 16px; align-items: flex-end;}
+        .hud-element { 
+            background: rgba(0, 0, 0, 0.6); padding: 8px 15px; border-radius: 4px; 
+            border: 1px solid #cda434; margin-bottom: 5px; min-width: 150px;
+        }
+        #rank-ui {
+            font-weight: bold; color: #34d399; text-align: center; 
+            background: rgba(0, 0, 0, 0.6); padding: 5px; border: 1px solid #cda434;
+            border-radius: 4px; margin-bottom: 5px;
+        }
         #shop-ui {
             display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: rgba(0,0,0,0.8); padding: 20px; border: 2px solid #cda434; pointer-events: auto; text-align: center; border-radius: 10px;
@@ -50,8 +58,8 @@
             <div>
                 <div class="hud-element" id="gold-ui">Gold: 0</div>
                 <div class="hud-element" id="bounty-ui">Bounty Level: 0</div>
-                <div id="rank-ui" style="font-weight: bold; color: #34d399; text-align: center; margin-bottom: 5px;">Rank: Swab</div>
-                <canvas id="minimap" width="150" height="150" style="border: 2px solid #cda434; border-radius: 50%; background: rgba(0,0,0,0.5); margin-top: 10px;"></canvas>
+                <div id="rank-ui">Rank: Swab</div>
+                <canvas id="minimap" width="150" height="150" style="border: 2px solid #cda434; border-radius: 50%; background: #1a365d; margin-top: 10px;"></canvas>
             </div>
         </div>
         <div id="bottom-bar">

@@ -42,6 +42,79 @@
 
   <main class="container">
 
+    <!-- BOOK CLUB SECTION -->
+    <section id="book-club-section">
+      <h2 class="section-title">Dragon's Book Club (Ages 10-15)</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem;">
+        
+        <!-- Book of the Month -->
+        <div class="glass-card" style="border-color: rgba(168, 85, 247, 0.4); display: flex; flex-direction: column; align-items: center; text-align: center;">
+          <h3 style="color: #a855f7; margin-bottom: 1rem;">🌟 Book of the Month</h3>
+          <img src="https://images.unsplash.com/photo-1629196914275-f7e48b488ddc?w=300&q=80" alt="Book Cover" style="width: 150px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); margin-bottom: 1.5rem; object-fit: cover; aspect-ratio: 2/3;">
+          <h4 style="font-size: 1.5rem; margin-bottom: 0.5rem;">The Hunger Games</h4>
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">by Suzanne Collins</p>
+          <p style="font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.5rem;">In the ruins of a place once known as North America lies the nation of Panem, a shining Capitol surrounded by twelve outlying districts. The Capitol keeps the districts in line by forcing them all to send one boy and one girl between the ages of twelve and eighteen to participate in the annual Hunger Games, a fight to the death on live TV.</p>
+          
+          <div style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; width: 100%; text-align: left;">
+            <h5 style="color: #fbbf24; margin-bottom: 0.5rem;">📅 Reading Schedule</h5>
+            <ul style="list-style: none; padding: 0; font-size: 0.9rem; margin: 0;">
+              <li style="margin-bottom: 0.5rem;"><strong>Week 1:</strong> Chapters 1 - 9</li>
+              <li style="margin-bottom: 0.5rem;"><strong>Week 2:</strong> Chapters 10 - 18</li>
+              <li style="margin-bottom: 0.5rem;"><strong>Week 3:</strong> Chapters 19 - 27</li>
+              <li><strong>Week 4:</strong> Final Discussion & Review!</li>
+            </ul>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 2rem;">
+          <!-- Discussion Questions -->
+          <div class="glass-card" style="border-color: rgba(56, 189, 248, 0.4);">
+            <h3 style="color: #38bdf8;">🤔 Discussion Questions</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">Think about these as you read!</p>
+            <ol style="padding-left: 1.2rem; font-size: 0.95rem; line-height: 1.6;">
+              <li style="margin-bottom: 0.8rem;">How does Katniss's relationship with Peeta evolve, and how much of it is strategy vs. genuine feeling?</li>
+              <li style="margin-bottom: 0.8rem;">What role does the media play in the Capitol's control over the districts?</li>
+              <li style="margin-bottom: 0.8rem;">If you were placed in the arena, what would be your survival strategy?</li>
+            </ol>
+            <div style="margin-top: 1rem;">
+              <textarea placeholder="Jot down your thoughts here..." style="width: 100%; height: 80px; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: white; resize: vertical; font-family: inherit; margin-bottom: 0.5rem;"></textarea>
+              <button style="width: 100%; background: rgba(56, 189, 248, 0.2); border-color: rgba(56, 189, 248, 0.5);">Save My Thoughts</button>
+            </div>
+          </div>
+
+          <!-- Recommended Books -->
+          <div class="glass-card" style="border-color: rgba(34, 197, 94, 0.4);">
+            <h3 style="color: #4ade80;">📚 Up Next / Recommendations</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">Great reads for ages 10-15</p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 1rem;">
+              
+              <div style="text-align: center; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=150&q=80" alt="Percy Jackson" style="width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: 4px; margin-bottom: 0.5rem;">
+                <p style="font-size: 0.8rem; font-weight: bold; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Percy Jackson</p>
+              </div>
+
+              <div style="text-align: center; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                <img src="https://images.unsplash.com/photo-1618666012174-83b441c0bc76?w=150&q=80" alt="Harry Potter" style="width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: 4px; margin-bottom: 0.5rem;">
+                <p style="font-size: 0.8rem; font-weight: bold; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Harry Potter</p>
+              </div>
+
+              <div style="text-align: center; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                <img src="https://images.unsplash.com/photo-1532012197267-da84d127e765?w=150&q=80" alt="A Wrinkle in Time" style="width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: 4px; margin-bottom: 0.5rem;">
+                <p style="font-size: 0.8rem; font-weight: bold; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">A Wrinkle in Time</p>
+              </div>
+
+              <div style="text-align: center; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                <img src="https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=150&q=80" alt="The Hobbit" style="width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: 4px; margin-bottom: 0.5rem;">
+                <p style="font-size: 0.8rem; font-weight: bold; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">The Hobbit</p>
+              </div>
+              
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
     <!-- IMAGES SECTION -->
     <section id="images-section">
       <h2 class="section-title">My CUTE Gallery</h2>

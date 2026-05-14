@@ -819,9 +819,15 @@ function updateMinimap() {
     if (!minimapCtx) return;
     minimapCtx.clearRect(0, 0, 150, 150);
     const center = 75;
-    const scale = 0.15;
+    const scale = 0.12; // Slightly more zoomed out
     
-    // Draw player
+    // Background Pulse
+    minimapCtx.fillStyle = 'rgba(26, 54, 93, 0.5)';
+    minimapCtx.beginPath();
+    minimapCtx.arc(center, center, 70, 0, Math.PI * 2);
+    minimapCtx.fill();
+    
+    // Draw player (Self)
     minimapCtx.fillStyle = '#ffffff';
     minimapCtx.beginPath();
     minimapCtx.arc(center, center, 3, 0, Math.PI * 2);
@@ -832,27 +838,34 @@ function updateMinimap() {
         const dx = (island.group.position.x - playerShip.position.x) * scale;
         const dz = (island.group.position.z - playerShip.position.z) * scale;
         if (Math.hypot(dx, dz) < 70) {
-            minimapCtx.fillStyle = island.hasTreasure ? '#ffff00' : '#2e8b57';
+            minimapCtx.fillStyle = island.hasTreasure ? '#ffff00' : (island.isOutpost ? '#fbbf24' : '#2e8b57');
             minimapCtx.beginPath();
-            minimapCtx.arc(center + dx, center + dz, island.radius * scale, 0, Math.PI * 2);
+            minimapCtx.arc(center + dx, center + dz, Math.max(3, island.radius * scale), 0, Math.PI * 2);
             minimapCtx.fill();
             if (island.hasTreasure) {
                 minimapCtx.strokeStyle = '#fff';
-                minimapCtx.lineWidth = 2;
+                minimapCtx.lineWidth = 1;
                 minimapCtx.stroke();
             }
         }
     });
     
     // Draw enemies
-    minimapCtx.fillStyle = '#ff0000';
     enemies.forEach(enemy => {
         const dx = (enemy.model.position.x - playerShip.position.x) * scale;
         const dz = (enemy.model.position.z - playerShip.position.z) * scale;
         if (Math.hypot(dx, dz) < 70) {
+            minimapCtx.fillStyle = enemy.isHunter ? '#ff0000' : (enemy.isGhost ? '#00ffff' : '#f87171');
             minimapCtx.fillRect(center + dx - 2, center + dz - 2, 4, 4);
         }
     });
+
+    // Draw compass ring
+    minimapCtx.strokeStyle = 'rgba(205, 164, 52, 0.5)';
+    minimapCtx.lineWidth = 2;
+    minimapCtx.beginPath();
+    minimapCtx.arc(center, center, 72, 0, Math.PI * 2);
+    minimapCtx.stroke();
 }
 
 // --- Game Loop Logic ---
