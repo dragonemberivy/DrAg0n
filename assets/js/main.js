@@ -557,26 +557,25 @@
       }, 1000);
     }
 
-    // D. Firebase Reviews Integration
-    let bookReviewsRef = null;
+    // D. Local Storage Reviews Integration
     const reviewsContainer = document.getElementById('reviews-container');
     
-    try {
-      bookReviewsRef = db.ref('book_club/reviews');
-      // Clear static review
-      if(reviewsContainer) reviewsContainer.innerHTML = '';
-      
-      bookReviewsRef.limitToLast(20).on('child_added', (snap) => {
-        const review = snap.val();
-        const div = document.createElement('div');
-        div.style.cssText = 'background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 0.5rem; animation: pulseGlow 1s ease-out;';
-        div.innerHTML = `<strong style="color: #38bdf8;">${review.username}:</strong> ${review.text}`;
-        // Add to top
-        reviewsContainer.insertBefore(div, reviewsContainer.firstChild);
-      });
-    } catch(e) {
-      console.warn("Firebase DB not fully available for Book Club.");
+    function loadLocalReviews() {
+      const localReviews = JSON.parse(localStorage.getItem('book_club_reviews') || '[]');
+      if (localReviews.length > 0 && reviewsContainer) {
+        reviewsContainer.innerHTML = ''; // Clear static placeholder
+        // Reverse so newest is on top
+        localReviews.slice().reverse().forEach(review => {
+          const div = document.createElement('div');
+          div.style.cssText = 'background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 0.5rem;';
+          div.innerHTML = `<strong style="color: #38bdf8;">${review.username}:</strong> ${review.text}`;
+          reviewsContainer.appendChild(div);
+        });
+      }
     }
+    
+    // Load immediately
+    loadLocalReviews();
 
     window.saveBookReview = function() {
       const usernameInput = document.getElementById('review-username');
@@ -593,16 +592,18 @@
       const escapedUsername = username.replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
       const escapedText = text.replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
       
-      if (bookReviewsRef) {
-        bookReviewsRef.push({
-          username: escapedUsername,
-          text: escapedText,
-          timestamp: Date.now()
-        });
-      } else {
-        // Fallback local
+      // Save to local storage
+      const localReviews = JSON.parse(localStorage.getItem('book_club_reviews') || '[]');
+      localReviews.push({ username: escapedUsername, text: escapedText, timestamp: Date.now() });
+      localStorage.setItem('book_club_reviews', JSON.stringify(localReviews));
+      
+      // Add to UI immediately
+      if (reviewsContainer) {
+        if (reviewsContainer.innerHTML.includes('DragonMaster:')) {
+          reviewsContainer.innerHTML = ''; // clear static on first real post
+        }
         const div = document.createElement('div');
-        div.style.cssText = 'background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 0.5rem;';
+        div.style.cssText = 'background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 0.5rem; animation: pulseGlow 0.5s ease-out;';
         div.innerHTML = `<strong style="color: #38bdf8;">${escapedUsername}:</strong> ${escapedText}`;
         reviewsContainer.insertBefore(div, reviewsContainer.firstChild);
       }
