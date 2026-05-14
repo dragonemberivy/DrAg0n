@@ -77,8 +77,17 @@
               <li style="margin-bottom: 0.8rem;">If you were placed in the arena, what would be your survival strategy?</li>
             </ol>
             <div style="margin-top: 1rem;">
-              <textarea placeholder="Jot down your thoughts here..." style="width: 100%; height: 80px; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: white; resize: vertical; font-family: inherit; margin-bottom: 0.5rem;"></textarea>
-              <button style="width: 100%; background: rgba(56, 189, 248, 0.2); border-color: rgba(56, 189, 248, 0.5);">Save My Thoughts</button>
+              <input type="text" id="review-username" placeholder="Pick a username..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: white; font-family: inherit; margin-bottom: 0.5rem;">
+              <textarea id="review-text" placeholder="Jot down your thoughts here..." style="width: 100%; height: 80px; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: white; resize: vertical; font-family: inherit; margin-bottom: 0.5rem;"></textarea>
+              <button onclick="saveBookReview()" style="width: 100%; background: rgba(56, 189, 248, 0.2); border-color: rgba(56, 189, 248, 0.5); font-weight: bold; cursor: pointer;">Save My Thoughts</button>
+            </div>
+
+            <!-- Area to display reviews -->
+            <div id="reviews-container" style="margin-top: 1.5rem; max-height: 150px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; padding-right: 5px;">
+               <!-- Reviews will appear here -->
+               <div style="background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 8px; font-size: 0.85rem;">
+                 <strong style="color: #a855f7;">DragonMaster:</strong> I think Katniss is so brave! The Capitol is terrifying.
+               </div>
             </div>
           </div>
 

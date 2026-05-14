@@ -443,3 +443,35 @@
       if (typingRef && currentRoom) typingRef.child(userId).remove();
     });
 
+    // ------------------------------------
+    // 8. BOOK CLUB REVIEWS
+    // ------------------------------------
+    window.saveBookReview = function() {
+      const usernameInput = document.getElementById('review-username');
+      const textInput = document.getElementById('review-text');
+      const container = document.getElementById('reviews-container');
+      
+      const username = usernameInput.value.trim() || 'Anonymous';
+      const text = textInput.value.trim();
+      
+      if (!text) {
+        alert('Please write some thoughts before saving!');
+        return;
+      }
+      
+      // Escape HTML to prevent XSS
+      const escapedUsername = username.replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
+      const escapedText = text.replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
+      
+      const div = document.createElement('div');
+      div.style.cssText = 'background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 8px; font-size: 0.85rem;';
+      div.innerHTML = `<strong style="color: #38bdf8;">${escapedUsername}:</strong> ${escapedText}`;
+      
+      // Add to top of container
+      container.insertBefore(div, container.firstChild);
+      
+      // Clear input
+      textInput.value = '';
+      usernameInput.value = '';
+    };
+
