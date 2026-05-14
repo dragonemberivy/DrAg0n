@@ -444,12 +444,139 @@
     });
 
     // ------------------------------------
-    // 8. BOOK CLUB REVIEWS
+    // 8. BOOK CLUB ADVANCED FEATURES
     // ------------------------------------
+    
+    // A. 30 Book Schedule Generator
+    const masterBookList = [
+      { title: "The Hunger Games", img: "https://images.unsplash.com/photo-1629196914275-f7e48b488ddc?w=150&q=80" },
+      { title: "Percy Jackson", img: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=150&q=80" },
+      { title: "Harry Potter", img: "https://images.unsplash.com/photo-1618666012174-83b441c0bc76?w=150&q=80" },
+      { title: "A Wrinkle in Time", img: "https://images.unsplash.com/photo-1532012197267-da84d127e765?w=150&q=80" },
+      { title: "The Hobbit", img: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=150&q=80" },
+      { title: "Ender's Game", img: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=150&q=80" },
+      { title: "The Giver", img: "https://images.unsplash.com/photo-1518382410471-1258169f44fb?w=150&q=80" },
+      { title: "Eragon", img: "https://images.unsplash.com/photo-1519077184716-11f44005b630?w=150&q=80" },
+      { title: "The Golden Compass", img: "https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=150&q=80" },
+      { title: "Divergent", img: "https://images.unsplash.com/photo-1506806732259-39c2d0268443?w=150&q=80" },
+      { title: "The Maze Runner", img: "https://images.unsplash.com/photo-1518605368461-1ee7c16503c1?w=150&q=80" },
+      { title: "City of Bones", img: "https://images.unsplash.com/photo-1555562098-b8bc00962b1a?w=150&q=80" },
+      { title: "Artemis Fowl", img: "https://images.unsplash.com/photo-1535905557558-afc4877a26fc?w=150&q=80" },
+      { title: "Coraline", img: "https://images.unsplash.com/photo-1505664194779-8beaceb93744?w=150&q=80" },
+      { title: "Wonder", img: "https://images.unsplash.com/photo-1491841550275-ad7854e35ca6?w=150&q=80" },
+      { title: "The Chronicles of Narnia", img: "https://images.unsplash.com/photo-1473221326025-9183b464bb7e?w=150&q=80" },
+      { title: "Keeper of the Lost Cities", img: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=150&q=80" },
+      { title: "The Book Thief", img: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=150&q=80" },
+      { title: "Legend", img: "https://images.unsplash.com/photo-1524578971701-4470bcff05c2?w=150&q=80" },
+      { title: "Scythe", img: "https://images.unsplash.com/photo-1600573472591-ee6b68d14c68?w=150&q=80" },
+      { title: "Cinder", img: "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=150&q=80" },
+      { title: "The Outsiders", img: "https://images.unsplash.com/photo-1544716278-e513176f20b5?w=150&q=80" },
+      { title: "Holes", img: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=150&q=80" },
+      { title: "A Series of Unfortunate Events", img: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=150&q=80" },
+      { title: "The Graveyard Book", img: "https://images.unsplash.com/photo-1478147427282-58a87a120781?w=150&q=80" },
+      { title: "Bridge to Terabithia", img: "https://images.unsplash.com/photo-1448375240586-882707db888b?w=150&q=80" },
+      { title: "Out of My Mind", img: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=150&q=80" },
+      { title: "Shadow and Bone", img: "https://images.unsplash.com/photo-1507721999472-8ed4421c4af2?w=150&q=80" },
+      { title: "The Lightning Queen", img: "https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=150&q=80" },
+      { title: "The Crossover", img: "https://images.unsplash.com/photo-1491841550275-ad7854e35ca6?w=150&q=80" }
+    ];
+
+    const bookContainer = document.getElementById('book-schedule-container');
+    const audio = document.getElementById('page-turn-audio');
+    if (bookContainer) {
+      masterBookList.forEach((book, index) => {
+        const div = document.createElement('div');
+        div.className = 'book-item';
+        div.style.cssText = 'text-align: center; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: transform 0.2s;';
+        div.innerHTML = `
+          <div style="font-size: 0.7rem; color: #a855f7; font-weight: bold; margin-bottom: 2px;">Book ${index + 1}</div>
+          <img src="${book.img}" alt="${book.title}" style="width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: 4px; margin-bottom: 0.5rem; pointer-events: none;">
+          <p style="font-size: 0.8rem; font-weight: bold; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none;">${book.title}</p>
+        `;
+        div.addEventListener('mouseenter', () => {
+          audio.currentTime = 0;
+          audio.volume = 0.2;
+          audio.play().catch(e => {});
+        });
+        bookContainer.appendChild(div);
+      });
+    }
+
+    // B. Star Rating Logic
+    const stars = document.querySelectorAll('.star');
+    const starText = document.getElementById('star-rating-text');
+    let currentRating = 0;
+
+    stars.forEach(star => {
+      star.addEventListener('mouseover', function() {
+        const val = parseInt(this.getAttribute('data-value'));
+        stars.forEach(s => {
+          if(parseInt(s.getAttribute('data-value')) <= val) s.style.color = '#fbbf24';
+          else s.style.color = 'rgba(255,255,255,0.2)';
+        });
+      });
+      star.addEventListener('mouseout', function() {
+        stars.forEach(s => {
+          if(parseInt(s.getAttribute('data-value')) <= currentRating) {
+            s.style.color = '#fbbf24';
+            s.classList.add('active');
+          }
+          else {
+            s.style.color = 'rgba(255,255,255,0.2)';
+            s.classList.remove('active');
+          }
+        });
+      });
+      star.addEventListener('click', function() {
+        currentRating = parseInt(this.getAttribute('data-value'));
+        starText.textContent = `You rated it ${currentRating} stars!`;
+        starText.style.color = '#4ade80';
+      });
+    });
+
+    // C. Countdown Timer Logic
+    const countdownEl = document.getElementById('meeting-countdown');
+    if (countdownEl) {
+      // Set target to exactly 14 days from now
+      const targetDate = new Date().getTime() + (14 * 24 * 60 * 60 * 1000);
+      
+      setInterval(() => {
+        const now = new Date().getTime();
+        const distance = targetDate - now;
+        
+        const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((distance % (1000 * 60)) / 1000);
+        
+        countdownEl.innerHTML = `${d}d ${h.toString().padStart(2, '0')}h ${m.toString().padStart(2, '0')}m ${s.toString().padStart(2, '0')}s`;
+      }, 1000);
+    }
+
+    // D. Firebase Reviews Integration
+    let bookReviewsRef = null;
+    const reviewsContainer = document.getElementById('reviews-container');
+    
+    try {
+      bookReviewsRef = db.ref('book_club/reviews');
+      // Clear static review
+      if(reviewsContainer) reviewsContainer.innerHTML = '';
+      
+      bookReviewsRef.limitToLast(20).on('child_added', (snap) => {
+        const review = snap.val();
+        const div = document.createElement('div');
+        div.style.cssText = 'background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 0.5rem; animation: pulseGlow 1s ease-out;';
+        div.innerHTML = `<strong style="color: #38bdf8;">${review.username}:</strong> ${review.text}`;
+        // Add to top
+        reviewsContainer.insertBefore(div, reviewsContainer.firstChild);
+      });
+    } catch(e) {
+      console.warn("Firebase DB not fully available for Book Club.");
+    }
+
     window.saveBookReview = function() {
       const usernameInput = document.getElementById('review-username');
       const textInput = document.getElementById('review-text');
-      const container = document.getElementById('reviews-container');
       
       const username = usernameInput.value.trim() || 'Anonymous';
       const text = textInput.value.trim();
@@ -459,18 +586,23 @@
         return;
       }
       
-      // Escape HTML to prevent XSS
       const escapedUsername = username.replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
       const escapedText = text.replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
       
-      const div = document.createElement('div');
-      div.style.cssText = 'background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 8px; font-size: 0.85rem;';
-      div.innerHTML = `<strong style="color: #38bdf8;">${escapedUsername}:</strong> ${escapedText}`;
+      if (bookReviewsRef) {
+        bookReviewsRef.push({
+          username: escapedUsername,
+          text: escapedText,
+          timestamp: Date.now()
+        });
+      } else {
+        // Fallback local
+        const div = document.createElement('div');
+        div.style.cssText = 'background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 0.5rem;';
+        div.innerHTML = `<strong style="color: #38bdf8;">${escapedUsername}:</strong> ${escapedText}`;
+        reviewsContainer.insertBefore(div, reviewsContainer.firstChild);
+      }
       
-      // Add to top of container
-      container.insertBefore(div, container.firstChild);
-      
-      // Clear input
       textInput.value = '';
       usernameInput.value = '';
     };
