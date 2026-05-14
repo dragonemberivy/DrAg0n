@@ -450,35 +450,35 @@
     // A. 30 Book Schedule Generator
     const masterBookList = [
       { title: "The Hunger Games", img: "https://images.unsplash.com/photo-1629196914275-f7e48b488ddc?w=150&q=80" },
-      { title: "Percy Jackson", img: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=150&q=80" },
-      { title: "Harry Potter", img: "https://images.unsplash.com/photo-1618666012174-83b441c0bc76?w=150&q=80" },
+      { title: "Percy Jackson", img: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=150&q=80", read: true },
+      { title: "Harry Potter", img: "https://images.unsplash.com/photo-1618666012174-83b441c0bc76?w=150&q=80", read: true },
       { title: "A Wrinkle in Time", img: "https://images.unsplash.com/photo-1532012197267-da84d127e765?w=150&q=80" },
       { title: "The Hobbit", img: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=150&q=80" },
       { title: "Ender's Game", img: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=150&q=80" },
       { title: "The Giver", img: "https://images.unsplash.com/photo-1518382410471-1258169f44fb?w=150&q=80" },
-      { title: "Eragon", img: "https://images.unsplash.com/photo-1519077184716-11f44005b630?w=150&q=80" },
+      { title: "Eragon", img: "https://images.unsplash.com/photo-1519077184716-11f44005b630?w=150&q=80", read: true },
       { title: "The Golden Compass", img: "https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=150&q=80" },
       { title: "Divergent", img: "https://images.unsplash.com/photo-1506806732259-39c2d0268443?w=150&q=80" },
-      { title: "The Maze Runner", img: "https://images.unsplash.com/photo-1518605368461-1ee7c16503c1?w=150&q=80" },
+      { title: "The Maze Runner", img: "https://images.unsplash.com/photo-1518605368461-1ee7c16503c1?w=150&q=80", read: true },
       { title: "City of Bones", img: "https://images.unsplash.com/photo-1555562098-b8bc00962b1a?w=150&q=80" },
-      { title: "Artemis Fowl", img: "https://images.unsplash.com/photo-1535905557558-afc4877a26fc?w=150&q=80" },
+      { title: "Artemis Fowl", img: "https://images.unsplash.com/photo-1535905557558-afc4877a26fc?w=150&q=80", read: true },
       { title: "Coraline", img: "https://images.unsplash.com/photo-1505664194779-8beaceb93744?w=150&q=80" },
       { title: "Wonder", img: "https://images.unsplash.com/photo-1491841550275-ad7854e35ca6?w=150&q=80" },
-      { title: "The Chronicles of Narnia", img: "https://images.unsplash.com/photo-1473221326025-9183b464bb7e?w=150&q=80" },
-      { title: "Keeper of the Lost Cities", img: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=150&q=80" },
+      { title: "The Chronicles of Narnia", img: "https://images.unsplash.com/photo-1473221326025-9183b464bb7e?w=150&q=80", read: true },
+      { title: "Keeper of the Lost Cities", img: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=150&q=80", read: true },
       { title: "The Book Thief", img: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=150&q=80" },
       { title: "Legend", img: "https://images.unsplash.com/photo-1524578971701-4470bcff05c2?w=150&q=80" },
       { title: "Scythe", img: "https://images.unsplash.com/photo-1600573472591-ee6b68d14c68?w=150&q=80" },
       { title: "Cinder", img: "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=150&q=80" },
       { title: "The Outsiders", img: "https://images.unsplash.com/photo-1544716278-e513176f20b5?w=150&q=80" },
-      { title: "Holes", img: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=150&q=80" },
+      { title: "Holes", img: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=150&q=80", read: true },
       { title: "A Series of Unfortunate Events", img: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=150&q=80" },
       { title: "The Graveyard Book", img: "https://images.unsplash.com/photo-1478147427282-58a87a120781?w=150&q=80" },
       { title: "Bridge to Terabithia", img: "https://images.unsplash.com/photo-1448375240586-882707db888b?w=150&q=80" },
       { title: "Out of My Mind", img: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=150&q=80" },
       { title: "Shadow and Bone", img: "https://images.unsplash.com/photo-1507721999472-8ed4421c4af2?w=150&q=80" },
       { title: "The Lightning Queen", img: "https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=150&q=80" },
-      { title: "The Crossover", img: "https://images.unsplash.com/photo-1491841550275-ad7854e35ca6?w=150&q=80" }
+      { title: "The Crossover", img: "https://images.unsplash.com/photo-1491841550275-ad7854e35ca6?w=150&q=80", read: true }
     ];
 
     const bookContainer = document.getElementById('book-schedule-container');
@@ -487,11 +487,15 @@
       masterBookList.forEach((book, index) => {
         const div = document.createElement('div');
         div.className = 'book-item';
-        div.style.cssText = 'text-align: center; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: transform 0.2s;';
+        div.style.cssText = 'text-align: center; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: transform 0.2s; position: relative;';
+        
+        let readBadge = book.read ? `<div style="position: absolute; top: 0; right: 0; background: #4ade80; color: #111; font-weight: bold; padding: 2px 5px; font-size: 0.6rem; border-radius: 0 8px 0 8px; z-index: 2;">✅ READ</div>` : '';
+        
         div.innerHTML = `
+          ${readBadge}
           <div style="font-size: 0.7rem; color: #a855f7; font-weight: bold; margin-bottom: 2px;">Book ${index + 1}</div>
-          <img src="${book.img}" alt="${book.title}" style="width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: 4px; margin-bottom: 0.5rem; pointer-events: none;">
-          <p style="font-size: 0.8rem; font-weight: bold; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none;">${book.title}</p>
+          <img src="${book.img}" alt="${book.title}" style="width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: 4px; margin-bottom: 0.5rem; pointer-events: none; opacity: ${book.read ? '0.6' : '1'}">
+          <p style="font-size: 0.8rem; font-weight: bold; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; color: ${book.read ? '#aaa' : '#fff'};">${book.title}</p>
         `;
         div.addEventListener('mouseenter', () => {
           audio.currentTime = 0;
