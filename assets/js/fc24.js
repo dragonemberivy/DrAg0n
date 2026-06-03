@@ -1127,7 +1127,7 @@ window.toggleSoundMute = function() {
   audioCtrl.playClick();
 };
 
-// --- MATCH SIMULATOR & PLAYABLE 2D SOCCER GAME ---
+// --- MATCH SIMULATOR & PLAYABLE 3D SOCCER GAME (Three.js WebGL) ---
 let matchTickerInterval = null;
 let matchMinute = 0;
 let homeScore = 0;
@@ -1135,32 +1135,37 @@ let awayScore = 0;
 let currentOpponent = "";
 let animationFrameId = null;
 let canvas = null;
-let ctx = null;
+let ctx = null; // Unused in WebGL mode, but kept for compatibility
+
+// 3D Scene variables
+let scene3d = null;
+let camera3d = null;
+let renderer3d = null;
+let ballMesh = null;
+let pitchPlane = null;
 
 // Game State Variables
 let gameActive = false;
-let matchTimerSeconds = 0; // 60 seconds total match time (1s = 1.5 virtual match minutes)
-let controlledPlayerIndex = 0; // Index of player we control (blue circle)
+let matchTimerSeconds = 0; // 60 seconds total match time
+let controlledPlayerIndex = 0; // Index of player we control
 
 // Keyboard Controls State
 const keysPressed = {};
 
-// Game Entities
+// Game Entities (Physics coordinates)
 let ball = {
   x: 325, y: 200,
   vx: 0, vy: 0,
   radius: 6,
-  owner: null, // null, or player object
+  owner: null,
   lastOwner: null,
   tackleCooldown: 0
 };
 
-// Players and Opponent arrays
-let homePlayers = []; // Your 4-3-3 squad on the pitch
-let opponentPlayers = []; // AI Opponents (Red)
+let homePlayers = []; 
+let opponentPlayers = []; 
 let opponentGoalkeeper = { x: 625, y: 200, radius: 10, targetY: 200, speed: 2 };
 
-// 4-3-3 Pitch Coordinates (Attacking left to right)
 const baseCoordinates433 = {
   GK: { x: 45, y: 200 },
   LB: { x: 180, y: 80 },
@@ -1175,10 +1180,9 @@ const baseCoordinates433 = {
   RW: { x: 480, y: 320 }
 };
 
-// Key event listeners
+// Keyboard listener
 window.addEventListener("keydown", (e) => {
   keysPressed[e.key.toLowerCase()] = true;
-  // Prevent spacebar or arrow keys from scrolling the webpage while in game
   if (["space", "arrowup", "arrowdown", "arrowleft", "arrowright"].includes(e.key.toLowerCase())) {
     e.preventDefault();
   }
@@ -1187,15 +1191,228 @@ window.addEventListener("keyup", (e) => {
   keysPressed[e.key.toLowerCase()] = false;
 });
 
+// Initialize 3D Engine
+function init3DScene() {
+  if (!canvas) return;
+  try {
+    scene3d = new THREE.Scene();
+    scene3d.background = new THREE.Color("#05030d");
+    
+    const rect = canvas.parentNode.getBoundingClientRect();
+    camera3d = new THREE.PerspectiveCamera(40, rect.width / rect.height, 0.1, 1000);
+    camera3d.position.set(0, 24, 26);
+    
+    renderer3d = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+    renderer3d.setSize(rect.width, rect.height);
+    renderer3d.shadowMap.enabled = true;
+    
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
+    scene3d.add(ambientLight);
+    
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.85);
+    dirLight.position.set(15, 35, 15);
+    dirLight.castShadow = true;
+    dirLight.shadow.mapSize.width = 512;
+    dirLight.shadow.mapSize.height = 512;
+    scene3d.add(dirLight);
+    
+    build3DPitch();
+    
+    // Create 3D Ball
+    const ballGeo = new THREE.SphereGeometry(0.5, 16, 16);
+    const ballMat = new THREE.MeshPhongMaterial({ color: 0xffffff, shininess: 40 });
+    ballMesh = new THREE.Mesh(ballGeo, ballMat);
+    ballMesh.castShadow = true;
+    scene3d.add(ballMesh);
+    
+    window.addEventListener("resize", onWindowResize);
+  } catch (err) {
+    console.error("Three.js Init Error:", err);
+  }
+}
+
+function onWindowResize() {
+  if (!canvas || !renderer3d || !camera3d) return;
+  const rect = canvas.parentNode.getBoundingClientRect();
+  renderer3d.setSize(rect.width, rect.height);
+  camera3d.aspect = rect.width / rect.height;
+  camera3d.updateProjectionMatrix();
+}
+
+function createPitchTexture() {
+  const texCanvas = document.createElement("canvas");
+  texCanvas.width = 1024;
+  texCanvas.height = 512;
+  const tCtx = texCanvas.getContext("2d");
+  
+  tCtx.fillStyle = "#1e4620";
+  tCtx.fillRect(0, 0, texCanvas.width, texCanvas.height);
+  
+  tCtx.fillStyle = "#224f24";
+  const stripeW = texCanvas.width / 13;
+  for (let i = 0; i < 13; i += 2) {
+    tCtx.fillRect(i * stripeW, 0, stripeW, texCanvas.height);
+  }
+  
+  tCtx.strokeStyle = "rgba(255,255,255,0.45)";
+  tCtx.lineWidth = 4;
+  tCtx.strokeRect(30, 30, texCanvas.width - 60, texCanvas.height - 60);
+  
+  tCtx.beginPath();
+  tCtx.moveTo(texCanvas.width / 2, 30);
+  tCtx.lineTo(texCanvas.width / 2, texCanvas.height - 30);
+  tCtx.stroke();
+  
+  tCtx.beginPath();
+  tCtx.arc(texCanvas.width / 2, texCanvas.height / 2, 80, 0, Math.PI * 2);
+  tCtx.stroke();
+  tCtx.beginPath();
+  tCtx.arc(texCanvas.width / 2, texCanvas.height / 2, 5, 0, Math.PI * 2);
+  tCtx.fillStyle = "rgba(255,255,255,0.6)";
+  tCtx.fill();
+  
+  tCtx.strokeRect(30, 130, 120, 252);
+  tCtx.strokeRect(texCanvas.width - 150, 130, 120, 252);
+  
+  return new THREE.CanvasTexture(texCanvas);
+}
+
+function build3DPitch() {
+  const pitchGeo = new THREE.PlaneGeometry(65, 40);
+  const pitchTex = createPitchTexture();
+  const pitchMat = new THREE.MeshStandardMaterial({ map: pitchTex, roughness: 0.95 });
+  const pitchMesh = new THREE.Mesh(pitchGeo, pitchMat);
+  pitchMesh.rotation.x = -Math.PI / 2;
+  pitchMesh.receiveShadow = true;
+  scene3d.add(pitchMesh);
+  
+  pitchPlane = pitchMesh;
+  
+  const postMat = new THREE.MeshPhongMaterial({ color: 0xffffff, shininess: 50 });
+  const crossbarGeo = new THREE.CylinderGeometry(0.12, 0.12, 11.0, 8);
+  const postGeo = new THREE.CylinderGeometry(0.12, 0.12, 5.5, 8);
+  
+  const leftGoal = new THREE.Group();
+  const postL1 = new THREE.Mesh(postGeo, postMat);
+  postL1.position.set(0, 2.75, -5.5);
+  const postL2 = new THREE.Mesh(postGeo, postMat);
+  postL2.position.set(0, 2.75, 5.5);
+  const crossL = new THREE.Mesh(crossbarGeo, postMat);
+  crossL.rotation.x = Math.PI / 2;
+  crossL.position.set(0, 5.5, 0);
+  leftGoal.add(postL1, postL2, crossL);
+  leftGoal.position.set(-30.5, 0, 0);
+  scene3d.add(leftGoal);
+  
+  const rightGoal = new THREE.Group();
+  const postR1 = new THREE.Mesh(postGeo, postMat);
+  postR1.position.set(0, 2.75, -5.5);
+  const postR2 = new THREE.Mesh(postGeo, postMat);
+  postR2.position.set(0, 2.75, 5.5);
+  const crossR = new THREE.Mesh(crossbarGeo, postMat);
+  crossR.rotation.x = Math.PI / 2;
+  crossR.position.set(0, 5.5, 0);
+  rightGoal.add(postR1, postR2, crossR);
+  rightGoal.position.set(30.5, 0, 0);
+  scene3d.add(rightGoal);
+}
+
+function createPlayerLabelSprite(name, position, rating) {
+  const labelCanvas = document.createElement("canvas");
+  labelCanvas.width = 128;
+  labelCanvas.height = 48;
+  const lCtx = labelCanvas.getContext("2d");
+  
+  lCtx.fillStyle = "rgba(0, 0, 0, 0.7)";
+  lCtx.roundRect ? lCtx.roundRect(4, 4, 120, 40, 6) : lCtx.fillRect(4, 4, 120, 40);
+  lCtx.fill();
+  
+  lCtx.strokeStyle = "rgba(139, 92, 246, 0.75)";
+  lCtx.lineWidth = 2.0;
+  lCtx.stroke();
+  
+  lCtx.fillStyle = "#fbbf24";
+  lCtx.font = "bold 11px Outfit";
+  lCtx.fillText(`${position} (${rating})`, 12, 20);
+  
+  lCtx.fillStyle = "#ffffff";
+  lCtx.font = "10px Outfit";
+  lCtx.fillText(name.length > 15 ? name.substring(0, 13) + ".." : name, 12, 35);
+  
+  const texture = new THREE.CanvasTexture(labelCanvas);
+  const mat = new THREE.SpriteMaterial({ map: texture, depthTest: false });
+  const sprite = new THREE.Sprite(mat);
+  sprite.scale.set(3.5, 1.3, 1);
+  return sprite;
+}
+
+function build3DPlayerGroup(p, isOpponent = false, isGoalie = false) {
+  const group = new THREE.Group();
+  
+  const bodyGeo = new THREE.CylinderGeometry(0.4, 0.4, 1.6, 16);
+  const colorHex = isOpponent ? (isGoalie ? 0x7f1d1d : 0xef4444) : parseInt(p.color.replace("#", "0x"));
+  const bodyMat = new THREE.MeshPhongMaterial({ color: colorHex, shininess: 40 });
+  const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
+  bodyMesh.position.y = 0.8;
+  bodyMesh.castShadow = true;
+  group.add(bodyMesh);
+  
+  const headGeo = new THREE.SphereGeometry(0.3, 16, 16);
+  const headMat = new THREE.MeshPhongMaterial({ color: 0xffdbac, shininess: 20 });
+  const headMesh = new THREE.Mesh(headGeo, headMat);
+  headMesh.position.y = 1.8;
+  headMesh.castShadow = true;
+  group.add(headMesh);
+  
+  const labelSprite = createPlayerLabelSprite(isOpponent ? (isGoalie ? "Opp GK" : "AI Def") : p.name, isOpponent ? (isGoalie ? "GK" : "DEF") : p.position, isOpponent ? 80 : p.rating);
+  labelSprite.position.y = 2.6;
+  group.add(labelSprite);
+  
+  if (!isOpponent && homePlayers.indexOf(p) === controlledPlayerIndex) {
+    const ringGeo = new THREE.RingGeometry(0.65, 0.8, 16);
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide });
+    const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+    ringMesh.rotation.x = -Math.PI / 2;
+    ringMesh.position.y = 0.05;
+    group.add(ringMesh);
+    p.selectionRing3d = ringMesh;
+  }
+  
+  scene3d.add(group);
+  return group;
+}
+
+function updatePlayerSelectionRing() {
+  homePlayers.forEach((p, idx) => {
+    if (!p.mesh3d) return;
+    if (p.selectionRing3d) {
+      p.mesh3d.remove(p.selectionRing3d);
+      p.selectionRing3d = null;
+    }
+    if (idx === controlledPlayerIndex) {
+      const ringGeo = new THREE.RingGeometry(0.65, 0.8, 16);
+      const ringMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide });
+      const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+      ringMesh.rotation.x = -Math.PI / 2;
+      ringMesh.position.y = 0.05;
+      p.mesh3d.add(ringMesh);
+      p.selectionRing3d = ringMesh;
+    }
+  });
+}
+
 window.openMatchCenter = function() {
   try {
+    if (typeof THREE === "undefined") {
+      alert("Three.js WebGL Engine is loading, please try again in a second!");
+      return;
+    }
     audioCtrl.playClick();
     
     const overlay = document.getElementById("match-center-overlay");
     if (!overlay) throw new Error("match-center-overlay element is missing in HTML");
     overlay.style.display = "flex";
     
-    // Add the class list to fade in and activate pointer events
     setTimeout(() => {
       overlay.classList.add("show");
     }, 10);
@@ -1220,20 +1437,15 @@ window.openMatchCenter = function() {
     if (!awayTeam) throw new Error("match-away-team element is missing in HTML");
     awayTeam.textContent = currentOpponent;
     
-    // Initialize Canvas context
     canvas = document.getElementById("penalty-canvas");
     if (!canvas) return;
-    ctx = canvas.getContext("2d");
     
-    canvas.width = 650;
-    canvas.height = 400;
-    
-    // Render starting static pitch and start the rendering loop
+    init3DScene();
     initializeGameplayEntities();
     cancelAnimationFrame(animationFrameId);
     gameTick();
   } catch (err) {
-    alert("Error opening Match Center: " + err.message + "\n\nIf you have edited the HTML, please ensure all match overlay elements exist.");
+    alert("Error opening Match Center: " + err.message);
     console.error(err);
   }
 };
@@ -1247,40 +1459,43 @@ window.closeMatchCenter = function() {
     canvas.removeEventListener("click", handlePitchCanvasClick);
   }
   
+  if (renderer3d) {
+    renderer3d.dispose();
+    renderer3d = null;
+  }
+  scene3d = null;
+  camera3d = null;
+  ballMesh = null;
+  pitchPlane = null;
+  
+  window.removeEventListener("resize", onWindowResize);
+  
   const overlay = document.getElementById("match-center-overlay");
   if (overlay) {
     overlay.classList.remove("show");
     setTimeout(() => {
       overlay.style.display = "none";
-    }, 500); // Wait for transition fade out to complete
+    }, 500);
   }
   calculateSquadStats();
 };
 
 window.startSimulatedMatch = function() {
   document.getElementById("start-match-btn").style.display = "none";
-  
   gameActive = true;
   initializeGameplayEntities();
   startMatchTimer();
-  
-  // Bind canvas click event for passing/shooting
   canvas.addEventListener("click", handlePitchCanvasClick);
 };
 
 function startMatchTimer() {
-  matchTimerSeconds = 60; // 60 seconds total match time
+  matchTimerSeconds = 60;
   updateTimerDisplay();
-  
   matchTickerInterval = setInterval(() => {
     matchTimerSeconds--;
-    
-    // 60 seconds is 90 virtual minutes (1s = 1.5m)
     matchMinute = Math.round((60 - matchTimerSeconds) * 1.5);
     if (matchMinute > 90) matchMinute = 90;
-    
     updateTimerDisplay();
-    
     if (matchTimerSeconds <= 0) {
       clearInterval(matchTickerInterval);
       endGameplayMatch();
@@ -1298,10 +1513,10 @@ function updateTimerDisplay() {
 }
 
 function getPlayerColorByCardType(cardType) {
-  if (cardType === "icon") return "#d4af37"; // Icons get classic gold skins
-  if (cardType === "toty") return "#1e3a8a"; // Blue TOTY
-  if (cardType === "future-star") return "#db2777"; // Star Pink
-  if (cardType === "bronze-rare") return "#cd7f32"; // Bronze
+  if (cardType === "icon") return "#d4af37";
+  if (cardType === "toty") return "#1e3a8a";
+  if (cardType === "future-star") return "#db2777";
+  if (cardType === "bronze-rare") return "#cd7f32";
   return "#e2e8f0";
 }
 
@@ -1309,18 +1524,26 @@ function initializeGameplayEntities() {
   const avgRatingEl = document.getElementById("avg-rating-val");
   const currentOvr = avgRatingEl ? (parseInt(avgRatingEl.textContent) || 45) : 45;
   
-  // 1. Populate players based on active 4-3-3 squad builder cards
+  if (scene3d) {
+    homePlayers.forEach(p => {
+      if (p.mesh3d) scene3d.remove(p.mesh3d);
+    });
+    opponentPlayers.forEach(op => {
+      if (op.mesh3d) scene3d.remove(op.mesh3d);
+    });
+    if (opponentGoalkeeper && opponentGoalkeeper.mesh3d) {
+      scene3d.remove(opponentGoalkeeper.mesh3d);
+    }
+  }
+  
   homePlayers = [];
   Object.entries(squadState).forEach(([pos, pId]) => {
     if (pId) {
       const playerObj = allPlayersMap[pId];
       if (playerObj) {
-        // Retrieve stats or default to OVR rating
         const pace = playerObj.stats.pac || playerObj.stats.spd || playerObj.rating;
         const shooting = playerObj.stats.sho || playerObj.stats.div || playerObj.rating;
         const passing = playerObj.stats.pas || playerObj.stats.kic || playerObj.rating;
-        
-        // Base coordinate mapping
         const baseCoords = baseCoordinates433[pos] || { x: 300, y: 200 };
         
         homePlayers.push({
@@ -1341,23 +1564,20 @@ function initializeGameplayEntities() {
     }
   });
 
-  // Default control to Striker (ST) or first teammate
   controlledPlayerIndex = homePlayers.findIndex(p => p.position === "ST");
   if (controlledPlayerIndex === -1) controlledPlayerIndex = 0;
   
   if (homePlayers[controlledPlayerIndex]) {
-    // Spawn ball at player feet
     ball.x = homePlayers[controlledPlayerIndex].x + 14;
     ball.y = homePlayers[controlledPlayerIndex].y;
     ball.owner = homePlayers[controlledPlayerIndex];
   }
 
-  // 2. Initialize Opponent AI players (Red circles)
   opponentPlayers = [
-    { x: 380, y: 140, baseSpeed: 1.1, targetX: 380, targetY: 140, radius: 11 },
-    { x: 380, y: 260, baseSpeed: 1.1, targetX: 380, targetY: 260, radius: 11 },
-    { x: 480, y: 120, baseSpeed: 1.4, targetX: 480, targetY: 120, radius: 11 },
-    { x: 480, y: 280, baseSpeed: 1.4, targetX: 480, targetY: 280, radius: 11 }
+    { x: 380, y: 140, baseSpeed: 1.2, targetX: 380, targetY: 140, radius: 11, id: "opponent_1" },
+    { x: 380, y: 260, baseSpeed: 1.2, targetX: 380, targetY: 260, radius: 11, id: "opponent_2" },
+    { x: 480, y: 120, baseSpeed: 1.5, targetX: 480, targetY: 120, radius: 11, id: "opponent_3" },
+    { x: 480, y: 280, baseSpeed: 1.5, targetX: 480, targetY: 280, radius: 11, id: "opponent_4" }
   ];
 
   opponentGoalkeeper = {
@@ -1365,10 +1585,22 @@ function initializeGameplayEntities() {
     y: 200,
     radius: 12,
     targetY: 200,
-    speed: 1.1 + (currentOvr - 45) * 0.015 // Goalkeeper matches the team rating's pace slightly
+    speed: 1.1 + (currentOvr - 45) * 0.015,
+    id: "opponent_gk"
   };
 
-  // Reset ball velocities
+  if (scene3d) {
+    homePlayers.forEach(p => {
+      p.mesh3d = build3DPlayerGroup(p, false, false);
+    });
+    opponentPlayers.forEach(op => {
+      op.mesh3d = build3DPlayerGroup(op, true, false);
+    });
+    if (opponentGoalkeeper) {
+      opponentGoalkeeper.mesh3d = build3DPlayerGroup(opponentGoalkeeper, true, true);
+    }
+  }
+
   ball.vx = 0;
   ball.vy = 0;
   ball.tackleCooldown = 0;
@@ -1378,7 +1610,6 @@ function initializeGameplayEntities() {
 function updateGameplayLoop() {
   if (!gameActive) return;
 
-  // 1. Move the controlled player circle
   const player = homePlayers[controlledPlayerIndex];
   if (player) {
     let dx = 0;
@@ -1394,43 +1625,37 @@ function updateGameplayLoop() {
       dy *= 0.7071;
     }
     
-    // Pace determines speed: OVR maps to speed 1.7 to 4.0
-    const speed = 1.7 + (player.stats.pace / 100) * 2.3;
+    const speed = 1.8 + (player.stats.pace / 100) * 2.5;
     player.x += dx * speed;
     player.y += dy * speed;
     
-    // Pitch bounds checking
     player.x = Math.max(25, Math.min(625, player.x));
     player.y = Math.max(25, Math.min(375, player.y));
   }
 
-  // 2. Ball physics (tackles, rolling, friction)
   if (ball.tackleCooldown > 0) ball.tackleCooldown--;
 
   if (ball.owner) {
-    ball.x = ball.owner.x + 10;
+    ball.x = ball.owner.x + (ball.owner.id && ball.owner.id.startsWith("opponent_") ? -10 : 10);
     ball.y = ball.owner.y;
     ball.vx = 0;
     ball.vy = 0;
   } else {
     ball.x += ball.vx;
     ball.y += ball.vy;
-    ball.vx *= 0.96; // Grass rolling friction
+    ball.vx *= 0.96;
     ball.vy *= 0.96;
     
-    // Wall bounds rebounds
     if (ball.y <= 20 || ball.y >= 380) {
       ball.vy = -ball.vy * 0.7;
       ball.y = Math.max(20, Math.min(380, ball.y));
     }
     
-    // Check Goal Line (x >= 635, between y: 145 and 255)
     if (ball.x >= 630 && ball.y >= 145 && ball.y <= 255) {
-      triggerGoalScored(true); // GOAL!
+      triggerGoalScored(true);
     } else if (ball.x <= 20 && ball.y >= 145 && ball.y <= 255) {
-      triggerGoalScored(false); // Conceded goal
+      triggerGoalScored(false);
     } else {
-      // Rebounds off backlines
       if (ball.x <= 20) {
         ball.vx = -ball.vx * 0.7;
         ball.x = 20;
@@ -1442,92 +1667,159 @@ function updateGameplayLoop() {
     }
   }
 
-  // 3. Keep other teammates floating back toward formation slots
   homePlayers.forEach((p, idx) => {
     if (idx === controlledPlayerIndex) return;
-    const dx = p.targetX - p.x;
-    const dy = p.targetY - p.y;
-    p.x += dx * 0.04;
-    p.y += dy * 0.04;
-  });
-
-  // 4. Opponent defender AI (runs towards player with ball to tackle, else retreats)
-  opponentPlayers.forEach(op => {
-    if (ball.owner && !ball.owner.id.startsWith("opponent_")) {
-      const dx = ball.owner.x - op.x;
-      const dy = ball.owner.y - op.y;
-      const dist = Math.hypot(dx, dy);
+    
+    if (p.position === "GK") {
+      const targetY = Math.max(160, Math.min(240, ball.y));
+      const dy = targetY - p.y;
+      p.y += Math.sign(dy) * Math.min(Math.abs(dy), 2.2);
+      p.x = 45;
       
-      if (dist > 5) {
-        op.x += (dx / dist) * op.baseSpeed;
-        op.y += (dy / dist) * op.baseSpeed;
-      }
-      
-      // Perform tackle collision
-      if (dist < (op.radius + ball.owner.radius) && ball.tackleCooldown === 0) {
-        ball.owner = null;
-        ball.vx = -4.5 - Math.random() * 2.5; // Clear the ball leftwards
-        ball.vy = Math.random() * 4 - 2;
-        ball.tackleCooldown = 30; // 30 tick recovery before player can reclaim
+      const ballGkDist = Math.hypot(ball.x - p.x, ball.y - p.y);
+      if (ballGkDist < (p.radius + ball.radius) && !ball.owner) {
+        ball.vx = 7 + Math.random() * 4;
+        ball.vy = Math.random() * 6 - 3;
+        ball.tackleCooldown = 30;
         audioCtrl.playKick();
         
         const msg = document.getElementById("shootout-message");
         if (msg) {
           msg.style.display = "block";
-          msg.style.color = "#ef4444";
-          msg.textContent = "TACKLED! ⚔️";
+          msg.style.color = "#4ade80";
+          msg.textContent = "SAVED! 🧤";
           setTimeout(() => { msg.style.display = "none"; }, 800);
         }
       }
+      return;
+    }
+    
+    if (ball.owner && ball.owner.id && ball.owner.id.startsWith("opponent_")) {
+      const dx = ball.owner.x - p.x;
+      const dy = ball.owner.y - p.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist > 10) {
+        p.x += (dx / dist) * 1.5;
+        p.y += (dy / dist) * 1.5;
+      }
     } else {
-      // Return to baseline coordinates
-      const dx = op.targetX - op.x;
-      const dy = op.targetY - op.y;
-      op.x += dx * 0.03;
-      op.y += dy * 0.03;
+      const dx = p.targetX - p.x;
+      const dy = p.targetY - p.y;
+      p.x += dx * 0.04;
+      p.y += dy * 0.04;
+    }
+  });
+
+  opponentPlayers.forEach((op, opIdx) => {
+    if (ball.owner === op) {
+      const dx = 20 - op.x;
+      const dy = 200 - op.y;
+      const dist = Math.hypot(dx, dy);
       
-      // Kick loose balls away
+      op.x += (dx / dist) * op.baseSpeed;
+      op.y += (dy / dist) * op.baseSpeed;
+      
+      if (op.x < 240) {
+        audioCtrl.playKick();
+        ball.owner = null;
+        const shotAngle = Math.atan2(200 + (Math.random() * 60 - 30) - op.y, 20 - op.x);
+        ball.vx = Math.cos(shotAngle) * 7.5;
+        ball.vy = Math.sin(shotAngle) * 7.5;
+        ball.tackleCooldown = 35;
+        
+        const msg = document.getElementById("shootout-message");
+        if (msg) {
+          msg.style.display = "block";
+          msg.style.color = "#ef4444";
+          msg.textContent = "AI SHOT! ⚡";
+          setTimeout(() => { msg.style.display = "none"; }, 800);
+        }
+      } else {
+        if (Math.random() < 0.015) {
+          const passTargetIdx = (opIdx + 1) % opponentPlayers.length;
+          const targetOp = opponentPlayers[passTargetIdx];
+          audioCtrl.playPlace();
+          ball.owner = null;
+          const passAngle = Math.atan2(targetOp.y - op.y, targetOp.x - op.x);
+          ball.vx = Math.cos(passAngle) * 5.5;
+          ball.vy = Math.sin(passAngle) * 5.5;
+          ball.tackleCooldown = 20;
+        }
+      }
+    } else {
+      if (ball.owner && (!ball.owner.id || !ball.owner.id.startsWith("opponent_"))) {
+        const dx = ball.owner.x - op.x;
+        const dy = ball.owner.y - op.y;
+        const dist = Math.hypot(dx, dy);
+        
+        if (dist > 5) {
+          op.x += (dx / dist) * op.baseSpeed;
+          op.y += (dy / dist) * op.baseSpeed;
+        }
+        
+        if (dist < (op.radius + ball.owner.radius) && ball.tackleCooldown === 0) {
+          ball.owner = null;
+          ball.vx = -4.5 - Math.random() * 2.5;
+          ball.vy = Math.random() * 4 - 2;
+          ball.tackleCooldown = 35;
+          audioCtrl.playKick();
+          
+          const msg = document.getElementById("shootout-message");
+          if (msg) {
+            msg.style.display = "block";
+            msg.style.color = "#ef4444";
+            msg.textContent = "TACKLED! ⚔️";
+            setTimeout(() => { msg.style.display = "none"; }, 800);
+          }
+        }
+      } else {
+        const targetX = 650 - baseCoordinates433[Object.keys(baseCoordinates433)[opIdx + 5]].x;
+        const targetY = baseCoordinates433[Object.keys(baseCoordinates433)[opIdx + 5]].y;
+        
+        const dx = targetX - op.x;
+        const dy = targetY - op.y;
+        op.x += dx * 0.03;
+        op.y += dy * 0.03;
+      }
+      
       const ballDist = Math.hypot(ball.x - op.x, ball.y - op.y);
       if (ballDist < (op.radius + ball.radius) && ball.tackleCooldown === 0) {
-        ball.vx = -5.5 - Math.random() * 3;
-        ball.vy = Math.random() * 5 - 2.5;
-        ball.tackleCooldown = 40;
-        audioCtrl.playKick();
+        ball.owner = op;
+        audioCtrl.playPlace();
       }
     }
   });
 
-  // 5. Opponent Goalkeeper AI (tracks ball Y coord on the goal line)
   if (opponentGoalkeeper) {
     const gk = opponentGoalkeeper;
-    const targetY = Math.max(160, Math.min(240, ball.y));
-    const dy = targetY - gk.y;
-    gk.y += Math.sign(dy) * Math.min(Math.abs(dy), gk.speed);
-    
-    // Save block collision
-    const ballGkDist = Math.hypot(ball.x - gk.x, ball.y - gk.y);
-    if (ballGkDist < (gk.radius + ball.radius) && !ball.owner) {
+    if (ball.owner === gk) {
+      audioCtrl.playKick();
+      ball.owner = null;
       ball.vx = -7 - Math.random() * 4;
       ball.vy = Math.random() * 6 - 3;
-      audioCtrl.playKick();
+      ball.tackleCooldown = 30;
+    } else {
+      const targetY = Math.max(160, Math.min(240, ball.y));
+      const dy = targetY - gk.y;
+      gk.y += Math.sign(dy) * Math.min(Math.abs(dy), gk.speed);
       
-      const msg = document.getElementById("shootout-message");
-      if (msg) {
-        msg.style.display = "block";
-        msg.style.color = "#fbbf24";
-        msg.textContent = "SAVED! 🧤";
-        setTimeout(() => { msg.style.display = "none"; }, 800);
+      const ballGkDist = Math.hypot(ball.x - gk.x, ball.y - gk.y);
+      if (ballGkDist < (gk.radius + ball.radius) && ball.tackleCooldown === 0) {
+        if (!ball.owner) {
+          ball.owner = gk;
+          audioCtrl.playPlace();
+        }
       }
     }
   }
 
-  // 6. Claim loose balls
   if (!ball.owner && ball.tackleCooldown === 0) {
     homePlayers.forEach((p, idx) => {
       const dist = Math.hypot(ball.x - p.x, ball.y - p.y);
       if (dist < (p.radius + ball.radius)) {
         ball.owner = p;
         controlledPlayerIndex = idx;
+        updatePlayerSelectionRing();
         audioCtrl.playPlace();
       }
     });
@@ -1535,220 +1827,162 @@ function updateGameplayLoop() {
 }
 
 function drawPitchLoop() {
-  if (!ctx) return;
+  if (!scene3d || !renderer3d) return;
   try {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // Draw Field Grass (Dark Green)
-    ctx.fillStyle = "#1e4620";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // Grass stripes (alternating greens)
-    ctx.fillStyle = "#224f24";
-    for (let x = 0; x < canvas.width; x += 50) {
-      if ((x / 50) % 2 === 0) {
-        ctx.fillRect(x, 0, 25, canvas.height);
+    if (ballMesh) {
+      ballMesh.position.x = (ball.x - 325) / 10;
+      ballMesh.position.z = (ball.y - 200) / 10;
+      
+      if (!ball.owner && (Math.abs(ball.vx) > 0.1 || Math.abs(ball.vy) > 0.1)) {
+        const speed = Math.hypot(ball.vx, ball.vy);
+        if (speed > 4) {
+          ballMesh.position.y = Math.abs(Math.sin(Date.now() * 0.015)) * 1.5 + 0.5;
+        } else {
+          ballMesh.position.y = 0.5;
+        }
+        ballMesh.rotation.x += ball.vy * 0.05;
+        ballMesh.rotation.z -= ball.vx * 0.05;
+      } else {
+        ballMesh.position.y = 0.5;
       }
     }
     
-    // Draw Pitch Markings (White)
-    ctx.strokeStyle = "rgba(255,255,255,0.35)";
-    ctx.lineWidth = 2;
+    homePlayers.forEach(p => {
+      if (p.mesh3d) {
+        const targetX = (p.x - 325) / 10;
+        const targetZ = (p.y - 200) / 10;
+        p.mesh3d.position.x += (targetX - p.mesh3d.position.x) * 0.3;
+        p.mesh3d.position.z += (targetZ - p.mesh3d.position.z) * 0.3;
+        
+        const dx = targetX - p.mesh3d.position.x;
+        const dz = targetZ - p.mesh3d.position.z;
+        const dist = Math.hypot(dx, dz);
+        if (dist > 0.02) {
+          p.mesh3d.rotation.y = Math.atan2(-dz, dx);
+          p.mesh3d.rotation.z = Math.sin(Date.now() * 0.025) * 0.08;
+        } else {
+          p.mesh3d.rotation.z = 0;
+        }
+      }
+    });
     
-    // Boundary line
-    ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
-    
-    // Center line
-    ctx.beginPath();
-    ctx.moveTo(canvas.width / 2, 20);
-    ctx.lineTo(canvas.width / 2, canvas.height - 20);
-    ctx.stroke();
-    
-    // Center circle
-    ctx.beginPath();
-    ctx.arc(canvas.width / 2, canvas.height / 2, 50, 0, Math.PI * 2);
-    ctx.stroke();
-    
-    // Center spot
-    ctx.fillStyle = "rgba(255,255,255,0.45)";
-    ctx.beginPath();
-    ctx.arc(canvas.width / 2, canvas.height / 2, 3, 0, Math.PI * 2);
-    ctx.fill();
-    
-    // Penalty boxes
-    // Left box
-    ctx.strokeRect(20, 100, 80, 200);
-    // Right box
-    ctx.strokeRect(canvas.width - 100, 100, 80, 200);
-    
-    // Penalty Spots
-    ctx.beginPath();
-    ctx.arc(70, 200, 2.5, 0, Math.PI * 2);
-    ctx.arc(canvas.width - 70, 200, 2.5, 0, Math.PI * 2);
-    ctx.fill();
-    
-    // Draw Goal Nets (left and right)
-    ctx.fillStyle = "rgba(255,255,255,0.12)";
-    ctx.fillRect(5, 145, 15, 110);
-    ctx.fillRect(canvas.width - 20, 145, 15, 110);
-    
-    // Goal lines frame
-    ctx.strokeStyle = "#ffffff";
-    ctx.lineWidth = 3.5;
-    ctx.beginPath();
-    // left goalposts
-    ctx.moveTo(20, 145); ctx.lineTo(5, 145); ctx.lineTo(5, 255); ctx.lineTo(20, 255);
-    // right goalposts
-    ctx.moveTo(canvas.width - 20, 145); ctx.lineTo(canvas.width - 5, 145); ctx.lineTo(canvas.width - 5, 255); ctx.lineTo(canvas.width - 20, 255);
-    ctx.stroke();
-
-    // Draw Opponent AI defenders (Red Circles)
     opponentPlayers.forEach(op => {
-      ctx.fillStyle = "#ef4444"; // red
-      ctx.strokeStyle = "#991b1b";
-      ctx.lineWidth = 2.5;
-      ctx.beginPath();
-      ctx.arc(op.x, op.y, op.radius, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-    });
-
-    // Draw Opponent Goalkeeper (Dark Red)
-    if (opponentGoalkeeper) {
-      ctx.fillStyle = "#7f1d1d";
-      ctx.strokeStyle = "#ffffff";
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.arc(opponentGoalkeeper.x, opponentGoalkeeper.y, opponentGoalkeeper.radius, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 8px Outfit";
-      ctx.fillText("GK", opponentGoalkeeper.x - 5, opponentGoalkeeper.y + 3);
-    }
-
-    // Draw Teammates (Blue/Gold/Pink based on cardType)
-    homePlayers.forEach((p, idx) => {
-      ctx.fillStyle = p.color;
-      ctx.strokeStyle = (idx === controlledPlayerIndex) ? "#38bdf8" : "rgba(255,255,255,0.45)";
-      ctx.lineWidth = (idx === controlledPlayerIndex) ? 3.5 : 2.0;
-      
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-      
-      // Draw controlled ring highlight indicator
-      if (idx === controlledPlayerIndex) {
-        ctx.strokeStyle = "#fbbf24";
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius + 4, 0, Math.PI * 2);
-        ctx.stroke();
+      if (op.mesh3d) {
+        const targetX = (op.x - 325) / 10;
+        const targetZ = (op.y - 200) / 10;
+        op.mesh3d.position.x += (targetX - op.mesh3d.position.x) * 0.3;
+        op.mesh3d.position.z += (targetZ - op.mesh3d.position.z) * 0.3;
+        
+        const dx = targetX - op.mesh3d.position.x;
+        const dz = targetZ - op.mesh3d.position.z;
+        if (Math.hypot(dx, dz) > 0.02) {
+          op.mesh3d.rotation.y = Math.atan2(-dz, dx);
+        }
       }
-
-      // Draw position labels on circles
-      ctx.fillStyle = (p.color === "#d4af37" || p.color === "#e2e8f0") ? "#000000" : "#ffffff";
-      ctx.font = "bold 9px Outfit";
-      ctx.fillText(p.position, p.x - 6, p.y + 3);
     });
-
-    // Draw Ball shadow
-    ctx.fillStyle = "rgba(0,0,0,0.3)";
-    ctx.beginPath();
-    ctx.arc(ball.x + 2, ball.y + 3, ball.radius - 1.5, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Draw Ball
-    ctx.fillStyle = "#ffffff";
-    ctx.strokeStyle = "#000000";
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
     
-    // Draw ball center dot
-    ctx.fillStyle = "#000000";
-    ctx.beginPath();
-    ctx.arc(ball.x, ball.y, 1.5, 0, Math.PI * 2);
-    ctx.fill();
+    if (opponentGoalkeeper && opponentGoalkeeper.mesh3d) {
+      const targetX = (opponentGoalkeeper.x - 325) / 10;
+      const targetZ = (opponentGoalkeeper.y - 200) / 10;
+      opponentGoalkeeper.mesh3d.position.x += (targetX - opponentGoalkeeper.mesh3d.position.x) * 0.3;
+      opponentGoalkeeper.mesh3d.position.z += (targetZ - opponentGoalkeeper.mesh3d.position.z) * 0.3;
+    }
     
+    if (camera3d && ballMesh) {
+      const targetCamX = ballMesh.position.x * 0.7;
+      const targetCamZ = ballMesh.position.z + 18;
+      const targetCamY = 22;
+      
+      camera3d.position.x += (targetCamX - camera3d.position.x) * 0.05;
+      camera3d.position.z += (targetCamZ - camera3d.position.z) * 0.05;
+      camera3d.position.y += (targetCamY - camera3d.position.y) * 0.05;
+      
+      camera3d.lookAt(ballMesh.position.x, 0, ballMesh.position.z * 0.5);
+    }
+    
+    renderer3d.render(scene3d, camera3d);
   } catch (e) {
-    console.warn("Error drawing pitch scene:", e);
+    console.warn("Error in 3D draw loop:", e);
   }
 }
 
 function handlePitchCanvasClick(e) {
-  if (!gameActive || !ball.owner) return;
-  
-  const rect = canvas.getBoundingClientRect();
-  const clickX = ((e.clientX - rect.left) / rect.width) * canvas.width;
-  const clickY = ((e.clientY - rect.top) / rect.height) * canvas.height;
-  
-  const player = ball.owner;
-  
-  // Shoot vs Pass determination
-  if (clickX >= 480 && player.x >= 325) {
-    // SHOOT AT GOAL
-    audioCtrl.playKick();
+  if (!gameActive || !scene3d || !camera3d) return;
+  try {
+    const rect = canvas.getBoundingClientRect();
+    const mouse = new THREE.Vector2();
+    mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
     
-    const dx = clickX - player.x;
-    const dy = clickY - player.y;
-    const dist = Math.hypot(dx, dy);
+    const raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(mouse, camera3d);
+    const intersects = raycaster.intersectObject(pitchPlane);
     
-    // Shooting stat dictates shot speed: maps OVR rating to 5.5 - 12.0
-    const velocity = 5.5 + (player.stats.shooting / 100) * 6.5;
-    
-    ball.owner = null;
-    ball.vx = (dx / dist) * velocity;
-    ball.vy = (dy / dist) * velocity;
-    ball.tackleCooldown = 25;
-    
-    const msg = document.getElementById("shootout-message");
-    if (msg) {
-      msg.style.display = "block";
-      msg.style.color = "#38bdf8";
-      msg.textContent = "SHOT! ⚡";
-      setTimeout(() => { msg.style.display = "none"; }, 800);
-    }
-  } else {
-    // PASS TO TEAMMATE
-    let closestTeammateIndex = -1;
-    let minDist = Infinity;
-    
-    homePlayers.forEach((p, idx) => {
-      if (idx === controlledPlayerIndex) return;
-      const dist = Math.hypot(clickX - p.x, clickY - p.y);
-      if (dist < minDist) {
-        minDist = dist;
-        closestTeammateIndex = idx;
+    if (intersects.length > 0) {
+      const clickPoint = intersects[0].point;
+      const clickX = clickPoint.x * 10 + 325;
+      const clickY = clickPoint.z * 10 + 200;
+      
+      const player = ball.owner;
+      if (!player) return;
+      
+      if (clickX >= 480 && player.x >= 325) {
+        audioCtrl.playKick();
+        const dx = clickX - player.x;
+        const dy = clickY - player.y;
+        const dist = Math.hypot(dx, dy);
+        const velocity = 5.5 + (player.stats.shooting / 100) * 6.5;
+        
+        ball.owner = null;
+        ball.vx = (dx / dist) * velocity;
+        ball.vy = (dy / dist) * velocity;
+        ball.tackleCooldown = 25;
+        
+        const msg = document.getElementById("shootout-message");
+        if (msg) {
+          msg.style.display = "block";
+          msg.style.color = "#38bdf8";
+          msg.textContent = "SHOT! ⚡";
+          setTimeout(() => { msg.style.display = "none"; }, 800);
+        }
+      } else {
+        let closestTeammateIndex = -1;
+        let minDist = Infinity;
+        
+        homePlayers.forEach((p, idx) => {
+          if (idx === controlledPlayerIndex) return;
+          const dist = Math.hypot(clickX - p.x, clickY - p.y);
+          if (dist < minDist) {
+            minDist = dist;
+            closestTeammateIndex = idx;
+          }
+        });
+        
+        if (closestTeammateIndex !== -1 && minDist < 150) {
+          audioCtrl.playPlace();
+          const targetTeammate = homePlayers[closestTeammateIndex];
+          const dx = targetTeammate.x - player.x;
+          const dy = targetTeammate.y - player.y;
+          
+          const passAccuracy = player.stats.passing;
+          const drift = (100 - passAccuracy) * 0.15;
+          const angleOffset = (Math.random() * 2 - 1) * drift * (Math.PI / 180);
+          
+          const angle = Math.atan2(dy, dx) + angleOffset;
+          const passSpeed = 6.0;
+          
+          ball.owner = null;
+          ball.vx = Math.cos(angle) * passSpeed;
+          ball.vy = Math.sin(angle) * passSpeed;
+          ball.tackleCooldown = 15;
+          
+          controlledPlayerIndex = closestTeammateIndex;
+          updatePlayerSelectionRing();
+        }
       }
-    });
-    
-    if (closestTeammateIndex !== -1 && minDist < 150) {
-      audioCtrl.playPlace();
-      const targetTeammate = homePlayers[closestTeammateIndex];
-      
-      const dx = targetTeammate.x - player.x;
-      const dy = targetTeammate.y - player.y;
-      
-      // Passing accuracy scaling: lower passing rating adds random drift angles
-      const passAccuracy = player.stats.passing;
-      const drift = (100 - passAccuracy) * 0.15;
-      const angleOffset = (Math.random() * 2 - 1) * drift * (Math.PI / 180);
-      
-      const angle = Math.atan2(dy, dx) + angleOffset;
-      const passSpeed = 6.0;
-      
-      ball.owner = null;
-      ball.vx = Math.cos(angle) * passSpeed;
-      ball.vy = Math.sin(angle) * passSpeed;
-      ball.tackleCooldown = 15;
-      
-      // Switch controlled highlights immediately to allow receiving actions
-      controlledPlayerIndex = closestTeammateIndex;
     }
+  } catch (err) {
+    console.warn("Click raycast error:", err);
   }
 }
 
@@ -1757,17 +1991,14 @@ function gameTick() {
     updateGameplayLoop();
   }
   drawPitchLoop();
-  if (canvas) {
-    animationFrameId = requestAnimationFrame(gameTick);
-  }
+  animationFrameId = requestAnimationFrame(gameTick);
 }
 
 function triggerGoalScored(byPlayer) {
   ball.owner = null;
   ball.vx = 0;
   ball.vy = 0;
-  ball.tackleCooldown = 60; // 60 ticks before reclaiming
-  
+  ball.tackleCooldown = 60;
   audioCtrl.playCheer();
   
   const msg = document.getElementById("shootout-message");
@@ -1785,7 +2016,6 @@ function triggerGoalScored(byPlayer) {
     document.getElementById("match-score").textContent = `${homeScore} - ${awayScore}`;
     setTimeout(() => {
       msg.style.display = "none";
-      // Reposition ball at center and reset coordinates
       initializeGameplayEntities();
     }, 2000);
   }
@@ -1797,7 +2027,6 @@ function endGameplayMatch() {
   if (canvas) {
     canvas.removeEventListener("click", handlePitchCanvasClick);
   }
-  
   audioCtrl.playCheer();
   
   let resultReward = 50;
@@ -1816,7 +2045,6 @@ function endGameplayMatch() {
   
   const goalBonus = homeScore * 10;
   const totalPayout = resultReward + goalBonus;
-  
   dragonbux += totalPayout;
   updateDragonbuxDisplay();
   
@@ -1826,38 +2054,11 @@ function endGameplayMatch() {
     msg.style.color = color;
     msg.innerHTML = `MATCH ENDED!<br>RESULT: ${resultText}<br>Earned: ${totalPayout} DB`;
   }
-  
   document.getElementById("close-match-btn").style.display = "inline-block";
 }
 
 function endSimulatedMatch() {
-  clearInterval(matchTickerInterval);
-  cancelAnimationFrame(animationFrameId);
-  addCommentaryEntry("90'", "Referee blows the final whistle! Full time.", "#fbbf24");
-  
-  let resultReward = 50;
-  let resultText = "LOSS";
-  let color = "#ef4444";
-  
-  if (homeScore > awayScore) {
-    resultReward = 120;
-    resultText = "VICTORY";
-    color = "#4ade80";
-    audioCtrl.playCheer();
-  } else if (homeScore === awayScore) {
-    resultReward = 80;
-    resultText = "DRAW";
-    color = "#fbbf24";
-  }
-  
-  const goalBonus = homeScore * 10;
-  const totalPayout = resultReward + goalBonus;
-  
-  dragonbux += totalPayout;
-  updateDragonbuxDisplay();
-  
-  addCommentaryEntry("END", `MATCH RESULT: ${resultText}! Earned: ${resultReward} DB + ${goalBonus} DB Goal Bonus = ${totalPayout} DB!`, color);
-  document.getElementById("close-match-btn").style.display = "inline-block";
+  endGameplayMatch();
 }
 
 // --- INITIALIZE ON DOM LOAD ---

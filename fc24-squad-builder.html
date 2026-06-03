@@ -1118,37 +1118,37 @@
   </div>
 
   <!-- PLAYING PART: MATCH CENTER OVERLAY MODAL -->
-  <div id="match-center-overlay" class="celebration-banner-overlay" style="display:none;">
-    <div class="match-center-modal" style="background:#090616; border:2px solid var(--fut-purple); max-width: 800px; width:90%; padding:2rem; border-radius:16px; box-shadow: 0 10px 50px rgba(139, 92, 246, 0.4); overflow:hidden; position:relative; pointer-events:auto;">
-      <h2 style="text-align:center; font-style:italic; background:linear-gradient(135deg, #fbbf24, #d946ef); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size:2rem; margin-bottom:1rem;">Match Center</h2>
+  <div id="match-center-overlay" class="celebration-banner-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; padding:0; align-items:stretch; justify-content:stretch;">
+    <div class="match-center-modal" style="background:#05030d; border:none; width:100%; height:100%; max-width:100%; padding:1rem 1.5rem; border-radius:0; box-shadow:none; overflow:hidden; position:relative; pointer-events:auto; display:flex; flex-direction:column;">
+      <h2 style="text-align:center; font-style:italic; background:linear-gradient(135deg, #fbbf24, #d946ef); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size:1.6rem; margin-bottom:0.5rem; font-weight:900;">Match Center</h2>
       
       <!-- Scoreboard -->
-      <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.05); padding:1rem; border-radius:8px; margin-bottom:1rem; font-weight:800; font-size:1.2rem;">
+      <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.05); padding:0.8rem 1.5rem; border-radius:8px; margin-bottom:0.5rem; font-weight:800; font-size:1.1rem; border:1px solid rgba(255,255,255,0.05);">
         <span id="match-home-team">YOUR CLUB</span>
-        <span id="match-score" style="font-size:2rem; color:#fbbf24;">0 - 0</span>
+        <span id="match-score" style="font-size:1.8rem; color:#fbbf24;">0 - 0</span>
         <span id="match-away-team">OPPONENT FC</span>
       </div>
       
-      <!-- Interactive 2D Pitch Console -->
-      <div style="display:flex; flex-direction:column; align-items:center; position:relative; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.05); padding:1rem; border-radius:8px;">
-        <div style="display:flex; justify-content:space-between; width:100%; font-size:0.85rem; color:#fbbf24; font-weight:700; margin-bottom:6px; padding:0 4px;">
-          <span>⚽ 2D LIVE SQUAD GAMEPLAY</span>
+      <!-- Interactive 3D Pitch Console (fills screen) -->
+      <div style="display:flex; flex-direction:column; align-items:center; position:relative; background:rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.05); padding:0.8rem; border-radius:8px; flex:1; overflow:hidden;">
+        <div style="display:flex; justify-content:space-between; width:100%; font-size:0.8rem; color:#fbbf24; font-weight:700; margin-bottom:4px; padding:0 4px;">
+          <span id="gameplay-title-mode">🎮 3D FULLSCREEN SOCCER GAMEPLAY (FIFA MODE)</span>
           <span id="match-timer-display" style="color:#d946ef; font-family:monospace; font-size:0.95rem; font-weight:800;">TIME: 0:00 (1')</span>
         </div>
         
-        <div id="canvas-container" style="position:relative; width:100%; max-width:680px; aspect-ratio:1.6/1; background:#1b4b24; border-radius:8px; border:2px solid #122c16; overflow:hidden;">
+        <div id="canvas-container" style="position:relative; width:100%; flex:1; background:#1b4b24; border-radius:8px; border:2px solid #122c16; overflow:hidden;">
           <canvas id="penalty-canvas" style="width:100%; height:100%; display:block; cursor:crosshair;"></canvas>
-          <div id="shootout-message" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.85); border:1px solid var(--fut-purple); color:#fff; font-weight:800; padding:12px 24px; border-radius:8px; display:none; pointer-events:none; text-align:center; font-size:1.4rem; z-index:100; text-shadow: 0 0 10px rgba(139,92,246,0.5);"></div>
+          <div id="shootout-message" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.85); border:1px solid var(--fut-purple); color:#fff; font-weight:800; padding:12px 24px; border-radius:8px; display:none; pointer-events:none; text-align:center; font-size:1.5rem; z-index:100; text-shadow: 0 0 10px rgba(139,92,246,0.5);"></div>
         </div>
         
-        <div style="margin-top:10px; font-size:0.75rem; color:var(--text-gray); text-align:center; line-height:1.4; display:flex; justify-content:center; gap:20px; flex-wrap: wrap;">
+        <div style="margin-top:8px; font-size:0.72rem; color:var(--text-gray); text-align:center; line-height:1.3; display:flex; justify-content:center; gap:20px; flex-wrap: wrap;">
           <span>🕹️ <b>Move Dribbler</b>: WASD or Arrow Keys</span>
-          <span>🎯 <b>Pass</b>: Click on teammate (highlighted circles)</span>
-          <span>⚡ <b>Shoot</b>: Click on opponent's goal (on the right)</span>
+          <span>🎯 <b>Pass</b>: Click on teammate in 3D scene</span>
+          <span>⚡ <b>Shoot</b>: Click on opponent's goal on the right</span>
         </div>
       </div>
       
-      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:1.5rem;">
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:0.8rem;">
         <button id="start-match-btn" onclick="startSimulatedMatch()">Kick Off ⚽</button>
         <button id="close-match-btn" class="secondary-btn" onclick="closeMatchCenter()" style="display:none;">Leave Match Center</button>
       </div>
@@ -1383,6 +1383,8 @@
 
   </main>
 
+  <!-- Load Three.js WebGL Engine -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <!-- Load Game Script -->
   <script src="assets/js/fc24.js?v=20260603"></script>
 
