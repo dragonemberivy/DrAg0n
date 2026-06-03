@@ -1080,6 +1080,22 @@
       color-interpolation-filters: sRGB;
     }
 
+    /* Bronze Card style */
+    .fut-card.bronze-rare {
+      background: linear-gradient(135deg, #a8703c 0%, #cd7f32 50%, #7d4d21 100%);
+      box-shadow: 0 4px 15px rgba(205, 127, 50, 0.15);
+    }
+    .fut-card.bronze-rare .card-inner {
+      background: linear-gradient(180deg, #1f140a 0%, #0d0804 100%);
+      border: 1px solid rgba(205, 127, 50, 0.15);
+    }
+    .fut-card.bronze-rare .card-ovr,
+    .fut-card.bronze-rare .card-pos,
+    .fut-card.bronze-rare .card-name {
+      color: #cd7f32;
+      text-shadow: 0 0 10px rgba(205, 127, 50, 0.2);
+    }
+
   </style>
 </head>
 <body>
@@ -1092,6 +1108,48 @@
     <!-- Inserted dynamically on click -->
   </div>
 
+  <!-- PLAYING PART: MATCH CENTER OVERLAY MODAL -->
+  <div id="match-center-overlay" class="celebration-banner-overlay" style="display:none;">
+    <div class="match-center-modal" style="background:#090616; border:2px solid var(--fut-purple); max-width: 800px; width:90%; padding:2rem; border-radius:16px; box-shadow: 0 10px 50px rgba(139, 92, 246, 0.4); overflow:hidden; position:relative; pointer-events:auto;">
+      <h2 style="text-align:center; font-style:italic; background:linear-gradient(135deg, #fbbf24, #d946ef); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size:2rem; margin-bottom:1rem;">Match Center</h2>
+      
+      <!-- Scoreboard -->
+      <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.05); padding:1rem; border-radius:8px; margin-bottom:1rem; font-weight:800; font-size:1.2rem;">
+        <span id="match-home-team">YOUR CLUB</span>
+        <span id="match-score" style="font-size:2rem; color:#fbbf24;">0 - 0</span>
+        <span id="match-away-team">OPPONENT FC</span>
+      </div>
+      
+      <!-- Split Console -->
+      <div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:1.5rem; height: 320px;">
+        <!-- Left: Live Commentary -->
+        <div style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.05); padding:1rem; border-radius:8px; display:flex; flex-direction:column; overflow:hidden;">
+          <h4 style="color:#d946ef; margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:4px; font-size:0.9rem;">Match Commentary</h4>
+          <div id="commentary-ticker" style="flex:1; overflow-y:auto; font-family:monospace; font-size:0.8rem; line-height:1.4; display:flex; flex-direction:column; gap:6px; padding-right:4px;">
+            <!-- Commentary entries injected here -->
+          </div>
+        </div>
+        
+        <!-- Right: Interactive penalty gameplay -->
+        <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.05); padding:1rem; border-radius:8px; position:relative;">
+          <h4 id="penalty-title" style="color:#fbbf24; margin-bottom:8px; font-size:0.95rem;">Shootout Zone</h4>
+          <div id="canvas-container" style="position:relative; width:100%; aspect-ratio:4/3; background:#1b4b24; border-radius:8px; border:2px solid #162a19; overflow:hidden;">
+            <canvas id="penalty-canvas" style="width:100%; height:100%; display:block; cursor:crosshair;"></canvas>
+            <div id="shootout-message" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.85); border:1px solid var(--fut-purple); color:#fff; font-weight:800; padding:10px 20px; border-radius:8px; display:none; pointer-events:none; text-align:center; font-size:1.1rem; z-index:100;"></div>
+          </div>
+          <div style="margin-top:10px; font-size:0.72rem; color:var(--text-gray); text-align:center; line-height:1.3;">
+            Wait for a Shootout, then click inside the goal posts to shoot. Shot accuracy scales with Team Rating!
+          </div>
+        </div>
+      </div>
+      
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:1.5rem;">
+        <button id="start-match-btn" onclick="startSimulatedMatch()">Kick Off ⚽</button>
+        <button id="close-match-btn" class="secondary-btn" onclick="closeMatchCenter()" style="display:none;">Leave Match Center</button>
+      </div>
+    </div>
+  </div>
+
   <!-- STICKY HEADER -->
   <header>
     <div style="display:flex; align-items:center; gap: 15px;">
@@ -1100,8 +1158,13 @@
     </div>
     
     <div class="header-controls">
+      <div style="display:flex; align-items:center; gap:8px; font-weight:800; background:rgba(255,255,255,0.05); padding:0.5rem 1rem; border-radius:8px; border:1px solid rgba(255,255,255,0.1);">
+        <span style="color:#fbbf24;">🪙 Dragonbux:</span>
+        <span id="dragonbux-val" style="color:#fff;">150</span>
+      </div>
+      <button class="secondary-btn" id="launch-match-btn" onclick="openMatchCenter()">🎮 Play Match</button>
       <button id="sound-mute-btn" class="secondary-btn" onclick="toggleSoundMute()">🔊 Sound On</button>
-      <button id="open-pack-btn" onclick="openPack()">🎁 Open Legends Pack</button>
+      <button id="open-pack-btn" onclick="openPack()">🎁 Open Legends Pack (100 DB)</button>
     </div>
   </header>
 
@@ -1279,10 +1342,10 @@
       <div class="glass-panel" style="font-size:0.9rem; line-height:1.5; color: var(--text-gray);">
         <h3 style="color:#fff; margin-bottom:8px; font-size:1rem;">How to Play:</h3>
         <ul style="padding-left:1.2rem; display:flex; flex-direction:column; gap:6px;">
-          <li>Drag players from the Bench to their slots, or <strong>tap a bench card then tap a slot</strong> to place.</li>
-          <li>Match the card's position (e.g. GK, LB, ST) to the field position to gain <strong>Chemistry</strong>!</li>
-          <li>Build links (same nation/club/set) to boost Chemistry to 33/33.</li>
-          <li>Switch sets to try different squads.</li>
+          <li>Your pitch starts with a squad of **Horrible Bronze Players**. Play matches to earn **Dragonbux**!</li>
+          <li>Spend **100 Dragonbux** to open a pack and unlock a premium footballer one at a time.</li>
+          <li>Click a bench card, then click a slot to replace a horrible bronze player.</li>
+          <li>Aim and kick in the **Match Center** penalty shootouts to score and win games!</li>
         </ul>
       </div>
 

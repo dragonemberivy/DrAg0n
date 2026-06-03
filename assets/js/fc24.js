@@ -1,5 +1,5 @@
 /**
- * FC 24 Squad Builder & Pack Opener Game Logic
+ * FC 24 Squad Builder & Match Center Game Logic
  */
 
 // --- PLAYER DATASETS (4-3-3 Formation) ---
@@ -58,6 +58,21 @@ const playerSets = {
   ]
 };
 
+// --- HORRIBLE DEFAULT BRONZE PLAYERS ---
+const horriblePlayers = {
+  GK: { id: "h_bob", name: "Butterfingers Bob", rating: 45, position: "GK", nation: "😭 Trashland", club: "Bronze", cardType: "bronze-rare", stats: { div: 40, han: 42, kic: 38, ref: 45, spd: 30, pos: 41 } },
+  LB: { id: "h_carl", name: "Concrete Carl", rating: 48, position: "LB", nation: "😭 Trashland", club: "Bronze", cardType: "bronze-rare", stats: { pac: 22, sho: 28, pas: 35, dri: 31, def: 50, phy: 52 } },
+  LCB: { id: "h_ned", name: "No-Show Ned", rating: 47, position: "LCB", nation: "😭 Trashland", club: "Bronze", cardType: "bronze-rare", stats: { pac: 25, sho: 20, pas: 30, dri: 28, def: 49, phy: 50 } },
+  RCB: { id: "h_sam", name: "Stumbling Sam", rating: 49, position: "RCB", nation: "😭 Trashland", club: "Bronze", cardType: "bronze-rare", stats: { pac: 20, sho: 22, pas: 32, dri: 25, def: 52, phy: 54 } },
+  RB: { id: "h_willy", name: "Wrongway Willy", rating: 48, position: "RB", nation: "😭 Trashland", club: "Bronze", cardType: "bronze-rare", stats: { pac: 24, sho: 25, pas: 34, dri: 30, def: 48, phy: 50 } },
+  CDM: { id: "h_sid", name: "Sleepy Sid", rating: 50, position: "CDM", nation: "😭 Trashland", club: "Bronze", cardType: "bronze-rare", stats: { pac: 30, sho: 35, pas: 42, dri: 38, def: 52, phy: 50 } },
+  LCM: { id: "h_pete", name: "Passback Pete", rating: 51, position: "LCM", nation: "😭 Trashland", club: "Bronze", cardType: "bronze-rare", stats: { pac: 35, sho: 40, pas: 48, dri: 42, def: 48, phy: 48 } },
+  RCM: { id: "h_dan", name: "Dribbleless Dan", rating: 50, position: "RCM", nation: "😭 Trashland", club: "Bronze", cardType: "bronze-rare", stats: { pac: 32, sho: 42, pas: 40, dri: 45, def: 45, phy: 48 } },
+  LW: { id: "h_nick", name: "No-Shot Nick", rating: 52, position: "LW", nation: "😭 Trashland", club: "Bronze", cardType: "bronze-rare", stats: { pac: 42, sho: 40, pas: 45, dri: 48, def: 20, phy: 45 } },
+  ST: { id: "h_manny", name: "Missfire Manny", rating: 52, position: "ST", nation: "😭 Trashland", club: "Bronze", cardType: "bronze-rare", stats: { pac: 45, sho: 42, pas: 38, dri: 40, def: 22, phy: 50 } },
+  RW: { id: "h_steve", name: "Slowpoke Steve", rating: 51, position: "RW", nation: "😭 Trashland", club: "Bronze", cardType: "bronze-rare", stats: { pac: 40, sho: 42, pas: 44, dri: 45, def: 24, phy: 48 } }
+};
+
 // All players flattened into one lookup map
 const allPlayersMap = {};
 Object.values(playerSets).forEach(set => {
@@ -65,8 +80,53 @@ Object.values(playerSets).forEach(set => {
     allPlayersMap[p.id] = p;
   });
 });
+Object.values(horriblePlayers).forEach(p => {
+  allPlayersMap[p.id] = p;
+});
 
-// --- AUDIO SYNTHESIZER (Web Audio API) ---
+// --- STATE MANAGEMENT ---
+let currentSetIndex = 1;
+let dragonbux = parseInt(localStorage.getItem("dragonbux")) || 150;
+let unlockedPlayers = new Set();
+
+// Always unlock horrible players
+Object.values(horriblePlayers).forEach(p => unlockedPlayers.add(p.id));
+
+// Load saved unlocked players
+function loadUnlockedPlayers() {
+  try {
+    const list = JSON.parse(localStorage.getItem("unlocked_players"));
+    if (list) {
+      list.forEach(id => unlockedPlayers.add(id));
+    }
+  } catch (e) {
+    console.error("Error loading unlocked players", e);
+  }
+}
+function saveUnlockedPlayers() {
+  localStorage.setItem("unlocked_players", JSON.stringify(Array.from(unlockedPlayers)));
+}
+loadUnlockedPlayers();
+
+// Pre-fill starting squad with horrible bronze players
+const squadState = {
+  GK: "h_bob",
+  LB: "h_carl",
+  LCB: "h_ned",
+  RCB: "h_sam",
+  RB: "h_willy",
+  CDM: "h_sid",
+  LCM: "h_pete",
+  RCM: "h_dan",
+  LW: "h_nick",
+  ST: "h_manny",
+  RW: "h_steve"
+};
+
+// Mobile tap interaction state
+let selectedBenchCardId = null;
+
+// --- AUDIO SYNTHESIZER ---
 class AudioController {
   constructor() {
     this.ctx = null;
@@ -84,17 +144,13 @@ class AudioController {
     this.init();
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
-    
     osc.type = "sine";
     osc.frequency.setValueAtTime(300, this.ctx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(100, this.ctx.currentTime + 0.05);
-    
     gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
     gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.05);
-    
     osc.connect(gain);
     gain.connect(this.ctx.destination);
-    
     osc.start();
     osc.stop(this.ctx.currentTime + 0.05);
   }
@@ -103,20 +159,14 @@ class AudioController {
     if (this.muted) return;
     this.init();
     const osc = this.ctx.createOscillator();
-    const noiseNode = this.ctx.createBufferSource();
     const gain = this.ctx.createGain();
-    
-    // Synth pop
     osc.type = "triangle";
     osc.frequency.setValueAtTime(150, this.ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(450, this.ctx.currentTime + 0.1);
-    
+    osc.frequency.exponentialRampToValueAtTime(450, this.ctx.currentTime + 0.15);
     gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
-    
     osc.connect(gain);
     gain.connect(this.ctx.destination);
-    
     osc.start();
     osc.stop(this.ctx.currentTime + 0.15);
   }
@@ -124,38 +174,30 @@ class AudioController {
   playOpenPack() {
     if (this.muted) return;
     this.init();
-    
-    // Low rumble leading to explosion
     const rumbleOsc = this.ctx.createOscillator();
     const rumbleGain = this.ctx.createGain();
     rumbleOsc.type = "sawtooth";
     rumbleOsc.frequency.setValueAtTime(55, this.ctx.currentTime);
     rumbleOsc.frequency.linearRampToValueAtTime(110, this.ctx.currentTime + 1.2);
-    
     rumbleGain.gain.setValueAtTime(0.01, this.ctx.currentTime);
     rumbleGain.gain.linearRampToValueAtTime(0.15, this.ctx.currentTime + 1.2);
     rumbleGain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 1.3);
-    
     rumbleOsc.connect(rumbleGain);
     rumbleGain.connect(this.ctx.destination);
     rumbleOsc.start();
     rumbleOsc.stop(this.ctx.currentTime + 1.3);
 
-    // Triumphant sound at 1.2s
     setTimeout(() => {
       if (this.muted) return;
-      // Synthesize a fanfare
-      const notes = [261.63, 329.63, 392.00, 523.25]; // C major chord
+      const notes = [261.63, 329.63, 392.00, 523.25];
       notes.forEach((freq, idx) => {
         const oscF = this.ctx.createOscillator();
         const gainF = this.ctx.createGain();
         oscF.type = "sine";
         oscF.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.15);
-        
         gainF.gain.setValueAtTime(0, this.ctx.currentTime);
         gainF.gain.linearRampToValueAtTime(0.08, this.ctx.currentTime + idx * 0.15 + 0.05);
         gainF.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.15 + 0.8);
-        
         oscF.connect(gainF);
         gainF.connect(this.ctx.destination);
         oscF.start();
@@ -167,15 +209,12 @@ class AudioController {
   playCheer() {
     if (this.muted) return;
     this.init();
-    
-    // Synthesize stadium roar using white noise
-    const bufferSize = this.ctx.sampleRate * 2.5; // 2.5 seconds
+    const bufferSize = this.ctx.sampleRate * 2.5;
     const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
     const output = noiseBuffer.getChannelData(0);
     for (let i = 0; i < bufferSize; i++) {
       output[i] = Math.random() * 2 - 1;
     }
-    
     const whiteNoise = this.ctx.createBufferSource();
     whiteNoise.buffer = noiseBuffer;
     
@@ -192,55 +231,36 @@ class AudioController {
     whiteNoise.connect(filter);
     filter.connect(gain);
     gain.connect(this.ctx.destination);
-    
     whiteNoise.start();
     whiteNoise.stop(this.ctx.currentTime + 2.5);
-
-    // Play high arpeggio
-    const chord = [392.00, 493.88, 587.33, 783.99]; // G Major
-    chord.forEach((freq, idx) => {
-      const osc = this.ctx.createOscillator();
-      const oscGain = this.ctx.createGain();
-      osc.type = "sine";
-      osc.frequency.value = freq;
-      oscGain.gain.setValueAtTime(0, this.ctx.currentTime);
-      oscGain.gain.linearRampToValueAtTime(0.07, this.ctx.currentTime + idx * 0.1 + 0.05);
-      oscGain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.1 + 1.2);
-      osc.connect(oscGain);
-      oscGain.connect(this.ctx.destination);
-      osc.start();
-      osc.stop(this.ctx.currentTime + idx * 0.1 + 1.25);
-    });
+  }
+  
+  playKick() {
+    if (this.muted) return;
+    this.init();
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(80, this.ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(10, this.ctx.currentTime + 0.1);
+    gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.1);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.1);
   }
 }
-
 const audioCtrl = new AudioController();
 
-// --- STATE MANAGEMENT ---
-let currentSetIndex = 1;
-const squadState = {
-  GK: null,
-  LB: null,
-  LCB: null,
-  RCB: null,
-  RB: null,
-  CDM: null,
-  LCM: null,
-  RCM: null,
-  LW: null,
-  ST: null,
-  RW: null
-};
+// --- CURRENCY WRITING ---
+function updateDragonbuxDisplay() {
+  localStorage.setItem("dragonbux", dragonbux);
+  const el = document.getElementById("dragonbux-val");
+  if (el) el.textContent = dragonbux;
+}
 
-// Unlocked players from Pack Opener (start with default unlocked for legends, others need pack opening or are unlocked by default depending on mode)
-let unlockedPlayers = new Set();
-// Auto-unlock Set 1 so the user can play with the requested defaults immediately
-playerSets[1].forEach(p => unlockedPlayers.add(p.id));
-
-// Mobile interaction tap state
-let selectedBenchCardId = null;
-
-// --- FIREWORKS CANVAS ---
+// --- FIREWORKS ---
 class CelebrationFX {
   constructor(canvasId) {
     this.canvas = document.getElementById(canvasId);
@@ -248,81 +268,52 @@ class CelebrationFX {
     this.ctx = this.canvas.getContext("2d");
     this.particles = [];
     this.active = false;
-    
     window.addEventListener("resize", () => this.resize());
     this.resize();
   }
-
   resize() {
     if (!this.canvas) return;
     this.canvas.width = window.innerWidth;
     this.canvas.height = window.innerHeight;
   }
-
   start() {
     this.active = true;
     this.particles = [];
     this.resize();
     this.animate();
-    
-    // Spawn several bursts
     for (let i = 0; i < 8; i++) {
       setTimeout(() => this.spawnBurst(), i * 350);
     }
-    
-    setTimeout(() => {
-      this.active = false;
-    }, 4500);
+    setTimeout(() => { this.active = false; }, 4500);
   }
-
   spawnBurst() {
     if (!this.active) return;
     const x = Math.random() * this.canvas.width;
     const y = Math.random() * (this.canvas.height * 0.6) + this.canvas.height * 0.15;
     const colors = ["#fbbf24", "#38bdf8", "#a855f7", "#4ade80", "#f43f5e", "#22d3ee"];
     const baseColor = colors[Math.floor(Math.random() * colors.length)];
-    
     for (let i = 0; i < 45; i++) {
       const angle = Math.random() * Math.PI * 2;
       const speed = Math.random() * 6 + 2;
       this.particles.push({
-        x: x,
-        y: y,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
-        alpha: 1,
-        color: baseColor,
-        size: Math.random() * 3 + 2,
-        gravity: 0.08,
-        friction: 0.97
+        x: x, y: y,
+        vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+        alpha: 1, color: baseColor, size: Math.random() * 3 + 2,
+        gravity: 0.08, friction: 0.97
       });
     }
   }
-
   animate() {
     if (!this.active && this.particles.length === 0) {
-      if (this.ctx && this.canvas) {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      }
+      if (this.ctx && this.canvas) this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
       return;
     }
-    
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    
     for (let i = this.particles.length - 1; i >= 0; i--) {
       const p = this.particles[i];
-      p.vx *= p.friction;
-      p.vy *= p.friction;
-      p.vy += p.gravity;
-      p.x += p.vx;
-      p.y += p.vy;
-      p.alpha -= 0.015;
-      
-      if (p.alpha <= 0) {
-        this.particles.splice(i, 1);
-        continue;
-      }
-      
+      p.vx *= p.friction; p.vy *= p.friction; p.vy += p.gravity;
+      p.x += p.vx; p.y += p.vy; p.alpha -= 0.015;
+      if (p.alpha <= 0) { this.particles.splice(i, 1); continue; }
       this.ctx.save();
       this.ctx.globalAlpha = p.alpha;
       this.ctx.fillStyle = p.color;
@@ -331,81 +322,53 @@ class CelebrationFX {
       this.ctx.fill();
       this.ctx.restore();
     }
-    
     requestAnimationFrame(() => this.animate());
   }
 }
-
 let fxController = null;
 
-// --- CHEMISTRY CONNECTIONS DEFINITION (4-3-3 formation) ---
+// --- CHEMISTRY CONNECTIONS ---
 const chemLinks = [
-  { from: "GK", to: "LCB" },
-  { from: "GK", to: "RCB" },
-  
-  { from: "LB", to: "LCB" },
-  { from: "LB", to: "LCM" },
-  
-  { from: "RB", to: "RCB" },
-  { from: "RB", to: "RCM" },
-  
-  { from: "LCB", to: "RCB" },
-  { from: "LCB", to: "CDM" },
-  { from: "RCB", to: "CDM" },
-  
-  { from: "CDM", to: "LCM" },
-  { from: "CDM", to: "RCM" },
-  
-  { from: "LCM", to: "LW" },
-  { from: "LCM", to: "ST" },
-  
-  { from: "RCM", to: "RW" },
-  { from: "RCM", to: "ST" },
-  
-  { from: "LW", to: "ST" },
-  { from: "RW", to: "ST" }
+  { from: "GK", to: "LCB" }, { from: "GK", to: "RCB" },
+  { from: "LB", to: "LCB" }, { from: "LB", to: "LCM" },
+  { from: "RB", to: "RCB" }, { from: "RB", to: "RCM" },
+  { from: "LCB", to: "RCB" }, { from: "LCB", to: "CDM" }, { from: "RCB", to: "CDM" },
+  { from: "CDM", to: "LCM" }, { from: "CDM", to: "RCM" },
+  { from: "LCM", to: "LW" }, { from: "LCM", to: "ST" },
+  { from: "RCM", to: "RW" }, { from: "RCM", to: "ST" },
+  { from: "LW", to: "ST" }, { from: "RW", to: "ST" }
 ];
 
-// --- CHEMISTRY AND RATING COMPUTATION ---
 function calculateSquadStats() {
   let totalRating = 0;
   let filledCount = 0;
   let rawAvgRating = 0;
   let chemistry = 0;
-  
+
   const placedPlayers = Object.entries(squadState)
     .filter(([pos, pId]) => pId !== null)
     .map(([pos, pId]) => ({ slotPos: pos, player: allPlayersMap[pId] }));
     
   filledCount = placedPlayers.length;
   
-  // Calculate average rating
   if (filledCount > 0) {
-    placedPlayers.forEach(item => {
-      totalRating += item.player.rating;
-    });
-    rawAvgRating = Math.round(totalRating / 11); // Standardized to full team slots
+    placedPlayers.forEach(item => { totalRating += item.player.rating; });
+    rawAvgRating = Math.round(totalRating / 11);
   }
 
-  // Calculate chemistry for each player on pitch (maximum 3 points each)
-  // FC 24 Ultimate Team Chemistry logic:
-  // - A player gets 0 chemistry if placed in the wrong position.
-  // - Icons get 3 chemistry points automatically if in correct position.
-  // - Other players get chemistry based on matches:
-  //   - Base: 1 chem for being in the correct position.
-  //   - Nation link: +1 chem if there is at least one other player on pitch of the same nation.
-  //   - Club/Set link: +1 chem if there is at least one other player on pitch of the same club or set.
-  //   - Max is 3 per player.
-  
   const playerChemScore = {};
   
   placedPlayers.forEach(item => {
     const slot = item.slotPos;
     const p = item.player;
     
-    // Check correct position mapping
-    const isCorrectPos = (p.position === slot);
+    // Horrible default team players give 0 chemistry
+    if (p.id.startsWith("h_")) {
+      playerChemScore[p.id] = 0;
+      return;
+    }
     
+    const isCorrectPos = (p.position === slot);
     if (!isCorrectPos) {
       playerChemScore[p.id] = 0;
       return;
@@ -416,112 +379,75 @@ function calculateSquadStats() {
       return;
     }
     
-    let chem = 1; // Base correct position chem
-    
-    // Set match strength (number of players of the same set prefix on pitch)
+    let chem = 1;
     const currentSetPrefix = p.id.split("_")[0];
     const sameSetCount = placedPlayers.filter(other => other.player.id.split("_")[0] === currentSetPrefix).length;
     
-    if (sameSetCount >= 8) {
-      chem += 2;
-    } else if (sameSetCount >= 5) {
-      chem += 1;
-    }
+    if (sameSetCount >= 8) { chem += 2; }
+    else if (sameSetCount >= 5) { chem += 1; }
     
-    // Nation Match check (if not already maxed out)
     if (chem < 3) {
-      const hasNationMatch = placedPlayers.some(other => {
-        return other.player.id !== p.id && other.player.nation === p.nation;
-      });
+      const hasNationMatch = placedPlayers.some(other => other.player.id !== p.id && other.player.nation === p.nation);
       if (hasNationMatch) chem += 1;
     }
-    
-    // Club Match check (if not already maxed out)
     if (chem < 3) {
-      const hasClubMatch = placedPlayers.some(other => {
-        return other.player.id !== p.id && other.player.club === p.club;
-      });
+      const hasClubMatch = placedPlayers.some(other => other.player.id !== p.id && other.player.club === p.club);
       if (hasClubMatch) chem += 1;
     }
-    
     playerChemScore[p.id] = Math.min(chem, 3);
   });
   
-  // Sum up all chemistry
-  placedPlayers.forEach(item => {
-    chemistry += playerChemScore[item.player.id] || 0;
-  });
+  placedPlayers.forEach(item => { chemistry += playerChemScore[item.player.id] || 0; });
   
-  // Display chemistry
   document.getElementById("avg-rating-val").textContent = rawAvgRating;
   document.getElementById("avg-rating-progress").style.width = `${(rawAvgRating / 99) * 100}%`;
   document.getElementById("chem-val").textContent = `${chemistry}/33`;
   document.getElementById("chem-progress").style.width = `${(chemistry / 33) * 100}%`;
   
-  // Update slot chemistry indicators visually
   Object.keys(squadState).forEach(pos => {
     const pId = squadState[pos];
     const slotEl = document.querySelector(`.pitch-slot[data-pos="${pos}"]`);
     if (!slotEl) return;
-    
     const chemPipContainer = slotEl.querySelector(".chem-pips");
     if (!chemPipContainer) return;
-    
     chemPipContainer.innerHTML = "";
     
-    if (pId === null) {
+    if (pId === null) { slotEl.classList.remove("correct", "incorrect"); return; }
+    
+    const player = allPlayersMap[pId];
+    if (player.id.startsWith("h_")) {
       slotEl.classList.remove("correct", "incorrect");
       return;
     }
     
-    const player = allPlayersMap[pId];
     const score = playerChemScore[pId] || 0;
-    
     if (player.position === pos) {
       slotEl.classList.add("correct");
       slotEl.classList.remove("incorrect");
-      // Add green filled dots (max 3)
       for (let i = 0; i < 3; i++) {
         const dot = document.createElement("span");
-        if (i < score) {
-          dot.className = "pip active";
-        } else {
-          dot.className = "pip";
-        }
+        dot.className = (i < score) ? "pip active" : "pip";
         chemPipContainer.appendChild(dot);
       }
     } else {
       slotEl.classList.add("incorrect");
       slotEl.classList.remove("correct");
-      // Add red dot representing out of position
       const dot = document.createElement("span");
       dot.className = "pip active warning";
       chemPipContainer.appendChild(dot);
     }
   });
 
-  // Redraw SVG chemistry links
   drawChemistryLinks(playerChemScore);
   
-  // Check completion achievement
   if (chemistry === 33 && filledCount === 11) {
     triggerVictoryCelebration();
   }
 }
 
-// --- VICTORY CELEBRATION ---
-let lastVictoryTime = 0;
 function triggerVictoryCelebration() {
-  const now = Date.now();
-  if (now - lastVictoryTime < 10000) return; // Prevent spamming
-  lastVictoryTime = now;
-  
   audioCtrl.playCheer();
-  if (fxController) {
-    fxController.start();
-  }
-  
-  // Show celebration dialog overlay
+  if (fxController) fxController.start();
   const overlay = document.createElement("div");
   overlay.className = "celebration-banner-overlay";
   overlay.innerHTML = `
@@ -535,22 +461,13 @@ function triggerVictoryCelebration() {
     </div>
   `;
   document.body.appendChild(overlay);
-  
-  // Run CSS confetti/particles if supported
-  setTimeout(() => {
-    overlay.classList.add("show");
-  }, 10);
+  setTimeout(() => overlay.classList.add("show"), 10);
 }
 
-// --- SVG CHEMISTRY LINE DRAWER ---
 function drawChemistryLinks(playerChemScore) {
   const svg = document.getElementById("pitch-chem-svg");
   if (!svg) return;
-  
-  // Clear existing lines
   svg.innerHTML = "";
-  
-  // Fetch scale container bounds
   const pitchContainer = document.querySelector(".pitch-view-container");
   const pitchBounds = pitchContainer.getBoundingClientRect();
   
@@ -561,13 +478,10 @@ function drawChemistryLinks(playerChemScore) {
   chemLinks.forEach(link => {
     const slotFrom = document.querySelector(`.pitch-slot[data-pos="${link.from}"]`);
     const slotTo = document.querySelector(`.pitch-slot[data-pos="${link.to}"]`);
-    
     if (!slotFrom || !slotTo) return;
     
     const fromBounds = slotFrom.getBoundingClientRect();
     const toBounds = slotTo.getBoundingClientRect();
-    
-    // Relative coordinates
     const x1 = (fromBounds.left + fromBounds.width / 2) - pitchBounds.left;
     const y1 = (fromBounds.top + fromBounds.height / 2) - pitchBounds.top;
     const x2 = (toBounds.left + toBounds.width / 2) - pitchBounds.left;
@@ -575,45 +489,40 @@ function drawChemistryLinks(playerChemScore) {
     
     const pFromId = squadState[link.from];
     const pToId = squadState[link.to];
-    
-    let lineType = "empty"; // empty, inactive, active
-    let chemIntensity = 0;
+    let lineType = "empty";
     
     if (pFromId !== null && pToId !== null) {
       const pFrom = allPlayersMap[pFromId];
       const pTo = allPlayersMap[pToId];
       
-      const fromCorrect = (pFrom.position === link.from);
-      const toCorrect = (pTo.position === link.to);
-      
-      if (fromCorrect && toCorrect) {
-        // Evaluate connection relationship (same nation, same club, or same set)
-        const sameNation = pFrom.nation === pTo.nation;
-        const sameClub = pFrom.club === pTo.club;
-        const sameSet = pFrom.id.split("_")[0] === pTo.id.split("_")[0];
-        
-        if (sameNation || sameClub || sameSet || pFrom.cardType === "icon" || pTo.cardType === "icon") {
-          lineType = "active";
+      // Bronze players don't form chemistry links
+      if (!pFrom.id.startsWith("h_") && !pTo.id.startsWith("h_")) {
+        const fromCorrect = (pFrom.position === link.from);
+        const toCorrect = (pTo.position === link.to);
+        if (fromCorrect && toCorrect) {
+          const sameNation = pFrom.nation === pTo.nation;
+          const sameClub = pFrom.club === pTo.club;
+          const sameSet = pFrom.id.split("_")[0] === pTo.id.split("_")[0];
+          if (sameSet || sameNation || sameClub || pFrom.cardType === "icon" || pTo.cardType === "icon") {
+            lineType = "active";
+          } else {
+            lineType = "inactive";
+          }
         } else {
           lineType = "inactive";
         }
-      } else {
-        lineType = "inactive";
       }
     }
     
     const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    line.setAttribute("x1", x1);
-    line.setAttribute("y1", y1);
-    line.setAttribute("x2", x2);
-    line.setAttribute("y2", y2);
+    line.setAttribute("x1", x1); line.setAttribute("y1", y1);
+    line.setAttribute("x2", x2); line.setAttribute("y2", y2);
     
     if (lineType === "active") {
       line.setAttribute("stroke", "#4ade80");
       line.setAttribute("stroke-width", "3.5");
       line.setAttribute("filter", "url(#glow)");
       line.style.opacity = "0.95";
-      line.style.strokeDasharray = "none";
     } else if (lineType === "inactive") {
       line.setAttribute("stroke", "#e2e8f0");
       line.setAttribute("stroke-width", "1.5");
@@ -625,32 +534,24 @@ function drawChemistryLinks(playerChemScore) {
       line.style.opacity = "0.2";
       line.style.strokeDasharray = "4, 4";
     }
-    
     svg.appendChild(line);
   });
 }
 
-// Redraw lines on resize
-window.addEventListener("resize", () => {
-  calculateSquadStats();
-});
+window.addEventListener("resize", () => { calculateSquadStats(); });
 
-// --- CARD BUILDER COMPONENT ---
-function createCardHTML(p, showStats = true) {
+// --- CARD HTML RENDERING ---
+function createCardHTML(p) {
   const isGK = (p.position === "GK");
-  
-  // Custom theme labels
   let cardThemeClass = "rare-gold";
   if (p.cardType === "icon") cardThemeClass = "fut-icon";
   if (p.cardType === "toty") cardThemeClass = "fut-toty";
   if (p.cardType === "future-star") cardThemeClass = "fut-future-star";
+  if (p.cardType === "bronze-rare") cardThemeClass = "bronze-rare";
   
   const cardIdAttr = p.id ? `id="card-${p.id}"` : '';
-
-  // Get flag emoji and name
   const flagEmoji = p.nation.split(" ")[0];
   
-  // Outfield / GK Stats mapping
   const statsHTML = isGK ? `
     <div class="stat-col"><div>${p.stats.div}</div><div>DIV</div></div>
     <div class="stat-col"><div>${p.stats.han}</div><div>HAN</div></div>
@@ -667,7 +568,6 @@ function createCardHTML(p, showStats = true) {
     <div class="stat-col"><div>${p.stats.phy}</div><div>PHY</div></div>
   `;
 
-  // Mini Action Shot illustration background
   const silhouetteSVG = `
     <svg class="player-avatar" viewBox="0 0 100 100">
       <defs>
@@ -677,18 +577,14 @@ function createCardHTML(p, showStats = true) {
         </radialGradient>
       </defs>
       <circle cx="50" cy="40" r="30" fill="url(#avatarGlow-${p.id})" />
-      <!-- Stylized silhouette -->
       <path d="M50 15 C40 15 35 22 35 32 C35 45 42 48 50 48 C58 48 65 45 65 32 C65 22 60 15 50 15 Z M22 85 C22 70 30 58 50 58 C70 58 78 70 78 85 L22 85 Z" fill="rgba(255,255,255,0.7)" />
-      <!-- Accent colors dynamic matching card class -->
-      <path d="M35 58 Q50 64 65 58 L68 70 Q50 78 32 70 Z" fill="${p.cardType === 'icon' ? '#d4af37' : p.cardType === 'toty' ? '#38bdf8' : p.cardType === 'future-star' ? '#f43f5e' : '#fbbf24'}" opacity="0.8"/>
+      <path d="M35 58 Q50 64 65 58 L68 70 Q50 78 32 70 Z" fill="${p.cardType === 'icon' ? '#d4af37' : p.cardType === 'toty' ? '#38bdf8' : p.cardType === 'future-star' ? '#f43f5e' : p.cardType === 'bronze-rare' ? '#cd7f32' : '#fbbf24'}" opacity="0.8"/>
     </svg>
   `;
 
   return `
     <div ${cardIdAttr} class="fut-card ${cardThemeClass}" draggable="true" ondragstart="handleDragStart(event)" data-player-id="${p.id}">
       <div class="card-glow"></div>
-      
-      <!-- Top info: Rating & Pos -->
       <div class="card-top">
         <div class="card-rating-box">
           <span class="card-ovr">${p.rating}</span>
@@ -699,34 +595,21 @@ function createCardHTML(p, showStats = true) {
           <div class="card-badge" title="${p.club}">${p.club.substring(0, 3).toUpperCase()}</div>
         </div>
       </div>
-      
-      <!-- Action shot / Silhouette -->
-      <div class="card-avatar-container">
-        ${silhouetteSVG}
-      </div>
-      
-      <!-- Player Name -->
+      <div class="card-avatar-container">${silhouetteSVG}</div>
       <div class="card-name">${p.name}</div>
-      
       <div class="card-divider"></div>
-      
-      <!-- Attributes Stats -->
-      <div class="card-stats-grid">
-        ${statsHTML}
-      </div>
+      <div class="card-stats-grid">${statsHTML}</div>
     </div>
   `;
 }
 
-// Global tap selection helper
+// Global click handler
 function handleCardClick(card, playerId) {
   audioCtrl.playClick();
-  
   const parentSlot = card.closest(".pitch-slot");
   
   if (selectedBenchCardId) {
     if (parentSlot && selectedBenchCardId !== playerId) {
-      // If we clicked a card on the pitch, and a different card was selected, place/swap!
       placePlayerInSlot(selectedBenchCardId, parentSlot.dataset.pos);
       selectedBenchCardId = null;
       document.querySelectorAll(".fut-card").forEach(el => el.classList.remove("selected-tap"));
@@ -734,7 +617,6 @@ function handleCardClick(card, playerId) {
     }
   }
   
-  // Normal select/deselect toggling
   if (selectedBenchCardId === playerId) {
     selectedBenchCardId = null;
     card.classList.remove("selected-tap");
@@ -745,134 +627,89 @@ function handleCardClick(card, playerId) {
   }
 }
 
-// --- POPULATE BENCH / RESERVE LIST ---
+// --- BENCH POOL LIST ---
 function renderBench() {
   const bench = document.getElementById("bench-list");
   if (!bench) return;
-  
   bench.innerHTML = "";
   
   const activeSet = playerSets[currentSetIndex];
-  
-  // Filter out players already on the pitch
   const placedIds = Object.values(squadState);
-  const benchPlayers = activeSet.filter(p => !placedIds.includes(p.id));
+  
+  // Show unlocked players belonging to this active set who are NOT currently on the pitch
+  const benchPlayers = activeSet.filter(p => unlockedPlayers.has(p.id) && !placedIds.includes(p.id));
   
   if (benchPlayers.length === 0) {
-    bench.innerHTML = `<div style="grid-column: 1/-1; padding: 2rem; text-align: center; color: var(--text-muted);">🎉 All players placed on the pitch!</div>`;
+    bench.innerHTML = `
+      <div style="grid-column: 1/-1; padding: 2rem; text-align: center; color: var(--text-gray);">
+        <p>No players on bench. Open packs or swap players back here!</p>
+        <span style="font-size:0.85rem; opacity:0.6;">(Unlock players from "Roster Set ${currentSetIndex}" by opening packs)</span>
+      </div>`;
     return;
   }
   
   benchPlayers.forEach(p => {
-    const isUnlocked = unlockedPlayers.has(p.id);
-    
     const wrapper = document.createElement("div");
-    wrapper.className = `bench-item-wrapper ${isUnlocked ? '' : 'locked-pack'}`;
-    
-    if (isUnlocked) {
-      wrapper.innerHTML = createCardHTML(p);
-      const card = wrapper.querySelector(".fut-card");
-      
-      // Tap selection helper
-      card.addEventListener("click", (e) => {
-        e.stopPropagation();
-        handleCardClick(card, p.id);
-      });
-      
-      // Add dynamic 3D tilt effects
-      applyCardTiltEffect(card);
-    } else {
-      wrapper.innerHTML = `
-        <div class="locked-card-placeholder">
-          <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔒</div>
-          <div style="font-size: 0.9rem; font-weight: bold;">Locked</div>
-          <div style="font-size: 0.75rem; color: #a855f7;">Open Pack to Unlock!</div>
-        </div>
-      `;
-    }
-    
+    wrapper.className = "bench-item-wrapper";
+    wrapper.innerHTML = createCardHTML(p);
+    const card = wrapper.querySelector(".fut-card");
+    card.addEventListener("click", (e) => {
+      e.stopPropagation();
+      handleCardClick(card, p.id);
+    });
+    applyCardTiltEffect(card);
     bench.appendChild(wrapper);
   });
 }
 
-// --- 3D TILT EFFECT FOR PREMIUM CARDS ---
 function applyCardTiltEffect(card) {
   card.addEventListener("mousemove", (e) => {
     const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left; // x position within element
-    const y = e.clientY - rect.top;  // y position within element
-    
-    const xc = rect.width / 2;
-    const yc = rect.height / 2;
-    
-    const angleX = (yc - y) / 10; // Max tilt degrees
-    const angleY = (x - xc) / 10;
-    
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const xc = rect.width / 2; const yc = rect.height / 2;
+    const angleX = (yc - y) / 10; const angleY = (x - xc) / 10;
     card.style.transform = `perspective(500px) rotateX(${angleX}deg) rotateY(${angleY}deg) scale(1.03)`;
-    
-    // Position reflection glow
     const glow = card.querySelector(".card-glow");
     if (glow) {
       glow.style.background = `radial-gradient(circle at ${(x / rect.width) * 100}% ${(y / rect.height) * 100}%, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0) 60%)`;
     }
   });
-  
   card.addEventListener("mouseleave", () => {
     card.style.transform = "perspective(500px) rotateX(0deg) rotateY(0deg) scale(1)";
     const glow = card.querySelector(".card-glow");
-    if (glow) {
-      glow.style.background = "none";
-    }
+    if (glow) glow.style.background = "none";
   });
 }
 
-// --- DRAG AND DROP EVENTS ---
+// --- DRAG AND DROP ---
 window.handleDragStart = function(ev) {
   ev.dataTransfer.setData("text/plain", ev.target.dataset.playerId);
   ev.dataTransfer.effectAllowed = "move";
-  // Add dragging class
   ev.target.classList.add("dragging");
   audioCtrl.playClick();
 };
 
 document.addEventListener("dragend", (ev) => {
-  if (ev.target.classList) {
-    ev.target.classList.remove("dragging");
-  }
+  if (ev.target.classList) ev.target.classList.remove("dragging");
 });
 
-// Configure Drop Slots
 function setupDropSlots() {
   const slots = document.querySelectorAll(".pitch-slot");
   slots.forEach(slot => {
-    slot.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = "move";
-    });
-    
-    slot.addEventListener("dragenter", (e) => {
-      e.preventDefault();
-      slot.classList.add("drag-hover");
-    });
-    
-    slot.addEventListener("dragleave", () => {
-      slot.classList.remove("drag-hover");
-    });
-    
+    slot.addEventListener("dragover", (e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; });
+    slot.addEventListener("dragenter", (e) => { e.preventDefault(); slot.classList.add("drag-hover"); });
+    slot.addEventListener("dragleave", () => { slot.classList.remove("drag-hover"); });
     slot.addEventListener("drop", (e) => {
       e.preventDefault();
       slot.classList.remove("drag-hover");
-      
       const playerId = e.dataTransfer.getData("text/plain");
       placePlayerInSlot(playerId, slot.dataset.pos);
     });
-    
-    // Tap to assign for mobile and standard clicks
     slot.addEventListener("click", (e) => {
       const pos = slot.dataset.pos;
-      
-      // If slot is empty and we have a selected card, place it
-      if (squadState[pos] === null && selectedBenchCardId) {
+      if (selectedBenchCardId) {
+        e.stopPropagation();
         placePlayerInSlot(selectedBenchCardId, pos);
         selectedBenchCardId = null;
         document.querySelectorAll(".fut-card").forEach(el => el.classList.remove("selected-tap"));
@@ -880,68 +717,54 @@ function setupDropSlots() {
     });
   });
   
-  // Bench drop handler (drag back to bench)
   const bench = document.getElementById("bench-list");
   if (bench) {
-    bench.addEventListener("dragover", (e) => {
-      e.preventDefault();
-    });
+    bench.addEventListener("dragover", (e) => { e.preventDefault(); });
     bench.addEventListener("drop", (e) => {
       e.preventDefault();
       const playerId = e.dataTransfer.getData("text/plain");
-      
-      // Find where player is currently placed
       const originPos = Object.keys(squadState).find(key => squadState[key] === playerId);
-      if (originPos) {
-        removePlayerFromSlot(originPos);
-      }
+      if (originPos) removePlayerFromSlot(originPos);
     });
   }
 }
 
-// Action to place player in a slot
 function placePlayerInSlot(playerId, targetPos) {
   if (!playerId || !targetPos) return;
-  
   const playerObj = allPlayersMap[playerId];
   if (!playerObj) return;
 
-  // Double check if player is unlocked
   if (!unlockedPlayers.has(playerId)) {
-    alert("You must open a pack to unlock this player first!");
+    alert("You must unlock this player first!");
     return;
   }
   
-  // If player is already on pitch elsewhere, swap or remove from previous slot
   const currentSlot = Object.keys(squadState).find(key => squadState[key] === playerId);
-  
-  // If there's already a player in the target slot
   const displacedPlayerId = squadState[targetPos];
   
   if (currentSlot) {
-    // If player is moved from one pitch slot to another
     squadState[currentSlot] = displacedPlayerId;
+  } else {
+    // If placing a new card from the bench, we need to swap out the displaced player.
+    // Horrible default bronze players are cleared, premium players go back to the bench pool.
+    // If the displaced player was a bronze placeholder, we just drop it (it doesn't go to the bench pool)
   }
   
   squadState[targetPos] = playerId;
   
-  // Render visual cards inside pitch slots
   updatePitchSlots();
-  
-  // Update bench pool
   renderBench();
-  
-  // Recalculate stats
   calculateSquadStats();
-  
   audioCtrl.playPlace();
 }
 
-// Action to remove player from a slot back to bench
 function removePlayerFromSlot(pos) {
   if (squadState[pos] === null) return;
+  const pId = squadState[pos];
   
-  squadState[pos] = null;
+  // If we remove a card, we must restore the horrible default player placeholder for that slot!
+  const defaultBronze = Object.values(horriblePlayers).find(p => p.position === pos);
+  squadState[pos] = defaultBronze ? defaultBronze.id : null;
   
   updatePitchSlots();
   renderBench();
@@ -949,56 +772,67 @@ function removePlayerFromSlot(pos) {
   audioCtrl.playClick();
 }
 
-// Update the DOM cards on the pitch
 function updatePitchSlots() {
   Object.keys(squadState).forEach(pos => {
     const pId = squadState[pos];
     const slotEl = document.querySelector(`.pitch-slot[data-pos="${pos}"]`);
     if (!slotEl) return;
-    
     const cardTarget = slotEl.querySelector(".slot-card-target");
     if (!cardTarget) return;
     
     if (pId === null) {
-      // Empty slot state
-      cardTarget.innerHTML = `
-        <div class="empty-card-outline">
-          <div class="pos-badge">${pos}</div>
-          <div class="plus-icon">+</div>
-        </div>
-      `;
+      cardTarget.innerHTML = `<div class="empty-card-outline"><div class="pos-badge">${pos}</div><div class="plus-icon">+</div></div>`;
       slotEl.classList.remove("filled");
     } else {
-      // Placed player card state
       const player = allPlayersMap[pId];
       cardTarget.innerHTML = createCardHTML(player);
-      
       const card = cardTarget.querySelector(".fut-card");
-      // Disable card level drag start internally to avoid browser conflicts, handled on wrapper
-      card.addEventListener("dragstart", (e) => {
-        e.dataTransfer.setData("text/plain", pId);
-      });
-      
-      // Tap selection helper for pitch card
+      card.addEventListener("dragstart", (e) => { e.dataTransfer.setData("text/plain", pId); });
       card.addEventListener("click", (e) => {
         e.stopPropagation();
         handleCardClick(card, pId);
       });
-      
       applyCardTiltEffect(card);
       slotEl.classList.add("filled");
     }
   });
 }
 
-// --- PACK OPENING GENERATOR ---
+// --- PACK REVEAL SINGLE-CARD LOOT SYSTEM ---
 window.openPack = function() {
+  if (dragonbux < 100) {
+    alert("Insufficient Dragonbux! You need 100 🪙 to open a pack. Play matches to earn more.");
+    return;
+  }
+
+  const activeSet = playerSets[currentSetIndex];
+  
+  // Find locked players in this set
+  const lockedInSet = activeSet.filter(p => !unlockedPlayers.has(p.id));
+  
+  if (lockedInSet.length === 0) {
+    alert(`All players in Roster Set ${currentSetIndex} are already unlocked! Switch active sets to unlock others.`);
+    return;
+  }
+
+  // Deduct Dragonbux
+  dragonbux -= 100;
+  updateDragonbuxDisplay();
+
+  // Draw EXACTLY ONE player
+  const randomIndex = Math.floor(Math.random() * lockedInSet.length);
+  const drawnPlayer = lockedInSet[randomIndex];
+  
+  // Unlock player
+  unlockedPlayers.add(drawnPlayer.id);
+  saveUnlockedPlayers();
+  
+  // Play Pack sounds
+  audioCtrl.playOpenPack();
+
+  // Render open overlay
   const packOpenSect = document.getElementById("pack-reveal-screen");
   if (!packOpenSect) return;
-
-  audioCtrl.playOpenPack();
-  
-  // Reset screen
   packOpenSect.style.display = "flex";
   packOpenSect.innerHTML = `
     <div class="pack-opening-container">
@@ -1006,154 +840,93 @@ window.openPack = function() {
         <div class="gold-pack-ribbon"></div>
         <div class="pack-face">
           <div class="logo-fut">FC 24</div>
-          <div class="pack-name-txt">MEGA PLAYER PACK</div>
-          <div class="pack-glow-spark"></div>
+          <div class="pack-name-txt">SINGLE PLAYER REVEAL</div>
+          <div style="font-size:0.9rem; color:#a855f7; margin-top:20px; font-weight:800;">100 DB PAID</div>
         </div>
       </div>
-      <div id="walkout-stage" class="walkout-stage-hidden">
-        <!-- Reveal elements filled dynamically -->
-      </div>
+      <div id="walkout-stage" class="walkout-stage-hidden"></div>
     </div>
   `;
 
   const packWrapper = document.getElementById("pack-wrapper-anim");
-  
-  // Pack click animation trigger
   packWrapper.addEventListener("click", () => {
     packWrapper.classList.add("rip-open");
-    
-    // After shake & rip open duration, show walkout player
     setTimeout(() => {
-      triggerWalkoutReveal();
+      triggerWalkoutReveal(drawnPlayer);
     }, 1200);
   });
 };
 
-function triggerWalkoutReveal() {
+function triggerWalkoutReveal(player) {
   const walkoutStage = document.getElementById("walkout-stage");
   const packWrapper = document.getElementById("pack-wrapper-anim");
   if (!walkoutStage) return;
-  
-  // Hide pack cover
   if (packWrapper) packWrapper.style.display = "none";
   
   walkoutStage.className = "walkout-stage-visible";
   
-  // Select active set players that are currently locked, or a random subset from set
-  const activeSet = playerSets[currentSetIndex];
-  
-  // Grab 5 random players from this set to show in pack.
-  // Make sure at least one is the "Walkout" player (highest rating)
-  const sortedSet = [...activeSet].sort((a,b) => b.rating - a.rating);
-  const walkoutPlayer = sortedSet[0]; // Highest rated is the walkout hero
-  
-  // Unlock all players in this opened set pack
-  activeSet.forEach(p => {
-    unlockedPlayers.add(p.id);
-  });
-  
-  // Save unlocked state to UI and reload bench
-  renderBench();
-  calculateSquadStats();
-  
-  // Walkout animation timeline
   walkoutStage.innerHTML = `
     <div class="walkout-flares"></div>
     <div class="walkout-stats-reveal" id="walkout-stats-item">
-      <div style="font-size: 1.5rem; color: #fbbf24;">${walkoutPlayer.cardType.toUpperCase()}</div>
-      <div class="stat-reveal-line" style="--d:0.2s">RATING: ${walkoutPlayer.rating}</div>
-      <div class="stat-reveal-line" style="--d:0.4s">POS: ${walkoutPlayer.position}</div>
-      <div class="stat-reveal-line" style="--d:0.6s">NATION: ${walkoutPlayer.nation}</div>
-      <div class="stat-reveal-line" style="--d:0.8s">CLUB: ${walkoutPlayer.club}</div>
+      <div style="font-size: 1.5rem; color: #fbbf24;">${player.cardType.toUpperCase()}</div>
+      <div class="stat-reveal-line" style="--d:0.2s">RATING: ${player.rating}</div>
+      <div class="stat-reveal-line" style="--d:0.4s">POS: ${player.position}</div>
+      <div class="stat-reveal-line" style="--d:0.6s">NATION: ${player.nation}</div>
+      <div class="stat-reveal-line" style="--d:0.8s">CLUB: ${player.club}</div>
     </div>
     
     <div class="walkout-card-holder" id="walkout-card-item">
-      ${createCardHTML(walkoutPlayer)}
+      ${createCardHTML(player)}
     </div>
     
-    <div class="walkout-pack-contents-drawer" id="pack-drawer">
-      <h3 style="color:#fff; text-shadow:0 0 10px rgba(0,0,0,0.5);">PACK CONTENTS UNLOCKED</h3>
-      <div class="pack-unlocked-grid">
-        ${activeSet.map(p => `
-          <div class="mini-unlocked-card">
-            <span style="color:#fbbf24; font-weight:800;">${p.rating}</span>
-            <span style="font-size:0.8rem;">${p.position}</span>
-            <span style="font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:80px;">${p.name}</span>
-          </div>
-        `).join("")}
-      </div>
-      <button onclick="closePackReveal()" style="margin-top:1.5rem; width:200px;">Send to Club</button>
+    <div class="walkout-pack-contents-drawer reveal" id="pack-drawer">
+      <h3 style="color:#fff; text-shadow:0 0 10px rgba(0,0,0,0.5); font-style:italic;">🎉 PLAYER UNLOCKED!</h3>
+      <p style="font-size:0.9rem; color:var(--text-gray); margin-top:5px;">This player has been sent to your bench collection pool.</p>
+      <button onclick="closePackReveal()" style="margin-top:1.5rem; width:220px;">Send to Bench</button>
     </div>
   `;
 
-  // Animate walkout elements entry
   setTimeout(() => {
     const statsItem = document.getElementById("walkout-stats-item");
     const cardItem = document.getElementById("walkout-card-item");
-    const drawerItem = document.getElementById("pack-drawer");
-    
     if (statsItem) statsItem.classList.add("reveal");
     if (cardItem) cardItem.classList.add("reveal");
-    if (drawerItem) {
-      setTimeout(() => drawerItem.classList.add("reveal"), 1500);
-    }
   }, 100);
 }
 
 window.closePackReveal = function() {
   const packOpenSect = document.getElementById("pack-reveal-screen");
-  if (packOpenSect) {
-    packOpenSect.style.display = "none";
-  }
+  if (packOpenSect) packOpenSect.style.display = "none";
   audioCtrl.playClick();
+  renderBench();
+  calculateSquadStats();
 };
 
 // --- SET INTERCHANGE SELECTOR ---
 window.switchActivePlayerSet = function(setIdx) {
   if (!playerSets[setIdx]) return;
   currentSetIndex = parseInt(setIdx);
-  
   audioCtrl.playClick();
   
-  // Clear currently placed players from previous set
-  Object.keys(squadState).forEach(pos => {
-    squadState[pos] = null;
-  });
-  
-  // Highlight active tab
   document.querySelectorAll(".set-tab-btn").forEach((btn, idx) => {
-    if (idx + 1 === currentSetIndex) {
-      btn.classList.add("active");
-    } else {
-      btn.classList.remove("active");
-    }
+    if (idx + 1 === currentSetIndex) btn.classList.add("active");
+    else btn.classList.remove("active");
   });
 
-  // Automatically unlock the set if selected to make building immediate
-  playerSets[currentSetIndex].forEach(p => unlockedPlayers.add(p.id));
-
-  // Reset pack opener button label
-  const packNameMap = {
-    1: "LEGENDS PACK",
-    2: "ELITES PACK",
-    3: "CLASSICS PACK",
-    4: "FUTURE PACK"
-  };
+  const packNameMap = { 1: "LEGENDS PACK", 2: "ELITES PACK", 3: "CLASSICS PACK", 4: "FUTURE PACK" };
   const packBtn = document.getElementById("open-pack-btn");
-  if (packBtn) {
-    packBtn.textContent = `Open ${packNameMap[currentSetIndex]}`;
-  }
+  if (packBtn) packBtn.textContent = `Open ${packNameMap[currentSetIndex]} (100 DB)`;
   
-  updatePitchSlots();
   renderBench();
   calculateSquadStats();
 };
 
-// --- GAME ACTIONS HELPERS ---
 window.clearActiveSquad = function() {
   audioCtrl.playClick();
+  // Clear restores horrible bronze players
   Object.keys(squadState).forEach(pos => {
-    squadState[pos] = null;
+    const defaultBronze = Object.values(horriblePlayers).find(p => p.position === pos);
+    squadState[pos] = defaultBronze ? defaultBronze.id : null;
   });
   updatePitchSlots();
   renderBench();
@@ -1162,25 +935,13 @@ window.clearActiveSquad = function() {
 
 window.autoSolveActiveSquad = function() {
   audioCtrl.playCheer();
-  
   const activeSet = playerSets[currentSetIndex];
-  
-  // Map correct positions
+  // Auto solve places players ONLY if they are unlocked!
   activeSet.forEach(p => {
-    // If position matches, place it
-    if (p.position === "GK") squadState.GK = p.id;
-    if (p.position === "LB") squadState.LB = p.id;
-    if (p.position === "LCB") squadState.LCB = p.id;
-    if (p.position === "RCB") squadState.RCB = p.id;
-    if (p.position === "RB") squadState.RB = p.id;
-    if (p.position === "CDM") squadState.CDM = p.id;
-    if (p.position === "LCM") squadState.LCM = p.id;
-    if (p.position === "RCM") squadState.RCM = p.id;
-    if (p.position === "LW") squadState.LW = p.id;
-    if (p.position === "ST") squadState.ST = p.id;
-    if (p.position === "RW") squadState.RW = p.id;
+    if (unlockedPlayers.has(p.id)) {
+      squadState[p.position] = p.id;
+    }
   });
-  
   updatePitchSlots();
   renderBench();
   calculateSquadStats();
@@ -1189,18 +950,336 @@ window.autoSolveActiveSquad = function() {
 window.toggleSoundMute = function() {
   audioCtrl.muted = !audioCtrl.muted;
   const soundBtn = document.getElementById("sound-mute-btn");
-  if (soundBtn) {
-    soundBtn.textContent = audioCtrl.muted ? "🔇 Sound Off" : "🔊 Sound On";
-  }
+  if (soundBtn) soundBtn.textContent = audioCtrl.muted ? "🔇 Sound Off" : "🔊 Sound On";
   audioCtrl.playClick();
 };
 
+// --- PLAYING PART: INTERACTIVE MATCH SIMULATOR & PENALTY SHOOTOUT ---
+let matchTickerInterval = null;
+let matchMinute = 0;
+let homeScore = 0;
+let awayScore = 0;
+let currentOpponent = "";
+let penaltyPhase = false;
+let goalsThisShootout = 0;
+let penaltyGoalTarget = { x: 0, y: 0 };
+let penaltyGKPosition = { x: 100, y: 80 };
+let animationFrameId = null;
+
+const commentaryPhrases = [
+  "Midfield battle intensifies! Clean tackling by both sides.",
+  "What a run! Dribbles past one defender, but loses control.",
+  "Excellent defensive intercept! Threat cleared.",
+  "Pass back to security, slowing down the game pace.",
+  "Chants echo around the arena! Fans are roaring.",
+  "Long pass down the flank, but goes out for a goal kick.",
+  "A slide tackle causes a brief stop in play. Warning issued!"
+];
+
+window.openMatchCenter = function() {
+  audioCtrl.playClick();
+  document.getElementById("match-center-overlay").style.display = "flex";
+  document.getElementById("close-match-btn").style.display = "none";
+  document.getElementById("start-match-btn").style.display = "inline-block";
+  document.getElementById("match-score").textContent = "0 - 0";
+  document.getElementById("commentary-ticker").innerHTML = `<div style="color:var(--text-gray);">Ready for Kickoff. Click 'Kick Off' to start the match!</div>`;
+  
+  // Reset states
+  homeScore = 0; awayScore = 0; matchMinute = 0;
+  const opponents = ["Galacticos FC", "Red Devils", "Sky Blues", "El Blaugrana", "Piemonte Calcio"];
+  currentOpponent = opponents[Math.floor(Math.random() * opponents.length)];
+  document.getElementById("match-away-team").textContent = currentOpponent;
+  
+  resetPenaltyCanvas();
+};
+
+window.closeMatchCenter = function() {
+  audioCtrl.playClick();
+  clearInterval(matchTickerInterval);
+  cancelAnimationFrame(animationFrameId);
+  document.getElementById("match-center-overlay").style.display = "none";
+  calculateSquadStats();
+};
+
+window.startSimulatedMatch = function() {
+  document.getElementById("start-match-btn").style.display = "none";
+  addCommentaryEntry("0'", "Referee blows the whistle! Kick off! ⚽");
+  
+  matchTickerInterval = setInterval(() => {
+    matchMinute += Math.floor(Math.random() * 3) + 1;
+    
+    if (matchMinute >= 90) {
+      matchMinute = 90;
+      clearInterval(matchTickerInterval);
+      endSimulatedMatch();
+      return;
+    }
+    
+    // Check for Penalty Shootout triggers at 30', 60', 85'
+    if ((matchMinute >= 30 && matchMinute <= 33 && !penaltyPhase) ||
+        (matchMinute >= 60 && matchMinute <= 63 && !penaltyPhase) ||
+        (matchMinute >= 83 && matchMinute <= 86 && !penaltyPhase)) {
+      triggerPenaltyPhase();
+    }
+    
+    if (!penaltyPhase) {
+      simulateStandardMinute();
+    }
+  }, 1200);
+};
+
+function addCommentaryEntry(min, text, color = "#fff") {
+  const ticker = document.getElementById("commentary-ticker");
+  if (!ticker) return;
+  const item = document.createElement("div");
+  item.style.color = color;
+  item.innerHTML = `<span style="color:#d946ef; font-weight:bold; margin-right:8px;">[${min}]</span> ${text}`;
+  ticker.appendChild(item);
+  ticker.scrollTop = ticker.scrollHeight;
+}
+
+function simulateStandardMinute() {
+  const rand = Math.random();
+  if (rand < 0.15) {
+    // Opponent scores
+    awayScore++;
+    document.getElementById("match-score").textContent = `${homeScore} - ${awayScore}`;
+    addCommentaryEntry(matchMinute + "'", `❌ GOAL! ${currentOpponent} score with a powerful strike into the corner!`, "#ef4444");
+  } else if (rand < 0.4) {
+    // Generic match commentary
+    const text = commentaryPhrases[Math.floor(Math.random() * commentaryPhrases.length)];
+    addCommentaryEntry(matchMinute + "'", text, "var(--text-gray)");
+  }
+}
+
+// --- PENALTY SHOOTOUT CANVAS MINI-GAME ---
+let canvas, ctx;
+let goalieX = 130;
+let goalieSpeed = 2.5;
+let ballX = 150;
+let ballY = 175;
+let ballTargetX = 150;
+let ballTargetY = 175;
+let isBallFlying = false;
+let canvasClicksEnabled = false;
+
+function resetPenaltyCanvas() {
+  canvas = document.getElementById("penalty-canvas");
+  if (!canvas) return;
+  ctx = canvas.getContext("2d");
+  
+  // Match layout styling size bounds
+  canvas.width = 300;
+  canvas.height = 200;
+  
+  goalieX = 120;
+  goalieSpeed = 2.5;
+  ballX = 150;
+  ballY = 175;
+  isBallFlying = false;
+  canvasClicksEnabled = false;
+  
+  drawPenaltyScene();
+}
+
+function drawPenaltyScene() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  // Field green grass
+  ctx.fillStyle = "#1e4620";
+  ctx.fillRect(0, 110, canvas.width, 90);
+  
+  // Goal box outline
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 3;
+  ctx.strokeRect(40, 30, 220, 80); // Goal Frame
+  
+  // Goalkeeper (represented as a dynamic colored glove rectangle)
+  ctx.fillStyle = "#d946ef";
+  ctx.fillRect(goalieX, 55, 60, 35);
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "8px Outfit";
+  ctx.fillText("GK", goalieX + 24, 75);
+  
+  // Soccer Ball
+  ctx.beginPath();
+  ctx.arc(ballX, ballY, 8, 0, Math.PI * 2);
+  ctx.fillStyle = "#ffffff";
+  ctx.fill();
+  ctx.strokeStyle = "#000";
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  
+  // Draw inner pentagon lines for realism
+  ctx.beginPath();
+  ctx.arc(ballX, ballY, 3, 0, Math.PI * 2);
+  ctx.fillStyle = "#000";
+  ctx.fill();
+}
+
+function updateGoalkeeper() {
+  if (isBallFlying) return; // Freeze keeper on kicker shoot
+  
+  goalieX += goalieSpeed;
+  if (goalieX <= 40 || goalieX + 60 >= 260) {
+    goalieSpeed = -goalieSpeed;
+  }
+}
+
+function animatePenaltyScene() {
+  updateGoalkeeper();
+  
+  if (isBallFlying) {
+    // Animate ball to goal target
+    const dx = ballTargetX - ballX;
+    const dy = ballTargetY - ballY;
+    
+    ballX += dx * 0.12;
+    ballY += dy * 0.12;
+    
+    // Check arrival at goal line (y <= 110)
+    if (Math.abs(ballY - ballTargetY) < 2) {
+      isBallFlying = false;
+      evaluatePenaltyOutcome();
+    }
+  }
+  
+  drawPenaltyScene();
+  animationFrameId = requestAnimationFrame(animatePenaltyScene);
+}
+
+function triggerPenaltyPhase() {
+  penaltyPhase = true;
+  canvasClicksEnabled = true;
+  goalsThisShootout = 0;
+  
+  clearInterval(matchTickerInterval);
+  
+  addCommentaryEntry(matchMinute + "'", "🔥 PENALTY SHOOTOUT! A chance to score. Aim and click on the goal post canvas!", "#fbbf24");
+  
+  const msg = document.getElementById("shootout-message");
+  if (msg) {
+    msg.style.display = "block";
+    msg.textContent = "AIM & CLICK TO KICK!";
+    setTimeout(() => { msg.style.display = "none"; }, 2000);
+  }
+  
+  resetPenaltyCanvas();
+  canvasClicksEnabled = true;
+  animatePenaltyScene();
+  
+  canvas.addEventListener("click", handlePenaltyClick);
+}
+
+function handlePenaltyClick(e) {
+  if (!canvasClicksEnabled || isBallFlying) return;
+  
+  const rect = canvas.getBoundingClientRect();
+  const clickX = ((e.clientX - rect.left) / rect.width) * canvas.width;
+  const clickY = ((e.clientY - rect.top) / rect.height) * canvas.height;
+  
+  // Ensure click is inside or near the goal area
+  if (clickY > 115) return;
+  
+  audioCtrl.playKick();
+  
+  // --- ACCURACY DISPERSION BASED ON TEAM RATING ---
+  // Average rating of the team determines how close the ball lands to the click coordinates
+  const currentRating = parseInt(document.getElementById("avg-rating-val").textContent) || 45;
+  
+  // Low rating = higher dispersion range
+  const maxDispersion = Math.max(5, 55 - (currentRating - 45) * 0.85); // 45 OVR -> 55px radius, 90 OVR -> 10px radius
+  
+  const angle = Math.random() * Math.PI * 2;
+  const radius = Math.random() * maxDispersion;
+  
+  ballTargetX = clickX + Math.cos(angle) * radius;
+  ballTargetY = clickY + Math.sin(angle) * radius;
+  
+  // Clamp target inside goal net area
+  ballTargetX = Math.max(42, Math.min(258, ballTargetX));
+  ballTargetY = Math.max(32, Math.min(108, ballTargetY));
+  
+  isBallFlying = true;
+  canvasClicksEnabled = false;
+}
+
+function evaluatePenaltyOutcome() {
+  canvasClicksEnabled = false;
+  canvas.removeEventListener("click", handlePenaltyClick);
+  cancelAnimationFrame(animationFrameId);
+  
+  // Check if goalkeeper gloves intercepted the ball target coordinates
+  const gkLeft = goalieX;
+  const gkRight = goalieX + 60;
+  const gkTop = 55;
+  const gkBottom = 90;
+  
+  const saved = (ballTargetX >= gkLeft - 5 && ballTargetX <= gkRight + 5 && ballTargetY >= gkTop - 5 && ballTargetY <= gkBottom + 5);
+  
+  const msg = document.getElementById("shootout-message");
+  msg.style.display = "block";
+  
+  if (saved) {
+    msg.style.color = "#ef4444";
+    msg.textContent = "SAVED! 🧤";
+    addCommentaryEntry(matchMinute + "'", "❌ Penalty saved by the keeper! What a disappointing kick.", "#94a3b8");
+  } else {
+    msg.style.color = "#4ade80";
+    msg.textContent = "GOAL! ⚽";
+    homeScore++;
+    document.getElementById("match-score").textContent = `${homeScore} - ${awayScore}`;
+    addCommentaryEntry(matchMinute + "'", "🔥 GOOOOOAL! Pinpoint penalty kick! The crowd erupts!", "#4ade80");
+  }
+  
+  setTimeout(() => {
+    msg.style.display = "none";
+    penaltyPhase = false;
+    // Resume match simulation ticker
+    startSimulatedMatch();
+  }, 2200);
+}
+
+function endSimulatedMatch() {
+  clearInterval(matchTickerInterval);
+  cancelAnimationFrame(animationFrameId);
+  
+  addCommentaryEntry("90'", "Referee blows the final whistle! Full time.", "#fbbf24");
+  
+  // Calculate reward pay-out
+  let resultReward = 50; // Loss reward
+  let resultText = "LOSS";
+  let color = "#ef4444";
+  
+  if (homeScore > awayScore) {
+    resultReward = 120;
+    resultText = "VICTORY";
+    color = "#4ade80";
+    audioCtrl.playCheer();
+  } else if (homeScore === awayScore) {
+    resultReward = 80;
+    resultText = "DRAW";
+    color = "#fbbf24";
+  }
+  
+  const goalBonus = homeScore * 10;
+  const totalPayout = resultReward + goalBonus;
+  
+  // Add payout to balance
+  dragonbux += totalPayout;
+  updateDragonbuxDisplay();
+  
+  addCommentaryEntry("END", `MATCH RESULT: ${resultText}! 🪙 Eearned: ${resultReward} DB + ${goalBonus} DB Goal Bonus = ${totalPayout} DB!`, color);
+  
+  document.getElementById("close-match-btn").style.display = "inline-block";
+}
+
 // --- INITIALIZE ON DOM LOAD ---
 document.addEventListener("DOMContentLoaded", () => {
-  // Initialize canvas effects
   fxController = new CelebrationFX("celebration-canvas");
   
-  // Populate initial components
+  // Sync starting displays
+  updateDragonbuxDisplay();
   updatePitchSlots();
   renderBench();
   setupDropSlots();
