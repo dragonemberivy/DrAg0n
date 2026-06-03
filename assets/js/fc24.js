@@ -1151,10 +1151,6 @@ const commentaryPhrases = [
 
 window.openMatchCenter = function() {
   try {
-    // Visual debug indicator
-    const btn = document.getElementById("launch-match-btn");
-    if (btn) btn.style.background = "red";
-    
     audioCtrl.playClick();
     
     const overlay = document.getElementById("match-center-overlay");
