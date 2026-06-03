@@ -1181,14 +1181,21 @@ const baseCoordinates433 = {
 };
 
 // Keyboard listener
+let passKeyDebounce = false;
+let shootKeyDebounce = false;
+
 window.addEventListener("keydown", (e) => {
-  keysPressed[e.key.toLowerCase()] = true;
-  if (["space", "arrowup", "arrowdown", "arrowleft", "arrowright"].includes(e.key.toLowerCase())) {
+  const key = e.key.toLowerCase();
+  keysPressed[key] = true;
+  if (["space", "arrowup", "arrowdown", "arrowleft", "arrowright", "/", ".", ","].includes(key)) {
     e.preventDefault();
   }
 });
 window.addEventListener("keyup", (e) => {
-  keysPressed[e.key.toLowerCase()] = false;
+  const key = e.key.toLowerCase();
+  keysPressed[key] = false;
+  if (key === "/") passKeyDebounce = false;
+  if (key === ".") shootKeyDebounce = false;
 });
 
 // Initialize 3D Engine
@@ -1625,12 +1632,80 @@ function updateGameplayLoop() {
       dy *= 0.7071;
     }
     
-    const speed = 1.8 + (player.stats.pace / 100) * 2.5;
+    // Shielding reduces pace by 50%
+    const isShielding = keysPressed[","] && ball.owner === player;
+    const baseSpeed = 1.8 + (player.stats.pace / 100) * 2.5;
+    const speed = isShielding ? baseSpeed * 0.5 : baseSpeed;
+    
     player.x += dx * speed;
     player.y += dy * speed;
     
     player.x = Math.max(25, Math.min(625, player.x));
     player.y = Math.max(25, Math.min(375, player.y));
+    
+    // Handle Keyboard Shoot (Period ".")
+    if (keysPressed["."] && ball.owner === player && !shootKeyDebounce) {
+      shootKeyDebounce = true;
+      audioCtrl.playKick();
+      
+      const targetGoalX = 630;
+      const targetGoalY = 200;
+      const tDx = targetGoalX - player.x;
+      const tDy = targetGoalY - player.y;
+      const dist = Math.hypot(tDx, tDy);
+      const velocity = 5.5 + (player.stats.shooting / 100) * 6.5;
+      
+      ball.owner = null;
+      ball.vx = (tDx / dist) * velocity;
+      ball.vy = (tDy / dist) * velocity;
+      ball.tackleCooldown = 25;
+      
+      const msg = document.getElementById("shootout-message");
+      if (msg) {
+        msg.style.display = "block";
+        msg.style.color = "#38bdf8";
+        msg.textContent = "SHOT! ⚡";
+        setTimeout(() => { msg.style.display = "none"; }, 800);
+      }
+    }
+    
+    // Handle Keyboard Pass (Slash "/")
+    if (keysPressed["/"] && ball.owner === player && !passKeyDebounce) {
+      passKeyDebounce = true;
+      
+      let closestIdx = -1;
+      let minDist = Infinity;
+      homePlayers.forEach((p, idx) => {
+        if (idx === controlledPlayerIndex) return;
+        const dist = Math.hypot(p.x - player.x, p.y - player.y);
+        if (dist < minDist) {
+          minDist = dist;
+          closestIdx = idx;
+        }
+      });
+      
+      if (closestIdx !== -1) {
+        audioCtrl.playPlace();
+        const targetTeammate = homePlayers[closestIdx];
+        const tDx = targetTeammate.x - player.x;
+        const tDy = targetTeammate.y - player.y;
+        
+        const passAccuracy = player.stats.passing;
+        const drift = (100 - passAccuracy) * 0.15;
+        const angleOffset = (Math.random() * 2 - 1) * drift * (Math.PI / 180);
+        
+        const angle = Math.atan2(tDy, tDx) + angleOffset;
+        const passSpeed = 6.0;
+        
+        ball.owner = null;
+        ball.vx = Math.cos(angle) * passSpeed;
+        ball.vy = Math.sin(angle) * passSpeed;
+        ball.tackleCooldown = 15;
+        
+        controlledPlayerIndex = closestIdx;
+        updatePlayerSelectionRing();
+      }
+    }
   }
 
   if (ball.tackleCooldown > 0) ball.tackleCooldown--;
@@ -1758,18 +1833,29 @@ function updateGameplayLoop() {
         }
         
         if (dist < (op.radius + ball.owner.radius) && ball.tackleCooldown === 0) {
-          ball.owner = null;
-          ball.vx = -4.5 - Math.random() * 2.5;
-          ball.vy = Math.random() * 4 - 2;
-          ball.tackleCooldown = 35;
-          audioCtrl.playKick();
-          
-          const msg = document.getElementById("shootout-message");
-          if (msg) {
-            msg.style.display = "block";
-            msg.style.color = "#ef4444";
-            msg.textContent = "TACKLED! ⚔️";
-            setTimeout(() => { msg.style.display = "none"; }, 800);
+          if (ball.owner === player && keysPressed[","]) {
+            ball.tackleCooldown = 15;
+            const msg = document.getElementById("shootout-message");
+            if (msg) {
+              msg.style.display = "block";
+              msg.style.color = "#38bdf8";
+              msg.textContent = "SHIELDED! 🛡️";
+              setTimeout(() => { msg.style.display = "none"; }, 800);
+            }
+          } else {
+            ball.owner = null;
+            ball.vx = -4.5 - Math.random() * 2.5;
+            ball.vy = Math.random() * 4 - 2;
+            ball.tackleCooldown = 35;
+            audioCtrl.playKick();
+            
+            const msg = document.getElementById("shootout-message");
+            if (msg) {
+              msg.style.display = "block";
+              msg.style.color = "#ef4444";
+              msg.textContent = "TACKLED! ⚔️";
+              setTimeout(() => { msg.style.display = "none"; }, 800);
+            }
           }
         }
       } else {
@@ -1847,12 +1933,34 @@ function drawPitchLoop() {
       }
     }
     
-    homePlayers.forEach(p => {
+    homePlayers.forEach((p, idx) => {
       if (p.mesh3d) {
         const targetX = (p.x - 325) / 10;
         const targetZ = (p.y - 200) / 10;
         p.mesh3d.position.x += (targetX - p.mesh3d.position.x) * 0.3;
         p.mesh3d.position.z += (targetZ - p.mesh3d.position.z) * 0.3;
+        
+        // Handle Shield Visual Mesh
+        if (idx === controlledPlayerIndex && keysPressed[","] && ball.owner === p) {
+          if (!p.shieldMesh3d) {
+            const shieldGeo = new THREE.SphereGeometry(1.1, 16, 16);
+            const shieldMat = new THREE.MeshBasicMaterial({
+              color: 0x38bdf8,
+              transparent: true,
+              opacity: 0.35,
+              wireframe: true
+            });
+            p.shieldMesh3d = new THREE.Mesh(shieldGeo, shieldMat);
+            p.shieldMesh3d.position.y = 0.8;
+            p.mesh3d.add(p.shieldMesh3d);
+          }
+          p.shieldMesh3d.rotation.y += 0.05;
+        } else {
+          if (p.shieldMesh3d) {
+            p.mesh3d.remove(p.shieldMesh3d);
+            p.shieldMesh3d = null;
+          }
+        }
         
         const dx = targetX - p.mesh3d.position.x;
         const dz = targetZ - p.mesh3d.position.z;
