@@ -1256,7 +1256,7 @@ function simulateStandardMinute() {
   }
 }
 
-// --- PENALTY SHOOTOUT CANVAS ---
+// --- PENALTY SHOOTOUT CANVAS & PHYSICS ---
 let canvas, ctx;
 let goalieX = 130;
 let goalieSpeed = 2.5;
@@ -1266,6 +1266,16 @@ let ballTargetX = 150;
 let ballTargetY = 175;
 let isBallFlying = false;
 let canvasClicksEnabled = false;
+
+// Upgraded FC 24 Aim and Goalkeeper state variables
+let mouseX = 150;
+let mouseY = 100;
+let gkDiveDirection = "idle"; // "idle", "left", "right", "center", "top-left", "top-right"
+let gkDiveProgress = 0;
+let ballHistory = [];
+let netRippleTimer = 0;
+let netRippleX = 0;
+let netRippleY = 0;
 
 function resetPenaltyCanvas() {
   try {
@@ -1283,6 +1293,10 @@ function resetPenaltyCanvas() {
     ballY = 175;
     isBallFlying = false;
     canvasClicksEnabled = false;
+    gkDiveDirection = "idle";
+    gkDiveProgress = 0;
+    ballHistory = [];
+    netRippleTimer = 0;
     
     drawPenaltyScene();
   } catch (e) {
@@ -1295,31 +1309,204 @@ function drawPenaltyScene() {
   try {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    ctx.fillStyle = "#1e4620";
+    // Draw Stadium Sky & Floodlight Glow
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, 110);
+    skyGrad.addColorStop(0, "#080514");
+    skyGrad.addColorStop(1, "#170e30");
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, canvas.width, 110);
+    
+    // Draw floodlight glowing points
+    ctx.fillStyle = "rgba(139, 92, 246, 0.15)";
+    ctx.beginPath();
+    ctx.arc(60, 20, 40, 0, Math.PI * 2);
+    ctx.arc(240, 20, 40, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Draw Grass Pitch with Lawn Stripes
+    ctx.fillStyle = "#163a19";
     ctx.fillRect(0, 110, canvas.width, 90);
     
-    ctx.strokeStyle = "#ffffff";
-    ctx.lineWidth = 3;
-    ctx.strokeRect(40, 30, 220, 80);
+    // Lawn stripes
+    ctx.fillStyle = "#1a441e";
+    for (let i = 110; i < 200; i += 20) {
+      ctx.fillRect(0, i, canvas.width, 10);
+    }
     
-    ctx.fillStyle = "#d946ef";
-    ctx.fillRect(goalieX, 55, 60, 35);
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "8px Outfit";
-    ctx.fillText("GK", goalieX + 24, 75);
-    
+    // Draw Pitch Markings (Penalty Box line, spot)
+    ctx.strokeStyle = "rgba(255,255,255,0.2)";
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.arc(ballX, ballY, 8, 0, Math.PI * 2);
-    ctx.fillStyle = "#ffffff";
-    ctx.fill();
-    ctx.strokeStyle = "#000";
-    ctx.lineWidth = 1.5;
+    ctx.arc(150, 175, 20, Math.PI, 0); // circle arc around penalty spot
     ctx.stroke();
     
+    // Penalty Spot
+    ctx.fillStyle = "rgba(255,255,255,0.6)";
     ctx.beginPath();
-    ctx.arc(ballX, ballY, 3, 0, Math.PI * 2);
-    ctx.fillStyle = "#000";
+    ctx.arc(150, 175, 2.5, 0, Math.PI * 2);
     ctx.fill();
+    
+    // Draw Goal Net Mesh Lines
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    // vertical net lines
+    for (let x = 40; x <= 260; x += 10) {
+      ctx.moveTo(x, 30);
+      ctx.lineTo(x + (x - 150) * 0.05, 110);
+    }
+    // horizontal net lines
+    for (let y = 30; y <= 110; y += 10) {
+      ctx.moveTo(40 + (y - 30) * 0.05, y);
+      ctx.lineTo(260 - (y - 30) * 0.05, y);
+    }
+    ctx.stroke();
+    
+    // Draw Goal Posts Frame (Crossbar & Posts)
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 4;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(40, 110);
+    ctx.lineTo(40, 30);
+    ctx.lineTo(260, 30);
+    ctx.lineTo(260, 110);
+    ctx.stroke();
+    
+    // Post Shadows on grass
+    ctx.fillStyle = "rgba(0,0,0,0.3)";
+    ctx.fillRect(36, 110, 8, 3);
+    ctx.fillRect(256, 110, 8, 3);
+    
+    // Draw Goalkeeper (with dive animation stretching)
+    let currentGoalieX = goalieX;
+    let currentGoalieY = 55;
+    let goalieWidth = 60;
+    let goalieHeight = 35;
+    
+    if (isBallFlying && gkDiveDirection !== "idle") {
+      gkDiveProgress = Math.min(1, gkDiveProgress + 0.08);
+      const diveDist = 45 * gkDiveProgress;
+      
+      if (gkDiveDirection === "left") {
+        currentGoalieX -= diveDist;
+        goalieWidth = 70; // stretch
+      } else if (gkDiveDirection === "right") {
+        currentGoalieX += diveDist;
+        goalieWidth = 70; // stretch
+      } else if (gkDiveDirection === "top-left") {
+        currentGoalieX -= diveDist;
+        currentGoalieY -= diveDist * 0.4;
+        goalieWidth = 75;
+      } else if (gkDiveDirection === "top-right") {
+        currentGoalieX += diveDist;
+        currentGoalieY -= diveDist * 0.4;
+        goalieWidth = 75;
+      }
+    }
+    
+    // Goalkeeper body
+    ctx.fillStyle = "#d946ef";
+    ctx.shadowColor = "rgba(217, 70, 239, 0.5)";
+    ctx.shadowBlur = 10;
+    ctx.fillRect(currentGoalieX, currentGoalieY, goalieWidth, goalieHeight);
+    ctx.shadowBlur = 0; // reset
+    
+    // GK label
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 9px Outfit";
+    ctx.fillText("GK", currentGoalieX + goalieWidth / 2 - 6, currentGoalieY + goalieHeight / 2 + 3);
+    
+    // Draw Net Ripple Impact Effect
+    if (netRippleTimer > 0) {
+      netRippleTimer--;
+      ctx.strokeStyle = "rgba(255, 255, 255, " + (netRippleTimer / 15) + ")";
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(netRippleX, netRippleY, (15 - netRippleTimer) * 2.5, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    
+    // Draw Ball History Trail
+    if (isBallFlying) {
+      ballHistory.forEach((pt, idx) => {
+        const alpha = (idx / ballHistory.length) * 0.4;
+        ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, pt.size * 0.9, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+    
+    // Draw Kicked Ball
+    if (isBallFlying) {
+      const progress = (175 - ballY) / (175 - ballTargetY);
+      const currentBallSize = Math.max(3.5, 8.5 - progress * 5); // 3D depth scaling
+      
+      // Draw ball shadow on pitch
+      if (ballY > 115) {
+        ctx.fillStyle = "rgba(0,0,0,0.25)";
+        ctx.beginPath();
+        ctx.arc(ballX, ballY + 15 * (1 - progress), currentBallSize * 0.8, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      
+      // Draw actual ball
+      ctx.beginPath();
+      ctx.arc(ballX, ballY, currentBallSize, 0, Math.PI * 2);
+      ctx.fillStyle = "#ffffff";
+      ctx.fill();
+      ctx.strokeStyle = "#000000";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      
+      // Soccer ball patterns
+      ctx.beginPath();
+      ctx.arc(ballX, ballY, currentBallSize * 0.4, 0, Math.PI * 2);
+      ctx.fillStyle = "#000000";
+      ctx.fill();
+    }
+    
+    // Draw Aim Reticle Circle (Aim Helper Target Ring)
+    if (canvasClicksEnabled && !isBallFlying) {
+      const currentRating = parseInt(document.getElementById("avg-rating-val").textContent) || 45;
+      const maxDispersion = Math.max(5, 55 - (currentRating - 45) * 0.85);
+      
+      // Dynamic color (green for precise accuracy, red/orange for shaky/poor team)
+      let reticleColor = "#ef4444"; // red
+      if (maxDispersion < 15) {
+        reticleColor = "#4ade80"; // neon green
+      } else if (maxDispersion < 30) {
+        reticleColor = "#fbbf24"; // yellow-gold
+      }
+      
+      // Pulse animation
+      const pulse = 1 + Math.sin(Date.now() * 0.007) * 0.08;
+      const drawRadius = maxDispersion * pulse;
+      
+      // Outer Target Ring
+      ctx.strokeStyle = reticleColor;
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.arc(mouseX, mouseY, drawRadius, 0, Math.PI * 2);
+      ctx.stroke();
+      
+      // Inner crosshair point
+      ctx.fillStyle = reticleColor;
+      ctx.beginPath();
+      ctx.arc(mouseX, mouseY, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Crosshair lines
+      ctx.strokeStyle = reticleColor;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(mouseX - 8, mouseY); ctx.lineTo(mouseX - 3, mouseY);
+      ctx.moveTo(mouseX + 3, mouseY); ctx.lineTo(mouseX + 8, mouseY);
+      ctx.moveTo(mouseX, mouseY - 8); ctx.lineTo(mouseX, mouseY - 3);
+      ctx.moveTo(mouseX, mouseY + 3); ctx.lineTo(mouseX, mouseY + 8);
+      ctx.stroke();
+    }
   } catch (e) {
     console.warn("Error drawing penalty scene:", e);
   }
@@ -1334,21 +1521,41 @@ function updateGoalkeeper() {
 }
 
 function animatePenaltyScene() {
-  updateGoalkeeper();
-  
   if (isBallFlying) {
     const dx = ballTargetX - ballX;
     const dy = ballTargetY - ballY;
     ballX += dx * 0.12;
     ballY += dy * 0.12;
+    
+    // Add point to ball trail history
+    const progress = (175 - ballY) / (175 - ballTargetY);
+    const size = Math.max(3.5, 8.5 - progress * 5);
+    ballHistory.push({ x: ballX, y: ballY, size: size });
+    if (ballHistory.length > 8) ballHistory.shift();
+    
     if (Math.abs(ballY - ballTargetY) < 2) {
       isBallFlying = false;
+      
+      // Set net ripple parameters
+      netRippleX = ballTargetX;
+      netRippleY = ballTargetY;
+      netRippleTimer = 15; // 15 frames of ripple animation
+      
       evaluatePenaltyOutcome();
     }
+  } else {
+    updateGoalkeeper();
   }
   
   drawPenaltyScene();
   animationFrameId = requestAnimationFrame(animatePenaltyScene);
+}
+
+function handlePenaltyMouseMove(e) {
+  if (!canvasClicksEnabled || isBallFlying) return;
+  const rect = canvas.getBoundingClientRect();
+  mouseX = ((e.clientX - rect.left) / rect.width) * canvas.width;
+  mouseY = ((e.clientY - rect.top) / rect.height) * canvas.height;
 }
 
 function triggerPenaltyPhase() {
@@ -1369,6 +1576,8 @@ function triggerPenaltyPhase() {
   resetPenaltyCanvas();
   canvasClicksEnabled = true;
   animatePenaltyScene();
+  
+  canvas.addEventListener("mousemove", handlePenaltyMouseMove);
   canvas.addEventListener("click", handlePenaltyClick);
 }
 
@@ -1394,21 +1603,52 @@ function handlePenaltyClick(e) {
   ballTargetX = Math.max(42, Math.min(258, ballTargetX));
   ballTargetY = Math.max(32, Math.min(108, ballTargetY));
   
+  // Select a random goalkeeper dive direction for animation
+  const directions = ["left", "right", "center", "top-left", "top-right"];
+  gkDiveDirection = directions[Math.floor(Math.random() * directions.length)];
+  gkDiveProgress = 0;
+  ballHistory = [];
+  
   isBallFlying = true;
   canvasClicksEnabled = false;
 }
 
 function evaluatePenaltyOutcome() {
   canvasClicksEnabled = false;
+  canvas.removeEventListener("mousemove", handlePenaltyMouseMove);
   canvas.removeEventListener("click", handlePenaltyClick);
   cancelAnimationFrame(animationFrameId);
   
-  const gkLeft = goalieX;
-  const gkRight = goalieX + 60;
-  const gkTop = 55;
-  const gkBottom = 90;
+  // Determine if goalkeeper saved the shot based on final goalie position and dimensions
+  let currentGoalieX = goalieX;
+  let currentGoalieY = 55;
+  let goalieWidth = 60;
+  let goalieHeight = 35;
   
-  const saved = (ballTargetX >= gkLeft - 5 && ballTargetX <= gkRight + 5 && ballTargetY >= gkTop - 5 && ballTargetY <= gkBottom + 5);
+  if (gkDiveDirection !== "idle") {
+    const diveDist = 45; // final dive distance
+    if (gkDiveDirection === "left") {
+      currentGoalieX -= diveDist;
+      goalieWidth = 70;
+    } else if (gkDiveDirection === "right") {
+      currentGoalieX += diveDist;
+      goalieWidth = 70;
+    } else if (gkDiveDirection === "top-left") {
+      currentGoalieX -= diveDist;
+      currentGoalieY -= diveDist * 0.4;
+      goalieWidth = 75;
+    } else if (gkDiveDirection === "top-right") {
+      currentGoalieX += diveDist;
+      currentGoalieY -= diveDist * 0.4;
+      goalieWidth = 75;
+    }
+  }
+  
+  const saved = (ballTargetX >= currentGoalieX - 5 && 
+                 ballTargetX <= currentGoalieX + goalieWidth + 5 && 
+                 ballTargetY >= currentGoalieY - 5 && 
+                 ballTargetY <= currentGoalieY + goalieHeight + 5);
+                 
   const msg = document.getElementById("shootout-message");
   msg.style.display = "block";
   
