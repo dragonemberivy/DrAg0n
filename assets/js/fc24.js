@@ -1146,19 +1146,42 @@ const commentaryPhrases = [
 ];
 
 window.openMatchCenter = function() {
-  audioCtrl.playClick();
-  document.getElementById("match-center-overlay").style.display = "flex";
-  document.getElementById("close-match-btn").style.display = "none";
-  document.getElementById("start-match-btn").style.display = "inline-block";
-  document.getElementById("match-score").textContent = "0 - 0";
-  document.getElementById("commentary-ticker").innerHTML = `<div style="color:var(--text-gray);">Ready for Kickoff. Click 'Kick Off' to start the match!</div>`;
-  
-  homeScore = 0; awayScore = 0; matchMinute = 0;
-  const opponents = ["Galacticos FC", "Red Devils", "Sky Blues", "El Blaugrana", "Piemonte Calcio"];
-  currentOpponent = opponents[Math.floor(Math.random() * opponents.length)];
-  document.getElementById("match-away-team").textContent = currentOpponent;
-  
-  resetPenaltyCanvas();
+  try {
+    audioCtrl.playClick();
+    
+    const overlay = document.getElementById("match-center-overlay");
+    if (!overlay) throw new Error("match-center-overlay element is missing in HTML");
+    overlay.style.display = "flex";
+    
+    const closeBtn = document.getElementById("close-match-btn");
+    if (!closeBtn) throw new Error("close-match-btn element is missing in HTML");
+    closeBtn.style.display = "none";
+    
+    const startBtn = document.getElementById("start-match-btn");
+    if (!startBtn) throw new Error("start-match-btn element is missing in HTML");
+    startBtn.style.display = "inline-block";
+    
+    const score = document.getElementById("match-score");
+    if (!score) throw new Error("match-score element is missing in HTML");
+    score.textContent = "0 - 0";
+    
+    const ticker = document.getElementById("commentary-ticker");
+    if (!ticker) throw new Error("commentary-ticker element is missing in HTML");
+    ticker.innerHTML = `<div style="color:var(--text-gray);">Ready for Kickoff. Click 'Kick Off' to start the match!</div>`;
+    
+    homeScore = 0; awayScore = 0; matchMinute = 0;
+    const opponents = ["Galacticos FC", "Red Devils", "Sky Blues", "El Blaugrana", "Piemonte Calcio"];
+    currentOpponent = opponents[Math.floor(Math.random() * opponents.length)];
+    
+    const awayTeam = document.getElementById("match-away-team");
+    if (!awayTeam) throw new Error("match-away-team element is missing in HTML");
+    awayTeam.textContent = currentOpponent;
+    
+    resetPenaltyCanvas();
+  } catch (err) {
+    alert("Error opening Match Center: " + err.message + "\n\nIf you have edited the HTML, please ensure all match overlay elements exist.");
+    console.error(err);
+  }
 };
 
 window.closeMatchCenter = function() {
