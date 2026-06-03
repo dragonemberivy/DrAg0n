@@ -289,6 +289,56 @@ class AudioController {
     }
   }
   
+  startStadiumAmbient() {
+    if (this.muted) return;
+    try {
+      this.init();
+      if (!this.ctx) return;
+      
+      if (this.ctx.state === "suspended") {
+        this.ctx.resume();
+      }
+      
+      this.stopStadiumAmbient();
+      
+      const bufferSize = this.ctx.sampleRate * 2.0;
+      const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const output = noiseBuffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        output[i] = Math.random() * 2 - 1;
+      }
+      
+      this.ambientSource = this.ctx.createBufferSource();
+      this.ambientSource.buffer = noiseBuffer;
+      this.ambientSource.loop = true;
+      
+      this.ambientFilter = this.ctx.createBiquadFilter();
+      this.ambientFilter.type = "lowpass";
+      this.ambientFilter.frequency.setValueAtTime(220, this.ctx.currentTime);
+      
+      this.ambientGain = this.ctx.createGain();
+      this.ambientGain.gain.setValueAtTime(0.04, this.ctx.currentTime);
+      
+      this.ambientSource.connect(this.ambientFilter);
+      this.ambientFilter.connect(this.ambientGain);
+      this.ambientGain.connect(this.ctx.destination);
+      
+      this.ambientSource.start();
+    } catch (e) {
+      console.warn("Could not start stadium ambient:", e);
+    }
+  }
+
+  stopStadiumAmbient() {
+    try {
+      if (this.ambientSource) {
+        this.ambientSource.stop();
+        this.ambientSource.disconnect();
+        this.ambientSource = null;
+      }
+    } catch (e) {}
+  }
+  
   playKick() {
     if (this.muted) return;
     try {
@@ -1151,6 +1201,9 @@ let controlledPlayerIndex = 0; // Index of player we control
 
 // Keyboard Controls State
 const keysPressed = {};
+let shootCharge = 0;
+let passCharge = 0;
+let powerCharge = 0;
 
 // Game Entities (Physics coordinates)
 let ball = {
@@ -1459,6 +1512,7 @@ window.openMatchCenter = function() {
 
 window.closeMatchCenter = function() {
   audioCtrl.playClick();
+  audioCtrl.stopStadiumAmbient();
   gameActive = false;
   clearInterval(matchTickerInterval);
   cancelAnimationFrame(animationFrameId);
@@ -1489,6 +1543,7 @@ window.closeMatchCenter = function() {
 
 window.startSimulatedMatch = function() {
   document.getElementById("start-match-btn").style.display = "none";
+  audioCtrl.startStadiumAmbient();
   gameActive = true;
   initializeGameplayEntities();
   startMatchTimer();
@@ -1643,17 +1698,27 @@ function updateGameplayLoop() {
     player.x = Math.max(25, Math.min(625, player.x));
     player.y = Math.max(25, Math.min(375, player.y));
     
-    // Handle Keyboard Shoot (Period ".")
-    if (keysPressed["."] && ball.owner === player && !shootKeyDebounce) {
-      shootKeyDebounce = true;
+    // Reset charge if control is lost
+    if (ball.owner !== player) {
+      shootCharge = 0;
+      passCharge = 0;
+      powerCharge = 0;
+    }
+
+    // Handle Keyboard Shoot (Period "." with hold to charge power)
+    if (keysPressed["."] && ball.owner === player) {
+      shootCharge = Math.min(1.0, shootCharge + 0.035);
+      powerCharge = shootCharge;
+    } else if (shootCharge > 0) {
       audioCtrl.playKick();
-      
       const targetGoalX = 630;
       const targetGoalY = 200;
       const tDx = targetGoalX - player.x;
       const tDy = targetGoalY - player.y;
       const dist = Math.hypot(tDx, tDy);
-      const velocity = 5.5 + (player.stats.shooting / 100) * 6.5;
+      
+      const baseVelocity = 5.5 + (player.stats.shooting / 100) * 6.5;
+      const velocity = baseVelocity * (0.35 + shootCharge * 0.95);
       
       ball.owner = null;
       ball.vx = (tDx / dist) * velocity;
@@ -1663,16 +1728,20 @@ function updateGameplayLoop() {
       const msg = document.getElementById("shootout-message");
       if (msg) {
         msg.style.display = "block";
-        msg.style.color = "#38bdf8";
-        msg.textContent = "SHOT! ⚡";
+        msg.style.color = "#fbbf24";
+        msg.textContent = `POWER SHOT! ⚡ (${Math.round(shootCharge * 100)}%)`;
         setTimeout(() => { msg.style.display = "none"; }, 800);
       }
+      
+      shootCharge = 0;
+      powerCharge = 0;
     }
     
-    // Handle Keyboard Pass (Slash "/")
-    if (keysPressed["/"] && ball.owner === player && !passKeyDebounce) {
-      passKeyDebounce = true;
-      
+    // Handle Keyboard Pass (Slash "/" with hold to charge power)
+    if (keysPressed["/"] && ball.owner === player) {
+      passCharge = Math.min(1.0, passCharge + 0.035);
+      powerCharge = passCharge;
+    } else if (passCharge > 0) {
       let closestIdx = -1;
       let minDist = Infinity;
       homePlayers.forEach((p, idx) => {
@@ -1695,7 +1764,7 @@ function updateGameplayLoop() {
         const angleOffset = (Math.random() * 2 - 1) * drift * (Math.PI / 180);
         
         const angle = Math.atan2(tDy, tDx) + angleOffset;
-        const passSpeed = 6.0;
+        const passSpeed = 3.5 + passCharge * 6.0;
         
         ball.owner = null;
         ball.vx = Math.cos(angle) * passSpeed;
@@ -1705,6 +1774,9 @@ function updateGameplayLoop() {
         controlledPlayerIndex = closestIdx;
         updatePlayerSelectionRing();
       }
+      
+      passCharge = 0;
+      powerCharge = 0;
     }
   }
 
@@ -2009,6 +2081,19 @@ function drawPitchLoop() {
     }
     
     renderer3d.render(scene3d, camera3d);
+    
+    // Update visual Power Bar HUD
+    const powerBarContainer = document.getElementById("match-power-bar-container");
+    const powerBarFill = document.getElementById("match-power-bar-fill");
+    if (powerBarContainer && powerBarFill) {
+      if (powerCharge > 0) {
+        powerBarContainer.style.display = "block";
+        powerBarFill.style.width = (powerCharge * 100) + "%";
+      } else {
+        powerBarContainer.style.display = "none";
+        powerBarFill.style.width = "0%";
+      }
+    }
   } catch (e) {
     console.warn("Error in 3D draw loop:", e);
   }
@@ -2130,6 +2215,7 @@ function triggerGoalScored(byPlayer) {
 }
 
 function endGameplayMatch() {
+  audioCtrl.stopStadiumAmbient();
   gameActive = false;
   cancelAnimationFrame(animationFrameId);
   if (canvas) {
