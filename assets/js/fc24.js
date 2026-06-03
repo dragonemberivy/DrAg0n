@@ -1229,51 +1229,61 @@ let isBallFlying = false;
 let canvasClicksEnabled = false;
 
 function resetPenaltyCanvas() {
-  canvas = document.getElementById("penalty-canvas");
-  if (!canvas) return;
-  ctx = canvas.getContext("2d");
-  
-  canvas.width = 300;
-  canvas.height = 200;
-  
-  goalieX = 120;
-  goalieSpeed = 2.5;
-  ballX = 150;
-  ballY = 175;
-  isBallFlying = false;
-  canvasClicksEnabled = false;
-  
-  drawPenaltyScene();
+  try {
+    canvas = document.getElementById("penalty-canvas");
+    if (!canvas) return;
+    ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    
+    canvas.width = 300;
+    canvas.height = 200;
+    
+    goalieX = 120;
+    goalieSpeed = 2.5;
+    ballX = 150;
+    ballY = 175;
+    isBallFlying = false;
+    canvasClicksEnabled = false;
+    
+    drawPenaltyScene();
+  } catch (e) {
+    console.warn("Error resetting penalty canvas:", e);
+  }
 }
 
 function drawPenaltyScene() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
-  ctx.fillStyle = "#1e4620";
-  ctx.fillRect(0, 110, canvas.width, 90);
-  
-  ctx.strokeStyle = "#ffffff";
-  ctx.lineWidth = 3;
-  ctx.strokeRect(40, 30, 220, 80);
-  
-  ctx.fillStyle = "#d946ef";
-  ctx.fillRect(goalieX, 55, 60, 35);
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "8px Outfit";
-  ctx.fillText("GK", goalieX + 24, 75);
-  
-  ctx.beginPath();
-  ctx.arc(ballX, ballY, 8, 0, Math.PI * 2);
-  ctx.fillStyle = "#ffffff";
-  ctx.fill();
-  ctx.strokeStyle = "#000";
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
-  
-  ctx.beginPath();
-  ctx.arc(ballX, ballY, 3, 0, Math.PI * 2);
-  ctx.fillStyle = "#000";
-  ctx.fill();
+  if (!ctx) return;
+  try {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.fillStyle = "#1e4620";
+    ctx.fillRect(0, 110, canvas.width, 90);
+    
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 3;
+    ctx.strokeRect(40, 30, 220, 80);
+    
+    ctx.fillStyle = "#d946ef";
+    ctx.fillRect(goalieX, 55, 60, 35);
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "8px Outfit";
+    ctx.fillText("GK", goalieX + 24, 75);
+    
+    ctx.beginPath();
+    ctx.arc(ballX, ballY, 8, 0, Math.PI * 2);
+    ctx.fillStyle = "#ffffff";
+    ctx.fill();
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.arc(ballX, ballY, 3, 0, Math.PI * 2);
+    ctx.fillStyle = "#000";
+    ctx.fill();
+  } catch (e) {
+    console.warn("Error drawing penalty scene:", e);
+  }
 }
 
 function updateGoalkeeper() {
