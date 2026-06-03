@@ -1157,6 +1157,11 @@ window.openMatchCenter = function() {
     if (!overlay) throw new Error("match-center-overlay element is missing in HTML");
     overlay.style.display = "flex";
     
+    // Add the class list to fade in and activate pointer events
+    setTimeout(() => {
+      overlay.classList.add("show");
+    }, 10);
+    
     const closeBtn = document.getElementById("close-match-btn");
     if (!closeBtn) throw new Error("close-match-btn element is missing in HTML");
     closeBtn.style.display = "none";
@@ -1192,7 +1197,14 @@ window.closeMatchCenter = function() {
   audioCtrl.playClick();
   clearInterval(matchTickerInterval);
   cancelAnimationFrame(animationFrameId);
-  document.getElementById("match-center-overlay").style.display = "none";
+  
+  const overlay = document.getElementById("match-center-overlay");
+  if (overlay) {
+    overlay.classList.remove("show");
+    setTimeout(() => {
+      overlay.style.display = "none";
+    }, 500); // Wait for transition fade out to complete
+  }
   calculateSquadStats();
 };
 
