@@ -1134,6 +1134,8 @@ let homeScore = 0;
 let awayScore = 0;
 let currentOpponent = "";
 let animationFrameId = null;
+let canvas = null;
+let ctx = null;
 
 // Game State Variables
 let gameActive = false;
