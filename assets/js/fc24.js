@@ -718,7 +718,7 @@ function createCardHTML(p) {
         </div>
       </div>
       <div class="card-avatar-container">
-        <img src="${playerPhotoUrl}" class="player-avatar" alt="${p.name}" onerror="handleAvatarError(this, '${p.id}', ${sofifaIdVal})">
+        <img src="${playerPhotoUrl}" class="player-avatar" alt="${p.name}" referrerpolicy="no-referrer" onerror="handleAvatarError(this, '${p.id}', ${sofifaIdVal})">
       </div>
       <div class="card-name">${p.name}</div>
       <div class="card-divider"></div>
