@@ -58,19 +58,19 @@ const playerSets = {
   ]
 };
 
-// --- HORRIBLE DEFAULT BRONZE PLAYERS ---
+// --- REAL WORLD LOWEST RATED FC 24 BRONZE PLAYERS ---
 const horriblePlayers = {
-  GK: { id: "h_bob", name: "Butterfingers Bob", rating: 45, position: "GK", nation: "😭 Trashland", club: "Bronze", cardType: "bronze-rare", stats: { div: 40, han: 42, kic: 38, ref: 45, spd: 30, pos: 41 } },
-  LB: { id: "h_carl", name: "Concrete Carl", rating: 48, position: "LB", nation: "😭 Trashland", club: "Bronze", cardType: "bronze-rare", stats: { pac: 22, sho: 28, pas: 35, dri: 31, def: 50, phy: 52 } },
-  LCB: { id: "h_ned", name: "No-Show Ned", rating: 47, position: "LCB", nation: "😭 Trashland", club: "Bronze", cardType: "bronze-rare", stats: { pac: 25, sho: 20, pas: 30, dri: 28, def: 49, phy: 50 } },
-  RCB: { id: "h_sam", name: "Stumbling Sam", rating: 49, position: "RCB", nation: "😭 Trashland", club: "Bronze", cardType: "bronze-rare", stats: { pac: 20, sho: 22, pas: 32, dri: 25, def: 52, phy: 54 } },
-  RB: { id: "h_willy", name: "Wrongway Willy", rating: 48, position: "RB", nation: "😭 Trashland", club: "Bronze", cardType: "bronze-rare", stats: { pac: 24, sho: 25, pas: 34, dri: 30, def: 48, phy: 50 } },
-  CDM: { id: "h_sid", name: "Sleepy Sid", rating: 50, position: "CDM", nation: "😭 Trashland", club: "Bronze", cardType: "bronze-rare", stats: { pac: 30, sho: 35, pas: 42, dri: 38, def: 52, phy: 50 } },
-  LCM: { id: "h_pete", name: "Passback Pete", rating: 51, position: "LCM", nation: "😭 Trashland", club: "Bronze", cardType: "bronze-rare", stats: { pac: 35, sho: 40, pas: 48, dri: 42, def: 48, phy: 48 } },
-  RCM: { id: "h_dan", name: "Dribbleless Dan", rating: 50, position: "RCM", nation: "😭 Trashland", club: "Bronze", cardType: "bronze-rare", stats: { pac: 32, sho: 42, pas: 40, dri: 45, def: 45, phy: 48 } },
-  LW: { id: "h_nick", name: "No-Shot Nick", rating: 52, position: "LW", nation: "😭 Trashland", club: "Bronze", cardType: "bronze-rare", stats: { pac: 42, sho: 40, pas: 45, dri: 48, def: 20, phy: 45 } },
-  ST: { id: "h_manny", name: "Missfire Manny", rating: 52, position: "ST", nation: "😭 Trashland", club: "Bronze", cardType: "bronze-rare", stats: { pac: 45, sho: 42, pas: 38, dri: 40, def: 22, phy: 50 } },
-  RW: { id: "h_steve", name: "Slowpoke Steve", rating: 51, position: "RW", nation: "😭 Trashland", club: "Bronze", cardType: "bronze-rare", stats: { pac: 40, sho: 42, pas: 44, dri: 45, def: 24, phy: 48 } }
+  GK: { id: "h_nasser", name: "Eyad Al Nasser", rating: 48, position: "GK", nation: "🇸🇦 Saudi Arabia", club: "Al Khaleej", cardType: "bronze-rare", stats: { div: 47, han: 48, kic: 46, ref: 48, spd: 32, pos: 45 } },
+  LB: { id: "h_egel", name: "Dennis Egel", rating: 47, position: "LB", nation: "🇩🇪 Germany", club: "SV Sandhausen", cardType: "bronze-rare", stats: { pac: 60, sho: 28, pas: 35, dri: 41, def: 44, phy: 48 } },
+  LCB: { id: "h_jiaqiang", name: "Lyu Jiaqiang", rating: 47, position: "LCB", nation: "🇨🇳 China", club: "Shenzhen FC", cardType: "bronze-rare", stats: { pac: 55, sho: 22, pas: 28, dri: 29, def: 48, phy: 52 } },
+  RCB: { id: "h_guoliang", name: "Chen Guoliang", rating: 48, position: "RCB", nation: "🇨🇳 China", club: "Shenzhen FC", cardType: "bronze-rare", stats: { pac: 56, sho: 23, pas: 30, dri: 31, def: 49, phy: 55 } },
+  RB: { id: "h_singh", name: "Abhishek Singh", rating: 48, position: "RB", nation: "🇮🇳 India", club: "Punjab FC", cardType: "bronze-rare", stats: { pac: 58, sho: 26, pas: 32, dri: 38, def: 45, phy: 49 } },
+  CDM: { id: "h_sawhney", name: "Deven Sawhney", rating: 47, position: "CDM", nation: "🇮🇳 India", club: "Odisha FC", cardType: "bronze-rare", stats: { pac: 50, sho: 32, pas: 40, dri: 41, def: 46, phy: 48 } },
+  LCM: { id: "h_remtluanga", name: "CVL Remtluanga", rating: 47, position: "LCM", nation: "🇮🇳 India", club: "Odisha FC", cardType: "bronze-rare", stats: { pac: 52, sho: 36, pas: 45, dri: 44, def: 42, phy: 45 } },
+  RCM: { id: "h_horam", name: "Chanso Horam", rating: 48, position: "RCM", nation: "🇮🇳 India", club: "Mumbai City", cardType: "bronze-rare", stats: { pac: 64, sho: 38, pas: 42, dri: 46, def: 38, phy: 44 } },
+  LW: { id: "h_chothe", name: "Sonam Chothe", rating: 48, position: "LW", nation: "🇮🇳 India", club: "Punjab FC", cardType: "bronze-rare", stats: { pac: 62, sho: 40, pas: 42, dri: 48, def: 28, phy: 46 } },
+  ST: { id: "h_youzu", name: "He Youzu", rating: 48, position: "ST", nation: "🇨🇳 China", club: "Cangzhou FC", cardType: "bronze-rare", stats: { pac: 58, sho: 46, pas: 34, dri: 42, def: 25, phy: 50 } },
+  RW: { id: "h_jinad", name: "Tobi Jinad", rating: 48, position: "RW", nation: "🇮🇪 Ireland", club: "Bohemians", cardType: "bronze-rare", stats: { pac: 65, sho: 41, pas: 38, dri: 44, def: 22, phy: 45 } }
 };
 
 // All players flattened into one lookup map
@@ -108,19 +108,19 @@ function saveUnlockedPlayers() {
 }
 loadUnlockedPlayers();
 
-// Pre-fill starting squad with horrible bronze players
+// Pre-fill starting squad with real lowest rated players
 const squadState = {
-  GK: "h_bob",
-  LB: "h_carl",
-  LCB: "h_ned",
-  RCB: "h_sam",
-  RB: "h_willy",
-  CDM: "h_sid",
-  LCM: "h_pete",
-  RCM: "h_dan",
-  LW: "h_nick",
-  ST: "h_manny",
-  RW: "h_steve"
+  GK: "h_nasser",
+  LB: "h_egel",
+  LCB: "h_jiaqiang",
+  RCB: "h_guoliang",
+  RB: "h_singh",
+  CDM: "h_sawhney",
+  LCM: "h_remtluanga",
+  RCM: "h_horam",
+  LW: "h_chothe",
+  ST: "h_youzu",
+  RW: "h_jinad"
 };
 
 // Mobile tap interaction state
@@ -541,13 +541,115 @@ function drawChemistryLinks(playerChemScore) {
 window.addEventListener("resize", () => { calculateSquadStats(); });
 
 // --- CARD HTML RENDERING ---
+// --- SOFIFA ID MAPPING FOR REAL PICTURES ---
+const playerSofifaIds = {
+  // Set 1 (Legends)
+  "s1_yashin": 238380,
+  "s1_rcarlos": 110777,
+  "s1_maldini": 110771,
+  "s1_ramos": 155862,
+  "s1_cafu": 10587,
+  "s1_pirlo": 10574,
+  "s1_ronaldinho": 2087,
+  "s1_zidane": 2064,
+  "s1_ronaldo": 20801,
+  "s1_zlatan": 41236,
+  "s1_messi": 158023,
+
+  // Set 2 (Modern Elites)
+  "s2_courtois": 192119,
+  "s2_davies": 234396,
+  "s2_vandijk": 203376,
+  "s2_dias": 239818,
+  "s2_hakimi": 235212,
+  "s2_rodri": 231866,
+  "s2_debruyne": 192985,
+  "s2_bellingham": 252371,
+  "s2_vinicius": 238794,
+  "s2_haaland": 239085,
+  "s2_salah": 209331,
+
+  // Set 3 (Classic Champions)
+  "s3_buffon": 1179,
+  "s3_marcelo": 176676,
+  "s3_puyol": 109287,
+  "s3_nesta": 1088,
+  "s3_zanetti": 1041,
+  "s3_vieira": 1647,
+  "s3_maradona": 240407,
+  "s3_iniesta": 189509,
+  "s3_henry": 1032,
+  "s3_ronaldo": 37576,
+  "s3_beckham": 1367,
+
+  // Set 4 (Future Stars)
+  "s4_donnarumma": 230621,
+  "s4_balde": 263622,
+  "s4_saliba": 243769,
+  "s4_gvardiol": 256654,
+  "s4_frimpong": 253004,
+  "s4_camavinga": 248243,
+  "s4_musiala": 256790,
+  "s4_pedri": 251854,
+  "s4_palmer": 244263,
+  "s4_alvarez": 256726,
+  "s4_yamal": 277016,
+
+  // Horrible Players Fallbacks
+  "h_nasser": 271223,
+  "h_egel": 271228,
+  "h_jiaqiang": 259600,
+  "h_guoliang": 259160,
+  "h_singh": 269220,
+  "h_sawhney": 269300,
+  "h_remtluanga": 269302,
+  "h_horam": 266986,
+  "h_chothe": 269221,
+  "h_youzu": 205340, // Wu Lei (Real Chinese striker face)
+  "h_jinad": 240410  // Chiedozie Ogbene (Real Irish RW face)
+};
+
+// --- CARD HTML RENDERING ---
 function createCardHTML(p) {
   const isGK = (p.position === "GK");
   let cardThemeClass = "rare-gold";
-  if (p.cardType === "icon") cardThemeClass = "fut-icon";
-  if (p.cardType === "toty") cardThemeClass = "fut-toty";
-  if (p.cardType === "future-star") cardThemeClass = "fut-future-star";
-  if (p.cardType === "bronze-rare") cardThemeClass = "bronze-rare";
+  
+  // Determine portrait image URL
+  const locallyGenerated = ["h_nasser", "h_egel", "h_jiaqiang", "h_guoliang", "h_singh", "h_sawhney", "h_remtluanga", "h_horam", "h_chothe"];
+  let playerPhotoUrl = "";
+  
+  if (locallyGenerated.includes(p.id)) {
+    playerPhotoUrl = `assets/images/players/${p.id}.png`;
+  } else {
+    const sofifaId = playerSofifaIds[p.id];
+    if (sofifaId) {
+      const padded = sofifaId.toString().padStart(6, '0');
+      const part1 = padded.substring(0, 3);
+      const part2 = padded.substring(3, 6);
+      playerPhotoUrl = `https://cdn.sofifa.net/players/${part1}/${part2}/24_120.png`;
+    } else {
+      // Fallback templates
+      if (p.cardType === "icon") {
+        playerPhotoUrl = "assets/images/icon_player.png";
+      } else if (p.cardType === "toty") {
+        playerPhotoUrl = "assets/images/toty_player.png";
+      } else if (p.cardType === "future-star") {
+        playerPhotoUrl = "assets/images/future_star_player.png";
+      } else {
+        playerPhotoUrl = "assets/images/bronze_player.png";
+      }
+    }
+  }
+
+  if (p.cardType === "icon") {
+    cardThemeClass = "fut-icon";
+  } else if (p.cardType === "toty") {
+    cardThemeClass = "fut-toty";
+  } else if (p.cardType === "future-star") {
+    cardThemeClass = "fut-future-star";
+  } else if (p.cardType === "bronze-rare") {
+    cardThemeClass = "bronze-rare";
+  }
   
   const cardIdAttr = p.id ? `id="card-${p.id}"` : '';
   const flagEmoji = p.nation.split(" ")[0];
@@ -568,20 +670,6 @@ function createCardHTML(p) {
     <div class="stat-col"><div>${p.stats.phy}</div><div>PHY</div></div>
   `;
 
-  const silhouetteSVG = `
-    <svg class="player-avatar" viewBox="0 0 100 100">
-      <defs>
-        <radialGradient id="avatarGlow-${p.id}" cx="50%" cy="40%" r="50%">
-          <stop offset="0%" stop-color="rgba(255,255,255,0.25)" />
-          <stop offset="100%" stop-color="rgba(0,0,0,0)" />
-        </radialGradient>
-      </defs>
-      <circle cx="50" cy="40" r="30" fill="url(#avatarGlow-${p.id})" />
-      <path d="M50 15 C40 15 35 22 35 32 C35 45 42 48 50 48 C58 48 65 45 65 32 C65 22 60 15 50 15 Z M22 85 C22 70 30 58 50 58 C70 58 78 70 78 85 L22 85 Z" fill="rgba(255,255,255,0.7)" />
-      <path d="M35 58 Q50 64 65 58 L68 70 Q50 78 32 70 Z" fill="${p.cardType === 'icon' ? '#d4af37' : p.cardType === 'toty' ? '#38bdf8' : p.cardType === 'future-star' ? '#f43f5e' : p.cardType === 'bronze-rare' ? '#cd7f32' : '#fbbf24'}" opacity="0.8"/>
-    </svg>
-  `;
-
   return `
     <div ${cardIdAttr} class="fut-card ${cardThemeClass}" draggable="true" ondragstart="handleDragStart(event)" data-player-id="${p.id}">
       <div class="card-glow"></div>
@@ -595,7 +683,9 @@ function createCardHTML(p) {
           <div class="card-badge" title="${p.club}">${p.club.substring(0, 3).toUpperCase()}</div>
         </div>
       </div>
-      <div class="card-avatar-container">${silhouetteSVG}</div>
+      <div class="card-avatar-container">
+        <img src="${playerPhotoUrl}" class="player-avatar" alt="${p.name}">
+      </div>
       <div class="card-name">${p.name}</div>
       <div class="card-divider"></div>
       <div class="card-stats-grid">${statsHTML}</div>
@@ -635,8 +725,6 @@ function renderBench() {
   
   const activeSet = playerSets[currentSetIndex];
   const placedIds = Object.values(squadState);
-  
-  // Show unlocked players belonging to this active set who are NOT currently on the pitch
   const benchPlayers = activeSet.filter(p => unlockedPlayers.has(p.id) && !placedIds.includes(p.id));
   
   if (benchPlayers.length === 0) {
@@ -744,10 +832,6 @@ function placePlayerInSlot(playerId, targetPos) {
   
   if (currentSlot) {
     squadState[currentSlot] = displacedPlayerId;
-  } else {
-    // If placing a new card from the bench, we need to swap out the displaced player.
-    // Horrible default bronze players are cleared, premium players go back to the bench pool.
-    // If the displaced player was a bronze placeholder, we just drop it (it doesn't go to the bench pool)
   }
   
   squadState[targetPos] = playerId;
@@ -762,7 +846,7 @@ function removePlayerFromSlot(pos) {
   if (squadState[pos] === null) return;
   const pId = squadState[pos];
   
-  // If we remove a card, we must restore the horrible default player placeholder for that slot!
+  // Restore real world lowest rated placeholder
   const defaultBronze = Object.values(horriblePlayers).find(p => p.position === pos);
   squadState[pos] = defaultBronze ? defaultBronze.id : null;
   
@@ -806,8 +890,6 @@ window.openPack = function() {
   }
 
   const activeSet = playerSets[currentSetIndex];
-  
-  // Find locked players in this set
   const lockedInSet = activeSet.filter(p => !unlockedPlayers.has(p.id));
   
   if (lockedInSet.length === 0) {
@@ -815,22 +897,17 @@ window.openPack = function() {
     return;
   }
 
-  // Deduct Dragonbux
   dragonbux -= 100;
   updateDragonbuxDisplay();
 
-  // Draw EXACTLY ONE player
   const randomIndex = Math.floor(Math.random() * lockedInSet.length);
   const drawnPlayer = lockedInSet[randomIndex];
   
-  // Unlock player
   unlockedPlayers.add(drawnPlayer.id);
   saveUnlockedPlayers();
   
-  // Play Pack sounds
   audioCtrl.playOpenPack();
 
-  // Render open overlay
   const packOpenSect = document.getElementById("pack-reveal-screen");
   if (!packOpenSect) return;
   packOpenSect.style.display = "flex";
@@ -923,7 +1000,6 @@ window.switchActivePlayerSet = function(setIdx) {
 
 window.clearActiveSquad = function() {
   audioCtrl.playClick();
-  // Clear restores horrible bronze players
   Object.keys(squadState).forEach(pos => {
     const defaultBronze = Object.values(horriblePlayers).find(p => p.position === pos);
     squadState[pos] = defaultBronze ? defaultBronze.id : null;
@@ -936,7 +1012,6 @@ window.clearActiveSquad = function() {
 window.autoSolveActiveSquad = function() {
   audioCtrl.playCheer();
   const activeSet = playerSets[currentSetIndex];
-  // Auto solve places players ONLY if they are unlocked!
   activeSet.forEach(p => {
     if (unlockedPlayers.has(p.id)) {
       squadState[p.position] = p.id;
@@ -954,7 +1029,7 @@ window.toggleSoundMute = function() {
   audioCtrl.playClick();
 };
 
-// --- PLAYING PART: INTERACTIVE MATCH SIMULATOR & PENALTY SHOOTOUT ---
+// --- MATCH SIMULATOR & PENALTY SHOOTOUT ---
 let matchTickerInterval = null;
 let matchMinute = 0;
 let homeScore = 0;
@@ -984,7 +1059,6 @@ window.openMatchCenter = function() {
   document.getElementById("match-score").textContent = "0 - 0";
   document.getElementById("commentary-ticker").innerHTML = `<div style="color:var(--text-gray);">Ready for Kickoff. Click 'Kick Off' to start the match!</div>`;
   
-  // Reset states
   homeScore = 0; awayScore = 0; matchMinute = 0;
   const opponents = ["Galacticos FC", "Red Devils", "Sky Blues", "El Blaugrana", "Piemonte Calcio"];
   currentOpponent = opponents[Math.floor(Math.random() * opponents.length)];
@@ -1015,7 +1089,6 @@ window.startSimulatedMatch = function() {
       return;
     }
     
-    // Check for Penalty Shootout triggers at 30', 60', 85'
     if ((matchMinute >= 30 && matchMinute <= 33 && !penaltyPhase) ||
         (matchMinute >= 60 && matchMinute <= 63 && !penaltyPhase) ||
         (matchMinute >= 83 && matchMinute <= 86 && !penaltyPhase)) {
@@ -1041,18 +1114,16 @@ function addCommentaryEntry(min, text, color = "#fff") {
 function simulateStandardMinute() {
   const rand = Math.random();
   if (rand < 0.15) {
-    // Opponent scores
     awayScore++;
     document.getElementById("match-score").textContent = `${homeScore} - ${awayScore}`;
     addCommentaryEntry(matchMinute + "'", `❌ GOAL! ${currentOpponent} score with a powerful strike into the corner!`, "#ef4444");
   } else if (rand < 0.4) {
-    // Generic match commentary
     const text = commentaryPhrases[Math.floor(Math.random() * commentaryPhrases.length)];
     addCommentaryEntry(matchMinute + "'", text, "var(--text-gray)");
   }
 }
 
-// --- PENALTY SHOOTOUT CANVAS MINI-GAME ---
+// --- PENALTY SHOOTOUT CANVAS ---
 let canvas, ctx;
 let goalieX = 130;
 let goalieSpeed = 2.5;
@@ -1068,7 +1139,6 @@ function resetPenaltyCanvas() {
   if (!canvas) return;
   ctx = canvas.getContext("2d");
   
-  // Match layout styling size bounds
   canvas.width = 300;
   canvas.height = 200;
   
@@ -1085,23 +1155,19 @@ function resetPenaltyCanvas() {
 function drawPenaltyScene() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   
-  // Field green grass
   ctx.fillStyle = "#1e4620";
   ctx.fillRect(0, 110, canvas.width, 90);
   
-  // Goal box outline
   ctx.strokeStyle = "#ffffff";
   ctx.lineWidth = 3;
-  ctx.strokeRect(40, 30, 220, 80); // Goal Frame
+  ctx.strokeRect(40, 30, 220, 80);
   
-  // Goalkeeper (represented as a dynamic colored glove rectangle)
   ctx.fillStyle = "#d946ef";
   ctx.fillRect(goalieX, 55, 60, 35);
   ctx.fillStyle = "#ffffff";
   ctx.font = "8px Outfit";
   ctx.fillText("GK", goalieX + 24, 75);
   
-  // Soccer Ball
   ctx.beginPath();
   ctx.arc(ballX, ballY, 8, 0, Math.PI * 2);
   ctx.fillStyle = "#ffffff";
@@ -1110,7 +1176,6 @@ function drawPenaltyScene() {
   ctx.lineWidth = 1.5;
   ctx.stroke();
   
-  // Draw inner pentagon lines for realism
   ctx.beginPath();
   ctx.arc(ballX, ballY, 3, 0, Math.PI * 2);
   ctx.fillStyle = "#000";
@@ -1118,8 +1183,7 @@ function drawPenaltyScene() {
 }
 
 function updateGoalkeeper() {
-  if (isBallFlying) return; // Freeze keeper on kicker shoot
-  
+  if (isBallFlying) return;
   goalieX += goalieSpeed;
   if (goalieX <= 40 || goalieX + 60 >= 260) {
     goalieSpeed = -goalieSpeed;
@@ -1130,14 +1194,10 @@ function animatePenaltyScene() {
   updateGoalkeeper();
   
   if (isBallFlying) {
-    // Animate ball to goal target
     const dx = ballTargetX - ballX;
     const dy = ballTargetY - ballY;
-    
     ballX += dx * 0.12;
     ballY += dy * 0.12;
-    
-    // Check arrival at goal line (y <= 110)
     if (Math.abs(ballY - ballTargetY) < 2) {
       isBallFlying = false;
       evaluatePenaltyOutcome();
@@ -1152,10 +1212,9 @@ function triggerPenaltyPhase() {
   penaltyPhase = true;
   canvasClicksEnabled = true;
   goalsThisShootout = 0;
-  
   clearInterval(matchTickerInterval);
   
-  addCommentaryEntry(matchMinute + "'", "🔥 PENALTY SHOOTOUT! A chance to score. Aim and click on the goal post canvas!", "#fbbf24");
+  addCommentaryEntry(matchMinute + "'", "🔥 PENALTY SHOOTOUT! Aim and click on the goal post canvas!", "#fbbf24");
   
   const msg = document.getElementById("shootout-message");
   if (msg) {
@@ -1167,7 +1226,6 @@ function triggerPenaltyPhase() {
   resetPenaltyCanvas();
   canvasClicksEnabled = true;
   animatePenaltyScene();
-  
   canvas.addEventListener("click", handlePenaltyClick);
 }
 
@@ -1178,17 +1236,11 @@ function handlePenaltyClick(e) {
   const clickX = ((e.clientX - rect.left) / rect.width) * canvas.width;
   const clickY = ((e.clientY - rect.top) / rect.height) * canvas.height;
   
-  // Ensure click is inside or near the goal area
   if (clickY > 115) return;
-  
   audioCtrl.playKick();
   
-  // --- ACCURACY DISPERSION BASED ON TEAM RATING ---
-  // Average rating of the team determines how close the ball lands to the click coordinates
   const currentRating = parseInt(document.getElementById("avg-rating-val").textContent) || 45;
-  
-  // Low rating = higher dispersion range
-  const maxDispersion = Math.max(5, 55 - (currentRating - 45) * 0.85); // 45 OVR -> 55px radius, 90 OVR -> 10px radius
+  const maxDispersion = Math.max(5, 55 - (currentRating - 45) * 0.85);
   
   const angle = Math.random() * Math.PI * 2;
   const radius = Math.random() * maxDispersion;
@@ -1196,7 +1248,6 @@ function handlePenaltyClick(e) {
   ballTargetX = clickX + Math.cos(angle) * radius;
   ballTargetY = clickY + Math.sin(angle) * radius;
   
-  // Clamp target inside goal net area
   ballTargetX = Math.max(42, Math.min(258, ballTargetX));
   ballTargetY = Math.max(32, Math.min(108, ballTargetY));
   
@@ -1209,33 +1260,30 @@ function evaluatePenaltyOutcome() {
   canvas.removeEventListener("click", handlePenaltyClick);
   cancelAnimationFrame(animationFrameId);
   
-  // Check if goalkeeper gloves intercepted the ball target coordinates
   const gkLeft = goalieX;
   const gkRight = goalieX + 60;
   const gkTop = 55;
   const gkBottom = 90;
   
   const saved = (ballTargetX >= gkLeft - 5 && ballTargetX <= gkRight + 5 && ballTargetY >= gkTop - 5 && ballTargetY <= gkBottom + 5);
-  
   const msg = document.getElementById("shootout-message");
   msg.style.display = "block";
   
   if (saved) {
     msg.style.color = "#ef4444";
     msg.textContent = "SAVED! 🧤";
-    addCommentaryEntry(matchMinute + "'", "❌ Penalty saved by the keeper! What a disappointing kick.", "#94a3b8");
+    addCommentaryEntry(matchMinute + "'", "❌ Penalty saved by the keeper!", "#94a3b8");
   } else {
     msg.style.color = "#4ade80";
     msg.textContent = "GOAL! ⚽";
     homeScore++;
     document.getElementById("match-score").textContent = `${homeScore} - ${awayScore}`;
-    addCommentaryEntry(matchMinute + "'", "🔥 GOOOOOAL! Pinpoint penalty kick! The crowd erupts!", "#4ade80");
+    addCommentaryEntry(matchMinute + "'", "🔥 GOOOOOAL! Pinpoint penalty kick!", "#4ade80");
   }
   
   setTimeout(() => {
     msg.style.display = "none";
     penaltyPhase = false;
-    // Resume match simulation ticker
     startSimulatedMatch();
   }, 2200);
 }
@@ -1243,11 +1291,9 @@ function evaluatePenaltyOutcome() {
 function endSimulatedMatch() {
   clearInterval(matchTickerInterval);
   cancelAnimationFrame(animationFrameId);
-  
   addCommentaryEntry("90'", "Referee blows the final whistle! Full time.", "#fbbf24");
   
-  // Calculate reward pay-out
-  let resultReward = 50; // Loss reward
+  let resultReward = 50;
   let resultText = "LOSS";
   let color = "#ef4444";
   
@@ -1265,27 +1311,22 @@ function endSimulatedMatch() {
   const goalBonus = homeScore * 10;
   const totalPayout = resultReward + goalBonus;
   
-  // Add payout to balance
   dragonbux += totalPayout;
   updateDragonbuxDisplay();
   
-  addCommentaryEntry("END", `MATCH RESULT: ${resultText}! 🪙 Eearned: ${resultReward} DB + ${goalBonus} DB Goal Bonus = ${totalPayout} DB!`, color);
-  
+  addCommentaryEntry("END", `MATCH RESULT: ${resultText}! Earned: ${resultReward} DB + ${goalBonus} DB Goal Bonus = ${totalPayout} DB!`, color);
   document.getElementById("close-match-btn").style.display = "inline-block";
 }
 
 // --- INITIALIZE ON DOM LOAD ---
 document.addEventListener("DOMContentLoaded", () => {
   fxController = new CelebrationFX("celebration-canvas");
-  
-  // Sync starting displays
   updateDragonbuxDisplay();
   updatePitchSlots();
   renderBench();
   setupDropSlots();
   calculateSquadStats();
   
-  // Handle click on body to clear tap selection
   document.body.addEventListener("click", () => {
     selectedBenchCardId = null;
     document.querySelectorAll(".bench-item-wrapper .fut-card").forEach(el => {
