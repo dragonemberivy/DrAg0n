@@ -1127,27 +1127,63 @@ window.toggleSoundMute = function() {
   audioCtrl.playClick();
 };
 
-// --- MATCH SIMULATOR & PENALTY SHOOTOUT ---
+// --- MATCH SIMULATOR & PLAYABLE 2D SOCCER GAME ---
 let matchTickerInterval = null;
 let matchMinute = 0;
 let homeScore = 0;
 let awayScore = 0;
 let currentOpponent = "";
-let penaltyPhase = false;
-let goalsThisShootout = 0;
-let penaltyGoalTarget = { x: 0, y: 0 };
-let penaltyGKPosition = { x: 100, y: 80 };
 let animationFrameId = null;
 
-const commentaryPhrases = [
-  "Midfield battle intensifies! Clean tackling by both sides.",
-  "What a run! Dribbles past one defender, but loses control.",
-  "Excellent defensive intercept! Threat cleared.",
-  "Pass back to security, slowing down the game pace.",
-  "Chants echo around the arena! Fans are roaring.",
-  "Long pass down the flank, but goes out for a goal kick.",
-  "A slide tackle causes a brief stop in play. Warning issued!"
-];
+// Game State Variables
+let gameActive = false;
+let matchTimerSeconds = 0; // 60 seconds total match time (1s = 1.5 virtual match minutes)
+let controlledPlayerIndex = 0; // Index of player we control (blue circle)
+
+// Keyboard Controls State
+const keysPressed = {};
+
+// Game Entities
+let ball = {
+  x: 325, y: 200,
+  vx: 0, vy: 0,
+  radius: 6,
+  owner: null, // null, or player object
+  lastOwner: null,
+  tackleCooldown: 0
+};
+
+// Players and Opponent arrays
+let homePlayers = []; // Your 4-3-3 squad on the pitch
+let opponentPlayers = []; // AI Opponents (Red)
+let opponentGoalkeeper = { x: 625, y: 200, radius: 10, targetY: 200, speed: 2 };
+
+// 4-3-3 Pitch Coordinates (Attacking left to right)
+const baseCoordinates433 = {
+  GK: { x: 45, y: 200 },
+  LB: { x: 180, y: 80 },
+  LCB: { x: 160, y: 160 },
+  RCB: { x: 160, y: 240 },
+  RB: { x: 180, y: 320 },
+  CDM: { x: 300, y: 200 },
+  LCM: { x: 330, y: 120 },
+  RCM: { x: 330, y: 280 },
+  LW: { x: 480, y: 80 },
+  ST: { x: 500, y: 200 },
+  RW: { x: 480, y: 320 }
+};
+
+// Key event listeners
+window.addEventListener("keydown", (e) => {
+  keysPressed[e.key.toLowerCase()] = true;
+  // Prevent spacebar or arrow keys from scrolling the webpage while in game
+  if (["space", "arrowup", "arrowdown", "arrowleft", "arrowright"].includes(e.key.toLowerCase())) {
+    e.preventDefault();
+  }
+});
+window.addEventListener("keyup", (e) => {
+  keysPressed[e.key.toLowerCase()] = false;
+});
 
 window.openMatchCenter = function() {
   try {
@@ -1174,10 +1210,6 @@ window.openMatchCenter = function() {
     if (!score) throw new Error("match-score element is missing in HTML");
     score.textContent = "0 - 0";
     
-    const ticker = document.getElementById("commentary-ticker");
-    if (!ticker) throw new Error("commentary-ticker element is missing in HTML");
-    ticker.innerHTML = `<div style="color:var(--text-gray);">Ready for Kickoff. Click 'Kick Off' to start the match!</div>`;
-    
     homeScore = 0; awayScore = 0; matchMinute = 0;
     const opponents = ["Galacticos FC", "Red Devils", "Sky Blues", "El Blaugrana", "Piemonte Calcio"];
     currentOpponent = opponents[Math.floor(Math.random() * opponents.length)];
@@ -1186,7 +1218,17 @@ window.openMatchCenter = function() {
     if (!awayTeam) throw new Error("match-away-team element is missing in HTML");
     awayTeam.textContent = currentOpponent;
     
-    resetPenaltyCanvas();
+    // Initialize Canvas context
+    canvas = document.getElementById("penalty-canvas");
+    if (!canvas) return;
+    ctx = canvas.getContext("2d");
+    
+    canvas.width = 650;
+    canvas.height = 400;
+    
+    // Render starting static pitch
+    initializeGameplayEntities();
+    drawPitchLoop();
   } catch (err) {
     alert("Error opening Match Center: " + err.message + "\n\nIf you have edited the HTML, please ensure all match overlay elements exist.");
     console.error(err);
@@ -1195,8 +1237,12 @@ window.openMatchCenter = function() {
 
 window.closeMatchCenter = function() {
   audioCtrl.playClick();
+  gameActive = false;
   clearInterval(matchTickerInterval);
   cancelAnimationFrame(animationFrameId);
+  if (canvas) {
+    canvas.removeEventListener("click", handlePitchCanvasClick);
+  }
   
   const overlay = document.getElementById("match-center-overlay");
   if (overlay) {
@@ -1210,465 +1256,572 @@ window.closeMatchCenter = function() {
 
 window.startSimulatedMatch = function() {
   document.getElementById("start-match-btn").style.display = "none";
-  addCommentaryEntry("0'", "Referee blows the whistle! Kick off! ⚽");
   
-  matchTickerInterval = setInterval(() => {
-    matchMinute += Math.floor(Math.random() * 3) + 1;
-    
-    if (matchMinute >= 90) {
-      matchMinute = 90;
-      clearInterval(matchTickerInterval);
-      endSimulatedMatch();
-      return;
-    }
-    
-    if ((matchMinute >= 30 && matchMinute <= 33 && !penaltyPhase) ||
-        (matchMinute >= 60 && matchMinute <= 63 && !penaltyPhase) ||
-        (matchMinute >= 83 && matchMinute <= 86 && !penaltyPhase)) {
-      triggerPenaltyPhase();
-    }
-    
-    if (!penaltyPhase) {
-      simulateStandardMinute();
-    }
-  }, 1200);
+  gameActive = true;
+  initializeGameplayEntities();
+  startMatchTimer();
+  gameTick();
+  
+  // Bind canvas click event for passing/shooting
+  canvas.addEventListener("click", handlePitchCanvasClick);
 };
 
-function addCommentaryEntry(min, text, color = "#fff") {
-  const ticker = document.getElementById("commentary-ticker");
-  if (!ticker) return;
-  const item = document.createElement("div");
-  item.style.color = color;
-  item.innerHTML = `<span style="color:#d946ef; font-weight:bold; margin-right:8px;">[${min}]</span> ${text}`;
-  ticker.appendChild(item);
-  ticker.scrollTop = ticker.scrollHeight;
+function startMatchTimer() {
+  matchTimerSeconds = 60; // 60 seconds total match time
+  updateTimerDisplay();
+  
+  matchTickerInterval = setInterval(() => {
+    matchTimerSeconds--;
+    
+    // 60 seconds is 90 virtual minutes (1s = 1.5m)
+    matchMinute = Math.round((60 - matchTimerSeconds) * 1.5);
+    if (matchMinute > 90) matchMinute = 90;
+    
+    updateTimerDisplay();
+    
+    if (matchTimerSeconds <= 0) {
+      clearInterval(matchTickerInterval);
+      endGameplayMatch();
+    }
+  }, 1000);
 }
 
-function simulateStandardMinute() {
-  const rand = Math.random();
-  if (rand < 0.15) {
-    awayScore++;
-    document.getElementById("match-score").textContent = `${homeScore} - ${awayScore}`;
-    addCommentaryEntry(matchMinute + "'", `❌ GOAL! ${currentOpponent} score with a powerful strike into the corner!`, "#ef4444");
-  } else if (rand < 0.4) {
-    const text = commentaryPhrases[Math.floor(Math.random() * commentaryPhrases.length)];
-    addCommentaryEntry(matchMinute + "'", text, "var(--text-gray)");
+function updateTimerDisplay() {
+  const display = document.getElementById("match-timer-display");
+  if (!display) return;
+  const mins = Math.floor(matchTimerSeconds / 60);
+  const secs = matchTimerSeconds % 60;
+  const padSecs = secs.toString().padStart(2, '0');
+  display.textContent = `TIME: ${mins}:${padSecs} (${matchMinute}')`;
+}
+
+function getPlayerColorByCardType(cardType) {
+  if (cardType === "icon") return "#d4af37"; // Icons get classic gold skins
+  if (cardType === "toty") return "#1e3a8a"; // Blue TOTY
+  if (cardType === "future-star") return "#db2777"; // Star Pink
+  if (cardType === "bronze-rare") return "#cd7f32"; // Bronze
+  return "#e2e8f0";
+}
+
+function initializeGameplayEntities() {
+  const currentOvr = parseInt(document.getElementById("avg-rating-val").textContent) || 45;
+  
+  // 1. Populate players based on active 4-3-3 squad builder cards
+  homePlayers = [];
+  Object.entries(squadState).forEach(([pos, pId]) => {
+    if (pId) {
+      const playerObj = allPlayersMap[pId];
+      if (playerObj) {
+        // Retrieve stats or default to OVR rating
+        const pace = playerObj.stats.pac || playerObj.stats.spd || playerObj.rating;
+        const shooting = playerObj.stats.sho || playerObj.stats.div || playerObj.rating;
+        const passing = playerObj.stats.pas || playerObj.stats.kic || playerObj.rating;
+        
+        // Base coordinate mapping
+        const baseCoords = baseCoordinates433[pos] || { x: 300, y: 200 };
+        
+        homePlayers.push({
+          id: pId,
+          name: playerObj.name,
+          rating: playerObj.rating,
+          position: pos,
+          cardType: playerObj.cardType,
+          x: baseCoords.x,
+          y: baseCoords.y,
+          targetX: baseCoords.x,
+          targetY: baseCoords.y,
+          radius: 12,
+          color: getPlayerColorByCardType(playerObj.cardType),
+          stats: { pace, shooting, passing }
+        });
+      }
+    }
+  });
+
+  // Default control to Striker (ST) or first teammate
+  controlledPlayerIndex = homePlayers.findIndex(p => p.position === "ST");
+  if (controlledPlayerIndex === -1) controlledPlayerIndex = 0;
+  
+  if (homePlayers[controlledPlayerIndex]) {
+    // Spawn ball at player feet
+    ball.x = homePlayers[controlledPlayerIndex].x + 14;
+    ball.y = homePlayers[controlledPlayerIndex].y;
+    ball.owner = homePlayers[controlledPlayerIndex];
+  }
+
+  // 2. Initialize Opponent AI players (Red circles)
+  opponentPlayers = [
+    { x: 380, y: 140, baseSpeed: 1.1, targetX: 380, targetY: 140, radius: 11 },
+    { x: 380, y: 260, baseSpeed: 1.1, targetX: 380, targetY: 260, radius: 11 },
+    { x: 480, y: 120, baseSpeed: 1.4, targetX: 480, targetY: 120, radius: 11 },
+    { x: 480, y: 280, baseSpeed: 1.4, targetX: 480, targetY: 280, radius: 11 }
+  ];
+
+  opponentGoalkeeper = {
+    x: 625,
+    y: 200,
+    radius: 12,
+    targetY: 200,
+    speed: 1.1 + (currentOvr - 45) * 0.015 // Goalkeeper matches the team rating's pace slightly
+  };
+
+  // Reset ball velocities
+  ball.vx = 0;
+  ball.vy = 0;
+  ball.tackleCooldown = 0;
+  ball.lastOwner = null;
+}
+
+function updateGameplayLoop() {
+  if (!gameActive) return;
+
+  // 1. Move the controlled player circle
+  const player = homePlayers[controlledPlayerIndex];
+  if (player) {
+    let dx = 0;
+    let dy = 0;
+    
+    if (keysPressed["w"] || keysPressed["arrowup"]) dy = -1;
+    if (keysPressed["s"] || keysPressed["arrowdown"]) dy = 1;
+    if (keysPressed["a"] || keysPressed["arrowleft"]) dx = -1;
+    if (keysPressed["d"] || keysPressed["arrowright"]) dx = 1;
+    
+    if (dx !== 0 && dy !== 0) {
+      dx *= 0.7071;
+      dy *= 0.7071;
+    }
+    
+    // Pace determines speed: OVR maps to speed 1.7 to 4.0
+    const speed = 1.7 + (player.stats.pace / 100) * 2.3;
+    player.x += dx * speed;
+    player.y += dy * speed;
+    
+    // Pitch bounds checking
+    player.x = Math.max(25, Math.min(625, player.x));
+    player.y = Math.max(25, Math.min(375, player.y));
+  }
+
+  // 2. Ball physics (tackles, rolling, friction)
+  if (ball.tackleCooldown > 0) ball.tackleCooldown--;
+
+  if (ball.owner) {
+    ball.x = ball.owner.x + 10;
+    ball.y = ball.owner.y;
+    ball.vx = 0;
+    ball.vy = 0;
+  } else {
+    ball.x += ball.vx;
+    ball.y += ball.vy;
+    ball.vx *= 0.96; // Grass rolling friction
+    ball.vy *= 0.96;
+    
+    // Wall bounds rebounds
+    if (ball.y <= 20 || ball.y >= 380) {
+      ball.vy = -ball.vy * 0.7;
+      ball.y = Math.max(20, Math.min(380, ball.y));
+    }
+    
+    // Check Goal Line (x >= 635, between y: 145 and 255)
+    if (ball.x >= 630 && ball.y >= 145 && ball.y <= 255) {
+      triggerGoalScored(true); // GOAL!
+    } else if (ball.x <= 20 && ball.y >= 145 && ball.y <= 255) {
+      triggerGoalScored(false); // Conceded goal
+    } else {
+      // Rebounds off backlines
+      if (ball.x <= 20) {
+        ball.vx = -ball.vx * 0.7;
+        ball.x = 20;
+      }
+      if (ball.x >= 630) {
+        ball.vx = -ball.vx * 0.7;
+        ball.x = 630;
+      }
+    }
+  }
+
+  // 3. Keep other teammates floating back toward formation slots
+  homePlayers.forEach((p, idx) => {
+    if (idx === controlledPlayerIndex) return;
+    const dx = p.targetX - p.x;
+    const dy = p.targetY - p.y;
+    p.x += dx * 0.04;
+    p.y += dy * 0.04;
+  });
+
+  // 4. Opponent defender AI (runs towards player with ball to tackle, else retreats)
+  opponentPlayers.forEach(op => {
+    if (ball.owner && !ball.owner.id.startsWith("opponent_")) {
+      const dx = ball.owner.x - op.x;
+      const dy = ball.owner.y - op.y;
+      const dist = Math.hypot(dx, dy);
+      
+      if (dist > 5) {
+        op.x += (dx / dist) * op.baseSpeed;
+        op.y += (dy / dist) * op.baseSpeed;
+      }
+      
+      // Perform tackle collision
+      if (dist < (op.radius + ball.owner.radius) && ball.tackleCooldown === 0) {
+        ball.owner = null;
+        ball.vx = -4.5 - Math.random() * 2.5; // Clear the ball leftwards
+        ball.vy = Math.random() * 4 - 2;
+        ball.tackleCooldown = 30; // 30 tick recovery before player can reclaim
+        audioCtrl.playKick();
+        
+        const msg = document.getElementById("shootout-message");
+        if (msg) {
+          msg.style.display = "block";
+          msg.style.color = "#ef4444";
+          msg.textContent = "TACKLED! ⚔️";
+          setTimeout(() => { msg.style.display = "none"; }, 800);
+        }
+      }
+    } else {
+      // Return to baseline coordinates
+      const dx = op.targetX - op.x;
+      const dy = op.targetY - op.y;
+      op.x += dx * 0.03;
+      op.y += dy * 0.03;
+      
+      // Kick loose balls away
+      const ballDist = Math.hypot(ball.x - op.x, ball.y - op.y);
+      if (ballDist < (op.radius + ball.radius) && ball.tackleCooldown === 0) {
+        ball.vx = -5.5 - Math.random() * 3;
+        ball.vy = Math.random() * 5 - 2.5;
+        ball.tackleCooldown = 40;
+        audioCtrl.playKick();
+      }
+    }
+  });
+
+  // 5. Opponent Goalkeeper AI (tracks ball Y coord on the goal line)
+  if (opponentGoalkeeper) {
+    const gk = opponentGoalkeeper;
+    const targetY = Math.max(160, Math.min(240, ball.y));
+    const dy = targetY - gk.y;
+    gk.y += Math.sign(dy) * Math.min(Math.abs(dy), gk.speed);
+    
+    // Save block collision
+    const ballGkDist = Math.hypot(ball.x - gk.x, ball.y - gk.y);
+    if (ballGkDist < (gk.radius + ball.radius) && !ball.owner) {
+      ball.vx = -7 - Math.random() * 4;
+      ball.vy = Math.random() * 6 - 3;
+      audioCtrl.playKick();
+      
+      const msg = document.getElementById("shootout-message");
+      if (msg) {
+        msg.style.display = "block";
+        msg.style.color = "#fbbf24";
+        msg.textContent = "SAVED! 🧤";
+        setTimeout(() => { msg.style.display = "none"; }, 800);
+      }
+    }
+  }
+
+  // 6. Claim loose balls
+  if (!ball.owner && ball.tackleCooldown === 0) {
+    homePlayers.forEach((p, idx) => {
+      const dist = Math.hypot(ball.x - p.x, ball.y - p.y);
+      if (dist < (p.radius + ball.radius)) {
+        ball.owner = p;
+        controlledPlayerIndex = idx;
+        audioCtrl.playPlace();
+      }
+    });
   }
 }
 
-// --- PENALTY SHOOTOUT CANVAS & PHYSICS ---
-let canvas, ctx;
-let goalieX = 130;
-let goalieSpeed = 2.5;
-let ballX = 150;
-let ballY = 175;
-let ballTargetX = 150;
-let ballTargetY = 175;
-let isBallFlying = false;
-let canvasClicksEnabled = false;
-
-// Upgraded FC 24 Aim and Goalkeeper state variables
-let mouseX = 150;
-let mouseY = 100;
-let gkDiveDirection = "idle"; // "idle", "left", "right", "center", "top-left", "top-right"
-let gkDiveProgress = 0;
-let ballHistory = [];
-let netRippleTimer = 0;
-let netRippleX = 0;
-let netRippleY = 0;
-
-function resetPenaltyCanvas() {
-  try {
-    canvas = document.getElementById("penalty-canvas");
-    if (!canvas) return;
-    ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    
-    canvas.width = 300;
-    canvas.height = 200;
-    
-    goalieX = 120;
-    goalieSpeed = 2.5;
-    ballX = 150;
-    ballY = 175;
-    isBallFlying = false;
-    canvasClicksEnabled = false;
-    gkDiveDirection = "idle";
-    gkDiveProgress = 0;
-    ballHistory = [];
-    netRippleTimer = 0;
-    
-    drawPenaltyScene();
-  } catch (e) {
-    console.warn("Error resetting penalty canvas:", e);
-  }
-}
-
-function drawPenaltyScene() {
+function drawPitchLoop() {
   if (!ctx) return;
   try {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Draw Stadium Sky & Floodlight Glow
-    const skyGrad = ctx.createLinearGradient(0, 0, 0, 110);
-    skyGrad.addColorStop(0, "#080514");
-    skyGrad.addColorStop(1, "#170e30");
-    ctx.fillStyle = skyGrad;
-    ctx.fillRect(0, 0, canvas.width, 110);
+    // Draw Field Grass (Dark Green)
+    ctx.fillStyle = "#1e4620";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // Draw floodlight glowing points
-    ctx.fillStyle = "rgba(139, 92, 246, 0.15)";
-    ctx.beginPath();
-    ctx.arc(60, 20, 40, 0, Math.PI * 2);
-    ctx.arc(240, 20, 40, 0, Math.PI * 2);
-    ctx.fill();
-    
-    // Draw Grass Pitch with Lawn Stripes
-    ctx.fillStyle = "#163a19";
-    ctx.fillRect(0, 110, canvas.width, 90);
-    
-    // Lawn stripes
-    ctx.fillStyle = "#1a441e";
-    for (let i = 110; i < 200; i += 20) {
-      ctx.fillRect(0, i, canvas.width, 10);
-    }
-    
-    // Draw Pitch Markings (Penalty Box line, spot)
-    ctx.strokeStyle = "rgba(255,255,255,0.2)";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(150, 175, 20, Math.PI, 0); // circle arc around penalty spot
-    ctx.stroke();
-    
-    // Penalty Spot
-    ctx.fillStyle = "rgba(255,255,255,0.6)";
-    ctx.beginPath();
-    ctx.arc(150, 175, 2.5, 0, Math.PI * 2);
-    ctx.fill();
-    
-    // Draw Goal Net Mesh Lines
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    // vertical net lines
-    for (let x = 40; x <= 260; x += 10) {
-      ctx.moveTo(x, 30);
-      ctx.lineTo(x + (x - 150) * 0.05, 110);
-    }
-    // horizontal net lines
-    for (let y = 30; y <= 110; y += 10) {
-      ctx.moveTo(40 + (y - 30) * 0.05, y);
-      ctx.lineTo(260 - (y - 30) * 0.05, y);
-    }
-    ctx.stroke();
-    
-    // Draw Goal Posts Frame (Crossbar & Posts)
-    ctx.strokeStyle = "#ffffff";
-    ctx.lineWidth = 4;
-    ctx.lineCap = "round";
-    ctx.beginPath();
-    ctx.moveTo(40, 110);
-    ctx.lineTo(40, 30);
-    ctx.lineTo(260, 30);
-    ctx.lineTo(260, 110);
-    ctx.stroke();
-    
-    // Post Shadows on grass
-    ctx.fillStyle = "rgba(0,0,0,0.3)";
-    ctx.fillRect(36, 110, 8, 3);
-    ctx.fillRect(256, 110, 8, 3);
-    
-    // Draw Goalkeeper (with dive animation stretching)
-    let currentGoalieX = goalieX;
-    let currentGoalieY = 55;
-    let goalieWidth = 60;
-    let goalieHeight = 35;
-    
-    if (isBallFlying && gkDiveDirection !== "idle") {
-      gkDiveProgress = Math.min(1, gkDiveProgress + 0.08);
-      const diveDist = 45 * gkDiveProgress;
-      
-      if (gkDiveDirection === "left") {
-        currentGoalieX -= diveDist;
-        goalieWidth = 70; // stretch
-      } else if (gkDiveDirection === "right") {
-        currentGoalieX += diveDist;
-        goalieWidth = 70; // stretch
-      } else if (gkDiveDirection === "top-left") {
-        currentGoalieX -= diveDist;
-        currentGoalieY -= diveDist * 0.4;
-        goalieWidth = 75;
-      } else if (gkDiveDirection === "top-right") {
-        currentGoalieX += diveDist;
-        currentGoalieY -= diveDist * 0.4;
-        goalieWidth = 75;
+    // Grass stripes (alternating greens)
+    ctx.fillStyle = "#224f24";
+    for (let x = 0; x < canvas.width; x += 50) {
+      if ((x / 50) % 2 === 0) {
+        ctx.fillRect(x, 0, 25, canvas.height);
       }
     }
     
-    // Goalkeeper body
-    ctx.fillStyle = "#d946ef";
-    ctx.shadowColor = "rgba(217, 70, 239, 0.5)";
-    ctx.shadowBlur = 10;
-    ctx.fillRect(currentGoalieX, currentGoalieY, goalieWidth, goalieHeight);
-    ctx.shadowBlur = 0; // reset
+    // Draw Pitch Markings (White)
+    ctx.strokeStyle = "rgba(255,255,255,0.35)";
+    ctx.lineWidth = 2;
     
-    // GK label
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 9px Outfit";
-    ctx.fillText("GK", currentGoalieX + goalieWidth / 2 - 6, currentGoalieY + goalieHeight / 2 + 3);
+    // Boundary line
+    ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
     
-    // Draw Net Ripple Impact Effect
-    if (netRippleTimer > 0) {
-      netRippleTimer--;
-      ctx.strokeStyle = "rgba(255, 255, 255, " + (netRippleTimer / 15) + ")";
+    // Center line
+    ctx.beginPath();
+    ctx.moveTo(canvas.width / 2, 20);
+    ctx.lineTo(canvas.width / 2, canvas.height - 20);
+    ctx.stroke();
+    
+    // Center circle
+    ctx.beginPath();
+    ctx.arc(canvas.width / 2, canvas.height / 2, 50, 0, Math.PI * 2);
+    ctx.stroke();
+    
+    // Center spot
+    ctx.fillStyle = "rgba(255,255,255,0.45)";
+    ctx.beginPath();
+    ctx.arc(canvas.width / 2, canvas.height / 2, 3, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Penalty boxes
+    // Left box
+    ctx.strokeRect(20, 100, 80, 200);
+    // Right box
+    ctx.strokeRect(canvas.width - 100, 100, 80, 200);
+    
+    // Penalty Spots
+    ctx.beginPath();
+    ctx.arc(70, 200, 2.5, 0, Math.PI * 2);
+    ctx.arc(canvas.width - 70, 200, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Draw Goal Nets (left and right)
+    ctx.fillStyle = "rgba(255,255,255,0.12)";
+    ctx.fillRect(5, 145, 15, 110);
+    ctx.fillRect(canvas.width - 20, 145, 15, 110);
+    
+    // Goal lines frame
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 3.5;
+    ctx.beginPath();
+    // left goalposts
+    ctx.moveTo(20, 145); ctx.lineTo(5, 145); ctx.lineTo(5, 255); ctx.lineTo(20, 255);
+    // right goalposts
+    ctx.moveTo(canvas.width - 20, 145); ctx.lineTo(canvas.width - 5, 145); ctx.lineTo(canvas.width - 5, 255); ctx.lineTo(canvas.width - 20, 255);
+    ctx.stroke();
+
+    // Draw Opponent AI defenders (Red Circles)
+    opponentPlayers.forEach(op => {
+      ctx.fillStyle = "#ef4444"; // red
+      ctx.strokeStyle = "#991b1b";
       ctx.lineWidth = 2.5;
       ctx.beginPath();
-      ctx.arc(netRippleX, netRippleY, (15 - netRippleTimer) * 2.5, 0, Math.PI * 2);
+      ctx.arc(op.x, op.y, op.radius, 0, Math.PI * 2);
+      ctx.fill();
       ctx.stroke();
-    }
-    
-    // Draw Ball History Trail
-    if (isBallFlying) {
-      ballHistory.forEach((pt, idx) => {
-        const alpha = (idx / ballHistory.length) * 0.4;
-        ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-        ctx.beginPath();
-        ctx.arc(pt.x, pt.y, pt.size * 0.9, 0, Math.PI * 2);
-        ctx.fill();
-      });
-    }
-    
-    // Draw Kicked Ball
-    if (isBallFlying) {
-      const progress = (175 - ballY) / (175 - ballTargetY);
-      const currentBallSize = Math.max(3.5, 8.5 - progress * 5); // 3D depth scaling
-      
-      // Draw ball shadow on pitch
-      if (ballY > 115) {
-        ctx.fillStyle = "rgba(0,0,0,0.25)";
-        ctx.beginPath();
-        ctx.arc(ballX, ballY + 15 * (1 - progress), currentBallSize * 0.8, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      
-      // Draw actual ball
+    });
+
+    // Draw Opponent Goalkeeper (Dark Red)
+    if (opponentGoalkeeper) {
+      ctx.fillStyle = "#7f1d1d";
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.arc(ballX, ballY, currentBallSize, 0, Math.PI * 2);
+      ctx.arc(opponentGoalkeeper.x, opponentGoalkeeper.y, opponentGoalkeeper.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
       ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 8px Outfit";
+      ctx.fillText("GK", opponentGoalkeeper.x - 5, opponentGoalkeeper.y + 3);
+    }
+
+    // Draw Teammates (Blue/Gold/Pink based on cardType)
+    homePlayers.forEach((p, idx) => {
+      ctx.fillStyle = p.color;
+      ctx.strokeStyle = (idx === controlledPlayerIndex) ? "#38bdf8" : "rgba(255,255,255,0.45)";
+      ctx.lineWidth = (idx === controlledPlayerIndex) ? 3.5 : 2.0;
+      
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = "#000000";
-      ctx.lineWidth = 1;
       ctx.stroke();
       
-      // Soccer ball patterns
-      ctx.beginPath();
-      ctx.arc(ballX, ballY, currentBallSize * 0.4, 0, Math.PI * 2);
-      ctx.fillStyle = "#000000";
-      ctx.fill();
-    }
-    
-    // Draw Aim Reticle Circle (Aim Helper Target Ring)
-    if (canvasClicksEnabled && !isBallFlying) {
-      const currentRating = parseInt(document.getElementById("avg-rating-val").textContent) || 45;
-      const maxDispersion = Math.max(5, 55 - (currentRating - 45) * 0.85);
-      
-      // Dynamic color (green for precise accuracy, red/orange for shaky/poor team)
-      let reticleColor = "#ef4444"; // red
-      if (maxDispersion < 15) {
-        reticleColor = "#4ade80"; // neon green
-      } else if (maxDispersion < 30) {
-        reticleColor = "#fbbf24"; // yellow-gold
+      // Draw controlled ring highlight indicator
+      if (idx === controlledPlayerIndex) {
+        ctx.strokeStyle = "#fbbf24";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius + 4, 0, Math.PI * 2);
+        ctx.stroke();
       }
-      
-      // Pulse animation
-      const pulse = 1 + Math.sin(Date.now() * 0.007) * 0.08;
-      const drawRadius = maxDispersion * pulse;
-      
-      // Outer Target Ring
-      ctx.strokeStyle = reticleColor;
-      ctx.lineWidth = 2.2;
-      ctx.beginPath();
-      ctx.arc(mouseX, mouseY, drawRadius, 0, Math.PI * 2);
-      ctx.stroke();
-      
-      // Inner crosshair point
-      ctx.fillStyle = reticleColor;
-      ctx.beginPath();
-      ctx.arc(mouseX, mouseY, 3.5, 0, Math.PI * 2);
-      ctx.fill();
-      
-      // Crosshair lines
-      ctx.strokeStyle = reticleColor;
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(mouseX - 8, mouseY); ctx.lineTo(mouseX - 3, mouseY);
-      ctx.moveTo(mouseX + 3, mouseY); ctx.lineTo(mouseX + 8, mouseY);
-      ctx.moveTo(mouseX, mouseY - 8); ctx.lineTo(mouseX, mouseY - 3);
-      ctx.moveTo(mouseX, mouseY + 3); ctx.lineTo(mouseX, mouseY + 8);
-      ctx.stroke();
-    }
+
+      // Draw position labels on circles
+      ctx.fillStyle = (p.color === "#d4af37" || p.color === "#e2e8f0") ? "#000000" : "#ffffff";
+      ctx.font = "bold 9px Outfit";
+      ctx.fillText(p.position, p.x - 6, p.y + 3);
+    });
+
+    // Draw Ball shadow
+    ctx.fillStyle = "rgba(0,0,0,0.3)";
+    ctx.beginPath();
+    ctx.arc(ball.x + 2, ball.y + 3, ball.radius - 1.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Draw Ball
+    ctx.fillStyle = "#ffffff";
+    ctx.strokeStyle = "#000000";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Draw ball center dot
+    ctx.fillStyle = "#000000";
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+    
   } catch (e) {
-    console.warn("Error drawing penalty scene:", e);
+    console.warn("Error drawing pitch scene:", e);
   }
 }
 
-function updateGoalkeeper() {
-  if (isBallFlying) return;
-  goalieX += goalieSpeed;
-  if (goalieX <= 40 || goalieX + 60 >= 260) {
-    goalieSpeed = -goalieSpeed;
-  }
-}
-
-function animatePenaltyScene() {
-  if (isBallFlying) {
-    const dx = ballTargetX - ballX;
-    const dy = ballTargetY - ballY;
-    ballX += dx * 0.12;
-    ballY += dy * 0.12;
-    
-    // Add point to ball trail history
-    const progress = (175 - ballY) / (175 - ballTargetY);
-    const size = Math.max(3.5, 8.5 - progress * 5);
-    ballHistory.push({ x: ballX, y: ballY, size: size });
-    if (ballHistory.length > 8) ballHistory.shift();
-    
-    if (Math.abs(ballY - ballTargetY) < 2) {
-      isBallFlying = false;
-      
-      // Set net ripple parameters
-      netRippleX = ballTargetX;
-      netRippleY = ballTargetY;
-      netRippleTimer = 15; // 15 frames of ripple animation
-      
-      evaluatePenaltyOutcome();
-    }
-  } else {
-    updateGoalkeeper();
-  }
-  
-  drawPenaltyScene();
-  animationFrameId = requestAnimationFrame(animatePenaltyScene);
-}
-
-function handlePenaltyMouseMove(e) {
-  if (!canvasClicksEnabled || isBallFlying) return;
-  const rect = canvas.getBoundingClientRect();
-  mouseX = ((e.clientX - rect.left) / rect.width) * canvas.width;
-  mouseY = ((e.clientY - rect.top) / rect.height) * canvas.height;
-}
-
-function triggerPenaltyPhase() {
-  penaltyPhase = true;
-  canvasClicksEnabled = true;
-  goalsThisShootout = 0;
-  clearInterval(matchTickerInterval);
-  
-  addCommentaryEntry(matchMinute + "'", "🔥 PENALTY SHOOTOUT! Aim and click on the goal post canvas!", "#fbbf24");
-  
-  const msg = document.getElementById("shootout-message");
-  if (msg) {
-    msg.style.display = "block";
-    msg.textContent = "AIM & CLICK TO KICK!";
-    setTimeout(() => { msg.style.display = "none"; }, 2000);
-  }
-  
-  resetPenaltyCanvas();
-  canvasClicksEnabled = true;
-  animatePenaltyScene();
-  
-  canvas.addEventListener("mousemove", handlePenaltyMouseMove);
-  canvas.addEventListener("click", handlePenaltyClick);
-}
-
-function handlePenaltyClick(e) {
-  if (!canvasClicksEnabled || isBallFlying) return;
+function handlePitchCanvasClick(e) {
+  if (!gameActive || !ball.owner) return;
   
   const rect = canvas.getBoundingClientRect();
   const clickX = ((e.clientX - rect.left) / rect.width) * canvas.width;
   const clickY = ((e.clientY - rect.top) / rect.height) * canvas.height;
   
-  if (clickY > 115) return;
-  audioCtrl.playKick();
+  const player = ball.owner;
   
-  const currentRating = parseInt(document.getElementById("avg-rating-val").textContent) || 45;
-  const maxDispersion = Math.max(5, 55 - (currentRating - 45) * 0.85);
-  
-  const angle = Math.random() * Math.PI * 2;
-  const radius = Math.random() * maxDispersion;
-  
-  ballTargetX = clickX + Math.cos(angle) * radius;
-  ballTargetY = clickY + Math.sin(angle) * radius;
-  
-  ballTargetX = Math.max(42, Math.min(258, ballTargetX));
-  ballTargetY = Math.max(32, Math.min(108, ballTargetY));
-  
-  // Select a random goalkeeper dive direction for animation
-  const directions = ["left", "right", "center", "top-left", "top-right"];
-  gkDiveDirection = directions[Math.floor(Math.random() * directions.length)];
-  gkDiveProgress = 0;
-  ballHistory = [];
-  
-  isBallFlying = true;
-  canvasClicksEnabled = false;
-}
-
-function evaluatePenaltyOutcome() {
-  canvasClicksEnabled = false;
-  canvas.removeEventListener("mousemove", handlePenaltyMouseMove);
-  canvas.removeEventListener("click", handlePenaltyClick);
-  cancelAnimationFrame(animationFrameId);
-  
-  // Determine if goalkeeper saved the shot based on final goalie position and dimensions
-  let currentGoalieX = goalieX;
-  let currentGoalieY = 55;
-  let goalieWidth = 60;
-  let goalieHeight = 35;
-  
-  if (gkDiveDirection !== "idle") {
-    const diveDist = 45; // final dive distance
-    if (gkDiveDirection === "left") {
-      currentGoalieX -= diveDist;
-      goalieWidth = 70;
-    } else if (gkDiveDirection === "right") {
-      currentGoalieX += diveDist;
-      goalieWidth = 70;
-    } else if (gkDiveDirection === "top-left") {
-      currentGoalieX -= diveDist;
-      currentGoalieY -= diveDist * 0.4;
-      goalieWidth = 75;
-    } else if (gkDiveDirection === "top-right") {
-      currentGoalieX += diveDist;
-      currentGoalieY -= diveDist * 0.4;
-      goalieWidth = 75;
+  // Shoot vs Pass determination
+  if (clickX >= 480 && player.x >= 325) {
+    // SHOOT AT GOAL
+    audioCtrl.playKick();
+    
+    const dx = clickX - player.x;
+    const dy = clickY - player.y;
+    const dist = Math.hypot(dx, dy);
+    
+    // Shooting stat dictates shot speed: maps OVR rating to 5.5 - 12.0
+    const velocity = 5.5 + (player.stats.shooting / 100) * 6.5;
+    
+    ball.owner = null;
+    ball.vx = (dx / dist) * velocity;
+    ball.vy = (dy / dist) * velocity;
+    ball.tackleCooldown = 25;
+    
+    const msg = document.getElementById("shootout-message");
+    if (msg) {
+      msg.style.display = "block";
+      msg.style.color = "#38bdf8";
+      msg.textContent = "SHOT! ⚡";
+      setTimeout(() => { msg.style.display = "none"; }, 800);
+    }
+  } else {
+    // PASS TO TEAMMATE
+    let closestTeammateIndex = -1;
+    let minDist = Infinity;
+    
+    homePlayers.forEach((p, idx) => {
+      if (idx === controlledPlayerIndex) return;
+      const dist = Math.hypot(clickX - p.x, clickY - p.y);
+      if (dist < minDist) {
+        minDist = dist;
+        closestTeammateIndex = idx;
+      }
+    });
+    
+    if (closestTeammateIndex !== -1 && minDist < 150) {
+      audioCtrl.playPlace();
+      const targetTeammate = homePlayers[closestTeammateIndex];
+      
+      const dx = targetTeammate.x - player.x;
+      const dy = targetTeammate.y - player.y;
+      
+      // Passing accuracy scaling: lower passing rating adds random drift angles
+      const passAccuracy = player.stats.passing;
+      const drift = (100 - passAccuracy) * 0.15;
+      const angleOffset = (Math.random() * 2 - 1) * drift * (Math.PI / 180);
+      
+      const angle = Math.atan2(dy, dx) + angleOffset;
+      const passSpeed = 6.0;
+      
+      ball.owner = null;
+      ball.vx = Math.cos(angle) * passSpeed;
+      ball.vy = Math.sin(angle) * passSpeed;
+      ball.tackleCooldown = 15;
+      
+      // Switch controlled highlights immediately to allow receiving actions
+      controlledPlayerIndex = closestTeammateIndex;
     }
   }
+}
+
+function gameTick() {
+  if (!gameActive) return;
+  updateGameplayLoop();
+  drawPitchLoop();
+  animationFrameId = requestAnimationFrame(gameTick);
+}
+
+function triggerGoalScored(byPlayer) {
+  ball.owner = null;
+  ball.vx = 0;
+  ball.vy = 0;
+  ball.tackleCooldown = 60; // 60 ticks before reclaiming
   
-  const saved = (ballTargetX >= currentGoalieX - 5 && 
-                 ballTargetX <= currentGoalieX + goalieWidth + 5 && 
-                 ballTargetY >= currentGoalieY - 5 && 
-                 ballTargetY <= currentGoalieY + goalieHeight + 5);
-                 
+  audioCtrl.playCheer();
+  
   const msg = document.getElementById("shootout-message");
-  msg.style.display = "block";
-  
-  if (saved) {
-    msg.style.color = "#ef4444";
-    msg.textContent = "SAVED! 🧤";
-    addCommentaryEntry(matchMinute + "'", "❌ Penalty saved by the keeper!", "#94a3b8");
-  } else {
-    msg.style.color = "#4ade80";
-    msg.textContent = "GOAL! ⚽";
-    homeScore++;
+  if (msg) {
+    msg.style.display = "block";
+    if (byPlayer) {
+      homeScore++;
+      msg.style.color = "#4ade80";
+      msg.textContent = "GOAL!!! ⚽🏆";
+    } else {
+      awayScore++;
+      msg.style.color = "#ef4444";
+      msg.textContent = "CONCEDED! ❌";
+    }
     document.getElementById("match-score").textContent = `${homeScore} - ${awayScore}`;
-    addCommentaryEntry(matchMinute + "'", "🔥 GOOOOOAL! Pinpoint penalty kick!", "#4ade80");
+    setTimeout(() => {
+      msg.style.display = "none";
+      // Reposition ball at center and reset coordinates
+      initializeGameplayEntities();
+    }, 2000);
+  }
+}
+
+function endGameplayMatch() {
+  gameActive = false;
+  cancelAnimationFrame(animationFrameId);
+  if (canvas) {
+    canvas.removeEventListener("click", handlePitchCanvasClick);
   }
   
-  setTimeout(() => {
-    msg.style.display = "none";
-    penaltyPhase = false;
-    startSimulatedMatch();
-  }, 2200);
+  audioCtrl.playCheer();
+  
+  let resultReward = 50;
+  let resultText = "LOSS";
+  let color = "#ef4444";
+  
+  if (homeScore > awayScore) {
+    resultReward = 120;
+    resultText = "VICTORY";
+    color = "#4ade80";
+  } else if (homeScore === awayScore) {
+    resultReward = 80;
+    resultText = "DRAW";
+    color = "#fbbf24";
+  }
+  
+  const goalBonus = homeScore * 10;
+  const totalPayout = resultReward + goalBonus;
+  
+  dragonbux += totalPayout;
+  updateDragonbuxDisplay();
+  
+  const msg = document.getElementById("shootout-message");
+  if (msg) {
+    msg.style.display = "block";
+    msg.style.color = color;
+    msg.innerHTML = `MATCH ENDED!<br>RESULT: ${resultText}<br>Earned: ${totalPayout} DB`;
+  }
+  
+  document.getElementById("close-match-btn").style.display = "inline-block";
 }
 
 function endSimulatedMatch() {

@@ -1129,26 +1129,22 @@
         <span id="match-away-team">OPPONENT FC</span>
       </div>
       
-      <!-- Split Console -->
-      <div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:1.5rem; height: 320px;">
-        <!-- Left: Live Commentary -->
-        <div style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.05); padding:1rem; border-radius:8px; display:flex; flex-direction:column; overflow:hidden;">
-          <h4 style="color:#d946ef; margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:4px; font-size:0.9rem;">Match Commentary</h4>
-          <div id="commentary-ticker" style="flex:1; overflow-y:auto; font-family:monospace; font-size:0.8rem; line-height:1.4; display:flex; flex-direction:column; gap:6px; padding-right:4px;">
-            <!-- Commentary entries injected here -->
-          </div>
+      <!-- Interactive 2D Pitch Console -->
+      <div style="display:flex; flex-direction:column; align-items:center; position:relative; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.05); padding:1rem; border-radius:8px;">
+        <div style="display:flex; justify-content:space-between; width:100%; font-size:0.85rem; color:#fbbf24; font-weight:700; margin-bottom:6px; padding:0 4px;">
+          <span>⚽ 2D LIVE SQUAD GAMEPLAY</span>
+          <span id="match-timer-display" style="color:#d946ef; font-family:monospace; font-size:0.95rem; font-weight:800;">TIME: 0:00 (1')</span>
         </div>
         
-        <!-- Right: Interactive penalty gameplay -->
-        <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.05); padding:1rem; border-radius:8px; position:relative;">
-          <h4 id="penalty-title" style="color:#fbbf24; margin-bottom:8px; font-size:0.95rem;">Shootout Zone</h4>
-          <div id="canvas-container" style="position:relative; width:100%; aspect-ratio:4/3; background:#1b4b24; border-radius:8px; border:2px solid #162a19; overflow:hidden;">
-            <canvas id="penalty-canvas" style="width:100%; height:100%; display:block; cursor:crosshair;"></canvas>
-            <div id="shootout-message" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.85); border:1px solid var(--fut-purple); color:#fff; font-weight:800; padding:10px 20px; border-radius:8px; display:none; pointer-events:none; text-align:center; font-size:1.1rem; z-index:100;"></div>
-          </div>
-          <div style="margin-top:10px; font-size:0.72rem; color:var(--text-gray); text-align:center; line-height:1.3;">
-            Wait for a Shootout, then click inside the goal posts to shoot. Shot accuracy scales with Team Rating!
-          </div>
+        <div id="canvas-container" style="position:relative; width:100%; max-width:680px; aspect-ratio:1.6/1; background:#1b4b24; border-radius:8px; border:2px solid #122c16; overflow:hidden;">
+          <canvas id="penalty-canvas" style="width:100%; height:100%; display:block; cursor:crosshair;"></canvas>
+          <div id="shootout-message" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.85); border:1px solid var(--fut-purple); color:#fff; font-weight:800; padding:12px 24px; border-radius:8px; display:none; pointer-events:none; text-align:center; font-size:1.4rem; z-index:100; text-shadow: 0 0 10px rgba(139,92,246,0.5);"></div>
+        </div>
+        
+        <div style="margin-top:10px; font-size:0.75rem; color:var(--text-gray); text-align:center; line-height:1.4; display:flex; justify-content:center; gap:20px; flex-wrap: wrap;">
+          <span>🕹️ <b>Move Dribbler</b>: WASD or Arrow Keys</span>
+          <span>🎯 <b>Pass</b>: Click on teammate (highlighted circles)</span>
+          <span>⚡ <b>Shoot</b>: Click on opponent's goal (on the right)</span>
         </div>
       </div>
       
