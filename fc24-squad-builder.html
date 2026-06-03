@@ -629,19 +629,28 @@
 
     .card-avatar-container {
       width: 100%;
-      height: 70px;
+      height: 90px;
       display: flex;
       justify-content: center;
       align-items: flex-end;
       position: relative;
+      margin-top: -12px;
       margin-bottom: 4px;
+      overflow: visible;
     }
 
     .player-avatar {
-      width: 65px;
-      height: 65px;
+      width: 95px;
+      height: 95px;
       object-fit: contain;
       z-index: 2;
+      transform: scale(1.15);
+      transform-origin: bottom center;
+      transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .fut-card:hover .player-avatar {
+      transform: scale(1.28);
     }
 
     .card-name {
