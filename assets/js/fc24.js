@@ -1,3 +1,7 @@
+window.onerror = function(message, source, lineno, colno, error) {
+  alert("Global JS Error Caught:\n" + message + "\nSource: " + source + "\nLine: " + lineno + "\nCol: " + colno);
+};
+
 /**
  * FC 24 Squad Builder & Match Center Game Logic
  */
