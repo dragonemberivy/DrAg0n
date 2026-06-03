@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FC 24 Ultimate Squad Builder</title>
+  <!-- Outfit Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* --- CSS DESIGN SYSTEM & TOKENS --- */
+    :root {
+      --pitch-bg: #092e10;
+      --pitch-line: rgba(255, 255, 255, 0.4);
+      --pitch-grass-light: #164e20;
+      --pitch-grass-dark: #0f3d17;
+      
+      --fut-dark-bg: #05030d;
+      --fut-card-bg: #100f1c;
+      --fut-border: rgba(255, 255, 255, 0.08);
+      --fut-accent: #fbbf24;
+      --fut-purple: #8b5cf6;
+      --fut-pink: #d946ef;
+      --text-gold: #f59e0b;
+      --text-light: #f8fafc;
+      --text-gray: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--fut-dark-bg);
+      background-image: 
+        radial-gradient(circle at 20% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(217, 70, 239, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, #0d091e 0%, #030208 100%);
+      color: var(--text-light);
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding-bottom: 3rem;
+    }
+
+    header {
+      padding: 2rem 2rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--fut-border);
+      backdrop-filter: blur(10px);
+      background: rgba(5, 3, 13, 0.8);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand-title {
+      font-weight: 800;
+      font-size: 2.2rem;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #fbbf24 0%, #ea580c 50%, #d946ef 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-transform: uppercase;
+      font-style: italic;
+      text-shadow: 0 0 30px rgba(250, 204, 21, 0.2);
+    }
+
+    .header-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    button {
+      background: linear-gradient(135deg, #8b5cf6, #d946ef);
+      color: white;
+      border: none;
+      padding: 0.65rem 1.25rem;
+      border-radius: 8px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(217, 70, 239, 0.5);
+      filter: brightness(1.1);
+    }
+
+    button.secondary-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--fut-border);
+      box-shadow: none;
+    }
+    
+    button.secondary-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      box-shadow: none;
+    }
+
+    .game-layout {
+      max-width: 1400px;
+      margin: 1.5rem auto;
+      padding: 0 1.5rem;
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 2rem;
+    }
+
+    @media (max-width: 1100px) {
+      .game-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* --- SIDEBAR & SQUAD STATS --- */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .glass-panel {
+      background: rgba(16, 15, 28, 0.6);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--fut-border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    .panel-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 0.5rem;
+    }
+
+    .stat-tracker {
+      margin-bottom: 1.25rem;
+    }
+
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .stat-bar-container {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.02);
+    }
+
+    .stat-bar-fill {
+      height: 100%;
+      width: 0%;
+      transition: width 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      border-radius: 4px;
+    }
+
+    #chem-progress {
+      background: linear-gradient(90deg, #10b981, #34d399);
+      box-shadow: 0 0 10px rgba(52, 211, 153, 0.5);
+    }
+
+    #avg-rating-progress {
+      background: linear-gradient(90deg, #fbbf24, #f59e0b);
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+    }
+
+    /* Set Switchers */
+    .set-selector-tabs {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .set-tab-btn {
+      width: 100%;
+      text-align: left;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      color: var(--text-gray);
+      font-weight: 600;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .set-tab-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .set-tab-btn.active {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(217, 70, 239, 0.15));
+      border: 1px solid rgba(217, 70, 239, 0.3);
+      color: #fff;
+      box-shadow: 0 0 15px rgba(217, 70, 239, 0.1) inset;
+    }
+
+    .set-tab-btn .badge-pill {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .set-tab-btn.active .badge-pill {
+      background: var(--fut-pink);
+    }
+
+    /* Dynamic Pitch Visuals */
+    .pitch-view-container {
+      position: relative;
+      background: radial-gradient(circle at center, #1b4b24 0%, #0d2811 100%);
+      border: 6px solid #162a19;
+      border-radius: 20px;
+      aspect-ratio: 4 / 5;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      /* Perspective transform for 3D field */
+      transform-style: preserve-3d;
+      perspective: 1000px;
+    }
+
+    .pitch-field-lines {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      /* Pitch grid striping */
+      background: repeating-linear-gradient(
+        to bottom,
+        var(--pitch-grass-light),
+        var(--pitch-grass-light) 8.33%,
+        var(--pitch-grass-dark) 8.33%,
+        var(--pitch-grass-dark) 16.66%
+      );
+      opacity: 0.85;
+    }
+
+    /* Traditional field line markings */
+    .pitch-lines-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border: 2px solid var(--pitch-line);
+      margin: 15px;
+      pointer-events: none;
+    }
+
+    .pitch-lines-center-circle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 140px;
+      height: 140px;
+      border: 2px solid var(--pitch-line);
+      border-radius: 50%;
+    }
+
+    .pitch-lines-center-line {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--pitch-line);
+    }
+
+    .pitch-lines-penalty-top {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 250px;
+      height: 90px;
+      border: 2px solid var(--pitch-line);
+      border-top: none;
+    }
+
+    .pitch-lines-penalty-bottom {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 250px;
+      height: 90px;
+      border: 2px solid var(--pitch-line);
+      border-bottom: none;
+    }
+
+    .pitch-transform-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: grid;
+      grid-template-rows: repeat(5, 1fr);
+      padding: 2.5rem 1rem 1rem;
+      z-index: 10;
+      /* 3D Perspective angle */
+      transform: rotateX(20deg) scale(0.95);
+      transform-origin: center bottom;
+    }
+
+    .pitch-row {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      width: 100%;
+    }
+
+    /* Position slots */
+    .pitch-slot {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      width: 130px;
+      height: 195px;
+      transition: all 0.3s ease;
+    }
+
+    .pitch-slot.drag-hover {
+      transform: scale(1.08);
+      filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.4));
+    }
+
+    .slot-card-target {
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .empty-card-outline {
+      width: 100%;
+      height: 100%;
+      border: 2px dashed rgba(255, 255, 255, 0.15);
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(4px);
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .pitch-slot:hover .empty-card-outline {
+      border-color: rgba(255, 255, 255, 0.4);
+      background: rgba(0, 0, 0, 0.45);
+    }
+
+    .empty-card-outline .pos-badge {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: rgba(255, 255, 255, 0.4);
+      letter-spacing: 1px;
+    }
+
+    .empty-card-outline .plus-icon {
+      font-size: 2rem;
+      color: rgba(255, 255, 255, 0.15);
+      margin-top: 5px;
+      transition: color 0.2s;
+    }
+
+    .pitch-slot:hover .plus-icon {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    /* Chemistry dots pip container below card */
+    .chem-pips {
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+      margin-top: 8px;
+      position: absolute;
+      bottom: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 12;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 3px 10px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      pointer-events: none;
+    }
+
+    .chem-pips .pip {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .chem-pips .pip.active {
+      background: #10b981;
+      box-shadow: 0 0 6px #10b981;
+    }
+
+    .chem-pips .pip.active.warning {
+      background: #ef4444;
+      box-shadow: 0 0 6px #ef4444;
+    }
+
+    /* --- SVG CHEMISTRY LINKS LAYER --- */
+    #pitch-chem-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    /* --- PREMIUM FUT CARD STYLING --- */
+    .fut-card {
+      position: relative;
+      width: 130px;
+      height: 195px;
+      padding: 3px;
+      /* Custom shield clip-path */
+      clip-path: polygon(0 8%, 10% 0, 90% 0, 100% 8%, 100% 75%, 50% 100%, 0 75%);
+      transition: transform 0.1s ease, box-shadow 0.2s ease;
+      cursor: grab;
+      user-select: none;
+    }
+
+    .fut-card:active {
+      cursor: grabbing;
+    }
+
+    .fut-card.dragging {
+      opacity: 0.5;
+    }
+
+    /* Glow reflection layer */
+    .card-glow {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      z-index: 10;
+      border-radius: inherit;
+    }
+
+    .fut-card .card-inner {
+      width: 100%;
+      height: 100%;
+      clip-path: polygon(0 8%, 10% 0, 90% 0, 100% 8%, 100% 75%, 50% 100%, 0 75%);
+      display: flex;
+      flex-direction: column;
+      padding: 8px 6px 15px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Theme colors */
+    /* Rare Gold */
+    .fut-card.rare-gold {
+      background: linear-gradient(135deg, #ffe066 0%, #d4af37 50%, #8c660d 100%);
+      box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+    }
+    .fut-card.rare-gold .card-inner {
+      background: linear-gradient(180deg, #1b160a 0%, #080704 100%);
+      border: 1px solid rgba(251, 191, 36, 0.15);
+    }
+    .fut-card.rare-gold .card-ovr,
+    .fut-card.rare-gold .card-pos,
+    .fut-card.rare-gold .card-name {
+      color: #fbbf24;
+      text-shadow: 0 0 10px rgba(251, 191, 36, 0.2);
+    }
+
+    /* Icons */
+    .fut-card.fut-icon {
+      background: linear-gradient(135deg, #ffffff 0%, #d4af37 50%, #ae8a1b 100%);
+      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.15);
+    }
+    .fut-card.fut-icon .card-inner {
+      background: linear-gradient(180deg, #fbfaf7 0%, #eae3d2 100%);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+    }
+    .fut-card.fut-icon .card-ovr,
+    .fut-card.fut-icon .card-pos,
+    .fut-card.fut-icon .card-name,
+    .fut-card.fut-icon .stat-col div {
+      color: #654e19;
+    }
+    .fut-card.fut-icon .card-badge,
+    .fut-card.fut-icon .stat-col div:last-child {
+      color: #937d4d;
+    }
+    .fut-card.fut-icon .card-divider {
+      background: rgba(101, 78, 25, 0.2);
+    }
+    .fut-card.fut-icon .player-avatar path {
+      fill: rgba(0, 0, 0, 0.6);
+    }
+
+    /* TOTY */
+    .fut-card.fut-toty {
+      background: linear-gradient(135deg, #1d4ed8 0%, #60a5fa 30%, #fbbf24 70%, #d97706 100%);
+      box-shadow: 0 4px 25px rgba(56, 189, 248, 0.4);
+    }
+    .fut-card.fut-toty .card-inner {
+      background: linear-gradient(180deg, #060e26 0%, #02040b 100%);
+      border: 1px solid rgba(96, 165, 250, 0.3);
+    }
+    .fut-card.fut-toty::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(circle at 70% 30%, rgba(56, 189, 248, 0.15) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .fut-card.fut-toty .card-ovr,
+    .fut-card.fut-toty .card-pos,
+    .fut-card.fut-toty .card-name {
+      color: #60a5fa;
+      text-shadow: 0 0 10px rgba(96, 165, 250, 0.4);
+    }
+
+    /* Future Stars */
+    .fut-card.fut-future-star {
+      background: linear-gradient(135deg, #f43f5e 0%, #d946ef 50%, #eab308 100%);
+      box-shadow: 0 4px 25px rgba(217, 70, 239, 0.4);
+    }
+    .fut-card.fut-future-star .card-inner {
+      background: linear-gradient(180deg, #240529 0%, #0d010e 100%);
+      border: 1px solid rgba(217, 70, 239, 0.3);
+    }
+    .fut-card.fut-future-star .card-ovr,
+    .fut-card.fut-future-star .card-pos,
+    .fut-card.fut-future-star .card-name {
+      color: #f472b6;
+      text-shadow: 0 0 10px rgba(244, 114, 182, 0.4);
+    }
+
+    /* Elements inside cards */
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 2px;
+      z-index: 10;
+    }
+
+    .card-rating-box {
+      display: flex;
+      flex-direction: column;
+      line-height: 1;
+    }
+
+    .card-ovr {
+      font-size: 1.45rem;
+      font-weight: 800;
+    }
+
+    .card-pos {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-top: 1px;
+    }
+
+    .card-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 3px;
+    }
+
+    .card-flag {
+      font-size: 0.95rem;
+    }
+
+    .card-badge {
+      font-size: 0.6rem;
+      font-weight: 700;
+      color: var(--text-gray);
+      background: rgba(255, 255, 255, 0.05);
+      padding: 1px 3px;
+      border-radius: 3px;
+      letter-spacing: 0.5px;
+    }
+
+    .card-avatar-container {
+      width: 100%;
+      height: 70px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      position: relative;
+      margin-bottom: 4px;
+    }
+
+    .player-avatar {
+      width: 65px;
+      height: 65px;
+      object-fit: contain;
+      z-index: 2;
+    }
+
+    .card-name {
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-align: center;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+      letter-spacing: -0.2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      z-index: 10;
+    }
+
+    .card-divider {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.1);
+      margin: 2px 5px 6px;
+      z-index: 10;
+    }
+
+    .card-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      row-gap: 4px;
+      column-gap: 2px;
+      padding: 0 4px;
+      z-index: 10;
+    }
+
+    .stat-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1.1;
+    }
+
+    .stat-col div:first-child {
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .stat-col div:last-child {
+      font-size: 0.52rem;
+      color: var(--text-gray);
+      font-weight: 600;
+    }
+
+    /* Tap selected outline helper */
+    .fut-card.selected-tap {
+      outline: 3px solid var(--fut-pink) !important;
+      box-shadow: 0 0 15px var(--fut-pink);
+    }
+
+    /* --- BENCH & POOL AT BOTTOM --- */
+    .bench-container {
+      grid-column: 1 / -1;
+      margin-top: 1rem;
+    }
+
+    .bench-scroll-area {
+      display: flex;
+      gap: 1.25rem;
+      overflow-x: auto;
+      padding: 1.5rem 1rem;
+      background: rgba(16, 15, 28, 0.4);
+      border: 1px solid var(--fut-border);
+      border-radius: 16px;
+      min-height: 245px;
+      align-items: center;
+      scroll-behavior: smooth;
+    }
+
+    /* Custom scrollbars */
+    .bench-scroll-area::-webkit-scrollbar {
+      height: 8px;
+    }
+    .bench-scroll-area::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 4px;
+    }
+    .bench-scroll-area::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+    .bench-scroll-area::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .bench-item-wrapper {
+      flex: 0 0 auto;
+      transition: all 0.2s;
+    }
+
+    /* Locked state */
+    .bench-item-wrapper.locked-pack {
+      filter: grayscale(0.8) blur(0.5px);
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .locked-card-placeholder {
+      width: 130px;
+      height: 195px;
+      border: 2px dashed rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 10px;
+    }
+
+    /* --- CELEBRATION FOREGROUND OVERLAYS --- */
+    #celebration-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10000;
+    }
+
+    .celebration-banner-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(5, 3, 13, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      pointer-events: none;
+    }
+    
+    .celebration-banner-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .celebration-banner-modal {
+      background: radial-gradient(circle at center, #1b0a2b 0%, #07020d 100%);
+      border: 2px solid var(--fut-pink);
+      box-shadow: 0 10px 50px rgba(217, 70, 239, 0.4);
+      border-radius: 20px;
+      padding: 3rem;
+      text-align: center;
+      max-width: 500px;
+      transform: scale(0.8);
+      transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .celebration-banner-overlay.show .celebration-banner-modal {
+      transform: scale(1);
+    }
+
+    .glow-text {
+      text-shadow: 0 0 20px var(--fut-pink);
+      color: #fff;
+    }
+
+    /* --- PACK OPENER ANIMATION STYLES --- */
+    #pack-reveal-screen {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.95);
+      backdrop-filter: blur(15px);
+      z-index: 100000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pack-opening-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* The pack wrapper itself */
+    .pack-wrapper-animated {
+      width: 260px;
+      height: 380px;
+      background: linear-gradient(135deg, #1f143d 0%, #0d061c 100%);
+      border: 4px solid #d4af37;
+      border-radius: 16px;
+      box-shadow: 
+        0 10px 40px rgba(0, 0, 0, 0.8),
+        0 0 50px rgba(212, 175, 55, 0.3);
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.3s;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+
+    .pack-wrapper-animated:hover {
+      transform: scale(1.05) rotate(1deg);
+    }
+
+    .gold-pack-ribbon {
+      position: absolute;
+      top: -50px;
+      left: -50px;
+      width: 150px;
+      height: 150px;
+      background: linear-gradient(45deg, #aa7c11, #ffe066, #d4af37);
+      transform: rotate(-45deg);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 10px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: #000;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .pack-face {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+      position: relative;
+    }
+
+    .logo-fut {
+      font-size: 3.5rem;
+      font-weight: 900;
+      font-style: italic;
+      color: #d4af37;
+      text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      margin-bottom: 1rem;
+    }
+
+    .pack-name-txt {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 2px;
+      text-align: center;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding: 0.5rem 0;
+    }
+
+    /* Keyframes for rip open */
+    @keyframes packShake {
+      0%, 100% { transform: scale(1) rotate(0); }
+      10%, 30%, 50%, 70%, 90% { transform: scale(1.02) rotate(-2deg); }
+      20%, 40%, 60%, 80% { transform: scale(1.02) rotate(2deg); }
+    }
+
+    @keyframes packRip {
+      0% { transform: scale(1); opacity: 1; filter: brightness(1); }
+      50% { transform: scale(1.2) translateY(-20px); opacity: 0.5; filter: brightness(2); }
+      100% { transform: scale(0.5) translateY(200px); opacity: 0; }
+    }
+
+    .pack-wrapper-animated.rip-open {
+      animation: 
+        packShake 0.6s ease-in-out,
+        packRip 0.6s 0.6s forwards;
+    }
+
+    /* Walkout Stage overlay details */
+    .walkout-stage-hidden {
+      display: none;
+    }
+
+    .walkout-stage-visible {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    .walkout-flares {
+      position: absolute;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at center, rgba(212, 175, 55, 0.4) 0%, transparent 40%);
+      pointer-events: none;
+      animation: rotateFlares 20s linear infinite;
+      z-index: 1;
+    }
+
+    @keyframes rotateFlares {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Spotlight lasers */
+    .walkout-stage-visible::before,
+    .walkout-stage-visible::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      width: 100px;
+      height: 100%;
+      background: linear-gradient(to top, rgba(139, 92, 246, 0.3), transparent);
+      z-index: 1;
+      transform-origin: bottom center;
+    }
+    
+    .walkout-stage-visible::before {
+      left: 15%;
+      transform: rotate(25deg);
+      animation: laserSweep1 4s ease-in-out infinite alternate;
+    }
+
+    .walkout-stage-visible::after {
+      right: 15%;
+      transform: rotate(-25deg);
+      animation: laserSweep2 4s ease-in-out infinite alternate;
+    }
+
+    @keyframes laserSweep1 {
+      0% { transform: rotate(15deg); }
+      100% { transform: rotate(35deg); }
+    }
+
+    @keyframes laserSweep2 {
+      0% { transform: rotate(-15deg); }
+      100% { transform: rotate(-35deg); }
+    }
+
+    /* Revealed card slot and details container */
+    .walkout-card-holder {
+      transform: scale(0.2) rotateY(180deg);
+      opacity: 0;
+      transition: all 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.2);
+      z-index: 10;
+    }
+    
+    .walkout-card-holder.reveal {
+      transform: scale(1.6) rotateY(0deg);
+      opacity: 1;
+    }
+
+    .walkout-stats-reveal {
+      position: absolute;
+      left: 10%;
+      top: 30%;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      font-weight: 800;
+      font-size: 1.3rem;
+      color: #fff;
+      opacity: 0;
+      transform: translateX(-50px);
+      transition: all 0.8s ease;
+      z-index: 10;
+    }
+
+    .walkout-stats-reveal.reveal {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .stat-reveal-line {
+      background: rgba(0,0,0,0.6);
+      padding: 8px 20px;
+      border-radius: 6px;
+      border-left: 4px solid var(--fut-accent);
+      transform: skewX(-10deg);
+      animation: slideInLeft 0.5s var(--d) forwards;
+      opacity: 0;
+    }
+
+    @keyframes slideInLeft {
+      0% { transform: translateX(-30px) skewX(-10deg); opacity: 0; }
+      100% { transform: translateX(0) skewX(-10deg); opacity: 1; }
+    }
+
+    /* Drawer contents unlocked */
+    .walkout-pack-contents-drawer {
+      position: absolute;
+      bottom: -300px;
+      background: linear-gradient(to top, rgba(5, 3, 13, 0.98) 70%, rgba(5, 3, 13, 0.8) 0%);
+      width: 100%;
+      border-top: 2px solid var(--fut-border);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: bottom 0.6s cubic-bezier(0.175, 0.885, 0.32, 1);
+      z-index: 20;
+    }
+    
+    .walkout-pack-contents-drawer.reveal {
+      bottom: 0;
+    }
+
+    .pack-unlocked-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 1rem;
+      max-width: 900px;
+    }
+
+    .mini-unlocked-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 8px 12px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      color: #fff;
+      font-size: 0.85rem;
+    }
+
+    /* Glow filters for lines */
+    svg filter {
+      color-interpolation-filters: sRGB;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Background Celebration Fireworks Canvas -->
+  <canvas id="celebration-canvas"></canvas>
+
+  <!-- PACK OPENER ANIMATION OVERLAY -->
+  <div id="pack-reveal-screen">
+    <!-- Inserted dynamically on click -->
+  </div>
+
+  <!-- STICKY HEADER -->
+  <header>
+    <div style="display:flex; align-items:center; gap: 15px;">
+      <a href="index.html" style="text-decoration:none; font-size:1.8rem; line-height:1; color:#fff;" title="Back to Home">🏠</a>
+      <h1 class="brand-title">Ultimate Squad Builder</h1>
+    </div>
+    
+    <div class="header-controls">
+      <button id="sound-mute-btn" class="secondary-btn" onclick="toggleSoundMute()">🔊 Sound On</button>
+      <button id="open-pack-btn" onclick="openPack()">🎁 Open Legends Pack</button>
+    </div>
+  </header>
+
+  <!-- MAIN GAME DISPLAY -->
+  <main class="game-layout">
+    
+    <!-- Pitch Column (Left) -->
+    <section style="display:flex; flex-direction:column; gap:1.5rem;">
+      <div class="pitch-view-container">
+        
+        <!-- Field line marking rendering layers -->
+        <div class="pitch-field-lines"></div>
+        <div class="pitch-lines-overlay">
+          <div class="pitch-lines-center-line"></div>
+          <div class="pitch-lines-center-circle"></div>
+          <div class="pitch-lines-penalty-top"></div>
+          <div class="pitch-lines-penalty-bottom"></div>
+        </div>
+        
+        <!-- Connection links (behind cards) -->
+        <svg id="pitch-chem-svg">
+          <defs>
+            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="5" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+          </defs>
+        </svg>
+
+        <!-- Position Slots Layer (4-3-3 config) -->
+        <div class="pitch-transform-layer">
+          
+          <!-- Attackers Row (ST, LW, RW) -->
+          <div class="pitch-row">
+            <!-- LW -->
+            <div class="pitch-slot" data-pos="LW">
+              <div class="slot-card-target"></div>
+              <div class="chem-pips"></div>
+            </div>
+            
+            <!-- ST -->
+            <div class="pitch-slot" data-pos="ST">
+              <div class="slot-card-target"></div>
+              <div class="chem-pips"></div>
+            </div>
+            
+            <!-- RW -->
+            <div class="pitch-slot" data-pos="RW">
+              <div class="slot-card-target"></div>
+              <div class="chem-pips"></div>
+            </div>
+          </div>
+          
+          <!-- Midfield Attacking Row (LCM, RCM) -->
+          <div class="pitch-row">
+            <!-- LCM -->
+            <div class="pitch-slot" data-pos="LCM">
+              <div class="slot-card-target"></div>
+              <div class="chem-pips"></div>
+            </div>
+            
+            <!-- RCM -->
+            <div class="pitch-slot" data-pos="RCM">
+              <div class="slot-card-target"></div>
+              <div class="chem-pips"></div>
+            </div>
+          </div>
+
+          <!-- Midfield Defensive Row (CDM) -->
+          <div class="pitch-row">
+            <!-- CDM -->
+            <div class="pitch-slot" data-pos="CDM">
+              <div class="slot-card-target"></div>
+              <div class="chem-pips"></div>
+            </div>
+          </div>
+          
+          <!-- Defenders Row (LB, LCB, RCB, RB) -->
+          <div class="pitch-row">
+            <!-- LB -->
+            <div class="pitch-slot" data-pos="LB">
+              <div class="slot-card-target"></div>
+              <div class="chem-pips"></div>
+            </div>
+            
+            <!-- LCB -->
+            <div class="pitch-slot" data-pos="LCB">
+              <div class="slot-card-target"></div>
+              <div class="chem-pips"></div>
+            </div>
+            
+            <!-- RCB -->
+            <div class="pitch-slot" data-pos="RCB">
+              <div class="slot-card-target"></div>
+              <div class="chem-pips"></div>
+            </div>
+            
+            <!-- RB -->
+            <div class="pitch-slot" data-pos="RB">
+              <div class="slot-card-target"></div>
+              <div class="chem-pips"></div>
+            </div>
+          </div>
+          
+          <!-- Goalkeeper Row -->
+          <div class="pitch-row">
+            <!-- GK -->
+            <div class="pitch-slot" data-pos="GK">
+              <div class="slot-card-target"></div>
+              <div class="chem-pips"></div>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    </section>
+
+    <!-- Sidebar Column (Right) -->
+    <aside class="sidebar">
+      
+      <!-- Panel 1: Chemistry & Rating Trackers -->
+      <div class="glass-panel">
+        <h2 class="panel-title">Squad Hub</h2>
+        
+        <div class="stat-tracker">
+          <div class="stat-header">
+            <span>TEAM CHEMISTRY</span>
+            <span id="chem-val" style="color:#10b981; font-weight:800;">0/33</span>
+          </div>
+          <div class="stat-bar-container">
+            <div id="chem-progress" class="stat-bar-fill"></div>
+          </div>
+        </div>
+
+        <div class="stat-tracker">
+          <div class="stat-header">
+            <span>TEAM RATING</span>
+            <span id="avg-rating-val" style="color:#fbbf24; font-weight:800;">0</span>
+          </div>
+          <div class="stat-bar-container">
+            <div id="avg-rating-progress" class="stat-bar-fill"></div>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:1.5rem;">
+          <button onclick="autoSolveActiveSquad()">⚡ Auto Solve</button>
+          <button onclick="clearActiveSquad()" class="secondary-btn">🧹 Clear Pitch</button>
+        </div>
+      </div>
+
+      <!-- Panel 2: Interchangeable Sets -->
+      <div class="glass-panel">
+        <h2 class="panel-title">Active Roster Sets</h2>
+        <div class="set-selector-tabs">
+          <button class="set-tab-btn active" onclick="switchActivePlayerSet(1)">
+            <span>Legends & Icons</span>
+            <span class="badge-pill">Set 1</span>
+          </button>
+          <button class="set-tab-btn" onclick="switchActivePlayerSet(2)">
+            <span>Modern Elites</span>
+            <span class="badge-pill">Set 2</span>
+          </button>
+          <button class="set-tab-btn" onclick="switchActivePlayerSet(3)">
+            <span>Classic Champions</span>
+            <span class="badge-pill">Set 3</span>
+          </button>
+          <button class="set-tab-btn" onclick="switchActivePlayerSet(4)">
+            <span>Future Stars</span>
+            <span class="badge-pill">Set 4</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Instructions Panel -->
+      <div class="glass-panel" style="font-size:0.9rem; line-height:1.5; color: var(--text-gray);">
+        <h3 style="color:#fff; margin-bottom:8px; font-size:1rem;">How to Play:</h3>
+        <ul style="padding-left:1.2rem; display:flex; flex-direction:column; gap:6px;">
+          <li>Drag players from the Bench to their slots, or <strong>tap a bench card then tap a slot</strong> to place.</li>
+          <li>Match the card's position (e.g. GK, LB, ST) to the field position to gain <strong>Chemistry</strong>!</li>
+          <li>Build links (same nation/club/set) to boost Chemistry to 33/33.</li>
+          <li>Switch sets to try different squads.</li>
+        </ul>
+      </div>
+
+    </aside>
+
+    <!-- Bench Cards Row (Full Width Bottom) -->
+    <section class="bench-container">
+      <h2 class="panel-title" style="margin-left: 10px; border:none; padding:0;">Club Players Pool (Bench)</h2>
+      <div class="bench-scroll-area" id="bench-list">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Load Game Script -->
+  <script src="assets/js/fc24.js"></script>
+
+</body>
+</html>
