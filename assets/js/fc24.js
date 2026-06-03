@@ -718,6 +718,33 @@ function createCardHTML(p, showStats = true) {
   `;
 }
 
+// Global tap selection helper
+function handleCardClick(card, playerId) {
+  audioCtrl.playClick();
+  
+  const parentSlot = card.closest(".pitch-slot");
+  
+  if (selectedBenchCardId) {
+    if (parentSlot && selectedBenchCardId !== playerId) {
+      // If we clicked a card on the pitch, and a different card was selected, place/swap!
+      placePlayerInSlot(selectedBenchCardId, parentSlot.dataset.pos);
+      selectedBenchCardId = null;
+      document.querySelectorAll(".fut-card").forEach(el => el.classList.remove("selected-tap"));
+      return;
+    }
+  }
+  
+  // Normal select/deselect toggling
+  if (selectedBenchCardId === playerId) {
+    selectedBenchCardId = null;
+    card.classList.remove("selected-tap");
+  } else {
+    selectedBenchCardId = playerId;
+    document.querySelectorAll(".fut-card").forEach(el => el.classList.remove("selected-tap"));
+    card.classList.add("selected-tap");
+  }
+}
+
 // --- POPULATE BENCH / RESERVE LIST ---
 function renderBench() {
   const bench = document.getElementById("bench-list");
@@ -746,22 +773,10 @@ function renderBench() {
       wrapper.innerHTML = createCardHTML(p);
       const card = wrapper.querySelector(".fut-card");
       
-      // Tap selection helper for mobile
+      // Tap selection helper
       card.addEventListener("click", (e) => {
         e.stopPropagation();
-        audioCtrl.playClick();
-        
-        // Remove active class from other bench items
-        document.querySelectorAll(".bench-item-wrapper .fut-card").forEach(el => {
-          el.classList.remove("selected-tap");
-        });
-        
-        if (selectedBenchCardId === p.id) {
-          selectedBenchCardId = null;
-        } else {
-          selectedBenchCardId = p.id;
-          card.classList.add("selected-tap");
-        }
+        handleCardClick(card, p.id);
       });
       
       // Add dynamic 3D tilt effects
@@ -853,19 +868,14 @@ function setupDropSlots() {
     });
     
     // Tap to assign for mobile and standard clicks
-    slot.addEventListener("click", () => {
+    slot.addEventListener("click", (e) => {
       const pos = slot.dataset.pos;
       
-      // If slot is filled, click removes player back to bench
-      if (squadState[pos] !== null) {
-        removePlayerFromSlot(pos);
-        return;
-      }
-      
-      // If we have a selected bench card, place it
-      if (selectedBenchCardId) {
+      // If slot is empty and we have a selected card, place it
+      if (squadState[pos] === null && selectedBenchCardId) {
         placePlayerInSlot(selectedBenchCardId, pos);
         selectedBenchCardId = null;
+        document.querySelectorAll(".fut-card").forEach(el => el.classList.remove("selected-tap"));
       }
     });
   });
@@ -967,6 +977,12 @@ function updatePitchSlots() {
       // Disable card level drag start internally to avoid browser conflicts, handled on wrapper
       card.addEventListener("dragstart", (e) => {
         e.dataTransfer.setData("text/plain", pId);
+      });
+      
+      // Tap selection helper for pitch card
+      card.addEventListener("click", (e) => {
+        e.stopPropagation();
+        handleCardClick(card, pId);
       });
       
       applyCardTiltEffect(card);
