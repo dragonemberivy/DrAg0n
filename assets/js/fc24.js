@@ -1228,9 +1228,10 @@ window.openMatchCenter = function() {
     canvas.width = 650;
     canvas.height = 400;
     
-    // Render starting static pitch
+    // Render starting static pitch and start the rendering loop
     initializeGameplayEntities();
-    drawPitchLoop();
+    cancelAnimationFrame(animationFrameId);
+    gameTick();
   } catch (err) {
     alert("Error opening Match Center: " + err.message + "\n\nIf you have edited the HTML, please ensure all match overlay elements exist.");
     console.error(err);
@@ -1262,7 +1263,6 @@ window.startSimulatedMatch = function() {
   gameActive = true;
   initializeGameplayEntities();
   startMatchTimer();
-  gameTick();
   
   // Bind canvas click event for passing/shooting
   canvas.addEventListener("click", handlePitchCanvasClick);
@@ -1306,7 +1306,8 @@ function getPlayerColorByCardType(cardType) {
 }
 
 function initializeGameplayEntities() {
-  const currentOvr = parseInt(document.getElementById("avg-rating-val").textContent) || 45;
+  const avgRatingEl = document.getElementById("avg-rating-val");
+  const currentOvr = avgRatingEl ? (parseInt(avgRatingEl.textContent) || 45) : 45;
   
   // 1. Populate players based on active 4-3-3 squad builder cards
   homePlayers = [];
@@ -1752,10 +1753,13 @@ function handlePitchCanvasClick(e) {
 }
 
 function gameTick() {
-  if (!gameActive) return;
-  updateGameplayLoop();
+  if (gameActive) {
+    updateGameplayLoop();
+  }
   drawPitchLoop();
-  animationFrameId = requestAnimationFrame(gameTick);
+  if (canvas) {
+    animationFrameId = requestAnimationFrame(gameTick);
+  }
 }
 
 function triggerGoalScored(byPlayer) {
