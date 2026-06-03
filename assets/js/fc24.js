@@ -605,8 +605,40 @@ const playerSofifaIds = {
   "h_remtluanga": 269302,
   "h_horam": 266986,
   "h_chothe": 269221,
-  "h_youzu": 205340, // Wu Lei (Real Chinese striker face)
+  "h_youzu": 212792, // Wu Lei (Correct SoFIFA ID: 212792)
   "h_jinad": 240410  // Chiedozie Ogbene (Real Irish RW face)
+};
+
+// Self-healing avatar image fallback for retired or licensing-removed players
+window.handleAvatarError = function(imgElement, playerId, sofifaId) {
+  const currentSrc = imgElement.src;
+  
+  if (currentSrc.includes("/24_120.png")) {
+    imgElement.src = currentSrc.replace("/24_120.png", "/23_120.png");
+  } else if (currentSrc.includes("/23_120.png")) {
+    imgElement.src = currentSrc.replace("/23_120.png", "/22_120.png");
+  } else if (currentSrc.includes("/22_120.png")) {
+    imgElement.src = currentSrc.replace("/22_120.png", "/21_120.png");
+  } else if (currentSrc.includes("/21_120.png")) {
+    imgElement.src = currentSrc.replace("/21_120.png", "/20_120.png");
+  } else {
+    // Ultimate local asset fallbacks
+    const player = allPlayersMap[playerId];
+    if (player) {
+      if (player.cardType === "icon") {
+        imgElement.src = "assets/images/icon_player.png";
+      } else if (player.cardType === "toty") {
+        imgElement.src = "assets/images/toty_player.png";
+      } else if (player.cardType === "future-star") {
+        imgElement.src = "assets/images/future_star_player.png";
+      } else {
+        imgElement.src = "assets/images/bronze_player.png";
+      }
+    } else {
+      imgElement.src = "assets/images/toty_player.png";
+    }
+    imgElement.onerror = null; // stop retry loop
+  }
 };
 
 // --- CARD HTML RENDERING ---
@@ -670,6 +702,8 @@ function createCardHTML(p) {
     <div class="stat-col"><div>${p.stats.phy}</div><div>PHY</div></div>
   `;
 
+  const sofifaIdVal = playerSofifaIds[p.id] || "null";
+
   return `
     <div ${cardIdAttr} class="fut-card ${cardThemeClass}" draggable="true" ondragstart="handleDragStart(event)" data-player-id="${p.id}">
       <div class="card-glow"></div>
@@ -684,7 +718,7 @@ function createCardHTML(p) {
         </div>
       </div>
       <div class="card-avatar-container">
-        <img src="${playerPhotoUrl}" class="player-avatar" alt="${p.name}">
+        <img src="${playerPhotoUrl}" class="player-avatar" alt="${p.name}" onerror="handleAvatarError(this, '${p.id}', ${sofifaIdVal})">
       </div>
       <div class="card-name">${p.name}</div>
       <div class="card-divider"></div>
