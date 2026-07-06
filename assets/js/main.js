@@ -431,12 +431,26 @@
     }
 
     // PROFILE SELECTION
-    if(chatProfSel) { chatProfSel.addEventListener("change", () => {
-      currentProfile = chatProfSel.value;
-      chatInp.disabled = false;
-      chatBtn.disabled = false;
-      chatInp.placeholder = "Type a message...";
-    }); }
+    const savedUser = localStorage.getItem('drag0n_user');
+    const savedAvatar = localStorage.getItem('drag0n_avatar');
+
+    if(chatProfSel) {
+      if (savedUser) {
+        // Auto-login to chat
+        currentProfile = savedUser;
+        chatProfSel.style.display = 'none'; // hide selector
+        if(chatInp) chatInp.disabled = false;
+        if(chatBtn) chatBtn.disabled = false;
+        if(chatInp) chatInp.placeholder = "Type a message...";
+      } else {
+        chatProfSel.addEventListener("change", () => {
+          currentProfile = chatProfSel.value;
+          chatInp.disabled = false;
+          chatBtn.disabled = false;
+          chatInp.placeholder = "Type a message...";
+        });
+      }
+    }
 
     // SEND MESSAGE
     if(chatBtn) { chatBtn.onclick = sendMessage; }
@@ -625,11 +639,21 @@
     // Load immediately
     loadLocalReviews();
 
+    // Pre-fill username if exists
+    window.addEventListener('load', () => {
+      const usernameInput = document.getElementById('review-username');
+      if (usernameInput && localStorage.getItem('drag0n_user')) {
+        usernameInput.value = localStorage.getItem('drag0n_user');
+        usernameInput.disabled = true; // Lock it
+      }
+    });
+
     window.saveBookReview = function() {
       const usernameInput = document.getElementById('review-username');
       const textInput = document.getElementById('review-text');
       
-      const username = usernameInput.value.trim() || 'Anonymous';
+      const username = localStorage.getItem('drag0n_user') || (usernameInput ? usernameInput.value.trim() : '') || 'Anonymous';
+      const avatar = localStorage.getItem('drag0n_avatar') || '✨';
       const text = textInput.value.trim();
       
       if (!text) {
@@ -652,7 +676,7 @@
         }
         const div = document.createElement('div');
         div.style.cssText = 'background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 0.5rem; animation: pulseGlow 0.5s ease-out;';
-        div.innerHTML = `<strong style="color: #38bdf8;">${escapedUsername}:</strong> ${escapedText}`;
+        div.innerHTML = `<span style="margin-right: 5px; font-size: 1.2rem;">${avatar.startsWith('data:') ? '<img src="'+avatar+'" style="width:20px;height:20px;border-radius:50%;vertical-align:middle;">' : avatar}</span><strong style="color: #38bdf8;">${escapedUsername}:</strong> ${escapedText}`;
         reviewsContainer.insertBefore(div, reviewsContainer.firstChild);
       }
       
