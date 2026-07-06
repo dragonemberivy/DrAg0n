@@ -311,11 +311,13 @@
       if (pw === pws.owner) {
         // Owner Mode
         localStorage.setItem('drag0n_owner', 'true');
+        sessionStorage.setItem('site_unlocked', 'true');
         siteModal.style.display = 'none';
         document.body.style.overflow = 'auto';
       } else if (pw === pws.visitor) {
         // Visitor Mode
         localStorage.setItem('drag0n_owner', 'false');
+        sessionStorage.setItem('site_unlocked', 'true');
         siteModal.style.display = 'none';
         document.body.style.overflow = 'auto';
         
@@ -346,6 +348,12 @@
     }); }
 
     // Automatically focus the password input on load
+    
+    if (siteModal && sessionStorage.getItem('site_unlocked') === 'true') {
+      siteModal.style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+
     window.addEventListener('load', () => {
       if(sitePwInput) sitePwInput.focus();
     });
