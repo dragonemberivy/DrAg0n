@@ -333,7 +333,7 @@
         
         // Redirect to register if no account
         if (!localStorage.getItem('drag0n_user') && window.location.pathname.endsWith('index.html')) {
-          window.location.href = 'register.html';
+          const rm = document.getElementById('register-modal'); if(rm) rm.style.display = 'flex';
         }
       } else {
         sitePwError.style.display = 'block';
@@ -702,3 +702,122 @@
         }
       }
     });
+
+    // REGISTRATION LOGIC
+    const profileWidget = document.getElementById('profile-widget');
+    const registerModal = document.getElementById('register-modal');
+    const pwName = document.getElementById('pw-name');
+    const pwAvatar = document.getElementById('pw-avatar');
+    
+    function updateProfileWidget() {
+      if(!profileWidget) return;
+      const u = localStorage.getItem('drag0n_user');
+      const a = localStorage.getItem('drag0n_avatar');
+      if(u) {
+        pwName.textContent = u;
+        pwAvatar.innerHTML = a.startsWith('data:') ? `<img src="${a}" style="width:24px;height:24px;border-radius:50%;vertical-align:middle;">` : a;
+      }
+    }
+    window.addEventListener('load', updateProfileWidget);
+    
+    if(profileWidget) {
+      profileWidget.addEventListener('click', () => {
+        if(!localStorage.getItem('drag0n_user')) {
+          registerModal.style.display = 'flex';
+        } else {
+          alert('You are already registered as ' + localStorage.getItem('drag0n_user') + '!');
+        }
+      });
+    }
+
+    if(document.getElementById('close-register-btn')) {
+      document.getElementById('close-register-btn').addEventListener('click', () => {
+        registerModal.style.display = 'none';
+      });
+    }
+
+    const emojiGrid = document.getElementById('emoji-grid');
+    if (emojiGrid) {
+      const emojis = ['🦊', '🐉', '🐱', '🐶', '🐙', '🐼', '🐨', '🐸', '🦁', '🐯', '🐰', '🐹', '🐻', '🐷', '🦄', '🐝', '🐢', '🐍', '🦕', '🦖', '🦈', '🐬', '🐧', '🦉', '🦋'];
+      const preview = document.getElementById('preview-avatar');
+      let selectedAvatar = '✨';
+
+      emojis.forEach(e => {
+        const div = document.createElement('div');
+        div.style.cssText = 'font-size: 1.5rem; text-align: center; cursor: pointer; padding: 5px; border-radius: 8px; transition: all 0.2s; user-select: none;';
+        div.textContent = e;
+        div.onclick = () => {
+          Array.from(emojiGrid.children).forEach(el => el.style.background = 'transparent');
+          div.style.background = 'rgba(56, 189, 248, 0.2)';
+          selectedAvatar = e;
+          preview.innerHTML = e;
+        };
+        emojiGrid.appendChild(div);
+      });
+
+      const avatarUpload = document.getElementById('avatar-upload');
+      if(avatarUpload) {
+        avatarUpload.addEventListener('change', function(e) {
+          const file = e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            const img = new Image();
+            img.onload = function() {
+              const canvas = document.createElement('canvas');
+              const max_size = 150;
+              let width = img.width, height = img.height;
+              if (width > height) { if (width > max_size) { height *= max_size / width; width = max_size; } } 
+              else { if (height > max_size) { width *= max_size / height; height = max_size; } }
+              canvas.width = width; canvas.height = height;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, width, height);
+              const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+              selectedAvatar = dataUrl;
+              preview.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;">`;
+              Array.from(emojiGrid.children).forEach(el => el.style.background = 'transparent');
+            };
+            img.src = event.target.result;
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      const createBtn = document.getElementById('create-account-btn');
+      if(createBtn) {
+        createBtn.addEventListener('click', async () => {
+          const username = document.getElementById('username-input').value.trim();
+          const errorEl = document.getElementById('username-error');
+          if (!username) { errorEl.textContent = "Please enter a username!"; errorEl.style.display = 'block'; return; }
+          if (!/^[a-zA-Z0-9_]+$/.test(username)) { errorEl.textContent = "Letters, numbers, and underscores only!"; errorEl.style.display = 'block'; return; }
+
+          createBtn.disabled = true; createBtn.textContent = "Checking...";
+          try {
+            if (typeof firebase !== 'undefined') {
+              const userRef = firebase.database().ref('users/' + username.toLowerCase());
+              const snapshot = await userRef.once('value');
+              if (snapshot.exists()) {
+                errorEl.textContent = "Username is already taken!"; errorEl.style.display = 'block';
+                createBtn.disabled = false; createBtn.textContent = "Enter Website";
+              } else {
+                await userRef.set({ username: username, avatar: selectedAvatar, created_at: Date.now() });
+                localStorage.setItem('drag0n_user', username);
+                localStorage.setItem('drag0n_avatar', selectedAvatar);
+                registerModal.style.display = 'none';
+                updateProfileWidget();
+                
+                // If they created an account from index page after lock
+                const siteModal = document.getElementById('site-password-modal');
+                if(siteModal && siteModal.style.display !== 'none') {
+                  siteModal.style.display = 'none';
+                  document.body.style.overflow = 'auto';
+                }
+              }
+            }
+          } catch(e) {
+            errorEl.textContent = "Network error. Try again."; errorEl.style.display = 'block';
+            createBtn.disabled = false; createBtn.textContent = "Enter Website";
+          }
+        });
+      }
+    }
