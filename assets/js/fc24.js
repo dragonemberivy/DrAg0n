@@ -1195,6 +1195,11 @@ let ballMesh = null;
 let pitchPlane = null;
 
 // Game State Variables
+const pitchWidthPhysics = 1050;
+const pitchHeightPhysics = 680;
+const pitchCenterPhysicsX = 525;
+const pitchCenterPhysicsY = 340;
+let isGoalResetting = false;
 let gameActive = false;
 let matchTimerSeconds = 0; // 60 seconds total match time
 let controlledPlayerIndex = 0; // Index of player we control
@@ -1204,10 +1209,17 @@ const keysPressed = {};
 let shootCharge = 0;
 let passCharge = 0;
 let powerCharge = 0;
+let skillActive = null;
+let skillCooldown = 0;
+let skillAnimTicks = 0;
+let qKeyDebounce = false;
+let eKeyDebounce = false;
+let cKeyDebounce = false;
+let mKeyDebounce = false;
 
 // Game Entities (Physics coordinates)
 let ball = {
-  x: 325, y: 200,
+  x: 525, y: 340,
   vx: 0, vy: 0,
   radius: 6,
   owner: null,
@@ -1217,20 +1229,20 @@ let ball = {
 
 let homePlayers = []; 
 let opponentPlayers = []; 
-let opponentGoalkeeper = { x: 625, y: 200, radius: 10, targetY: 200, speed: 2 };
+let opponentGoalkeeper = { x: 950, y: 340, radius: 10, targetY: 340, speed: 2 };
 
 const baseCoordinates433 = {
-  GK: { x: 45, y: 200 },
-  LB: { x: 180, y: 80 },
-  LCB: { x: 160, y: 160 },
-  RCB: { x: 160, y: 240 },
-  RB: { x: 180, y: 320 },
-  CDM: { x: 300, y: 200 },
-  LCM: { x: 330, y: 120 },
-  RCM: { x: 330, y: 280 },
-  LW: { x: 480, y: 80 },
-  ST: { x: 500, y: 200 },
-  RW: { x: 480, y: 320 }
+  GK: { x: 100, y: 340 },
+  LB: { x: 300, y: 140 },
+  LCB: { x: 270, y: 270 },
+  RCB: { x: 270, y: 410 },
+  RB: { x: 300, y: 540 },
+  CDM: { x: 500, y: 340 },
+  LCM: { x: 550, y: 200 },
+  RCM: { x: 550, y: 480 },
+  LW: { x: 800, y: 140 },
+  ST: { x: 830, y: 340 },
+  RW: { x: 800, y: 540 }
 };
 
 // Keyboard listener
@@ -1240,7 +1252,7 @@ let shootKeyDebounce = false;
 window.addEventListener("keydown", (e) => {
   const key = e.key.toLowerCase();
   keysPressed[key] = true;
-  if (["space", "arrowup", "arrowdown", "arrowleft", "arrowright", "/", ".", ","].includes(key)) {
+  if (["space", "arrowup", "arrowdown", "arrowleft", "arrowright", "/", ".", ",", "q", "e", "c", "m"].includes(key)) {
     e.preventDefault();
   }
 });
@@ -1249,6 +1261,10 @@ window.addEventListener("keyup", (e) => {
   keysPressed[key] = false;
   if (key === "/") passKeyDebounce = false;
   if (key === ".") shootKeyDebounce = false;
+  if (key === "q") qKeyDebounce = false;
+  if (key === "e") eKeyDebounce = false;
+  if (key === "c") cKeyDebounce = false;
+  if (key === "m") mKeyDebounce = false;
 });
 
 // Initialize 3D Engine
@@ -1338,7 +1354,7 @@ function createPitchTexture() {
 }
 
 function build3DPitch() {
-  const pitchGeo = new THREE.PlaneGeometry(65, 40);
+  const pitchGeo = new THREE.PlaneGeometry(105, 68);
   const pitchTex = createPitchTexture();
   const pitchMat = new THREE.MeshStandardMaterial({ map: pitchTex, roughness: 0.95 });
   const pitchMesh = new THREE.Mesh(pitchGeo, pitchMat);
@@ -1361,7 +1377,7 @@ function build3DPitch() {
   crossL.rotation.x = Math.PI / 2;
   crossL.position.set(0, 5.5, 0);
   leftGoal.add(postL1, postL2, crossL);
-  leftGoal.position.set(-30.5, 0, 0);
+  leftGoal.position.set(-49.0, 0, 0);
   scene3d.add(leftGoal);
   
   const rightGoal = new THREE.Group();
@@ -1373,7 +1389,7 @@ function build3DPitch() {
   crossR.rotation.x = Math.PI / 2;
   crossR.position.set(0, 5.5, 0);
   rightGoal.add(postR1, postR2, crossR);
-  rightGoal.position.set(30.5, 0, 0);
+  rightGoal.position.set(49.0, 0, 0);
   scene3d.add(rightGoal);
 }
 
@@ -1406,23 +1422,126 @@ function createPlayerLabelSprite(name, position, rating) {
   return sprite;
 }
 
+const jerseyNumbers = {
+  GK: 1, LB: 3, LCB: 4, RCB: 5, RB: 2,
+  CDM: 6, LCM: 8, RCM: 10, LW: 11, ST: 9, RW: 7
+};
+
+function getSkinColor(name) {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const skinTones = [0xffdbac, 0xf1c27d, 0xe0ac69, 0xc68642, 0x8d5524];
+  return skinTones[Math.abs(hash) % skinTones.length];
+}
+
+function getHairColor(name) {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const colors = [0x4a3728, 0x2c221e, 0xa78bfa, 0xb45309, 0xfcd34d, 0x1f2937];
+  return colors[Math.abs(hash) % colors.length];
+}
+
+function createJerseyTexture(baseColorHex, jerseyNumber, isOpponent) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 128;
+  canvas.height = 128;
+  const ctx = canvas.getContext("2d");
+  
+  ctx.fillStyle = baseColorHex;
+  ctx.fillRect(0, 0, 128, 128);
+  
+  ctx.fillStyle = isOpponent ? "#7f1d1d" : "#ffffff";
+  ctx.fillRect(0, 0, 128, 20);
+  
+  ctx.fillStyle = isOpponent ? "#991b1b" : "rgba(255,255,255,0.25)";
+  ctx.fillRect(20, 20, 20, 108);
+  ctx.fillRect(60, 20, 20, 108);
+  ctx.fillRect(100, 20, 20, 108);
+  
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 44px sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(String(jerseyNumber), 64, 75);
+  
+  const texture = new THREE.CanvasTexture(canvas);
+  return texture;
+}
+
 function build3DPlayerGroup(p, isOpponent = false, isGoalie = false) {
   const group = new THREE.Group();
   
-  const bodyGeo = new THREE.CylinderGeometry(0.4, 0.4, 1.6, 16);
-  const colorHex = isOpponent ? (isGoalie ? 0x7f1d1d : 0xef4444) : parseInt(p.color.replace("#", "0x"));
-  const bodyMat = new THREE.MeshPhongMaterial({ color: colorHex, shininess: 40 });
-  const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
-  bodyMesh.position.y = 0.8;
-  bodyMesh.castShadow = true;
-  group.add(bodyMesh);
+  const baseColor = isOpponent ? (isGoalie ? "#7f1d1d" : "#ef4444") : (p.color || "#3b82f6");
+  const num = isOpponent ? (isGoalie ? 1 : 2 + Math.floor(Math.random() * 9)) : (jerseyNumbers[p.position] || 10);
   
-  const headGeo = new THREE.SphereGeometry(0.3, 16, 16);
-  const headMat = new THREE.MeshPhongMaterial({ color: 0xffdbac, shininess: 20 });
-  const headMesh = new THREE.Mesh(headGeo, headMat);
-  headMesh.position.y = 1.8;
+  const jerseyTex = createJerseyTexture(baseColor, num, isOpponent);
+  
+  // Torso
+  const torsoGeo = new THREE.CylinderGeometry(0.35, 0.35, 1.0, 16);
+  const torsoMat = new THREE.MeshPhongMaterial({ map: jerseyTex, shininess: 30 });
+  const torsoMesh = new THREE.Mesh(torsoGeo, torsoMat);
+  torsoMesh.position.y = 1.25;
+  torsoMesh.castShadow = true;
+  group.add(torsoMesh);
+  
+  // Shorts
+  const shortsGeo = new THREE.CylinderGeometry(0.37, 0.37, 0.35, 16);
+  const shortsMat = new THREE.MeshPhongMaterial({ color: isOpponent ? 0x111827 : 0xffffff, shininess: 20 });
+  const shortsMesh = new THREE.Mesh(shortsGeo, shortsMat);
+  shortsMesh.position.y = 0.85;
+  shortsMesh.castShadow = true;
+  group.add(shortsMesh);
+  
+  const skinHex = getSkinColor(p.name || (isGoalie ? "Opp GK" : "AI Def"));
+  const hairHex = getHairColor(p.name || (isGoalie ? "Opp GK" : "AI Def"));
+  
+  const skinMat = new THREE.MeshPhongMaterial({ color: skinHex, shininess: 20 });
+  const hairMat = new THREE.MeshPhongMaterial({ color: hairHex, shininess: 10 });
+  
+  // Head
+  const headGeo = new THREE.SphereGeometry(0.25, 16, 16);
+  const headMesh = new THREE.Mesh(headGeo, skinMat);
+  headMesh.position.y = 1.9;
   headMesh.castShadow = true;
   group.add(headMesh);
+  
+  // Hair
+  const hairGeo = new THREE.SphereGeometry(0.26, 12, 12);
+  const hairMesh = new THREE.Mesh(hairGeo, hairMat);
+  hairMesh.position.set(0, 2.0, -0.05);
+  hairMesh.scale.set(1.0, 0.7, 1.0);
+  hairMesh.castShadow = true;
+  group.add(hairMesh);
+  
+  // Legs
+  const legGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.7, 8);
+  const leftLeg = new THREE.Mesh(legGeo, skinMat);
+  leftLeg.position.set(-0.16, 0.35, 0);
+  leftLeg.castShadow = true;
+  group.add(leftLeg);
+  
+  const rightLeg = new THREE.Mesh(legGeo, skinMat);
+  rightLeg.position.set(0.16, 0.35, 0);
+  rightLeg.castShadow = true;
+  group.add(rightLeg);
+  
+  // Arms
+  const armGeo = new THREE.CylinderGeometry(0.07, 0.07, 0.7, 8);
+  const leftArm = new THREE.Mesh(armGeo, skinMat);
+  leftArm.position.set(-0.45, 1.25, 0);
+  leftArm.rotation.z = 0.15;
+  leftArm.castShadow = true;
+  group.add(leftArm);
+  
+  const rightArm = new THREE.Mesh(armGeo, skinMat);
+  rightArm.position.set(0.45, 1.25, 0);
+  rightArm.rotation.z = -0.15;
+  rightArm.castShadow = true;
+  group.add(rightArm);
   
   const labelSprite = createPlayerLabelSprite(isOpponent ? (isGoalie ? "Opp GK" : "AI Def") : p.name, isOpponent ? (isGoalie ? "GK" : "DEF") : p.position, isOpponent ? 80 : p.rating);
   labelSprite.position.y = 2.6;
@@ -1636,18 +1755,18 @@ function initializeGameplayEntities() {
   }
 
   opponentPlayers = [
-    { x: 380, y: 140, baseSpeed: 1.2, targetX: 380, targetY: 140, radius: 11, id: "opponent_1" },
-    { x: 380, y: 260, baseSpeed: 1.2, targetX: 380, targetY: 260, radius: 11, id: "opponent_2" },
-    { x: 480, y: 120, baseSpeed: 1.5, targetX: 480, targetY: 120, radius: 11, id: "opponent_3" },
-    { x: 480, y: 280, baseSpeed: 1.5, targetX: 480, targetY: 280, radius: 11, id: "opponent_4" }
+    { x: 620, y: 240, baseSpeed: 0.45, targetX: 620, targetY: 240, radius: 11, id: "opponent_1", stunTicks: 0 },
+    { x: 620, y: 440, baseSpeed: 0.45, targetX: 620, targetY: 440, radius: 11, id: "opponent_2", stunTicks: 0 },
+    { x: 780, y: 200, baseSpeed: 0.55, targetX: 780, targetY: 200, radius: 11, id: "opponent_3", stunTicks: 0 },
+    { x: 780, y: 480, baseSpeed: 0.55, targetX: 780, targetY: 480, radius: 11, id: "opponent_4", stunTicks: 0 }
   ];
 
   opponentGoalkeeper = {
-    x: 625,
-    y: 200,
+    x: 950,
+    y: 340,
     radius: 12,
-    targetY: 200,
-    speed: 1.1 + (currentOvr - 45) * 0.015,
+    targetY: 340,
+    speed: 0.5 + (currentOvr - 45) * 0.005,
     id: "opponent_gk"
   };
 
@@ -1670,7 +1789,21 @@ function initializeGameplayEntities() {
 }
 
 function updateGameplayLoop() {
-  if (!gameActive) return;
+  if (!gameActive || isGoalResetting) return;
+
+  // Decrement skill animation ticks and cooldown
+  if (skillAnimTicks > 0) {
+    skillAnimTicks--;
+    if (skillAnimTicks === 0) {
+      skillActive = null;
+    }
+  }
+  if (skillCooldown > 0) skillCooldown--;
+
+  // Decrement opponent stun ticks
+  opponentPlayers.forEach(op => {
+    if (op.stunTicks > 0) op.stunTicks--;
+  });
 
   const player = homePlayers[controlledPlayerIndex];
   if (player) {
@@ -1686,17 +1819,113 @@ function updateGameplayLoop() {
       dx *= 0.7071;
       dy *= 0.7071;
     }
+
+    // Tackle move on M
+    if (keysPressed["m"] && !mKeyDebounce && ball.owner !== player) {
+      mKeyDebounce = true;
+      audioCtrl.playKick();
+      
+      let lungeDx = dx;
+      let lungeDy = dy;
+      if (lungeDx === 0 && lungeDy === 0) {
+        const angle = Math.atan2(ball.y - player.y, ball.x - player.x);
+        lungeDx = Math.cos(angle);
+        lungeDy = Math.sin(angle);
+      }
+      
+      player.x += lungeDx * 45;
+      player.y += lungeDy * 45;
+      player.x = Math.max(25, Math.min(1025, player.x));
+      player.y = Math.max(25, Math.min(655, player.y));
+      
+      let tackleSuccess = false;
+      opponentPlayers.forEach(op => {
+        const dist = Math.hypot(op.x - player.x, op.y - player.y);
+        if (dist < 65) {
+          if (ball.owner === op) {
+            ball.owner = player;
+            ball.tackleCooldown = 35;
+            op.stunTicks = 80;
+            tackleSuccess = true;
+          }
+        }
+      });
+      
+      if (opponentGoalkeeper && ball.owner === opponentGoalkeeper) {
+        const dist = Math.hypot(opponentGoalkeeper.x - player.x, opponentGoalkeeper.y - player.y);
+        if (dist < 65) {
+          ball.owner = player;
+          ball.tackleCooldown = 35;
+          tackleSuccess = true;
+        }
+      }
+      
+      const msg = document.getElementById("shootout-message");
+      if (msg) {
+        msg.style.display = "block";
+        msg.style.color = tackleSuccess ? "#38bdf8" : "#fbbf24";
+        msg.textContent = tackleSuccess ? "USER TACKLE! ⚔️" : "SLIDE TACKLE! 🏃‍♂️";
+        setTimeout(() => { msg.style.display = "none"; }, 800);
+      }
+    }
+
+    // Trigger skills
+    let speedMultiplier = 1.0;
+    if (ball.owner === player && !skillActive && skillCooldown === 0) {
+      if (keysPressed["q"] && !qKeyDebounce) {
+        qKeyDebounce = true;
+        skillActive = "roulette";
+        skillAnimTicks = 20;
+        skillCooldown = 50;
+        opponentPlayers.forEach(op => {
+          const dist = Math.hypot(op.x - player.x, op.y - player.y);
+          if (dist < 100) op.stunTicks = 120;
+        });
+        audioCtrl.playPlace();
+      } else if (keysPressed["e"] && !eKeyDebounce) {
+        eKeyDebounce = true;
+        skillActive = "rainbow";
+        skillAnimTicks = 25;
+        skillCooldown = 70;
+        ball.owner = null;
+        const speed = 2.2 + (player.stats.pace / 100) * 1.5;
+        ball.vx = speed;
+        ball.vy = 0;
+        ball.tackleCooldown = 28;
+        opponentPlayers.forEach(op => {
+          const dist = Math.hypot(op.x - player.x, op.y - player.y);
+          if (dist < 100) op.stunTicks = 120;
+        });
+        audioCtrl.playKick();
+      } else if (keysPressed["c"] && !cKeyDebounce) {
+        cKeyDebounce = true;
+        skillActive = "stepover";
+        skillAnimTicks = 15;
+        skillCooldown = 40;
+        opponentPlayers.forEach(op => {
+          const dist = Math.hypot(op.x - player.x, op.y - player.y);
+          if (dist < 80) op.stunTicks = 90;
+        });
+        audioCtrl.playPlace();
+      }
+    }
+
+    if (skillActive === "roulette") {
+      speedMultiplier = 1.4;
+    } else if (skillActive === "stepover") {
+      speedMultiplier = 1.8;
+    }
     
     // Shielding reduces pace by 50%
     const isShielding = keysPressed[","] && ball.owner === player;
     const baseSpeed = 1.8 + (player.stats.pace / 100) * 2.5;
-    const speed = isShielding ? baseSpeed * 0.5 : baseSpeed;
+    const speed = isShielding ? baseSpeed * 0.5 : baseSpeed * speedMultiplier;
     
     player.x += dx * speed;
     player.y += dy * speed;
     
-    player.x = Math.max(25, Math.min(625, player.x));
-    player.y = Math.max(25, Math.min(375, player.y));
+    player.x = Math.max(25, Math.min(1025, player.x));
+    player.y = Math.max(25, Math.min(655, player.y));
     
     // Reset charge if control is lost
     if (ball.owner !== player) {
@@ -1711,8 +1940,8 @@ function updateGameplayLoop() {
       powerCharge = shootCharge;
     } else if (shootCharge > 0) {
       audioCtrl.playKick();
-      const targetGoalX = 630;
-      const targetGoalY = 200;
+      const targetGoalX = 1010;
+      const targetGoalY = 340;
       const tDx = targetGoalX - player.x;
       const tDy = targetGoalY - player.y;
       const dist = Math.hypot(tDx, tDy);
@@ -1793,23 +2022,23 @@ function updateGameplayLoop() {
     ball.vx *= 0.96;
     ball.vy *= 0.96;
     
-    if (ball.y <= 20 || ball.y >= 380) {
+    if (ball.y <= 20 || ball.y >= 660) {
       ball.vy = -ball.vy * 0.7;
-      ball.y = Math.max(20, Math.min(380, ball.y));
+      ball.y = Math.max(20, Math.min(660, ball.y));
     }
     
-    if (ball.x >= 630 && ball.y >= 145 && ball.y <= 255) {
+    if (ball.x >= 1010 && ball.y >= 285 && ball.y <= 395) {
       triggerGoalScored(true);
-    } else if (ball.x <= 20 && ball.y >= 145 && ball.y <= 255) {
+    } else if (ball.x <= 40 && ball.y >= 285 && ball.y <= 395) {
       triggerGoalScored(false);
     } else {
-      if (ball.x <= 20) {
+      if (ball.x <= 40) {
         ball.vx = -ball.vx * 0.7;
-        ball.x = 20;
+        ball.x = 40;
       }
-      if (ball.x >= 630) {
+      if (ball.x >= 1010) {
         ball.vx = -ball.vx * 0.7;
-        ball.x = 630;
+        ball.x = 1010;
       }
     }
   }
@@ -1818,10 +2047,10 @@ function updateGameplayLoop() {
     if (idx === controlledPlayerIndex) return;
     
     if (p.position === "GK") {
-      const targetY = Math.max(160, Math.min(240, ball.y));
+      const targetY = Math.max(285, Math.min(395, ball.y));
       const dy = targetY - p.y;
       p.y += Math.sign(dy) * Math.min(Math.abs(dy), 2.2);
-      p.x = 45;
+      p.x = 100;
       
       const ballGkDist = Math.hypot(ball.x - p.x, ball.y - p.y);
       if (ballGkDist < (p.radius + ball.radius) && !ball.owner) {
@@ -1859,17 +2088,17 @@ function updateGameplayLoop() {
 
   opponentPlayers.forEach((op, opIdx) => {
     if (ball.owner === op) {
-      const dx = 20 - op.x;
-      const dy = 200 - op.y;
+      const dx = 40 - op.x;
+      const dy = 340 - op.y;
       const dist = Math.hypot(dx, dy);
       
       op.x += (dx / dist) * op.baseSpeed;
       op.y += (dy / dist) * op.baseSpeed;
       
-      if (op.x < 240) {
+      if (op.x < 300) {
         audioCtrl.playKick();
         ball.owner = null;
-        const shotAngle = Math.atan2(200 + (Math.random() * 60 - 30) - op.y, 20 - op.x);
+        const shotAngle = Math.atan2(340 + (Math.random() * 60 - 30) - op.y, 40 - op.x);
         ball.vx = Math.cos(shotAngle) * 7.5;
         ball.vy = Math.sin(shotAngle) * 7.5;
         ball.tackleCooldown = 35;
@@ -1899,13 +2128,18 @@ function updateGameplayLoop() {
         const dy = ball.owner.y - op.y;
         const dist = Math.hypot(dx, dy);
         
-        if (dist > 5) {
+        if (op.stunTicks > 0) {
+          op.x += (dx / dist) * 0.1;
+          op.y += (dy / dist) * 0.1;
+        } else if (dist > 5) {
           op.x += (dx / dist) * op.baseSpeed;
           op.y += (dy / dist) * op.baseSpeed;
         }
         
-        if (dist < (op.radius + ball.owner.radius) && ball.tackleCooldown === 0) {
-          if (ball.owner === player && keysPressed[","]) {
+        if (dist < (op.radius + ball.owner.radius) && ball.tackleCooldown === 0 && (!op.stunTicks || op.stunTicks === 0)) {
+          if (skillActive === "roulette") {
+            // roulette grants immunity!
+          } else if (ball.owner === player && keysPressed[","]) {
             ball.tackleCooldown = 15;
             const msg = document.getElementById("shootout-message");
             if (msg) {
@@ -1915,9 +2149,8 @@ function updateGameplayLoop() {
               setTimeout(() => { msg.style.display = "none"; }, 800);
             }
           } else {
-            ball.owner = null;
-            ball.vx = -4.5 - Math.random() * 2.5;
-            ball.vy = Math.random() * 4 - 2;
+            // AI tackles player and TAKES ball ownership
+            ball.owner = op;
             ball.tackleCooldown = 35;
             audioCtrl.playKick();
             
@@ -1925,23 +2158,28 @@ function updateGameplayLoop() {
             if (msg) {
               msg.style.display = "block";
               msg.style.color = "#ef4444";
-              msg.textContent = "TACKLED! ⚔️";
+              msg.textContent = "AI INTERCEPT! ⚔️";
               setTimeout(() => { msg.style.display = "none"; }, 800);
             }
           }
         }
       } else {
-        const targetX = 650 - baseCoordinates433[Object.keys(baseCoordinates433)[opIdx + 5]].x;
+        const targetX = 1050 - baseCoordinates433[Object.keys(baseCoordinates433)[opIdx + 5]].x;
         const targetY = baseCoordinates433[Object.keys(baseCoordinates433)[opIdx + 5]].y;
         
         const dx = targetX - op.x;
         const dy = targetY - op.y;
-        op.x += dx * 0.03;
-        op.y += dy * 0.03;
+        if (op.stunTicks > 0) {
+          op.x += dx * 0.005;
+          op.y += dy * 0.005;
+        } else {
+          op.x += dx * 0.03;
+          op.y += dy * 0.03;
+        }
       }
       
       const ballDist = Math.hypot(ball.x - op.x, ball.y - op.y);
-      if (ballDist < (op.radius + ball.radius) && ball.tackleCooldown === 0) {
+      if (ballDist < (op.radius + ball.radius) && ball.tackleCooldown === 0 && (!op.stunTicks || op.stunTicks === 0)) {
         ball.owner = op;
         audioCtrl.playPlace();
       }
@@ -1957,7 +2195,7 @@ function updateGameplayLoop() {
       ball.vy = Math.random() * 6 - 3;
       ball.tackleCooldown = 30;
     } else {
-      const targetY = Math.max(160, Math.min(240, ball.y));
+      const targetY = Math.max(285, Math.min(395, ball.y));
       const dy = targetY - gk.y;
       gk.y += Math.sign(dy) * Math.min(Math.abs(dy), gk.speed);
       
@@ -1988,10 +2226,13 @@ function drawPitchLoop() {
   if (!scene3d || !renderer3d) return;
   try {
     if (ballMesh) {
-      ballMesh.position.x = (ball.x - 325) / 10;
-      ballMesh.position.z = (ball.y - 200) / 10;
+      ballMesh.position.x = (ball.x - 525) / 10;
+      ballMesh.position.z = (ball.y - 340) / 10;
       
-      if (!ball.owner && (Math.abs(ball.vx) > 0.1 || Math.abs(ball.vy) > 0.1)) {
+      if (skillActive === "rainbow" && skillAnimTicks > 0) {
+        const progress = (25 - skillAnimTicks) / 25;
+        ballMesh.position.y = 0.5 + Math.sin(progress * Math.PI) * 3.5;
+      } else if (!ball.owner && (Math.abs(ball.vx) > 0.1 || Math.abs(ball.vy) > 0.1)) {
         const speed = Math.hypot(ball.vx, ball.vy);
         if (speed > 4) {
           ballMesh.position.y = Math.abs(Math.sin(Date.now() * 0.015)) * 1.5 + 0.5;
@@ -2007,8 +2248,8 @@ function drawPitchLoop() {
     
     homePlayers.forEach((p, idx) => {
       if (p.mesh3d) {
-        const targetX = (p.x - 325) / 10;
-        const targetZ = (p.y - 200) / 10;
+        const targetX = (p.x - 525) / 10;
+        const targetZ = (p.y - 340) / 10;
         p.mesh3d.position.x += (targetX - p.mesh3d.position.x) * 0.3;
         p.mesh3d.position.z += (targetZ - p.mesh3d.position.z) * 0.3;
         
@@ -2037,7 +2278,14 @@ function drawPitchLoop() {
         const dx = targetX - p.mesh3d.position.x;
         const dz = targetZ - p.mesh3d.position.z;
         const dist = Math.hypot(dx, dz);
-        if (dist > 0.02) {
+        if (idx === controlledPlayerIndex && skillActive === "roulette" && skillAnimTicks > 0) {
+          const progress = (20 - skillAnimTicks) / 20;
+          p.mesh3d.rotation.y = Math.atan2(-dz, dx) + progress * Math.PI * 2;
+          p.mesh3d.rotation.z = 0;
+        } else if (idx === controlledPlayerIndex && skillActive === "stepover" && skillAnimTicks > 0) {
+          p.mesh3d.rotation.y = Math.atan2(-dz, dx);
+          p.mesh3d.rotation.z = Math.sin(skillAnimTicks * 0.8) * 0.45;
+        } else if (dist > 0.02) {
           p.mesh3d.rotation.y = Math.atan2(-dz, dx);
           p.mesh3d.rotation.z = Math.sin(Date.now() * 0.025) * 0.08;
         } else {
@@ -2048,8 +2296,8 @@ function drawPitchLoop() {
     
     opponentPlayers.forEach(op => {
       if (op.mesh3d) {
-        const targetX = (op.x - 325) / 10;
-        const targetZ = (op.y - 200) / 10;
+        const targetX = (op.x - 525) / 10;
+        const targetZ = (op.y - 340) / 10;
         op.mesh3d.position.x += (targetX - op.mesh3d.position.x) * 0.3;
         op.mesh3d.position.z += (targetZ - op.mesh3d.position.z) * 0.3;
         
@@ -2062,16 +2310,16 @@ function drawPitchLoop() {
     });
     
     if (opponentGoalkeeper && opponentGoalkeeper.mesh3d) {
-      const targetX = (opponentGoalkeeper.x - 325) / 10;
-      const targetZ = (opponentGoalkeeper.y - 200) / 10;
+      const targetX = (opponentGoalkeeper.x - 525) / 10;
+      const targetZ = (opponentGoalkeeper.y - 340) / 10;
       opponentGoalkeeper.mesh3d.position.x += (targetX - opponentGoalkeeper.mesh3d.position.x) * 0.3;
       opponentGoalkeeper.mesh3d.position.z += (targetZ - opponentGoalkeeper.mesh3d.position.z) * 0.3;
     }
     
     if (camera3d && ballMesh) {
       const targetCamX = ballMesh.position.x * 0.7;
-      const targetCamZ = ballMesh.position.z + 18;
-      const targetCamY = 22;
+      const targetCamZ = ballMesh.position.z + 22;
+      const targetCamY = 28;
       
       camera3d.position.x += (targetCamX - camera3d.position.x) * 0.05;
       camera3d.position.z += (targetCamZ - camera3d.position.z) * 0.05;
@@ -2113,13 +2361,13 @@ function handlePitchCanvasClick(e) {
     
     if (intersects.length > 0) {
       const clickPoint = intersects[0].point;
-      const clickX = clickPoint.x * 10 + 325;
-      const clickY = clickPoint.z * 10 + 200;
+      const clickX = clickPoint.x * 10 + 1350;
+      const clickY = clickPoint.z * 10 + 750;
       
       const player = ball.owner;
       if (!player) return;
       
-      if (clickX >= 480 && player.x >= 325) {
+      if (clickX >= 1980 && player.x >= 1350) {
         audioCtrl.playKick();
         const dx = clickX - player.x;
         const dy = clickY - player.y;
@@ -2188,6 +2436,9 @@ function gameTick() {
 }
 
 function triggerGoalScored(byPlayer) {
+  isGoalResetting = true;
+  ball.x = 1350;
+  ball.y = 750;
   ball.owner = null;
   ball.vx = 0;
   ball.vy = 0;
@@ -2210,6 +2461,7 @@ function triggerGoalScored(byPlayer) {
     setTimeout(() => {
       msg.style.display = "none";
       initializeGameplayEntities();
+      isGoalResetting = false;
     }, 2000);
   }
 }
