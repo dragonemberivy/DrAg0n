@@ -742,7 +742,17 @@
         let progress = ((xp - prevLvlXp) / (nextLvlXp - prevLvlXp)) * 100;
 
         
-        pwName.innerHTML = `<div style="line-height:1.2;">${u} <span style="font-size:0.7rem; color:var(--accent-secondary);">Lv.${level}</span></div>
+        
+        let purchases = JSON.parse(localStorage.getItem('drag0n_purchases') || '{}');
+        let achievements = JSON.parse(localStorage.getItem('drag0n_achievements') || '[]');
+        let nameColor = purchases.chatColor === 'gold' ? '#fbbf24' : 'inherit';
+        let vipBadge = purchases.badge === 'vip' ? '👑' : '';
+        let borderStyle = purchases.avatarBorder === 'fire' ? 'border: 2px solid #ef4444; box-shadow: 0 0 10px #ef4444;' : '';
+        let aHtml = a.startsWith('data:') ? `<img src="${a}" style="width:24px;height:24px;border-radius:50%;vertical-align:middle; ${borderStyle}">` : `<span style="${borderStyle} border-radius:50%; padding:2px;">${a}</span>`;
+        
+        let achHtml = achievements.map(ach => `<span title="${ach}" style="font-size:0.8rem; margin-right:2px;">🏅</span>`).join('');
+        
+        pwName.innerHTML = `<div style="line-height:1.2; color:${nameColor};">${vipBadge}${u} <span style="font-size:0.7rem; color:var(--accent-secondary);">Lv.${level}</span> <div style="margin-top:2px;">${achHtml}</div></div>
                             <select onchange="window.changeBackground(this.value)" style="margin-top:2px; font-size:0.7rem; background:transparent; color:var(--text-muted); border:1px solid var(--border); border-radius:4px;" onclick="event.stopPropagation()">
                               <option value="Space">Space</option>
                               <option value="Matrix">Matrix</option>
@@ -751,7 +761,7 @@
                             </select>
 
                             <div class="xp-bar-container"><div class="xp-bar-fill" style="width:${progress}%"></div></div>`;
-        pwAvatar.innerHTML = a.startsWith('data:') ? `<img src="${a}" style="width:24px;height:24px;border-radius:50%;vertical-align:middle;">` : a;
+        pwAvatar.innerHTML = aHtml;
       }
     }
     window.addEventListener('load', updateProfileWidget);
@@ -866,6 +876,16 @@
       
       currentXp += amount;
       localStorage.setItem('drag0n_xp', currentXp);
+      
+      let dcEarned = Math.floor(amount / 5);
+      if(dcEarned > 0) {
+        let currentDC = parseInt(localStorage.getItem('drag0n_dc') || '0');
+        currentDC += dcEarned;
+        localStorage.setItem('drag0n_dc', currentDC);
+      }
+      
+      // Check Achievements
+      if(window.checkAchievements) window.checkAchievements();
       
       let newLvl = Math.floor(Math.sqrt(currentXp / 100)) + 1;
       if(newLvl > oldLvl) {
@@ -1006,3 +1026,238 @@
         }
       }
     };
+
+    window.checkAchievements = function() {
+      let achs = JSON.parse(localStorage.getItem('drag0n_achievements') || '[]');
+      let xp = parseInt(localStorage.getItem('drag0n_xp') || '0');
+      let level = Math.floor(Math.sqrt(xp / 100)) + 1;
+      
+      let newAch = null;
+      if(level >= 5 && !achs.includes('Level 5')) newAch = 'Level 5';
+      if(level >= 10 && !achs.includes('Level 10')) newAch = 'Level 10';
+      
+      if(newAch) {
+        achs.push(newAch);
+        localStorage.setItem('drag0n_achievements', JSON.stringify(achs));
+        alert('🏆 Achievement Unlocked: ' + newAch);
+        if(window.updateProfileWidget) window.updateProfileWidget();
+      }
+    };
+
+
+    // GLOBAL WHITEBOARD
+    const canvas = document.getElementById('whiteboard-canvas');
+    if (canvas && typeof firebase !== 'undefined') {
+      const ctx = canvas.getContext('2d');
+      let drawing = false;
+      let colorInp = document.getElementById('wb-color');
+      
+      canvas.addEventListener('mousedown', () => drawing = true);
+      canvas.addEventListener('mouseup', () => drawing = false);
+      canvas.addEventListener('mouseleave', () => drawing = false);
+      
+      canvas.addEventListener('mousemove', (e) => {
+        if(!drawing) return;
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const x = Math.floor((e.clientX - rect.left) * scaleX);
+        const y = Math.floor((e.clientY - rect.top) * scaleY);
+        
+        const color = colorInp.value;
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y, 4, 4);
+        
+        firebase.database().ref('whiteboard').push({x, y, color});
+      });
+      
+      // Receive pixels
+      firebase.database().ref('whiteboard').on('child_added', snap => {
+        const p = snap.val();
+        if(p && p.x != null && p.y != null) {
+          ctx.fillStyle = p.color || '#fff';
+          ctx.fillRect(p.x, p.y, 4, 4);
+        }
+      });
+      firebase.database().ref('whiteboard').on('child_removed', () => {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+      });
+    }
+
+
+    // MULTIPLAYER TIC-TAC-TOE
+    let currentTTTRoom = null;
+    let myTTTSymbol = '';
+    
+    window.createTTTGame = function() {
+      if(!localStorage.getItem('drag0n_user')) return alert("Create a profile first!");
+      const roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
+      currentTTTRoom = roomId;
+      myTTTSymbol = 'X';
+      
+      const gameRef = firebase.database().ref('ttt_games/' + roomId);
+      gameRef.set({
+        host: localStorage.getItem('drag0n_user'),
+        guest: null,
+        board: Array(9).fill(''),
+        turn: 'X',
+        winner: null,
+        timestamp: Date.now()
+      });
+      
+      document.getElementById('ttt-lobby-ui').style.display = 'none';
+      document.getElementById('ttt-game-ui').style.display = 'block';
+      document.getElementById('ttt-room-id').innerText = 'Game ID: ' + roomId;
+      document.getElementById('ttt-status').innerText = 'Waiting for opponent...';
+      listenToTTT(roomId);
+    };
+
+    window.joinTTTGame = function() {
+      if(!localStorage.getItem('drag0n_user')) return alert("Create a profile first!");
+      const roomId = document.getElementById('ttt-join-id').value.toUpperCase().trim();
+      if(!roomId) return;
+      
+      const gameRef = firebase.database().ref('ttt_games/' + roomId);
+      gameRef.once('value').then(snap => {
+        if(snap.exists() && !snap.val().guest) {
+          gameRef.update({ guest: localStorage.getItem('drag0n_user') });
+          currentTTTRoom = roomId;
+          myTTTSymbol = 'O';
+          document.getElementById('ttt-lobby-ui').style.display = 'none';
+          document.getElementById('ttt-game-ui').style.display = 'block';
+          document.getElementById('ttt-room-id').innerText = 'Game ID: ' + roomId;
+          listenToTTT(roomId);
+        } else {
+          alert("Room not found or already full.");
+        }
+      });
+    };
+
+    function listenToTTT(roomId) {
+      const gameRef = firebase.database().ref('ttt_games/' + roomId);
+      gameRef.on('value', snap => {
+        const game = snap.val();
+        if(!game) return window.leaveTTTGame(); // Game deleted
+        
+        const cells = document.querySelectorAll('.ttt-cell');
+        for(let i=0; i<9; i++) {
+          cells[i].innerText = game.board[i];
+          cells[i].style.color = game.board[i] === 'X' ? '#ef4444' : '#3b82f6';
+        }
+        
+        if(game.winner) {
+          if(game.winner === 'Draw') {
+            document.getElementById('ttt-status').innerText = "It's a draw!";
+          } else {
+            document.getElementById('ttt-status').innerText = (game.winner === myTTTSymbol ? "You won!" : "Opponent won!");
+            if(game.winner === myTTTSymbol && window.addXP) window.addXP(100);
+          }
+        } else if(!game.guest) {
+          document.getElementById('ttt-status').innerText = 'Waiting for opponent...';
+        } else {
+          document.getElementById('ttt-status').innerText = (game.turn === myTTTSymbol ? "YOUR TURN" : "Opponent's turn");
+        }
+      });
+    }
+
+    window.playTTTMove = function(index) {
+      if(!currentTTTRoom) return;
+      const gameRef = firebase.database().ref('ttt_games/' + currentTTTRoom);
+      gameRef.transaction(game => {
+        if(game && game.guest && !game.winner && game.turn === myTTTSymbol && game.board[index] === '') {
+          game.board[index] = myTTTSymbol;
+          
+          // Check win
+          const winPatterns = [
+            [0,1,2],[3,4,5],[6,7,8], // rows
+            [0,3,6],[1,4,7],[2,5,8], // cols
+            [0,4,8],[2,4,6] // diag
+          ];
+          let won = false;
+          for(let p of winPatterns) {
+            if(game.board[p[0]] && game.board[p[0]] === game.board[p[1]] && game.board[p[1]] === game.board[p[2]]) won = true;
+          }
+          
+          if(won) {
+            game.winner = myTTTSymbol;
+          } else if(!game.board.includes('')) {
+            game.winner = 'Draw';
+          } else {
+            game.turn = myTTTSymbol === 'X' ? 'O' : 'X';
+          }
+        }
+        return game;
+      });
+    };
+    
+    window.leaveTTTGame = function() {
+      if(currentTTTRoom) firebase.database().ref('ttt_games/' + currentTTTRoom).off();
+      currentTTTRoom = null;
+      document.getElementById('ttt-lobby-ui').style.display = 'block';
+      document.getElementById('ttt-game-ui').style.display = 'none';
+      
+      const cells = document.querySelectorAll('.ttt-cell');
+      cells.forEach(c => c.innerText = '');
+    };
+
+
+    // DIRECT MESSAGING
+    let currentDMUser = null;
+    let dmListenerRef = null;
+    
+    window.openDM = function(targetUser) {
+      const myUser = localStorage.getItem('drag0n_user');
+      if(!myUser) return alert("You must create a profile to DM!");
+      if(targetUser === myUser) return;
+      
+      currentDMUser = targetUser;
+      document.getElementById('dm-target-user').innerText = targetUser;
+      document.getElementById('dm-modal').style.display = 'flex';
+      
+      const container = document.getElementById('dm-messages-container');
+      container.innerHTML = '';
+      
+      // Determine DM channel ID (alphabetical sort to ensure both users write to same path)
+      const u1 = myUser.toLowerCase();
+      const u2 = targetUser.toLowerCase();
+      const dmId = u1 < u2 ? `${u1}_${u2}` : `${u2}_${u1}`;
+      
+      if(dmListenerRef) dmListenerRef.off();
+      
+      dmListenerRef = firebase.database().ref('dms/' + dmId);
+      dmListenerRef.on('child_added', snap => {
+        const msg = snap.val();
+        if(msg) {
+          const div = document.createElement('div');
+          div.style.marginBottom = '5px';
+          const isMe = msg.username === myUser;
+          div.innerHTML = `<strong style="color: ${isMe ? '#a855f7' : '#fbbf24'};">${msg.username}:</strong> ${msg.text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}`;
+          container.appendChild(div);
+          container.scrollTop = container.scrollHeight;
+        }
+      });
+    };
+    
+    const dmForm = document.getElementById('dm-form');
+    if(dmForm) {
+      dmForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const inp = document.getElementById('dm-input');
+        const text = inp.value.trim();
+        if(!text || !currentDMUser) return;
+        
+        const myUser = localStorage.getItem('drag0n_user');
+        const u1 = myUser.toLowerCase();
+        const u2 = currentDMUser.toLowerCase();
+        const dmId = u1 < u2 ? `${u1}_${u2}` : `${u2}_${u1}`;
+        
+        firebase.database().ref('dms/' + dmId).push({
+          username: myUser,
+          text: text,
+          timestamp: Date.now()
+        });
+        
+        inp.value = '';
+        if(window.addXP) window.addXP(5);
+      });
+    }

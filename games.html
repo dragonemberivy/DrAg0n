@@ -38,6 +38,37 @@
     <section id="games-section">
       <div class="games-grid">
 
+      <div class="glass-card" style="border-color: rgba(99, 102, 241, 0.4);">
+        <h3 style="color: #6366f1;">⚔️ Multiplayer Tic-Tac-Toe</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Play online against others!</p>
+        
+        <div id="ttt-lobby-ui" style="margin-top: 10px;">
+          <button onclick="window.createTTTGame()" style="background:#4f46e5; border:none; padding:8px 12px; color:white; border-radius:4px; cursor:pointer;">Create Game</button>
+          <div style="margin-top: 10px; font-size: 0.9rem;">
+            Or enter Game ID: <input type="text" id="ttt-join-id" style="width: 80px; padding:4px; background:rgba(0,0,0,0.5); color:white; border:1px solid #4f46e5;">
+            <button onclick="window.joinTTTGame()" style="background:#4338ca; border:none; padding:5px 10px; color:white; border-radius:4px; cursor:pointer;">Join</button>
+          </div>
+        </div>
+        
+        <div id="ttt-game-ui" style="display:none; margin-top: 10px; text-align:center;">
+          <h4 id="ttt-status" style="color:#fbbf24; margin-bottom:10px;">Waiting for opponent...</h4>
+          <h5 id="ttt-room-id" style="color:var(--text-muted); font-size:0.7rem;"></h5>
+          <div style="display:grid; grid-template-columns: repeat(3, 50px); gap:5px; justify-content:center; margin:0 auto;">
+            <div class="ttt-cell" onclick="window.playTTTMove(0)" style="width:50px; height:50px; background:rgba(255,255,255,0.1); border:1px solid #4f46e5; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer;"></div>
+            <div class="ttt-cell" onclick="window.playTTTMove(1)" style="width:50px; height:50px; background:rgba(255,255,255,0.1); border:1px solid #4f46e5; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer;"></div>
+            <div class="ttt-cell" onclick="window.playTTTMove(2)" style="width:50px; height:50px; background:rgba(255,255,255,0.1); border:1px solid #4f46e5; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer;"></div>
+            <div class="ttt-cell" onclick="window.playTTTMove(3)" style="width:50px; height:50px; background:rgba(255,255,255,0.1); border:1px solid #4f46e5; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer;"></div>
+            <div class="ttt-cell" onclick="window.playTTTMove(4)" style="width:50px; height:50px; background:rgba(255,255,255,0.1); border:1px solid #4f46e5; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer;"></div>
+            <div class="ttt-cell" onclick="window.playTTTMove(5)" style="width:50px; height:50px; background:rgba(255,255,255,0.1); border:1px solid #4f46e5; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer;"></div>
+            <div class="ttt-cell" onclick="window.playTTTMove(6)" style="width:50px; height:50px; background:rgba(255,255,255,0.1); border:1px solid #4f46e5; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer;"></div>
+            <div class="ttt-cell" onclick="window.playTTTMove(7)" style="width:50px; height:50px; background:rgba(255,255,255,0.1); border:1px solid #4f46e5; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer;"></div>
+            <div class="ttt-cell" onclick="window.playTTTMove(8)" style="width:50px; height:50px; background:rgba(255,255,255,0.1); border:1px solid #4f46e5; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer;"></div>
+          </div>
+          <button onclick="window.leaveTTTGame()" style="background:#ef4444; border:none; padding:5px 10px; color:white; border-radius:4px; cursor:pointer; margin-top:15px;">Leave Game</button>
+        </div>
+      </div>
+
+
       <div class="glass-card" style="border-color: rgba(236, 72, 153, 0.4);">
         <h3 style="color: #ec4899;">🐍 Neon Snake</h3>
         <p style="color: var(--text-muted); font-size: 0.9rem;">Classic Snake with a modern twist!</p>

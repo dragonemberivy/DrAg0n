@@ -50,6 +50,7 @@
 <body style="overflow: hidden;">
   <div onclick="window.findEgg('egg1', this)" style="position:absolute; bottom:50px; left:10px; font-size:0.5rem; cursor:pointer; z-index:10; opacity:0.1;">🪙</div>
 
+  <a href="shop.html" style="position: absolute; top: 2rem; right: 300px; text-decoration: none; font-size: 1.2rem; color: #fbbf24; z-index: 100000; font-weight:bold;">🛒 Shop</a>
   <!-- THEME TOGGLE -->
   <div id="theme-toggle" style="position: fixed; top: 2rem; right: 200px; font-size: 1.5rem; cursor: pointer; z-index: 100000; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 50%; border: 1px solid var(--border); width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;">🌙</div>
 
@@ -174,6 +175,7 @@
         <div class="gallery-item"><img src="assets/images/cat.jpg" alt="Cat"
             onerror="this.src='https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=500&q=80'"></div>
       </div>
+    
     </section>
 
     <!-- FUN STUFF SECTION -->
@@ -234,6 +236,18 @@
         </div>
 
       </div>
+    
+      <!-- GLOBAL WHITEBOARD -->
+      <div class="glass-card" style="grid-column: 1 / -1; margin-top: 2rem; text-align: center;">
+        <h2>🎨 Global Whiteboard</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">Draw something together! Updates live for everyone.</p>
+        <canvas id="whiteboard-canvas" width="600" height="300" style="background: rgba(255,255,255,0.1); border: 2px solid var(--border); border-radius: 8px; cursor: crosshair; touch-action: none; max-width:100%;"></canvas>
+        <div style="margin-top: 10px;">
+          <input type="color" id="wb-color" value="#38bdf8" style="width: 50px; height: 30px; border:none; cursor:pointer;">
+          <button onclick="document.getElementById('whiteboard-canvas').getContext('2d').clearRect(0,0,600,300); if(typeof firebase !== 'undefined') firebase.database().ref('whiteboard').remove();" style="padding: 5px 10px; font-size: 0.9rem; margin-left: 10px;">Clear Canvas</button>
+        </div>
+      </div>
+
     </section>
 
     <!-- FOOTER ADVERT -->

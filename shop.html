@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dragon Shop - DrAg0n</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <style>
+    .shop-item {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    .shop-item:hover {
+      background: rgba(255,255,255,0.1);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    }
+    .shop-price {
+      font-weight: bold;
+      color: #fbbf24;
+      font-size: 1.2rem;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <a href="index.html" style="position: absolute; top: 2rem; left: 2rem; text-decoration: none; font-size: 1.2rem; color: var(--accent); z-index: 100000;">← Return to Home</a>
+
+  <header style="padding: 2rem 1rem;">
+    <h1 style="font-size: 3rem;"><span class="gradient-text">Dragon Shop</span></h1>
+    <p style="font-size: 1.25rem; color: var(--text-muted); max-width: 600px; margin: 0 auto;">
+      Spend your Dragon Coins (DC) on exclusive perks! You have <span id="shop-dc-balance" style="color:#fbbf24; font-weight:bold;">0 DC</span>.
+    </p>
+  </header>
+
+  <main class="container">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-top: 2rem;">
+      
+      <div class="shop-item" onclick="window.buyItem('chatColor', 'gold', 50)">
+        <div style="font-size: 3rem;">📝</div>
+        <h3>Golden Chat Name</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Make your name glow gold in the Animal Chat.</p>
+        <div class="shop-price">50 DC</div>
+      </div>
+
+      <div class="shop-item" onclick="window.buyItem('avatarBorder', 'fire', 100)">
+        <div style="font-size: 3rem;">🔥</div>
+        <h3>Fire Avatar Border</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Adds a fiery ring around your avatar globally.</p>
+        <div class="shop-price">100 DC</div>
+      </div>
+
+      <div class="shop-item" onclick="window.buyItem('badge', 'vip', 500)">
+        <div style="font-size: 3rem;">👑</div>
+        <h3>VIP Badge</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">A permanent crown next to your name everywhere.</p>
+        <div class="shop-price">500 DC</div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      window.updateShopBalance = function() {
+        const dc = parseInt(localStorage.getItem('drag0n_dc') || '0');
+        document.getElementById('shop-dc-balance').textContent = dc + " DC";
+      };
+      
+      window.buyItem = function(type, value, cost) {
+        let dc = parseInt(localStorage.getItem('drag0n_dc') || '0');
+        if (dc >= cost) {
+          if (confirm(`Purchase for ${cost} DC?`)) {
+            dc -= cost;
+            localStorage.setItem('drag0n_dc', dc);
+            
+            let unlocked = JSON.parse(localStorage.getItem('drag0n_purchases') || '{}');
+            unlocked[type] = value;
+            localStorage.setItem('drag0n_purchases', JSON.stringify(unlocked));
+            
+            if(typeof firebase !== 'undefined' && localStorage.getItem('drag0n_user')) {
+              firebase.database().ref('users/' + localStorage.getItem('drag0n_user').toLowerCase() + '/dc').set(dc);
+              firebase.database().ref('users/' + localStorage.getItem('drag0n_user').toLowerCase() + '/purchases').set(unlocked);
+            }
+            
+            alert('Purchase successful!');
+            window.updateShopBalance();
+            if (window.updateProfileWidget) window.updateProfileWidget();
+          }
+        } else {
+          alert('Not enough Dragon Coins (DC)! Play games or chat to earn more.');
+        }
+      };
+      
+      setTimeout(window.updateShopBalance, 500);
+    });
+  </script>
+</body>
+</html>
