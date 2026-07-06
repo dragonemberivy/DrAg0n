@@ -746,13 +746,26 @@
         let purchases = JSON.parse(localStorage.getItem('drag0n_purchases') || '{}');
         let achievements = JSON.parse(localStorage.getItem('drag0n_achievements') || '[]');
         let nameColor = purchases.chatColor === 'gold' ? '#fbbf24' : 'inherit';
+        
         let vipBadge = purchases.badge === 'vip' ? '👑' : '';
+        let clanTag = purchases.clan ? `<span style="color:#a855f7; font-size:0.7rem; font-weight:bold;">[${purchases.clan}]</span> ` : '';
+        let pet = purchases.pet === 'dragon' ? '🐉' : purchases.pet === 'robot' ? '🤖' : '';
+        if(pet) {
+          if(!document.getElementById('profile-pet')) {
+            const petEl = document.createElement('div');
+            petEl.id = 'profile-pet';
+            petEl.style.cssText = 'position:absolute; top:-15px; right:-15px; font-size:1.5rem; animation: float 3s ease-in-out infinite; pointer-events:none; z-index:100;';
+            document.getElementById('drag0n-profile-widget').appendChild(petEl);
+          }
+          document.getElementById('profile-pet').innerText = pet;
+        }
+
         let borderStyle = purchases.avatarBorder === 'fire' ? 'border: 2px solid #ef4444; box-shadow: 0 0 10px #ef4444;' : '';
         let aHtml = a.startsWith('data:') ? `<img src="${a}" style="width:24px;height:24px;border-radius:50%;vertical-align:middle; ${borderStyle}">` : `<span style="${borderStyle} border-radius:50%; padding:2px;">${a}</span>`;
         
         let achHtml = achievements.map(ach => `<span title="${ach}" style="font-size:0.8rem; margin-right:2px;">🏅</span>`).join('');
         
-        pwName.innerHTML = `<div style="line-height:1.2; color:${nameColor};">${vipBadge}${u} <span style="font-size:0.7rem; color:var(--accent-secondary);">Lv.${level}</span> <div style="margin-top:2px;">${achHtml}</div></div>
+        pwName.innerHTML = `<div style="line-height:1.2; color:${nameColor};">${clanTag}${vipBadge}${u} <span style="font-size:0.7rem; color:var(--accent-secondary);">Lv.${level}</span> <div style="margin-top:2px;">${achHtml}</div></div>
                             <select onchange="window.changeBackground(this.value)" style="margin-top:2px; font-size:0.7rem; background:transparent; color:var(--text-muted); border:1px solid var(--border); border-radius:4px;" onclick="event.stopPropagation()">
                               <option value="Space">Space</option>
                               <option value="Matrix">Matrix</option>
@@ -1261,3 +1274,86 @@
         if(window.addXP) window.addXP(5);
       });
     }
+
+
+    // TRIVIA BOT
+    let currentTrivia = null;
+    const triviaQuestions = [
+      { q: "What is the capital of France?", a: "paris" },
+      { q: "What planet is known as the Red Planet?", a: "mars" },
+      { q: "What is the largest mammal?", a: "blue whale" },
+      { q: "How many legs does a spider have?", a: "8" }
+    ];
+    
+    function startTrivia() {
+      if(typeof firebase === 'undefined') return;
+      const t = triviaQuestions[Math.floor(Math.random() * triviaQuestions.length)];
+      firebase.database().ref('trivia_active').set({ q: t.q, a: t.a, timestamp: Date.now() });
+      firebase.database().ref('animal_chat').push({
+        username: 'TriviaBot',
+        avatar: '🤖',
+        text: `TRIVIA TIME! ${t.q} (First to answer wins 50 XP & 50 DC!)`,
+        color: '#fbbf24',
+        timestamp: Date.now()
+      });
+    }
+    
+    // Listen for active trivia
+    if(typeof firebase !== 'undefined') {
+      firebase.database().ref('trivia_active').on('value', snap => {
+        currentTrivia = snap.val();
+      });
+    }
+    
+    window.checkTriviaAnswer = function(text) {
+      if(!currentTrivia) return;
+      if(text.toLowerCase() === currentTrivia.a.toLowerCase()) {
+        firebase.database().ref('animal_chat').push({
+          username: 'TriviaBot',
+          avatar: '🤖',
+          text: `🎉 WINNER! ${localStorage.getItem('drag0n_user')} answered correctly!`,
+          color: '#fbbf24',
+          timestamp: Date.now()
+        });
+        if(window.addXP) window.addXP(50);
+        let currentDC = parseInt(localStorage.getItem('drag0n_dc') || '0');
+        localStorage.setItem('drag0n_dc', currentDC + 50);
+        firebase.database().ref('trivia_active').remove();
+      }
+    };
+    
+    // Start trivia occasionally if host
+    setInterval(() => {
+      if(localStorage.getItem('drag0n_owner') === 'true' && !currentTrivia) {
+        if(Math.random() < 0.1) startTrivia();
+      }
+    }, 60000);
+
+
+    window.queueSong = function() {
+      let dc = parseInt(localStorage.getItem('drag0n_dc') || '0');
+      if (dc >= 50) {
+        const vid = document.getElementById('jukebox-input').value.trim();
+        if(vid.length > 5) {
+          dc -= 50;
+          localStorage.setItem('drag0n_dc', dc);
+          if(window.updateShopBalance) window.updateShopBalance();
+          
+          if(typeof firebase !== 'undefined') {
+            firebase.database().ref('global_jukebox').set({ videoId: vid, timestamp: Date.now() });
+            firebase.database().ref('animal_chat').push({
+              username: 'Jukebox',
+              avatar: '🎵',
+              text: `${localStorage.getItem('drag0n_user')} queued a new song!`,
+              color: '#38bdf8',
+              timestamp: Date.now()
+            });
+          }
+          alert('Song queued globally!');
+        } else {
+          alert('Invalid YouTube Video ID (e.g. jfKfPfyJRdk)');
+        }
+      } else {
+        alert('Not enough DC to queue a song!');
+      }
+    };

@@ -64,6 +64,28 @@
       </div>
 
     </div>
+  
+      <div class="shop-item" onclick="window.buyItem('pet', 'dragon', 1000)">
+        <div style="font-size: 3rem;">🐉</div>
+        <h3>Pet Dragon</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">A tiny dragon that floats next to your profile.</p>
+        <div class="shop-price">1000 DC</div>
+      </div>
+
+      <div class="shop-item" onclick="window.buyItem('pet', 'robot', 800)">
+        <div style="font-size: 3rem;">🤖</div>
+        <h3>Pet Robot</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">A loyal bot companion.</p>
+        <div class="shop-price">800 DC</div>
+      </div>
+      
+      <div class="shop-item" onclick="window.createClan()">
+        <div style="font-size: 3rem;">🛡️</div>
+        <h3>Found a Clan</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Get a custom [TAG] next to your name.</p>
+        <div class="shop-price">2000 DC</div>
+      </div>
+
   </main>
 
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -103,6 +125,31 @@
       
       setTimeout(window.updateShopBalance, 500);
     });
-  </script>
+  
+      window.createClan = function() {
+        let dc = parseInt(localStorage.getItem('drag0n_dc') || '0');
+        if (dc >= 2000) {
+          const tag = prompt("Enter a 3-4 letter Clan Tag:");
+          if (tag && tag.length >= 2 && tag.length <= 4) {
+            dc -= 2000;
+            localStorage.setItem('drag0n_dc', dc);
+            
+            let unlocked = JSON.parse(localStorage.getItem('drag0n_purchases') || '{}');
+            unlocked['clan'] = tag.toUpperCase();
+            localStorage.setItem('drag0n_purchases', JSON.stringify(unlocked));
+            
+            if(typeof firebase !== 'undefined' && localStorage.getItem('drag0n_user')) {
+              firebase.database().ref('users/' + localStorage.getItem('drag0n_user').toLowerCase() + '/dc').set(dc);
+              firebase.database().ref('users/' + localStorage.getItem('drag0n_user').toLowerCase() + '/purchases').set(unlocked);
+            }
+            alert('Clan created successfully!');
+            window.updateShopBalance();
+          }
+        } else {
+          alert('Not enough DC to found a Clan!');
+        }
+      };
+
+</script>
 </body>
 </html>
