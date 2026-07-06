@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Space Explorer - DrAg0n</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+    }
+    #nms-container {
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      max-width: none !important;
+      border-radius: 0 !important;
+    }
+    /* Hide the back button once playing */
+    .back-btn {
+      position: absolute;
+      top: 2rem;
+      left: 2rem;
+      text-decoration: none;
+      font-size: 1.2rem;
+      color: var(--accent);
+      z-index: 1000;
+      background: rgba(0,0,0,0.5);
+      padding: 10px 20px;
+      border-radius: 8px;
+      backdrop-filter: blur(5px);
+      border: 1px solid var(--border);
+    }
+  </style>
+</head>
+
+<body>
+  <a href="index.html" class="back-btn" id="back-home-btn">← Back Home</a>
+
+  <!-- Game 0: No Man's Sky Demo -->
+  <div id="nms-start-ui" style="position: absolute; top:0; left:0; width: 100%; height: 100%; z-index: 100; background: var(--bg-color); display: flex; align-items: center; justify-content: center;">
+      <div class="glass-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; max-width: 1200px; max-height: 90vh; overflow-y: auto;">
+        <h3 style="font-size: 2.5rem; margin-bottom: 1.5rem; text-align: center;">🚀 Procedural Universe Explorers 🌌</h3>
+        <div style="display: flex; gap: 1.5rem; width: 100%; margin-bottom: 2rem; align-items: stretch; justify-content: center; flex-wrap: wrap;">
+            <div style="flex: 2; min-width: 300px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; color: #ddd; font-family: monospace; line-height: 1.6;">
+                <h4 style="color: var(--accent); margin-top: 0; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.1);">PILOT'S MANUAL</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                  <div>
+                    <strong style="color: #fff;">Navigation & Combat</strong><br>
+                    <span style="color: #60a5fa;">WASD / Arrows</span>: Move & Pilot<br>
+                    <span style="color: #60a5fa;">Space</span>: Jetpack / Sub Ascend<br>
+                    <span style="color: #60a5fa;">Shift</span>: Sprint / Sub Dive<br>
+                    <span style="color: #60a5fa;">Left Click</span>: Mine / Shoot Laser<br>
+                    <span style="color: #60a5fa;">Press F</span>: Mount/Dismount Starship<br>
+                    <span style="color: #60a5fa;">Press V</span>: Third/First Person Camera<br>
+                  </div>
+                  <div>
+                    <strong style="color: #fff;">Interaction & Exploration</strong><br>
+                    <span style="color: #34d399;">Press E</span>: Board Beast / Sub / Enter Cave<br>
+                    <span style="color: #34d399;">Press Q</span>: Summon Nautilon Sub 🌊<br>
+                    <span style="color: #34d399;">Press U</span>: Summon Cave Entrance 🕳️<br>
+                    <span style="color: #34d399;">Press C</span>: Activate Discovery Scanner 📡<br>
+                    <span style="color: #34d399;">Press G</span>: Board Dungeon / Freighter<br>
+                    <span style="color: #34d399;">Press X</span>: Recharge Hazard Shield (20 Carbon)<br>
+                    <span style="color: #34d399;">Keys 1-3</span>: Consume Meals (on foot)<br>
+                    <span style="color: #34d399;">Key 7</span>: Drop Light Flare 💡<br>
+                    <span style="color: #34d399;">Key 8</span>: Summon Livestock 🐖<br>
+                  </div>
+                  <div>
+                    <strong style="color: #fff;">Systems & Command</strong><br>
+                    <span style="color: #fbbf24;">Press T</span>: Trade Menu (Near Stations)<br>
+                    <span style="color: #fbbf24;">Press B</span>: Toggle Build Mode<br>
+                    <span style="color: #fbbf24;">Keys 1-6</span>: Select Base Parts (Build)<br>
+                    <span style="color: #fbbf24;">Press H</span>: Summon Freighter (50k ¢) / Set Cave Home<br>
+                    <span style="color: #fbbf24;">Press M</span>: Open Galactic Map / Teleporter 🗺️<br>
+                    <span style="color: #f87171;">Press K</span>: Spawn Seismic Worm Boss 🪱<br>
+                    <span style="color: #f87171;">Press P</span>: Spawn Pirate Raider 🏴‍☠️<br>
+                    <span style="color: #f87171;">Press R</span>: Reset Universe (Deletes Save)<br>
+                  </div>
+                </div>
+                <div style="margin-top: 1rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem; color: #aaa;">
+                  *Tips: Fly into Black Holes to warp! Left-click AI Fleets to buy ships. Discovering a new biome or entering a cave instantly grants a 10x resource bonus!
+                </div>
+            </div>
+
+            <div style="flex: 1; min-width: 250px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; color: #ddd; font-family: monospace; line-height: 1.6;">
+                <h4 style="color: #34d399; margin-top: 0; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.1);">COOK'S GUIDE 🍲</h4>
+                <ul style="list-style-type: none; padding-left: 0; margin: 0; font-size: 0.9rem;">
+                  <li style="margin-bottom: 0.8rem;"><strong style="color: #f87171;">Raw Meat / Bone Shards</strong>: Culled from wild fauna or livestock.</li>
+                  <li style="margin-bottom: 0.8rem;"><strong style="color: #fbbf24;">Sweet Berries / Wild Yeast</strong>: Harvested randomly from standard flora.</li>
+                  <li style="margin-bottom: 0.8rem;"><strong style="color: #60a5fa;">Cave Salts / Glowing Moss</strong>: Mined from stalactites deep underground.</li>
+                  <li style="margin-bottom: 0.8rem;"><strong style="color: #a855f7;">Toxic Fungus</strong>: Found exclusively on Toxic biomes.</li>
+                  <li style="margin-bottom: 0.8rem;"><strong style="color: #ea580c;">Spicy Bulbs</strong>: Found exclusively on Inferno biomes.</li>
+                  <li style="margin-bottom: 0.8rem;"><strong style="color: #22d3ee;">Crystalized Sap</strong>: Found exclusively on Frozen biomes.</li>
+                  <li style="margin-bottom: 0.8rem;"><strong style="color: #94a3b8;">Carbon / Nanites</strong>: Basic resource harvesting & Sentinel combat.</li>
+                  <li style="color: #94a3b8; font-style: italic;">Tip: Build a Nutrient Processor (Build Menu 6) to combine these into powerful meals!</li>
+                </ul>
+            </div>
+        </div>
+        <div style="display: flex; gap: 1rem;">
+            <button onclick="startNMS(); document.getElementById('back-home-btn').style.display = 'none';" style="font-size: 1.5rem; padding: 0.75rem 3rem; border-radius: 50px; cursor: pointer; box-shadow: 0 0 20px var(--accent-glow);">Launch Universe</button>
+        </div>
+      </div>
+  </div>
+
+  <div style="position: relative; width: 100vw; height: 100vh; overflow: hidden; background: #000;" id="nms-container">
+      <div id="nms-canvas-container" style="width: 100%; height: 100%; display: block;"></div>
+      
+      <div id="nms-crosshair" style="position: absolute; top: 50%; left: 50%; width: 4px; height: 4px; background: white; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; display: none; z-index: 6;"></div>
+      
+      <div id="nms-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; cursor: pointer;">
+        <h2 style="font-size: 3rem; margin: 0; color: #fff;">READY FOR LAUNCH</h2>
+        <p style="font-size: 1.2rem; color: #aaa; margin: 1rem 0;">Clicking Play locks your mouse to the screen.<br>Press ESC to unlock.</p>
+        <button onclick="document.getElementById('back-home-btn').style.display = 'block'; document.exitPointerLock();" style="position: absolute; bottom: 2rem; left: 2rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3);">Cancel</button>
+      </div>
+      
+      <!-- HUD -->
+      <div id="nms-hud" style="position: absolute; bottom: 20px; left: 20px; color: white; text-shadow: 1px 1px 0 #000; font-family: monospace; font-size: 14px; pointer-events: none; display: none; z-index: 5;">
+        <div id="nms-debug-pos">Pos: 0, 0, 0</div>
+        <div id="nms-debug-mode">Mode: Walking</div>
+        <div id="nms-nanites" style="color: #60a5fa; margin-top: 4px;">Nanites: 0</div>
+        <div id="nms-health-container" style="margin-top: 10px; width: 200px; height: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.5); border-radius: 5px; overflow: hidden;">
+          <div id="nms-health-bar" style="width: 100%; height: 100%; background: #ef4444; transition: width 0.1s;"></div>
+        </div>
+        <!-- Phase 7: Hazard Protection Bar -->
+        <div id="nms-hazard-container" style="display:none; margin-top: 6px; width: 200px; height: 8px; background: rgba(0,0,0,0.5); border: 1px solid rgba(251,191,36,0.6); border-radius: 4px; overflow: hidden;">
+          <div id="nms-hazard-bar" style="width: 100%; height: 100%; background: #fbbf24; transition: width 0.1s;"></div>
+        </div>
+        <div id="nms-hazard-status" style="display:none; font-size: 10px; color: #fbbf24; margin-top: 2px;">Hazard detected: Toxic</div>
+
+        <!-- Jetpack Fuel Bar -->
+        <div style="margin-top:6px; display:flex; align-items:center; gap:6px;">
+          <span style="font-size:11px; opacity:0.8;">🚀 JET</span>
+          <div style="width:160px; height:7px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.4); border-radius:4px; overflow:hidden;">
+            <div id="nms-jetpack-bar" style="width:100%; height:100%; background:#3b82f6; transition:width 0.1s;"></div>
+          </div>
+        </div>
+        <!-- Pulse Drive Bar -->
+        <div style="margin-top:4px; display:flex; align-items:center; gap:6px;">
+          <span style="font-size:11px; opacity:0.8;">⚡ PULSE</span>
+          <div style="width:148px; height:7px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.4); border-radius:4px; overflow:hidden;">
+            <div id="nms-pulse-bar" style="width:100%; height:100%; background:#22d3ee; transition:width 0.1s;"></div>
+          </div>
+        </div>
+        <div id="nms-gpf-bribe" style="display:none; margin-top: 10px; pointer-events: all;">
+          <button onclick="window.bribeGPF()" style="background: rgba(239,68,68,0.85); border: 1px solid #f87171; color: white; font-family: monospace; font-size: 13px; padding: 6px 14px; border-radius: 6px; cursor: pointer; text-shadow: 1px 1px 0 #000; transition: background 0.2s;" onmouseover="this.style.background='rgba(220,38,38,0.95)'" onmouseout="this.style.background='rgba(239,68,68,0.85)'">
+            🚔 Bribe GPF — 200¢
+          </button>
+        </div>
+        <div id="nms-home-return" style="display:none; margin-top: 10px; pointer-events: all;">
+          <button onclick="window.returnToHomeCave()" style="background: rgba(96,165,250,0.85); border: 1px solid #93c5fd; color: white; font-family: monospace; font-size: 13px; padding: 6px 14px; border-radius: 6px; cursor: pointer; text-shadow: 1px 1px 0 #000; transition: background 0.2s;" onmouseover="this.style.background='rgba(59,130,246,0.95)'" onmouseout="this.style.background='rgba(96,165,250,0.85)'">
+            🏠 Return to Home Cave
+          </button>
+        </div>
+        <div style="margin-top: 10px; pointer-events: all;">
+          <button onclick="window.resetNMS()" style="background: rgba(55,65,81,0.85); border: 1px solid #9ca3af; color: white; font-family: monospace; font-size: 11px; padding: 4px 8px; border-radius: 4px; cursor: pointer; text-shadow: 1px 1px 0 #000;">
+            🔄 Reset Universe
+          </button>
+        </div>
+      </div>
+
+
+
+
+      <!-- PLANET INFO HUD -->
+      <div id="nms-planet-info" style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); text-align: center; color: white; font-family: monospace; pointer-events: none; display: none; z-index: 5; text-shadow: 1px 1px 0 #000; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.3); padding: 10px 20px; border-radius: 8px; backdrop-filter: blur(4px); transition: opacity 0.5s;">
+          <h3 id="nms-planet-name" style="margin: 0; color: #60a5fa; font-size: 1.2rem;">Unknown Planet</h3>
+          <p id="nms-planet-resource" style="margin: 5px 0 0 0; color: #fbbf24; font-size: 0.9rem;">Scans detect: Unknown</p>
+      </div>
+
+      <!-- TRADE STATION OVERLAY -->
+      <div id="nms-trade-overlay" style="position: absolute; top:0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 20, 0.85); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 20; color: white; font-family: monospace; backdrop-filter: blur(8px);">
+          <h2 style="font-size: 3rem; margin-bottom: 0.5rem; text-shadow: 0 0 10px #fbbf24; color: #fbbf24;">GALACTIC TRADING POST</h2>
+          <p style="font-size: 1.2rem; margin-bottom: 2rem; color: #aaa;">"We trade scrap for credits, explorer. Simple as."</p>
+          
+          <div style="background: rgba(0,0,0,0.5); border: 1px solid #444; padding: 2rem; border-radius: 12px; width: 80%; max-width: 500px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; border-bottom: 1px solid #444; padding-bottom: 1rem;">
+                <span>Your Credits:</span>
+                <span id="trade-credits" style="color: #4ade80; font-weight: bold; font-size: 1.2rem;">0 ¢</span>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
+                <button onclick="window.tradeSellScrap()" style="flex:1; padding: 10px; background: rgba(59, 130, 246, 0.2); border: 1px solid #3b82f6; color: white; cursor: pointer; border-radius: 4px;">Sell Pirate Scrap</button>
+                <button onclick="window.tradeSellMinerals()" style="flex:1; padding: 10px; background: rgba(234, 179, 8, 0.2); border: 1px solid #eab308; color: white; cursor: pointer; border-radius: 4px;">Sell Minerals</button>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
+                <button onclick="window.tradeRepairHull()" style="flex:1; padding: 10px; background: rgba(34, 197, 94, 0.2); border: 1px solid #22c55e; color: white; cursor: pointer; border-radius: 4px;">Repair Hull (100 ¢)</button>
+                <button onclick="window.tradeUpgradeEngine()" style="flex:1; padding: 10px; background: rgba(168, 85, 247, 0.2); border: 1px solid #a855f7; color: white; cursor: pointer; border-radius: 4px;">Upgrade Engine (500 ¢)</button>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
+                <button onclick="window.tradeDualLasers()" style="flex:1; padding: 10px; background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: white; cursor: pointer; border-radius: 4px;">Dual Lasers (2000 ¢)</button>
+                <button onclick="window.tradePaintJob()" style="flex:1; padding: 10px; background: rgba(236, 72, 153, 0.2); border: 1px solid #ec4899; color: white; cursor: pointer; border-radius: 4px;">Neon Paint Job (1000 ¢)</button>
+            </div>
+          </div>
+          
+          <button onclick="window.undockStation()" style="margin-top: 2rem; padding: 10px 30px; font-size: 1.2rem; background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: white; border-radius: 8px; cursor: pointer;">Undock & Leave</button>
+          <div id="trade-feedback" style="margin-top: 1rem; color: #a855f7; font-weight: bold; height: 20px;"></div>
+      </div>
+
+
+      <!-- Culinary / Cooking Overlay -->
+      <div id="nms-cooking-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 200; color: white; font-family: monospace;">
+          <div style="background: rgba(30, 41, 59, 0.95); padding: 30px; border: 2px solid #3b82f6; border-radius: 10px; text-align: center; max-width: 600px; width: 90%; backdrop-filter: blur(10px); box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+              <h2 style="color: #60a5fa; margin-top: 0; font-size: 1.5rem;">NUTRIENT PROCESSOR</h2>
+              <p style="font-size: 0.9rem; color: #cbd5e1; margin-bottom: 20px;">Combine biological ingredients to create survival consumables.</p>
+              
+              <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px; text-align: left;">
+                  <!-- Inventory Panel -->
+                  <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 15px;">
+                      <h4 style="margin: 0 0 10px 0; color: #fbbf24; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 5px;">Your Ingredients</h4>
+                      <div id="cooking-inventory" style="font-size: 13px; height: 300px; overflow-y: auto; padding-right: 5px;">
+                          <!-- Inventory list populated via JS -->
+                      </div>
+                  </div>
+                  
+                  <!-- Recipe Panel -->
+                  <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 15px;">
+                      <h4 style="margin: 0 0 10px 0; color: #34d399; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 5px;">Available Recipes</h4>
+                      <div id="cooking-recipes" style="font-size: 13px; height: 300px; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 8px;">
+                          <!-- Recipes populated via JS -->
+                      </div>
+                  </div>
+              </div>
+              
+              <div style="margin-top: 20px;">
+                  <button onclick="document.getElementById('nms-cooking-overlay').style.display='none'; document.body.requestPointerLock();" style="width: 100%; background: #4b5563; padding: 12px; border: none; border-radius: 6px; cursor: pointer; color: white; font-weight: bold; font-size: 1.1rem; transition: background 0.2s;">Exit Processor</button>
+              </div>
+          </div>
+      </div>
+
+      <!-- GALACTIC MAP OVERLAY -->
+      <div id="nms-map-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 200; color: white; font-family: monospace;">
+          <div style="background: rgba(15, 23, 42, 0.95); padding: 30px; border: 2px solid #8b5cf6; border-radius: 10px; text-align: center; max-width: 800px; width: 90%; backdrop-filter: blur(10px); box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+              <h2 style="color: #c4b5fd; margin-top: 0; font-size: 1.8rem; text-shadow: 0 0 10px #8b5cf6;">GALACTIC MAP & TELEPORT</h2>
+              <p style="font-size: 0.9rem; color: #cbd5e1; margin-bottom: 20px;">Fast-travel to known locations.</p>
+              
+              <div id="map-locations-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: left; max-height: 400px; overflow-y: auto; padding: 10px;">
+                  <!-- Buttons populated by JS -->
+              </div>
+              
+              <div style="margin-top: 25px;">
+                  <button onclick="document.getElementById('nms-map-overlay').style.display='none'; document.body.requestPointerLock();" style="width: 100%; background: #4b5563; padding: 12px; border: none; border-radius: 6px; cursor: pointer; color: white; font-weight: bold; font-size: 1.1rem; transition: background 0.2s;">Close Map</button>
+              </div>
+          </div>
+      </div>
+
+      <!-- OBJECTIVES PANEL -->
+      <div id="nms-objectives" style="position: absolute; top: 20px; right: 20px; width: 250px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 1rem; color: #fff; font-family: monospace; pointer-events: none; display: none; z-index: 5; text-shadow: 1px 1px 0 #000; backdrop-filter: blur(4px);">
+        <h4 style="margin: 0 0 0.5rem 0; color: #fbbf24; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 0.5rem;">MISSION LOG</h4>
+        <ul style="margin: 0; padding-left: 1.2rem; font-size: 14px; line-height: 1.5; list-style-type: none; padding: 0;">
+          <li id="obj-leave">[ ] Leave Origin's orbit</li>
+          <li id="obj-progress">[-] Visited 1/10 Planets</li>
+          <li id="obj-mine">[ ] Mine Crystals: 0/10 (Click!)</li>
+          <li id="obj-all" style="margin-top: 0.5rem; font-weight: bold;">[ ] Explore ALL 10 Planets!</li>
+        </ul>
+      </div>
+  </div>
+
+  <!-- THREE.JS & NOISE -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
+  <script src="assets/js/nms/core.js?v=30"></script>
+</body>
+</html>

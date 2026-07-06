@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Games - DrAg0n</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+
+<body>
+  <!-- HEADER -->
+  <header style="padding: 2rem 1rem;">
+    <a href="index.html" style="position: absolute; top: 2rem; left: 2rem; text-decoration: none; font-size: 1.2rem; color: var(--accent);">← Back Home</a>
+    <h1 style="font-size: 3rem;"><span class="gradient-text">Arcade</span></h1>
+    <p style="font-size: 1.25rem; color: var(--text-muted); max-width: 600px; margin: 0 auto;">
+      Welcome to the games hub!
+    </p>
+  </header>
+
+  <main class="container">
+    <!-- GAMES SECTION -->
+    <section id="games-section">
+      <div class="games-grid">
+
+        <!-- Game -0.5: FC 24 Ultimate Squad Builder -->
+        <div class="glass-card" style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2.5rem; text-align: center; border-color: rgba(251, 191, 36, 0.4); background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(217, 70, 239, 0.1));">
+          <div style="font-size: 3rem; margin-bottom: 0.5rem; filter: drop-shadow(0 0 10px rgba(251,191,36,0.5));">🏆</div>
+          <h3 style="font-size: 2.2rem; margin-bottom: 0.5rem; background: linear-gradient(135deg, #fbbf24 0%, #d946ef 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-style: italic;">FC 24 Ultimate Squad Builder</h3>
+          <p style="color: var(--text-muted); max-width: 600px; margin-bottom: 1.5rem;">
+            Open packs, unlock legendary footballers and modern stars, build chemistry links, and create your ultimate 4-3-3 squad builder dream team!
+          </p>
+          <a href="fc24-squad-builder.html" style="text-decoration: none;">
+            <button style="font-size: 1.2rem; padding: 0.75rem 2.5rem; border-radius: 50px; background: linear-gradient(135deg, #fbbf24, #d946ef); box-shadow: 0 4px 20px rgba(251,191,36,0.3); border: none; font-weight: bold; cursor: pointer; color: white;">
+              Launch Squad Builder ⚽
+            </button>
+          </a>
+        </div>
+
+        <!-- Game 0.5: Slice Master -->
+        <div class="glass-card" style="grid-column: 1 / -1; padding: 1.5rem;">
+          <h3>Slice Master</h3>
+          <p style="margin-bottom: 1rem;">Slice through everything in your path! Click inside to play.</p>
+          <div style="position: relative; width: 100%; padding-bottom: 56.25%; height: 0; border-radius: 12px; overflow: hidden; border: 2px solid var(--border); background: #000;">
+            <iframe src="https://slicemasterfree.github.io/" 
+                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; filter: invert(0.9) hue-rotate(240deg) saturate(4) contrast(1.2);" 
+                    allowfullscreen="true" scrolling="no">
+            </iframe>
+          </div>
+        </div>
+
+        <!-- Game 0.75: From Darkness To Light -->
+        <div class="glass-card" style="grid-column: 1 / -1; padding: 1.5rem;">
+          <h3>From Darkness To Light</h3>
+          <p style="margin-bottom: 1rem;">A 2D procedural narrative-action game. Survive the depths and uncover the story!</p>
+          <div style="position: relative; width: 100%; padding-bottom: 56.25%; height: 0; border-radius: 12px; overflow: hidden; border: 2px solid var(--border); background: #000;">
+            <iframe id="fdtl-iframe" src="fdtl/index.html" 
+                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;" 
+                    allowfullscreen="true" scrolling="no">
+            </iframe>
+            
+            <div id="fdtl-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; cursor: pointer;">
+              <h2 style="font-size: 3rem; margin: 0; color: #fff;">READY TO PLAY</h2>
+              <p style="font-size: 1.2rem; color: #aaa; margin: 1rem 0;">Click here to start and enable controls!</p>
+            </div>
+            
+            <script>
+              document.getElementById('fdtl-overlay').addEventListener('click', function() {
+                this.style.display = 'none';
+                const frame = document.getElementById('fdtl-iframe');
+                if(frame.contentWindow) frame.contentWindow.focus();
+              });
+            </script>
+          </div>
+          <button onclick="document.getElementById('fdtl-iframe').requestFullscreen()" style="margin-top: 1.5rem; width: 100%; background: rgba(0, 187, 255, 0.1); border-color: rgba(0, 187, 255, 0.5);">Play Fullscreen</button>
+        </div>
+
+        <!-- Game 0.8: Crimson Tides -->
+        <div class="glass-card" style="grid-column: 1 / -1; padding: 1.5rem;">
+          <h3>Crimson Tides</h3>
+          <p style="margin-bottom: 1rem;">A 3D pirate adventure. Sail the seas, sink enemies, and survive the Kraken!</p>
+          <div style="position: relative; width: 100%; padding-bottom: 56.25%; height: 0; border-radius: 12px; overflow: hidden; border: 2px solid var(--border); background: #000;">
+            <iframe id="crimson-tides-iframe" src="crimson-tides/index.html" 
+                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;" 
+                    allowfullscreen="true" scrolling="no">
+            </iframe>
+            
+            <div id="crimson-tides-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; cursor: pointer;">
+              <h2 style="font-size: 3rem; margin: 0; color: #fff;">READY FOR ADVENTURE</h2>
+              <p style="font-size: 1.2rem; color: #aaa; margin: 1rem 0;">Click here to set sail and enable controls!</p>
+            </div>
+            
+            <script>
+              document.getElementById('crimson-tides-overlay').addEventListener('click', function() {
+                this.style.display = 'none';
+                const frame = document.getElementById('crimson-tides-iframe');
+                if(frame.contentWindow) frame.contentWindow.focus();
+              });
+            </script>
+          </div>
+          <button onclick="document.getElementById('crimson-tides-iframe').requestFullscreen()" style="margin-top: 1.5rem; width: 100%; background: rgba(193, 155, 61, 0.1); border-color: rgba(193, 155, 61, 0.5); color: #cda434;">Play Fullscreen</button>
+        </div>
+
+        <!-- Game 1: Number Guessing -->
+        <div class="glass-card">
+          <h3>Number Guessing</h3>
+          <p>Guess a number between <strong>1</strong> and <strong>100</strong>.</p>
+          <div class="flex-center gap-2 mb-4">
+            <input type="number" id="userGuess" placeholder="Enter guess" min="1" max="100" style="margin:0;">
+            <button onclick="checkGuess()">Guess</button>
+          </div>
+          <p id="guessFeedback" style="font-weight: 600; color: var(--accent);"></p>
+          <p id="guessAttempts" class="mb-4"></p>
+          <button onclick="resetGuessGame()" style="background: rgba(255,255,255,0.1); width: 100%;">Restart</button>
+        </div>
+
+        <!-- Game 2: Rock Paper Scissors -->
+        <div class="glass-card">
+          <h3>Rock Paper Scissors</h3>
+          <p>Can you beat the computer?</p>
+          <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <button onclick="playRPS('rock')" style="flex:1;">Rock</button>
+            <button onclick="playRPS('paper')" style="flex:1;">Paper</button>
+            <button onclick="playRPS('scissors')" style="flex:1;">Scissors</button>
+          </div>
+          <div id="rpsResult"
+            style="padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 8px; text-align: center; font-weight: 600;">
+            Make a choice!</div>
+        </div>
+
+        <!-- Game 3: Memory Game -->
+        <div class="glass-card" style="grid-column: 1 / -1;">
+          <h3>Memory Match (<span style="opacity:0.3; font-size: 1rem;">Code: fruits</span>)</h3>
+          <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+            <div id="memory-game" class="memory-board" style="flex: 1; min-width: 300px;"></div>
+            <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+              <div style="font-size: 1.25rem; margin-bottom: 1rem;">
+                Moves: <span id="memory-moves" style="color: var(--accent); font-weight: bold;">0</span> |
+                Matches: <span id="memory-matches" style="color: var(--accent); font-weight: bold;">0</span>/8
+              </div>
+              <button onclick="createMemoryBoard()" class="mb-4">Restart Game</button>
+
+              <div
+                style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; border: 1px solid var(--border);">
+                <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">Secret Unlock Code:</p>
+                <div class="flex-center gap-2">
+                  <input type="text" id="memoryCodeInput" placeholder="Enter code" style="margin:0;">
+                  <button onclick="revealMemoryCards()">Reveal</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Game 4: Fun Color SVG -->
+        <div class="glass-card">
+          <h3>Fun Color!</h3>
+          <p>Click the flower parts to paint them.</p>
+          <div style="display: flex; gap: 1rem; align-items: start;">
+            <div style="flex: 1;">
+              <label style="font-size:0.8rem;">Red: <input type="range" id="rSlider" min="0" max="255" value="255"
+                  style="width:100%;"></label>
+              <label style="font-size:0.8rem;">Green: <input type="range" id="gSlider" min="0" max="255" value="100"
+                  style="width:100%;"></label>
+              <label style="font-size:0.8rem;">Blue: <input type="range" id="bSlider" min="0" max="255" value="200"
+                  style="width:100%;"></label>
+              <div id="colorPreview"
+                style="height: 40px; border-radius: 8px; border: 1px solid var(--border); margin: 10px 0;"></div>
+              <button id="undoBtn" style="width: 100%; background: rgba(255,255,255,0.1);">Undo</button>
+            </div>
+
+            <div id="svgContainer" style="background: white; border-radius: 12px; padding: 10px;">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="160" height="160"
+                style="cursor:pointer; user-select:none;">
+                <circle cx="200" cy="200" r="190" fill="#fff" stroke="#000" stroke-width="4" />
+                <g stroke="#000" stroke-width="4" fill="#fff">
+                  <path class="colorable"
+                    d="M200 20 L230 90 L270 90 L240 140 L270 190 L220 180 L200 230 L180 180 L130 190 L160 140 L130 90 L170 90 Z" />
+                </g>
+                <g stroke="#000" stroke-width="4" fill="#fff">
+                  <ellipse class="colorable" cx="200" cy="140" rx="30" ry="60" />
+                  <ellipse class="colorable" cx="260" cy="200" rx="30" ry="60" transform="rotate(60 260 200)" />
+                  <ellipse class="colorable" cx="140" cy="200" rx="30" ry="60" transform="rotate(-60 140 200)" />
+                </g>
+                <circle class="colorable" cx="200" cy="200" r="40" fill="#fff" stroke="#000" stroke-width="4" />
+                <g stroke="#000" stroke-width="4" fill="#fff">
+                  <path class="colorable" d="M200 80 Q210 100 200 120 Q190 100 200 80 Z" />
+                  <path class="colorable" d="M230 140 Q245 150 230 160 Q215 150 230 140 Z" />
+                  <path class="colorable" d="M170 140 Q155 150 170 160 Q185 150 170 140 Z" />
+                  <path class="colorable" d="M200 260 Q210 280 200 300 Q190 280 200 260 Z" />
+                </g>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ALL SCRIPTS (Consolidated) -->
+  <script src="assets/js/main.js"></script>
+</body>
+
+</html>

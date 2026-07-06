@@ -7,6 +7,44 @@
   <title>DrAg0n</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.css">
+  <style>
+    .nav-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 4rem;
+    }
+    .nav-card {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(129, 140, 248, 0.1));
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 2rem;
+      border-radius: 16px;
+      text-align: center;
+      text-decoration: none;
+      color: white;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .nav-card:hover {
+      transform: translateY(-5px) scale(1.02);
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(129, 140, 248, 0.2));
+      box-shadow: 0 10px 25px rgba(56, 189, 248, 0.4);
+    }
+    .nav-card-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      filter: drop-shadow(0 0 10px rgba(255,255,255,0.3));
+    }
+    .nav-card-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin: 0;
+    }
+  </style>
 </head>
 
 <body style="overflow: hidden;">
@@ -30,9 +68,9 @@
 
   <!-- HEADER -->
   <header>
-    <h1 style="font-size: 4rem;"><span class="gradient-text">DrAg0n</span></h1>
+    <h1 style="font-size: 5rem; margin-bottom: 0.5rem;"><span class="gradient-text">DrAg0n</span></h1>
     <p style="font-size: 1.25rem; color: var(--text-muted); max-width: 600px; margin: 0 auto;">
-      Hello and Welcome! This is my Amazing first web page about everything!
+      Welcome to my premium, cutting-edge hub. Explore the universe of DrAg0n.
     </p>
 
     <div id="clock-container">
@@ -41,6 +79,30 @@
   </header>
 
   <main class="container">
+
+    <!-- NAVIGATION GRID -->
+    <div class="nav-grid">
+      <a href="space-game.html" class="nav-card">
+        <div class="nav-card-icon">🚀</div>
+        <h3 class="nav-card-title">Space Explorer</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem;">A procedural universe</p>
+      </a>
+      <a href="games.html" class="nav-card">
+        <div class="nav-card-icon">🕹️</div>
+        <h3 class="nav-card-title">Arcade</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem;">Mini-games & More</p>
+      </a>
+      <a href="chat.html" class="nav-card">
+        <div class="nav-card-icon">💬</div>
+        <h3 class="nav-card-title">Animal Chat</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem;">Connect in the wild</p>
+      </a>
+      <a href="club.html" class="nav-card" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(236, 72, 153, 0.1)); border-color: rgba(236, 72, 153, 0.3);">
+        <div class="nav-card-icon">📚</div>
+        <h3 class="nav-card-title" style="background: linear-gradient(45deg, #a855f7, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Book Club</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem;">Reviews & Polls</p>
+      </a>
+    </div>
 
     <!-- IMAGES SECTION -->
     <section id="images-section">
@@ -54,419 +116,10 @@
             onerror="this.src='https://images.unsplash.com/photo-1502120000005-4b3f81e3a246?w=500&q=80'"></div>
         <div class="gallery-item"><img src="assets/images/harper_seal.jpg" alt="Harper Seal"
             onerror="this.src='https://images.unsplash.com/photo-1582855502183-b9be9398b95c?w=500&q=80'"></div>
-        <div class="gallery-item"><img src="assets/images/cat_and_deer.jpg" alt="Cat and Deer"
-            onerror="this.src='https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=500&q=80'"></div>
         <div class="gallery-item"><img src="assets/images/tiger.jpg" alt="Tiger"
             onerror="this.src='https://images.unsplash.com/photo-1561731216-c3a4d99437d5?w=500&q=80'"></div>
         <div class="gallery-item"><img src="assets/images/cat.jpg" alt="Cat"
             onerror="this.src='https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=500&q=80'"></div>
-        <div class="gallery-item"><img src="assets/images/kangaroo_rat.jpg" alt="Kangaroo Rat"
-            onerror="this.src='https://images.unsplash.com/photo-1628102491629-778571d893a3?w=500&q=80'"></div>
-        <div class="gallery-item"><img src="assets/images/joey.jpg" alt="Joey"
-            onerror="this.src='https://images.unsplash.com/photo-1526336024174-e58f5cdd8e13?w=500&q=80'"></div>
-        <div class="gallery-item"><img src="assets/images/sugar_glider.jpg" alt="Sugar Glider"
-            onerror="this.src='https://images.unsplash.com/photo-1548509925-0e7ea519914e?w=500&q=80'"></div>
-      </div>
-    </section>
-
-    <!-- GAMES SECTION -->
-    <section id="games-section">
-      <h2 class="section-title">Games & Interactivity</h2>
-      <div class="games-grid">
-
-        <!-- Game -0.5: FC 24 Ultimate Squad Builder -->
-        <div class="glass-card" style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2.5rem; text-align: center; border-color: rgba(251, 191, 36, 0.4); background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(217, 70, 239, 0.1));">
-          <div style="font-size: 3rem; margin-bottom: 0.5rem; filter: drop-shadow(0 0 10px rgba(251,191,36,0.5));">🏆</div>
-          <h3 style="font-size: 2.2rem; margin-bottom: 0.5rem; background: linear-gradient(135deg, #fbbf24 0%, #d946ef 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-style: italic;">FC 24 Ultimate Squad Builder</h3>
-          <p style="color: var(--text-muted); max-width: 600px; margin-bottom: 1.5rem;">
-            Open packs, unlock legendary footballers and modern stars, build chemistry links, and create your ultimate 4-3-3 squad builder dream team!
-          </p>
-          <a href="fc24-squad-builder.html" style="text-decoration: none;">
-            <button style="font-size: 1.2rem; padding: 0.75rem 2.5rem; border-radius: 50px; background: linear-gradient(135deg, #fbbf24, #d946ef); box-shadow: 0 4px 20px rgba(251,191,36,0.3); border: none; font-weight: bold; cursor: pointer; color: white;">
-              Launch Squad Builder ⚽
-            </button>
-          </a>
-        </div>
-
-        <!-- Game 0: No Man's Sky Demo -->
-        <div id="nms-start-ui">
-            <div class="glass-card" style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem;">
-              <h3 style="font-size: 2rem; margin-bottom: 0.5rem; text-align: center;">🚀 Procedural Universe Explorers 🌌</h3>
-              <div style="display: flex; gap: 1.5rem; width: 100%; max-width: 1200px; margin-bottom: 1.5rem; align-items: stretch; justify-content: center; flex-wrap: wrap;">
-                  <div style="flex: 2; min-width: 300px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; color: #ddd; font-family: monospace; line-height: 1.6;">
-                     <h4 style="color: var(--accent); margin-top: 0; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.1);">PILOT'S MANUAL</h4>
-                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                        <div>
-                          <strong style="color: #fff;">Navigation & Combat</strong><br>
-                          <span style="color: #60a5fa;">WASD / Arrows</span>: Move & Pilot<br>
-                          <span style="color: #60a5fa;">Space</span>: Jetpack / Sub Ascend<br>
-                          <span style="color: #60a5fa;">Shift</span>: Sprint / Sub Dive<br>
-                          <span style="color: #60a5fa;">Left Click</span>: Mine / Shoot Laser<br>
-                          <span style="color: #60a5fa;">Press F</span>: Mount/Dismount Starship<br>
-                          <span style="color: #60a5fa;">Press V</span>: Third/First Person Camera<br>
-                        </div>
-                        <div>
-                          <strong style="color: #fff;">Interaction & Exploration</strong><br>
-                          <span style="color: #34d399;">Press E</span>: Board Beast / Sub / Enter Cave<br>
-                          <span style="color: #34d399;">Press Q</span>: Summon Nautilon Sub 🌊<br>
-                          <span style="color: #34d399;">Press U</span>: Summon Cave Entrance 🕳️<br>
-                          <span style="color: #34d399;">Press C</span>: Activate Discovery Scanner 📡<br>
-                          <span style="color: #34d399;">Press G</span>: Board Dungeon / Freighter<br>
-                          <span style="color: #34d399;">Press X</span>: Recharge Hazard Shield (20 Carbon)<br>
-                          <span style="color: #34d399;">Keys 1-3</span>: Consume Meals (on foot)<br>
-                          <span style="color: #34d399;">Key 7</span>: Drop Light Flare 💡<br>
-                          <span style="color: #34d399;">Key 8</span>: Summon Livestock 🐖<br>
-                        </div>
-                        <div>
-                          <strong style="color: #fff;">Systems & Command</strong><br>
-                          <span style="color: #fbbf24;">Press T</span>: Trade Menu (Near Stations)<br>
-                          <span style="color: #fbbf24;">Press B</span>: Toggle Build Mode<br>
-                          <span style="color: #fbbf24;">Keys 1-6</span>: Select Base Parts (Build)<br>
-                          <span style="color: #fbbf24;">Press H</span>: Summon Freighter (50k ¢) / Set Cave Home<br>
-                          <span style="color: #fbbf24;">Press M</span>: Open Galactic Map / Teleporter 🗺️<br>
-                          <span style="color: #f87171;">Press K</span>: Spawn Seismic Worm Boss 🪱<br>
-                          <span style="color: #f87171;">Press P</span>: Spawn Pirate Raider 🏴‍☠️<br>
-                          <span style="color: #f87171;">Press R</span>: Reset Universe (Deletes Save)<br>
-                        </div>
-                     </div>
-                     <div style="margin-top: 1rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem; color: #aaa;">
-                       *Tips: Fly into Black Holes to warp! Left-click AI Fleets to buy ships. Discovering a new biome or entering a cave instantly grants a 10x resource bonus!
-                     </div>
-                  </div>
-
-                  <div style="flex: 1; min-width: 250px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; color: #ddd; font-family: monospace; line-height: 1.6;">
-                     <h4 style="color: #34d399; margin-top: 0; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.1);">COOK'S GUIDE 🍲</h4>
-                     <ul style="list-style-type: none; padding-left: 0; margin: 0; font-size: 0.9rem;">
-                       <li style="margin-bottom: 0.8rem;"><strong style="color: #f87171;">Raw Meat / Bone Shards</strong>: Culled from wild fauna or livestock.</li>
-                       <li style="margin-bottom: 0.8rem;"><strong style="color: #fbbf24;">Sweet Berries / Wild Yeast</strong>: Harvested randomly from standard flora.</li>
-                       <li style="margin-bottom: 0.8rem;"><strong style="color: #60a5fa;">Cave Salts / Glowing Moss</strong>: Mined from stalactites deep underground.</li>
-                       <li style="margin-bottom: 0.8rem;"><strong style="color: #a855f7;">Toxic Fungus</strong>: Found exclusively on Toxic biomes.</li>
-                       <li style="margin-bottom: 0.8rem;"><strong style="color: #ea580c;">Spicy Bulbs</strong>: Found exclusively on Inferno biomes.</li>
-                       <li style="margin-bottom: 0.8rem;"><strong style="color: #22d3ee;">Crystalized Sap</strong>: Found exclusively on Frozen biomes.</li>
-                       <li style="margin-bottom: 0.8rem;"><strong style="color: #94a3b8;">Carbon / Nanites</strong>: Basic resource harvesting & Sentinel combat.</li>
-                       <li style="color: #94a3b8; font-style: italic;">Tip: Build a Nutrient Processor (Build Menu 6) to combine these into powerful meals!</li>
-                     </ul>
-                  </div>
-              </div>
-              <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-                  <button onclick="startNMS()" style="font-size: 1.5rem; padding: 0.5rem 2rem; border-radius: 50px; cursor: pointer;">Launch Universe</button>
-                  <button onclick="toggleFullscreenNMS()" style="font-size: 1.5rem; padding: 0.5rem 2rem; border-radius: 50px; background: rgba(255,255,255,0.2); cursor: pointer;">⛶ Fullscreen</button>
-              </div>
-            </div>
-        </div>
-
-          <div style="position: relative; width: 800px; max-width: 100%; aspect-ratio: 16/9; overflow: hidden; border-radius: 12px; background: #000;" id="nms-container">
-            <div id="nms-canvas-container" style="width: 100%; height: 100%; display: block;"></div>
-            
-            <div id="nms-crosshair" style="position: absolute; top: 50%; left: 50%; width: 4px; height: 4px; background: white; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; display: none; z-index: 6;"></div>
-            
-            <div id="nms-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 12px; z-index: 10; cursor: pointer;">
-              <h2 style="font-size: 3rem; margin: 0; color: #fff;">READY FOR LAUNCH</h2>
-              <p style="font-size: 1.2rem; color: #aaa; margin: 1rem 0;">Clicking Play locks your mouse to the screen.<br>Press ESC to unlock.</p>
-            </div>
-            
-            <!-- HUD -->
-            <div id="nms-hud" style="position: absolute; bottom: 20px; left: 20px; color: white; text-shadow: 1px 1px 0 #000; font-family: monospace; font-size: 14px; pointer-events: none; display: none; z-index: 5;">
-              <div id="nms-debug-pos">Pos: 0, 0, 0</div>
-              <div id="nms-debug-mode">Mode: Walking</div>
-              <div id="nms-nanites" style="color: #60a5fa; margin-top: 4px;">Nanites: 0</div>
-              <div id="nms-health-container" style="margin-top: 10px; width: 200px; height: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.5); border-radius: 5px; overflow: hidden;">
-                <div id="nms-health-bar" style="width: 100%; height: 100%; background: #ef4444; transition: width 0.1s;"></div>
-              </div>
-              <!-- Phase 7: Hazard Protection Bar -->
-              <div id="nms-hazard-container" style="display:none; margin-top: 6px; width: 200px; height: 8px; background: rgba(0,0,0,0.5); border: 1px solid rgba(251,191,36,0.6); border-radius: 4px; overflow: hidden;">
-                <div id="nms-hazard-bar" style="width: 100%; height: 100%; background: #fbbf24; transition: width 0.1s;"></div>
-              </div>
-              <div id="nms-hazard-status" style="display:none; font-size: 10px; color: #fbbf24; margin-top: 2px;">Hazard detected: Toxic</div>
-
-              <!-- Jetpack Fuel Bar -->
-              <div style="margin-top:6px; display:flex; align-items:center; gap:6px;">
-                <span style="font-size:11px; opacity:0.8;">🚀 JET</span>
-                <div style="width:160px; height:7px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.4); border-radius:4px; overflow:hidden;">
-                  <div id="nms-jetpack-bar" style="width:100%; height:100%; background:#3b82f6; transition:width 0.1s;"></div>
-                </div>
-              </div>
-              <!-- Pulse Drive Bar -->
-              <div style="margin-top:4px; display:flex; align-items:center; gap:6px;">
-                <span style="font-size:11px; opacity:0.8;">⚡ PULSE</span>
-                <div style="width:148px; height:7px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.4); border-radius:4px; overflow:hidden;">
-                  <div id="nms-pulse-bar" style="width:100%; height:100%; background:#22d3ee; transition:width 0.1s;"></div>
-                </div>
-              </div>
-              <div id="nms-gpf-bribe" style="display:none; margin-top: 10px; pointer-events: all;">
-                <button onclick="window.bribeGPF()" style="background: rgba(239,68,68,0.85); border: 1px solid #f87171; color: white; font-family: monospace; font-size: 13px; padding: 6px 14px; border-radius: 6px; cursor: pointer; text-shadow: 1px 1px 0 #000; transition: background 0.2s;" onmouseover="this.style.background='rgba(220,38,38,0.95)'" onmouseout="this.style.background='rgba(239,68,68,0.85)'">
-                  🚔 Bribe GPF — 200¢
-                </button>
-              </div>
-              <div id="nms-home-return" style="display:none; margin-top: 10px; pointer-events: all;">
-                <button onclick="window.returnToHomeCave()" style="background: rgba(96,165,250,0.85); border: 1px solid #93c5fd; color: white; font-family: monospace; font-size: 13px; padding: 6px 14px; border-radius: 6px; cursor: pointer; text-shadow: 1px 1px 0 #000; transition: background 0.2s;" onmouseover="this.style.background='rgba(59,130,246,0.95)'" onmouseout="this.style.background='rgba(96,165,250,0.85)'">
-                  🏠 Return to Home Cave
-                </button>
-              </div>
-              <div style="margin-top: 10px; pointer-events: all;">
-                <button onclick="window.resetNMS()" style="background: rgba(55,65,81,0.85); border: 1px solid #9ca3af; color: white; font-family: monospace; font-size: 11px; padding: 4px 8px; border-radius: 4px; cursor: pointer; text-shadow: 1px 1px 0 #000;">
-                  🔄 Reset Universe
-                </button>
-              </div>
-            </div>
-
-
-
-
-            <!-- PLANET INFO HUD -->
-            <div id="nms-planet-info" style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); text-align: center; color: white; font-family: monospace; pointer-events: none; display: none; z-index: 5; text-shadow: 1px 1px 0 #000; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.3); padding: 10px 20px; border-radius: 8px; backdrop-filter: blur(4px); transition: opacity 0.5s;">
-               <h3 id="nms-planet-name" style="margin: 0; color: #60a5fa; font-size: 1.2rem;">Unknown Planet</h3>
-               <p id="nms-planet-resource" style="margin: 5px 0 0 0; color: #fbbf24; font-size: 0.9rem;">Scans detect: Unknown</p>
-            </div>
-
-            <!-- TRADE STATION OVERLAY -->
-            <div id="nms-trade-overlay" style="position: absolute; top:0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 20, 0.85); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 20; color: white; font-family: monospace; backdrop-filter: blur(8px);">
-               <h2 style="font-size: 3rem; margin-bottom: 0.5rem; text-shadow: 0 0 10px #fbbf24; color: #fbbf24;">GALACTIC TRADING POST</h2>
-               <p style="font-size: 1.2rem; margin-bottom: 2rem; color: #aaa;">"We trade scrap for credits, explorer. Simple as."</p>
-               
-               <div style="background: rgba(0,0,0,0.5); border: 1px solid #444; padding: 2rem; border-radius: 12px; width: 80%; max-width: 500px;">
-                  <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; border-bottom: 1px solid #444; padding-bottom: 1rem;">
-                     <span>Your Credits:</span>
-                     <span id="trade-credits" style="color: #4ade80; font-weight: bold; font-size: 1.2rem;">0 ¢</span>
-                  </div>
-                  
-                  <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
-                     <button onclick="window.tradeSellScrap()" style="flex:1; padding: 10px; background: rgba(59, 130, 246, 0.2); border: 1px solid #3b82f6; color: white; cursor: pointer; border-radius: 4px;">Sell Pirate Scrap</button>
-                     <button onclick="window.tradeSellMinerals()" style="flex:1; padding: 10px; background: rgba(234, 179, 8, 0.2); border: 1px solid #eab308; color: white; cursor: pointer; border-radius: 4px;">Sell Minerals</button>
-                  </div>
-                  
-                  <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
-                     <button onclick="window.tradeRepairHull()" style="flex:1; padding: 10px; background: rgba(34, 197, 94, 0.2); border: 1px solid #22c55e; color: white; cursor: pointer; border-radius: 4px;">Repair Hull (100 ¢)</button>
-                     <button onclick="window.tradeUpgradeEngine()" style="flex:1; padding: 10px; background: rgba(168, 85, 247, 0.2); border: 1px solid #a855f7; color: white; cursor: pointer; border-radius: 4px;">Upgrade Engine (500 ¢)</button>
-                  </div>
-                  
-                  <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
-                     <button onclick="window.tradeDualLasers()" style="flex:1; padding: 10px; background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: white; cursor: pointer; border-radius: 4px;">Dual Lasers (2000 ¢)</button>
-                     <button onclick="window.tradePaintJob()" style="flex:1; padding: 10px; background: rgba(236, 72, 153, 0.2); border: 1px solid #ec4899; color: white; cursor: pointer; border-radius: 4px;">Neon Paint Job (1000 ¢)</button>
-                  </div>
-               </div>
-               
-               <button onclick="window.undockStation()" style="margin-top: 2rem; padding: 10px 30px; font-size: 1.2rem; background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: white; border-radius: 8px; cursor: pointer;">Undock & Leave</button>
-               <div id="trade-feedback" style="margin-top: 1rem; color: #a855f7; font-weight: bold; height: 20px;"></div>
-            </div>
-
-
-            <!-- Culinary / Cooking Overlay -->
-            <div id="nms-cooking-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 200; color: white; font-family: monospace;">
-                <div style="background: rgba(30, 41, 59, 0.95); padding: 30px; border: 2px solid #3b82f6; border-radius: 10px; text-align: center; max-width: 600px; width: 90%; backdrop-filter: blur(10px); box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
-                    <h2 style="color: #60a5fa; margin-top: 0; font-size: 1.5rem;">NUTRIENT PROCESSOR</h2>
-                    <p style="font-size: 0.9rem; color: #cbd5e1; margin-bottom: 20px;">Combine biological ingredients to create survival consumables.</p>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px; text-align: left;">
-                        <!-- Inventory Panel -->
-                        <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 15px;">
-                            <h4 style="margin: 0 0 10px 0; color: #fbbf24; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 5px;">Your Ingredients</h4>
-                            <div id="cooking-inventory" style="font-size: 13px; height: 300px; overflow-y: auto; padding-right: 5px;">
-                                <!-- Inventory list populated via JS -->
-                            </div>
-                        </div>
-                        
-                        <!-- Recipe Panel -->
-                        <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 15px;">
-                            <h4 style="margin: 0 0 10px 0; color: #34d399; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 5px;">Available Recipes</h4>
-                            <div id="cooking-recipes" style="font-size: 13px; height: 300px; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 8px;">
-                                <!-- Recipes populated via JS -->
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div style="margin-top: 20px;">
-                        <button onclick="document.getElementById('nms-cooking-overlay').style.display='none'; document.body.requestPointerLock();" style="width: 100%; background: #4b5563; padding: 12px; border: none; border-radius: 6px; cursor: pointer; color: white; font-weight: bold; font-size: 1.1rem; transition: background 0.2s;">Exit Processor</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- GALACTIC MAP OVERLAY -->
-            <div id="nms-map-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 200; color: white; font-family: monospace;">
-                <div style="background: rgba(15, 23, 42, 0.95); padding: 30px; border: 2px solid #8b5cf6; border-radius: 10px; text-align: center; max-width: 800px; width: 90%; backdrop-filter: blur(10px); box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
-                    <h2 style="color: #c4b5fd; margin-top: 0; font-size: 1.8rem; text-shadow: 0 0 10px #8b5cf6;">GALACTIC MAP & TELEPORT</h2>
-                    <p style="font-size: 0.9rem; color: #cbd5e1; margin-bottom: 20px;">Fast-travel to known locations.</p>
-                    
-                    <div id="map-locations-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: left; max-height: 400px; overflow-y: auto; padding: 10px;">
-                        <!-- Buttons populated by JS -->
-                    </div>
-                    
-                    <div style="margin-top: 25px;">
-                        <button onclick="document.getElementById('nms-map-overlay').style.display='none'; document.body.requestPointerLock();" style="width: 100%; background: #4b5563; padding: 12px; border: none; border-radius: 6px; cursor: pointer; color: white; font-weight: bold; font-size: 1.1rem; transition: background 0.2s;">Close Map</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- OBJECTIVES PANEL -->
-            <div id="nms-objectives" style="position: absolute; top: 20px; right: 20px; width: 250px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 1rem; color: #fff; font-family: monospace; pointer-events: none; display: none; z-index: 5; text-shadow: 1px 1px 0 #000; backdrop-filter: blur(4px);">
-              <h4 style="margin: 0 0 0.5rem 0; color: #fbbf24; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 0.5rem;">MISSION LOG</h4>
-              <ul style="margin: 0; padding-left: 1.2rem; font-size: 14px; line-height: 1.5; list-style-type: none; padding: 0;">
-                <li id="obj-leave">[ ] Leave Origin's orbit</li>
-                <li id="obj-progress">[-] Visited 1/10 Planets</li>
-                <li id="obj-mine">[ ] Mine Crystals: 0/10 (Click!)</li>
-                <li id="obj-all" style="margin-top: 0.5rem; font-weight: bold;">[ ] Explore ALL 10 Planets!</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <!-- Game 0.5: Slice Master -->
-        <div class="glass-card" style="grid-column: 1 / -1; padding: 1.5rem;">
-          <h3>Slice Master</h3>
-          <p style="margin-bottom: 1rem;">Slice through everything in your path! Click inside to play.</p>
-          <div style="position: relative; width: 100%; padding-bottom: 56.25%; height: 0; border-radius: 12px; overflow: hidden; border: 2px solid var(--border); background: #000;">
-            <iframe src="https://slicemasterfree.github.io/" 
-                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; filter: invert(0.9) hue-rotate(240deg) saturate(4) contrast(1.2);" 
-                    allowfullscreen="true" scrolling="no">
-            </iframe>
-          </div>
-        </div>
-
-        <!-- Game 0.75: From Darkness To Light -->
-        <div class="glass-card" style="grid-column: 1 / -1; padding: 1.5rem;">
-          <h3>From Darkness To Light</h3>
-          <p style="margin-bottom: 1rem;">A 2D procedural narrative-action game. Survive the depths and uncover the story!</p>
-          <div style="position: relative; width: 100%; padding-bottom: 56.25%; height: 0; border-radius: 12px; overflow: hidden; border: 2px solid var(--border); background: #000;">
-            <iframe id="fdtl-iframe" src="fdtl/index.html" 
-                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;" 
-                    allowfullscreen="true" scrolling="no">
-            </iframe>
-            
-            <div id="fdtl-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; cursor: pointer;">
-              <h2 style="font-size: 3rem; margin: 0; color: #fff;">READY TO PLAY</h2>
-              <p style="font-size: 1.2rem; color: #aaa; margin: 1rem 0;">Click here to start and enable controls!</p>
-            </div>
-            
-            <script>
-              document.getElementById('fdtl-overlay').addEventListener('click', function() {
-                this.style.display = 'none';
-                const frame = document.getElementById('fdtl-iframe');
-                if(frame.contentWindow) frame.contentWindow.focus();
-              });
-            </script>
-          </div>
-          <button onclick="document.getElementById('fdtl-iframe').requestFullscreen()" style="margin-top: 1.5rem; width: 100%; background: rgba(0, 187, 255, 0.1); border-color: rgba(0, 187, 255, 0.5);">Play Fullscreen</button>
-        </div>
-
-        <!-- Game 0.8: Crimson Tides -->
-        <div class="glass-card" style="grid-column: 1 / -1; padding: 1.5rem;">
-          <h3>Crimson Tides</h3>
-          <p style="margin-bottom: 1rem;">A 3D pirate adventure. Sail the seas, sink enemies, and survive the Kraken!</p>
-          <div style="position: relative; width: 100%; padding-bottom: 56.25%; height: 0; border-radius: 12px; overflow: hidden; border: 2px solid var(--border); background: #000;">
-            <iframe id="crimson-tides-iframe" src="crimson-tides/index.html" 
-                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;" 
-                    allowfullscreen="true" scrolling="no">
-            </iframe>
-            
-            <div id="crimson-tides-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; cursor: pointer;">
-              <h2 style="font-size: 3rem; margin: 0; color: #fff;">READY FOR ADVENTURE</h2>
-              <p style="font-size: 1.2rem; color: #aaa; margin: 1rem 0;">Click here to set sail and enable controls!</p>
-            </div>
-            
-            <script>
-              document.getElementById('crimson-tides-overlay').addEventListener('click', function() {
-                this.style.display = 'none';
-                const frame = document.getElementById('crimson-tides-iframe');
-                if(frame.contentWindow) frame.contentWindow.focus();
-              });
-            </script>
-          </div>
-          <button onclick="document.getElementById('crimson-tides-iframe').requestFullscreen()" style="margin-top: 1.5rem; width: 100%; background: rgba(193, 155, 61, 0.1); border-color: rgba(193, 155, 61, 0.5); color: #cda434;">Play Fullscreen</button>
-        </div>
-
-        <!-- Game 1: Number Guessing -->
-        <div class="glass-card">
-          <h3>Number Guessing</h3>
-          <p>Guess a number between <strong>1</strong> and <strong>100</strong>.</p>
-          <div class="flex-center gap-2 mb-4">
-            <input type="number" id="userGuess" placeholder="Enter guess" min="1" max="100" style="margin:0;">
-            <button onclick="checkGuess()">Guess</button>
-          </div>
-          <p id="guessFeedback" style="font-weight: 600; color: var(--accent);"></p>
-          <p id="guessAttempts" class="mb-4"></p>
-          <button onclick="resetGuessGame()" style="background: rgba(255,255,255,0.1); width: 100%;">Restart</button>
-        </div>
-
-        <!-- Game 2: Rock Paper Scissors -->
-        <div class="glass-card">
-          <h3>Rock Paper Scissors</h3>
-          <p>Can you beat the computer?</p>
-          <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-            <button onclick="playRPS('rock')" style="flex:1;">Rock</button>
-            <button onclick="playRPS('paper')" style="flex:1;">Paper</button>
-            <button onclick="playRPS('scissors')" style="flex:1;">Scissors</button>
-          </div>
-          <div id="rpsResult"
-            style="padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 8px; text-align: center; font-weight: 600;">
-            Make a choice!</div>
-        </div>
-
-        <!-- Game 3: Memory Game -->
-        <div class="glass-card" style="grid-column: 1 / -1;">
-          <h3>Memory Match (<span style="opacity:0.3; font-size: 1rem;">Code: fruits</span>)</h3>
-          <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
-            <div id="memory-game" class="memory-board" style="flex: 1; min-width: 300px;"></div>
-            <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
-              <div style="font-size: 1.25rem; margin-bottom: 1rem;">
-                Moves: <span id="memory-moves" style="color: var(--accent); font-weight: bold;">0</span> |
-                Matches: <span id="memory-matches" style="color: var(--accent); font-weight: bold;">0</span>/8
-              </div>
-              <button onclick="createMemoryBoard()" class="mb-4">Restart Game</button>
-
-              <div
-                style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; border: 1px solid var(--border);">
-                <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">Secret Unlock Code:</p>
-                <div class="flex-center gap-2">
-                  <input type="text" id="memoryCodeInput" placeholder="Enter code" style="margin:0;">
-                  <button onclick="revealMemoryCards()">Reveal</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Game 4: Fun Color SVG -->
-        <div class="glass-card">
-          <h3>Fun Color!</h3>
-          <p>Click the flower parts to paint them.</p>
-          <div style="display: flex; gap: 1rem; align-items: start;">
-            <div style="flex: 1;">
-              <label style="font-size:0.8rem;">Red: <input type="range" id="rSlider" min="0" max="255" value="255"
-                  style="width:100%;"></label>
-              <label style="font-size:0.8rem;">Green: <input type="range" id="gSlider" min="0" max="255" value="100"
-                  style="width:100%;"></label>
-              <label style="font-size:0.8rem;">Blue: <input type="range" id="bSlider" min="0" max="255" value="200"
-                  style="width:100%;"></label>
-              <div id="colorPreview"
-                style="height: 40px; border-radius: 8px; border: 1px solid var(--border); margin: 10px 0;"></div>
-              <button id="undoBtn" style="width: 100%; background: rgba(255,255,255,0.1);">Undo</button>
-            </div>
-
-            <div id="svgContainer" style="background: white; border-radius: 12px; padding: 10px;">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="160" height="160"
-                style="cursor:pointer; user-select:none;">
-                <circle cx="200" cy="200" r="190" fill="#fff" stroke="#000" stroke-width="4" />
-                <g stroke="#000" stroke-width="4" fill="#fff">
-                  <path class="colorable"
-                    d="M200 20 L230 90 L270 90 L240 140 L270 190 L220 180 L200 230 L180 180 L130 190 L160 140 L130 90 L170 90 Z" />
-                </g>
-                <g stroke="#000" stroke-width="4" fill="#fff">
-                  <ellipse class="colorable" cx="200" cy="140" rx="30" ry="60" />
-                  <ellipse class="colorable" cx="260" cy="200" rx="30" ry="60" transform="rotate(60 260 200)" />
-                  <ellipse class="colorable" cx="140" cy="200" rx="30" ry="60" transform="rotate(-60 140 200)" />
-                </g>
-                <circle class="colorable" cx="200" cy="200" r="40" fill="#fff" stroke="#000" stroke-width="4" />
-                <g stroke="#000" stroke-width="4" fill="#fff">
-                  <path class="colorable" d="M200 80 Q210 100 200 120 Q190 100 200 80 Z" />
-                  <path class="colorable" d="M230 140 Q245 150 230 160 Q215 150 230 140 Z" />
-                  <path class="colorable" d="M170 140 Q155 150 170 160 Q185 150 170 140 Z" />
-                  <path class="colorable" d="M200 260 Q210 280 200 300 Q190 280 200 260 Z" />
-                </g>
-              </svg>
-            </div>
-          </div>
-        </div>
-
       </div>
     </section>
 
@@ -483,9 +136,6 @@
             <li style="padding: 8px 0; border-bottom: 1px solid var(--border);">Dogman</li>
             <li style="padding: 8px 0; border-bottom: 1px solid var(--border);">Why? 1,111 answers to everything</li>
             <li style="padding: 8px 0; border-bottom: 1px solid var(--border);">Amulet Series</li>
-            <li style="padding: 8px 0; border-bottom: 1px solid var(--border);">Harry Potter Series</li>
-            <li style="padding: 8px 0; border-bottom: 1px solid var(--border);">Cleopatra in space Series</li>
-            <li style="padding: 8px 0; border-bottom: 1px solid var(--border);">Swan Lake</li>
             <li style="padding: 8px 0;">...and more!</li>
           </ul>
         </div>
@@ -533,51 +183,9 @@
       </div>
     </section>
 
-    <!-- ANIMAL CHATROOM SECTION -->
-    <section id="chat-section">
-      <h2 class="section-title">Animal Chat Rooms</h2>
-      <div class="glass-card" style="max-width: 600px; margin: 0 auto; border-color: rgba(56, 189, 248, 0.4);">
-        <p style="text-align: center; margin-bottom: 1.5rem; color: var(--text-muted);">Connect with other animals in
-          the wild!</p>
-
-        <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
-          <select id="chat-room-select" style="flex:1; margin:0;">
-            <option value="" disabled selected>Select Room</option>
-            <option value="Forest">Forest</option>
-            <option value="Cave">Cave</option>
-            <option value="Ocean">Ocean</option>
-          </select>
-          <select id="chat-profile-select" style="flex:1; margin:0;" disabled>
-            <option value="" disabled selected>Select Animal</option>
-            <option value="Dragon">Dragon</option>
-            <option value="Cat">Cat</option>
-            <option value="Dog">Dog</option>
-            <option value="Kitsune">Kitsune</option>
-          </select>
-        </div>
-
-        <div id="chat-messages">
-          <div style="text-align: center; color: var(--text-muted); margin-top: 120px;">
-            Select a room and profile to join the chat.
-          </div>
-        </div>
-
-        <div style="display: flex; gap: 10px;">
-          <input type="text" id="chat-input-field" placeholder="Select room & profile first..."
-            style="margin:0; flex: 1;" disabled>
-          <button id="chat-send-btn" disabled>Send</button>
-        </div>
-      </div>
-    </section>
-
-
-    <!-- GO TO CLUB BUTTON -->
-    <div style="text-align: center; margin-top: 2rem; margin-bottom: 4rem;">
-      <a href="club.html" style="background: linear-gradient(45deg, #a855f7, #ec4899); color: white; padding: 15px 30px; border-radius: 8px; font-size: 1.5rem; font-weight: bold; text-decoration: none; display: inline-block; box-shadow: 0 5px 15px rgba(236, 72, 153, 0.4); transition: transform 0.2s;">Enter Book Club & Polls ➔</a>
-    </div>
     <!-- FOOTER ADVERT -->
     <div class="glass-card"
-      style="text-align: center; margin-top: 4rem; background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(0,0,0,0.2)); border-color: rgba(34, 197, 94, 0.3);">
+      style="text-align: center; margin-top: 4rem; margin-bottom: 4rem; background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(0,0,0,0.2)); border-color: rgba(34, 197, 94, 0.3);">
       <h3 style="color: #4ade80;">🌱 Advert</h3>
       <p>There are people trying to make the world a better place. One of these companies harnessing nature's bounty is
         Sasya.</p>
@@ -585,22 +193,6 @@
     </div>
 
   </main>
-
-  <!-- PASSWORD MODAL -->
-  <div id="password-modal"
-    style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10001; align-items:center; justify-content:center; backdrop-filter:blur(5px);">
-    <div class="glass-card"
-      style="text-align:center; min-width: 300px; transform: scale(1); box-shadow: 0 10px 40px rgba(56, 189, 248, 0.2);">
-      <h3 id="modal-title" style="margin-bottom: 1rem;">Enter Password</h3>
-      <input type="password" id="modal-pw-input" placeholder="Password..." style="margin-bottom:1rem; width:100%;">
-      <p id="modal-error" style="color: #ef4444; font-size: 0.9rem; margin-bottom: 1rem; display:none;">Wrong password!
-      </p>
-      <div style="display:flex; gap:10px; justify-content:center;">
-        <button id="modal-join-btn" style="flex:1;">Join</button>
-        <button id="modal-cancel-btn" style="flex:1; background:rgba(255,255,255,0.1);">Cancel</button>
-      </div>
-    </div>
-  </div>
 
   <!-- FLOATING EMOJI HUNTS -->
   <div id="emoji-hunt-1" class="emoji-hunt-box"></div>
@@ -611,17 +203,9 @@
   <div id="emoji-hunt-2" class="emoji-hunt-box"></div>
   <div id="score-display-2" class="emoji-score">Right Hunt: 0/30 (Code: yay)</div>
 
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
-  <!-- THREE.JS & NOISE -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
 
   <!-- ALL SCRIPTS (Consolidated) -->
   <script src="assets/js/main.js"></script>
-  <script src="assets/js/nms/core.js?v=30"></script>
 </body>
 
 </html>
