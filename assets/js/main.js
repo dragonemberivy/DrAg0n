@@ -129,6 +129,27 @@
         cards[idOne].classList.add('match'); cards[idTwo].classList.add('match');
         memCardsMatched++;
         document.getElementById('memory-matches').textContent = memCardsMatched;
+        
+        // Win condition
+        if (memCardsMatched === cardsArray.length / 2) {
+          setTimeout(() => {
+            alert(`You won in ${memMoves} moves!`);
+            if(window.addXP) window.addXP(50);
+            
+            // Firebase Leaderboard (fewest moves wins)
+            if(typeof firebase !== 'undefined' && localStorage.getItem('drag0n_user')) {
+              const u = localStorage.getItem('drag0n_user');
+              const a = localStorage.getItem('drag0n_avatar') || '✨';
+              const ref = firebase.database().ref('leaderboards/memory/' + u.toLowerCase());
+              ref.once('value').then(snap => {
+                const existing = snap.val();
+                if(!existing || memMoves < existing.score) {
+                  ref.set({ username: u, avatar: a, score: memMoves, timestamp: Date.now() });
+                }
+              });
+            }
+          }, 300);
+        }
       } else {
         cards[idOne].classList.remove('flip'); cards[idTwo].classList.remove('flip');
       }
