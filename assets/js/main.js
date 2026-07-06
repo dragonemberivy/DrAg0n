@@ -143,7 +143,7 @@
         alert('Incorrect memory code word!');
       }
     }
-    createMemoryBoard();
+    if(document.getElementById('memory-game')) createMemoryBoard();
 
     // ------------------------------------
     // 5. COLOR SVG
@@ -157,22 +157,27 @@
     function getCurrentColor() { return `rgb(${rSlider.value},${gSlider.value},${bSlider.value})`; }
     function updatePreview() { colorPreview.style.backgroundColor = getCurrentColor(); }
 
-    rSlider.oninput = gSlider.oninput = bSlider.oninput = updatePreview;
-    updatePreview();
+    if (rSlider && gSlider && bSlider && colorPreview) {
+      rSlider.oninput = gSlider.oninput = bSlider.oninput = updatePreview;
+      updatePreview();
 
-    document.querySelectorAll(".colorable").forEach(el => {
-      el.addEventListener("click", e => {
-        e.stopPropagation();
-        undoStack.push({ element: el, oldColor: el.getAttribute("fill") });
-        el.setAttribute("fill", getCurrentColor());
+      document.querySelectorAll(".colorable").forEach(el => {
+        el.addEventListener("click", e => {
+          e.stopPropagation();
+          undoStack.push({ element: el, oldColor: el.getAttribute("fill") });
+          el.setAttribute("fill", getCurrentColor());
+        });
       });
-    });
 
-    document.getElementById("undoBtn").onclick = () => {
-      if (undoStack.length === 0) return;
-      const last = undoStack.pop();
-      last.element.setAttribute("fill", last.oldColor || '#fff');
-    };
+      const undoBtn = document.getElementById("undoBtn");
+      if (undoBtn) {
+        undoBtn.onclick = () => {
+          if (undoStack.length === 0) return;
+          const last = undoStack.pop();
+          last.element.setAttribute("fill", last.oldColor || '#fff');
+        };
+      }
+    }
 
     // ------------------------------------
     // 6. EMOJI HUNTS
@@ -181,6 +186,7 @@
       const container = document.getElementById(boxId);
       const scoreDisp = document.getElementById(scoreId);
       const popSound = document.getElementById('pop-sound');
+      if (!container || !scoreDisp || !popSound) return;
       let score = 0;
       let revealed = false;
       const elements = [];
