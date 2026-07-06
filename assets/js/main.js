@@ -741,7 +741,15 @@
         let prevLvlXp = Math.pow(level - 1, 2) * 100;
         let progress = ((xp - prevLvlXp) / (nextLvlXp - prevLvlXp)) * 100;
 
+        
         pwName.innerHTML = `<div style="line-height:1.2;">${u} <span style="font-size:0.7rem; color:var(--accent-secondary);">Lv.${level}</span></div>
+                            <select onchange="window.changeBackground(this.value)" style="margin-top:2px; font-size:0.7rem; background:transparent; color:var(--text-muted); border:1px solid var(--border); border-radius:4px;" onclick="event.stopPropagation()">
+                              <option value="Space">Space</option>
+                              <option value="Matrix">Matrix</option>
+                              <option value="Ocean">Ocean</option>
+                              <option value="Sunset">Sunset</option>
+                            </select>
+
                             <div class="xp-bar-container"><div class="xp-bar-fill" style="width:${progress}%"></div></div>`;
         pwAvatar.innerHTML = a.startsWith('data:') ? `<img src="${a}" style="width:24px;height:24px;border-radius:50%;vertical-align:middle;">` : a;
       }
@@ -944,3 +952,57 @@
         } catch(e){}
       }, 3000); // wait for auth
     }
+
+    window.upvoteReview = function(bookId, reviewKey) {
+      if(!localStorage.getItem('drag0n_user')) { alert('Create a profile to upvote!'); return; }
+      if(localStorage.getItem('upvoted_'+reviewKey)) { alert('You already upvoted this!'); return; }
+      
+      localStorage.setItem('upvoted_'+reviewKey, 'true');
+      const ref = firebase.database().ref('book_reviews/' + bookId + '/' + reviewKey + '/upvotes');
+      ref.transaction(current => (current || 0) + 1);
+      if(window.addXP) window.addXP(5); // 5 XP for upvoting!
+    };
+
+    // DYNAMIC BACKGROUNDS
+    const bgColors = {
+      'Space': 'var(--bg-color)',
+      'Matrix': '#002200',
+      'Ocean': '#001a33',
+      'Sunset': '#331a00'
+    };
+    window.changeBackground = function(themeName) {
+      localStorage.setItem('drag0n_bg', themeName);
+      applyBackground();
+    };
+    function applyBackground() {
+      const bg = localStorage.getItem('drag0n_bg');
+      if(bg && bgColors[bg]) {
+        document.body.style.backgroundColor = bgColors[bg];
+        if(bg === 'Matrix') document.body.style.backgroundImage = 'radial-gradient(circle, #004400 0%, #001100 100%)';
+        else if(bg === 'Ocean') document.body.style.backgroundImage = 'linear-gradient(to bottom, #001a33, #004d99)';
+        else if(bg === 'Sunset') document.body.style.backgroundImage = 'linear-gradient(to bottom, #331a00, #993300)';
+        else document.body.style.backgroundImage = 'none';
+      }
+    }
+    window.addEventListener('load', applyBackground);
+
+    // EASTER EGG HUNT
+    window.findEgg = function(eggId, element) {
+      element.style.display = 'none';
+      let found = JSON.parse(localStorage.getItem('drag0n_eggs') || '[]');
+      if(!found.includes(eggId)) {
+        found.push(eggId);
+        localStorage.setItem('drag0n_eggs', JSON.stringify(found));
+        alert(`You found a secret token! (${found.length}/5)`);
+        if(window.addXP) window.addXP(100);
+        
+        if(found.length === 5) {
+          alert('YOU FOUND ALL 5 TOKENS! YOU UNLOCKED THE GOLDEN DRAGON AVATAR!');
+          localStorage.setItem('drag0n_avatar', '🐲');
+          if(typeof firebase !== 'undefined' && localStorage.getItem('drag0n_user')) {
+             firebase.database().ref('users/' + localStorage.getItem('drag0n_user').toLowerCase() + '/avatar').set('🐲');
+          }
+          updateProfileWidget();
+        }
+      }
+    };

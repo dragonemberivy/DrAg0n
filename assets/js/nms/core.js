@@ -1679,7 +1679,10 @@
     if (code === 'ArrowLeft' || code === 'KeyA' || key === 'a') keys.a = true;
     if (code === 'ArrowDown' || code === 'KeyS' || key === 's') keys.s = true;
     if (code === 'ArrowRight' || code === 'KeyD' || key === 'd') keys.d = true;
-    if (code === 'Space' || key === ' ') keys.space = true;
+    if (code === 'Space' || key === ' ') {
+      keys.space = true;
+      if (isFlying && isLocked) onMouseDown(e);
+    }
     if (e.shiftKey || code === 'ShiftLeft' || code === 'ShiftRight') keys.shift = true;
     
     switch(code) {
