@@ -815,7 +815,7 @@
               }
             }
           } catch(e) {
-            errorEl.textContent = "Network error. Try again."; errorEl.style.display = 'block';
+            errorEl.textContent = "Error: " + (e.message || "Network error"); errorEl.style.display = 'block';
             createBtn.disabled = false; createBtn.textContent = "Enter Website";
           }
         });
