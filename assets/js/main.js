@@ -7,7 +7,8 @@
       const dayName = days[now.getDay()];
       const date = now.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
       const time = now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      document.getElementById('clock').textContent = `${dayName}, ${date} – ${time}`;
+      const clockEl = document.getElementById('clock');
+      if(clockEl) clockEl.textContent = `${dayName}, ${date} – ${time}`;
     }
     updateClock();
     setInterval(updateClock, 1000);
@@ -300,14 +301,14 @@
       }
     }
 
-    siteUnlockBtn.addEventListener('click', tryUnlock);
-    sitePwInput.addEventListener('keypress', (e) => {
+    if(siteUnlockBtn) { siteUnlockBtn.addEventListener('click', tryUnlock); }
+    if(sitePwInput) { sitePwInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') tryUnlock();
-    });
+    }); }
 
     // Automatically focus the password input on load
     window.addEventListener('load', () => {
-      sitePwInput.focus();
+      if(sitePwInput) sitePwInput.focus();
     });
 
     // ROOM SELECTION
@@ -316,7 +317,7 @@
     const pwInput = document.getElementById('modal-pw-input');
     const pwError = document.getElementById('modal-error');
 
-    chatRoomSel.addEventListener("change", () => {
+    if(chatRoomSel) { chatRoomSel.addEventListener("change", () => {
       const roomKey = chatRoomSel.value;
       if (!roomKey) return;
 
@@ -326,9 +327,9 @@
       pwError.style.display = 'none';
       pwModal.style.display = 'flex';
       pwInput.focus();
-    });
+    }); }
 
-    document.getElementById('modal-join-btn').addEventListener('click', async () => {
+    if(document.getElementById('modal-join-btn')) { document.getElementById('modal-join-btn').addEventListener('click', async () => {
       if (!pendingRoomKey) return;
       const pw = pwInput.value.trim();
       
@@ -345,20 +346,20 @@
       pwModal.style.display = 'none';
       enterRoom(pendingRoomKey);
       pendingRoomKey = null;
-    });
+    }); }
 
-    document.getElementById('modal-cancel-btn').addEventListener('click', () => {
+    if(document.getElementById('modal-cancel-btn')) { document.getElementById('modal-cancel-btn').addEventListener('click', () => {
       pwModal.style.display = 'none';
       chatRoomSel.value = currentRoom || "";
       pendingRoomKey = null;
-    });
+    }); }
 
     // Allow enter key in modal
-    pwInput.addEventListener('keypress', (e) => {
+    if(pwInput) { pwInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         document.getElementById('modal-join-btn').click();
       }
-    });
+    }); }
 
     function enterRoom(roomKey) {
       currentRoom = roomKey;
@@ -383,16 +384,16 @@
     }
 
     // PROFILE SELECTION
-    chatProfSel.addEventListener("change", () => {
+    if(chatProfSel) { chatProfSel.addEventListener("change", () => {
       currentProfile = chatProfSel.value;
       chatInp.disabled = false;
       chatBtn.disabled = false;
       chatInp.placeholder = "Type a message...";
-    });
+    }); }
 
     // SEND MESSAGE
-    chatBtn.onclick = sendMessage;
-    chatInp.onkeypress = e => { if (e.key === "Enter") sendMessage(); };
+    if(chatBtn) { chatBtn.onclick = sendMessage; }
+    if(chatInp) { chatInp.onkeypress = e => { if (e.key === "Enter") sendMessage(); }; }
 
     function sendMessage() {
       if (!currentRoom || !currentProfile) return;
