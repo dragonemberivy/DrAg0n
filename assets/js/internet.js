@@ -56,7 +56,9 @@ function renderPage(url) {
     [base, query] = url.split('?');
   }
 
-  if (base === 'dragon://search') {
+  if (base.startsWith('http://') || base.startsWith('https://')) {
+    renderWebSite(base);
+  } else if (base === 'dragon://search') {
     renderSearch(query);
   } else if (base.startsWith('dragon://tube')) {
     renderTube(base, query);
@@ -106,7 +108,7 @@ function renderSearch(query) {
       `);
     }
 
-    // 2. Dynamic Video Result related directly to their search term!
+    // 2. Dynamic Video Result related directly to search term
     let videoId = encodeURIComponent(searchVal);
     matches.push(`
       <div class="ds-result">
@@ -115,9 +117,28 @@ function renderSearch(query) {
       </div>
     `);
 
-    // 3. Procedural Matches (Infinite Wiki Content Generator!)
+    // 3. NEW: Dynamic Infinite WEBSITE Matches!
+    const cleanDomain = searchVal.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const domains = [
+      `www.${cleanDomain}planet.dragon`,
+      `the${cleanDomain}hub.dragon`,
+      `www.${cleanDomain}defense.dragon`
+    ];
+    
+    // Choose one website domain dynamically
+    const randDom = getSeededRandom(cleanQuery);
+    const domainSelected = seededPick(domains, randDom);
+    matches.push(`
+      <div class="ds-result">
+        <div style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 2px;">http://${domainSelected}</div>
+        <a href="#" onclick="window.navigate('http://${domainSelected}')" class="ds-link">${searchVal.charAt(0).toUpperCase() + searchVal.slice(1)} Portal - Official Site</a>
+        <div class="ds-desc">Welcome to the official community gateway for ${searchVal.toLowerCase()}. Explore forums, download resources, and chat with local users.</div>
+      </div>
+    `);
+
+    // 4. Procedural Wiki Matches
     const rand = getSeededRandom(cleanQuery);
-    const numProcedural = 1 + Math.floor(rand() * 2); // Generate 1-2 extra results
+    const numProcedural = 1 + Math.floor(rand() * 2);
 
     const subjects = ["Ancient", "Future", "Secret", "Cursed", "Glow-in-the-dark", "Invisible", "Cybernetic", "Quantum", "Mystical"];
     const nouns = ["Artifacts", "Portals", "Dragons", "AI Agents", "Virtual Worlds", "Hacking Tools", "Whiteboards", "Void Crystals", "Nebula Cores"];
@@ -152,6 +173,83 @@ function renderSearch(query) {
         <button class="ds-btn" type="submit">Dragon Search</button>
       </form>
       ${resultsHTML}
+    </div>
+  `;
+}
+
+// --- FAKE WEBSITE RENDERER (Infinite Seeded Websites!) ---
+function renderWebSite(url) {
+  const domain = url.replace('http://', '').replace('https://', '').split('/')[0];
+  const cleanDomain = domain.replace('www.', '').split('.')[0];
+  
+  // Seeded generation matching the specific domain name
+  const rand = getSeededRandom(domain);
+  const themeHue = Math.floor(rand() * 360);
+  const accentColor = `hsl(${themeHue}, 80%, 60%)`;
+  const bgGradient = `linear-gradient(135deg, #090d16, hsl(${themeHue}, 40%, 10%))`;
+  
+  const siteTypes = ["Community Hub", "Database", "Security Grid", "Official Archive", "Research Portal"];
+  const type = seededPick(siteTypes, rand);
+  
+  const welcomes = ["Welcome to the database.", "Data streams stabilized.", "Authorized access granted.", "Grid online."];
+  const welcome = seededPick(welcomes, rand);
+  
+  const p1 = `This system was initialized to store, monitor, and catalog records related to ${cleanDomain}. The network currently registers over ${Math.floor(rand() * 50000 + 100)} active terminals across the sector.`;
+  const p2 = `By accessing this ${type.toLowerCase()}, users can run diagnostic reports, query local databases, and sync settings directly to the main server registers. Ensure you keep your DC balance safe at all times.`;
+
+  // Draw the custom website content
+  contentDiv.innerHTML = `
+    <div class="fake-site" style="background:${bgGradient}; min-height:100vh; color:#e2e8f0; font-family:'Outfit', sans-serif;">
+      <!-- Web site header banner -->
+      <div style="border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom: 20px; margin-bottom: 30px; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <h1 style="font-size:2.2rem; color:${accentColor}; margin:0; text-shadow: 0 0 20px rgba(255,255,255,0.1); text-transform:capitalize;">${cleanDomain} Portal</h1>
+          <span style="color:#94a3b8; font-size:0.85rem; text-transform:uppercase; letter-spacing:1px;">${type}</span>
+        </div>
+        <div style="font-size: 2.5rem;">🌐</div>
+      </div>
+      
+      <!-- Content columns -->
+      <div style="display:grid; grid-template-columns: 2fr 1fr; gap:30px;">
+        <div class="glass-card" style="background:rgba(255,255,255,0.02); border-color:rgba(255,255,255,0.1); padding:25px; border-radius:12px;">
+          <h2 style="color:${accentColor}; margin-top:0;">${welcome}</h2>
+          <p style="font-size:1.1rem; line-height:1.6; color:#cbd5e1;">${p1}</p>
+          <p style="font-size:1.1rem; line-height:1.6; color:#cbd5e1;">${p2}</p>
+          
+          <div style="margin-top: 30px; display:flex; gap:10px;">
+            <button onclick="alert('Accessing diagnostic logs for ${cleanDomain}...')" style="background:${accentColor}; color:#000; border:none; padding:10px 20px; border-radius:20px; font-weight:bold; cursor:pointer;">Run Diagnostics</button>
+            <button onclick="window.navigate('dragon://search')" style="background:rgba(255,255,255,0.08); color:#fff; border:1px solid rgba(255,255,255,0.2); padding:10px 20px; border-radius:20px; cursor:pointer;">Search Web</button>
+          </div>
+        </div>
+        
+        <div>
+          <!-- Right side panel -->
+          <div class="glass-card" style="background:rgba(0,0,0,0.3); border-color:rgba(255,255,255,0.08); padding:20px; border-radius:12px; margin-bottom:20px;">
+            <h3 style="color:#fff; margin-top:0;">Grid Status</h3>
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.9rem;">
+              <span style="color:#94a3b8;">System Load</span>
+              <span style="color:#34d399; font-weight:bold;">${Math.floor(rand() * 40 + 10)}%</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.9rem;">
+              <span style="color:#94a3b8;">Ledger Sync</span>
+              <span style="color:#34d399; font-weight:bold;">Active</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:0.9rem;">
+              <span style="color:#94a3b8;">Server Node</span>
+              <span style="color:#38bdf8; font-weight:bold;">Node-${Math.floor(rand() * 90 + 10)}</span>
+            </div>
+          </div>
+          
+          <div class="glass-card" style="background:rgba(255,255,255,0.02); border-color:rgba(255,255,255,0.1); padding:20px; border-radius:12px;">
+            <h3 style="color:#fff; margin-top:0;">Related Links</h3>
+            <ul style="padding-left:20px; margin:0; font-size:0.95rem;">
+              <li style="margin-bottom:10px;"><a href="#" onclick="window.navigate('dragon://wiki/Main_Page')" style="color:${accentColor};">DragonWiki Home</a></li>
+              <li style="margin-bottom:10px;"><a href="#" onclick="window.navigate('dragon://tube')" style="color:${accentColor};">DragonTube Videos</a></li>
+              <li><a href="#" onclick="window.navigate('dragon://weather')" style="color:${accentColor};">Weather Forecast</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
   `;
 }
