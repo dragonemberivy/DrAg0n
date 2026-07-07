@@ -303,42 +303,7 @@ const sfxDarkness = new Audio("./506_The_Verdant_Dark.mp3");
 const sfxLore = new Audio("./502_Sentient_Eye.mp3");
 
 function playSoundEffect(type = "darkness") {
-  if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
-      return; 
-  }
-  let trackToPlay;
-  
-  if (type === "companion") trackToPlay = sfxCompanion;
-  else if (type === "lore") trackToPlay = sfxLore;
-  else trackToPlay = sfxDarkness;
-
-  if (trackToPlay._timeout) clearTimeout(trackToPlay._timeout);
-  if (trackToPlay._fadeInterval) clearInterval(trackToPlay._fadeInterval);
-
-  trackToPlay.volume = 1.0;
-  trackToPlay.currentTime = 0;
-  trackToPlay.play().catch(e => console.warn("Audio blocked by browser:", e));
-
-  // Play solidly for 3.5 seconds, then linearly fade out the volume over 1.5 seconds
-  trackToPlay._timeout = setTimeout(() => {
-    let fadeSteps = 15;
-    let currentStep = 0;
-    
-    trackToPlay._fadeInterval = setInterval(() => {
-      currentStep++;
-      let newVolume = 1.0 * (1 - (currentStep / fadeSteps));
-      if (newVolume < 0) newVolume = 0;
-      
-      trackToPlay.volume = newVolume;
-      
-      if (currentStep >= fadeSteps) {
-        clearInterval(trackToPlay._fadeInterval);
-        trackToPlay.pause();
-        trackToPlay.currentTime = 0;
-        trackToPlay.volume = 1.0; // Reset for the next trigger
-      }
-    }, 100); 
-  }, 3500);
+  return;
 }
 
 const whispers = [

@@ -368,11 +368,10 @@
       if (e.key === 'Enter') tryUnlock();
     }); }
 
-    // Automatically focus the password input on load
-    
-    if (siteModal && sessionStorage.getItem('site_unlocked') === 'true') {
-      siteModal.style.display = 'none';
-      document.body.style.overflow = 'auto';
+    if (siteModal) {
+      siteModal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+      if (sitePwInput) sitePwInput.focus();
     }
 
     window.addEventListener('load', () => {
@@ -744,6 +743,11 @@
         
         
         let purchases = JSON.parse(localStorage.getItem('drag0n_purchases') || '{}');
+        
+        const pwDc = document.getElementById('pw-dc');
+        if(pwDc) {
+          pwDc.textContent = `${localStorage.getItem('drag0n_dc') || 0} DC`;
+        }
         let achievements = JSON.parse(localStorage.getItem('drag0n_achievements') || '[]');
         let nameColor = purchases.chatColor === 'gold' ? '#fbbf24' : 'inherit';
         
@@ -1357,3 +1361,19 @@
         alert('Not enough DC to queue a song!');
       }
     };
+    
+    // Global Jukebox Sync
+    if(typeof firebase !== 'undefined') {
+      firebase.database().ref('global_jukebox').on('value', snap => {
+        const s = snap.val();
+        if(s && s.videoId) {
+          const iframe = document.getElementById('jukebox-iframe');
+          if(iframe) {
+            const currentSrc = iframe.src;
+            if(!currentSrc.includes(s.videoId)) {
+              iframe.src = `https://www.youtube.com/embed/${s.videoId}?autoplay=1&loop=1`;
+            }
+          }
+        }
+      });
+    }
