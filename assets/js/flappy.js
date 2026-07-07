@@ -96,6 +96,7 @@ if (flappyContainer) {
         if (p.x + this.w <= 0) {
           this.position.shift();
           score += 1;
+          if(window.addXP) window.addXP(5); // Instantly award XP/DC for passing a pipe
         }
       }
     },
@@ -166,7 +167,6 @@ if (flappyContainer) {
 
   function submitFlappyScore(s) {
     if(s > 0 && typeof firebase !== 'undefined' && localStorage.getItem('drag0n_user')) {
-      if(window.addXP) window.addXP(s * 5); // 5 XP per pipe
       const u = localStorage.getItem('drag0n_user');
       const a = localStorage.getItem('drag0n_avatar') || '🐉';
       const ref = firebase.database().ref('leaderboards/flappy/' + u.toLowerCase());

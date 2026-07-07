@@ -886,20 +886,25 @@
     }
 
     window.addXP = function(amount) {
-      if(localStorage.getItem('drag0n_owner') === 'true') return; // owner doesn't level
-      if(!localStorage.getItem('drag0n_user')) return; // unregistered doesn't level
+      if(!localStorage.getItem('drag0n_user') && !localStorage.getItem('drag0n_owner')) return;
+      
+      // Everyone (including owners) gets DC
+      let dcEarned = Math.floor(amount * 2);
+      if(dcEarned > 0) {
+        let currentDC = parseInt(localStorage.getItem('drag0n_dc') || '0');
+        currentDC += dcEarned;
+        localStorage.setItem('drag0n_dc', currentDC);
+        if(typeof updateProfileWidget === 'function') updateProfileWidget();
+      }
+      
+      // Owners don't get XP
+      if(localStorage.getItem('drag0n_owner') === 'true') return; 
+      
       let currentXp = parseInt(localStorage.getItem('drag0n_xp') || '0');
       let oldLvl = Math.floor(Math.sqrt(currentXp / 100)) + 1;
       
       currentXp += amount;
       localStorage.setItem('drag0n_xp', currentXp);
-      
-      let dcEarned = Math.floor(amount / 5);
-      if(dcEarned > 0) {
-        let currentDC = parseInt(localStorage.getItem('drag0n_dc') || '0');
-        currentDC += dcEarned;
-        localStorage.setItem('drag0n_dc', currentDC);
-      }
       
       // Check Achievements
       if(window.checkAchievements) window.checkAchievements();

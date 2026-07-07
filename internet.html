@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tiny Internet - DrAg0n</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <style>
+    body {
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      overflow: hidden;
+    }
+    
+    #browser-window {
+      width: 90vw;
+      height: 90vh;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      overflow: hidden;
+    }
+
+    #browser-header {
+      background: rgba(15, 23, 42, 0.9);
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .browser-btn {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 5px;
+      border-radius: 50%;
+    }
+
+    .browser-btn:hover {
+      background: rgba(255,255,255,0.1);
+    }
+
+    #browser-url {
+      flex: 1;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid var(--border);
+      color: white;
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+
+    #browser-content {
+      flex: 1;
+      overflow-y: auto;
+      background: #ffffff; /* Faking a bright web page by default */
+      color: #000;
+      position: relative;
+    }
+
+    /* Fake Site Styles */
+    .fake-site {
+      padding: 2rem;
+      min-height: 100%;
+    }
+
+    /* DragonSearch */
+    .ds-logo { font-size: 4rem; text-align: center; margin-top: 10vh; color: #4285F4; font-weight: bold; }
+    .ds-input { width: 50%; padding: 15px; border-radius: 30px; border: 1px solid #ccc; font-size: 1.2rem; display: block; margin: 20px auto; }
+    .ds-btn { display: block; margin: 0 auto; padding: 10px 20px; background: #f8f9fa; border: 1px solid #f8f9fa; border-radius: 4px; cursor: pointer; }
+    
+    .ds-results { max-width: 800px; margin: 20px auto; }
+    .ds-result { margin-bottom: 20px; }
+    .ds-link { color: #1a0dab; font-size: 1.2rem; text-decoration: none; display: block; margin-bottom: 5px;}
+    .ds-link:hover { text-decoration: underline; }
+    .ds-desc { color: #4d5156; }
+
+    /* DragonTube */
+    .dt-header { background: #282828; color: white; padding: 15px; font-weight: bold; font-size: 1.5rem; display: flex; align-items: center; gap:10px;}
+    .dt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; padding: 20px; background: #0f0f0f; min-height: 100vh;}
+    .dt-card { cursor: pointer; }
+    .dt-thumb { background: #333; height: 140px; border-radius: 12px; margin-bottom: 10px; display:flex; align-items:center; justify-content:center; font-size: 3rem;}
+    .dt-title { color: white; font-weight: bold; font-size: 1rem;}
+    .dt-channel { color: #aaa; font-size: 0.9rem;}
+
+    .dt-player-container { padding: 20px; background: #0f0f0f; color: white; min-height: 100vh;}
+    .dt-player { width: 100%; max-width: 800px; height: 450px; background: black; margin: 0 auto 20px auto; display:flex; align-items:center; justify-content:center; color:white; font-size:2rem; animation: pulse 2s infinite;}
+    
+    @keyframes pulse { 0% { background: #111; } 50% { background: #333; } 100% { background: #111; } }
+
+    /* DragonWiki */
+    .dw-header { border-bottom: 1px solid #a2a9b1; padding-bottom: 10px; margin-bottom: 20px; font-size: 2rem; font-family: serif;}
+    .dw-content { font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; background: white; padding: 40px; border: 1px solid #c8ccd1;}
+    .dw-infobox { float: right; width: 250px; background: #f8f9fa; border: 1px solid #a2a9b1; padding: 10px; margin-left: 20px; font-size: 0.9rem;}
+    
+    /* Daily Dragon News */
+    .dn-header { text-align: center; font-family: "Times New Roman", serif; border-bottom: 4px double #333; padding-bottom: 20px; margin-bottom: 20px; }
+    .dn-title { font-size: 4rem; text-transform: uppercase; margin: 0;}
+    .dn-date { font-style: italic; color: #666;}
+    .dn-article { max-width: 800px; margin: 0 auto; columns: 2; column-gap: 40px; font-family: serif; line-height: 1.6; text-align: justify;}
+    .dn-headline { font-size: 2.5rem; column-span: all; text-align: center; margin-bottom: 20px; font-weight: bold;}
+
+    /* Dragon Weather */
+    .dwx-bg { background: linear-gradient(to bottom, #4facfe 0%, #00f2fe 100%); color: white; padding: 50px; text-align: center; min-height: 100vh;}
+    .dwx-temp { font-size: 8rem; font-weight: bold; margin: 20px 0;}
+    .dwx-desc { font-size: 2rem; }
+    
+  </style>
+</head>
+<body>
+
+  <a href="index.html" style="position: absolute; top: 1rem; left: 1rem; text-decoration: none; font-size: 1.2rem; color: var(--accent); z-index: 100;">← Back Home</a>
+
+  <div id="browser-window">
+    <div id="browser-header">
+      <button class="browser-btn" onclick="window.browserBack()" title="Back">◀</button>
+      <button class="browser-btn" onclick="window.browserForward()" title="Forward">▶</button>
+      <button class="browser-btn" onclick="window.navigate('dragon://search')" title="Home">🏠</button>
+      <input type="text" id="browser-url" value="dragon://search" readonly>
+    </div>
+    <div id="browser-content">
+      <!-- Content injected by JS -->
+    </div>
+  </div>
+
+  <script src="assets/js/internet.js"></script>
+</body>
+</html>
