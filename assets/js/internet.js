@@ -82,6 +82,10 @@ function renderSearch(query) {
     const cleanQuery = searchVal.toLowerCase();
     let matches = [];
 
+    // Extract core query word to generate cleaner headlines (e.g. remove "news article")
+    let topicName = searchVal.replace(/\bnews\b/gi, '').replace(/\barticle\b/gi, '').trim();
+    if (!topicName) topicName = searchVal;
+
     // 1. Static/Preset matches
     if (cleanQuery.includes('coin') || cleanQuery.includes('dc') || cleanQuery.includes('money')) {
       matches.push(`
@@ -102,42 +106,52 @@ function renderSearch(query) {
     if (cleanQuery.includes('weather') || cleanQuery.includes('forecast') || cleanQuery.includes('temp') || cleanQuery.includes('rain')) {
       matches.push(`
         <div class="ds-result">
-          <a href="#" onclick="window.navigate('dragon://weather?loc=' + encodeURIComponent('${searchVal}'))" class="ds-link">Local Weather Forecast for ${searchVal}</a>
-          <div class="ds-desc">Is it safe to fly in ${searchVal} today? Check the latest atmospheric conditions...</div>
+          <a href="#" onclick="window.navigate('dragon://weather?loc=' + encodeURIComponent('${topicName}'))" class="ds-link">Local Weather Forecast for ${topicName}</a>
+          <div class="ds-desc">Is it safe to fly in ${topicName} today? Check the latest atmospheric conditions...</div>
         </div>
       `);
     }
 
-    // 2. Dynamic Video Result related directly to search term
-    let videoId = encodeURIComponent(searchVal);
+    // 2. Dynamic News Article Result (Fulfills the "Cannibal hannibal news article" request!)
+    let newsId = encodeURIComponent(topicName);
     matches.push(`
       <div class="ds-result">
-        <a href="#" onclick="window.navigate('dragon://tube/watch?v=${videoId}')" class="ds-link">DragonTube: Trending Video on "${searchVal}"</a>
-        <div class="ds-desc">Stream this real video covering "${searchVal}" directly inside the browser. No YouTube player required.</div>
+        <div style="color: #f43f5e; font-size: 0.85rem; margin-bottom: 2px;">dragon://news/article-${newsId}</div>
+        <a href="#" onclick="window.navigate('dragon://news/article-${newsId}')" class="ds-link">The Daily Dragon: Breaking News on "${topicName}"</a>
+        <div class="ds-desc">Read the full, detailed news coverage regarding "${topicName}". Shocking details and community reactions inside.</div>
       </div>
     `);
 
-    // 3. NEW: Dynamic Infinite WEBSITE Matches!
-    const cleanDomain = searchVal.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const domains = [
-      `www.${cleanDomain}planet.dragon`,
-      `the${cleanDomain}hub.dragon`,
-      `www.${cleanDomain}defense.dragon`
-    ];
-    
-    // Choose one website domain dynamically
-    const randDom = getSeededRandom(cleanQuery);
-    const domainSelected = seededPick(domains, randDom);
+    // 3. Dynamic Video Result
+    let videoId = encodeURIComponent(topicName);
     matches.push(`
       <div class="ds-result">
-        <div style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 2px;">http://${domainSelected}</div>
-        <a href="#" onclick="window.navigate('http://${domainSelected}')" class="ds-link">${searchVal.charAt(0).toUpperCase() + searchVal.slice(1)} Portal - Official Site</a>
-        <div class="ds-desc">Welcome to the official community gateway for ${searchVal.toLowerCase()}. Explore forums, download resources, and chat with local users.</div>
+        <a href="#" onclick="window.navigate('dragon://tube/watch?v=${videoId}')" class="ds-link">DragonTube: Trending Video on "${topicName}"</a>
+        <div class="ds-desc">Stream this real video covering "${topicName}" directly inside the browser. No YouTube player required.</div>
       </div>
     `);
 
-    // 4. Procedural Wiki Matches
-    const rand = getSeededRandom(cleanQuery);
+    // 4. Dynamic Infinite Website Matches
+    const cleanDomain = topicName.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (cleanDomain) {
+      const domains = [
+        `www.${cleanDomain}planet.dragon`,
+        `the${cleanDomain}hub.dragon`,
+        `www.${cleanDomain}defense.dragon`
+      ];
+      const randDom = getSeededRandom(cleanDomain);
+      const domainSelected = seededPick(domains, randDom);
+      matches.push(`
+        <div class="ds-result">
+          <div style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 2px;">http://${domainSelected}</div>
+          <a href="#" onclick="window.navigate('http://${domainSelected}')" class="ds-link">${topicName.charAt(0).toUpperCase() + topicName.slice(1)} Portal - Official Site</a>
+          <div class="ds-desc">Welcome to the official community gateway for ${topicName.toLowerCase()}. Explore forums, download resources, and chat with local users.</div>
+        </div>
+      `);
+    }
+
+    // 5. Procedural Wiki Matches
+    const rand = getSeededRandom(topicName);
     const numProcedural = 1 + Math.floor(rand() * 2);
 
     const subjects = ["Ancient", "Future", "Secret", "Cursed", "Glow-in-the-dark", "Invisible", "Cybernetic", "Quantum", "Mystical"];
@@ -177,12 +191,11 @@ function renderSearch(query) {
   `;
 }
 
-// --- FAKE WEBSITE RENDERER (Infinite Seeded Websites!) ---
+// --- FAKE WEBSITE RENDERER (Infinite Seeded Websites) ---
 function renderWebSite(url) {
   const domain = url.replace('http://', '').replace('https://', '').split('/')[0];
   const cleanDomain = domain.replace('www.', '').split('.')[0];
   
-  // Seeded generation matching the specific domain name
   const rand = getSeededRandom(domain);
   const themeHue = Math.floor(rand() * 360);
   const accentColor = `hsl(${themeHue}, 80%, 60%)`;
@@ -197,10 +210,8 @@ function renderWebSite(url) {
   const p1 = `This system was initialized to store, monitor, and catalog records related to ${cleanDomain}. The network currently registers over ${Math.floor(rand() * 50000 + 100)} active terminals across the sector.`;
   const p2 = `By accessing this ${type.toLowerCase()}, users can run diagnostic reports, query local databases, and sync settings directly to the main server registers. Ensure you keep your DC balance safe at all times.`;
 
-  // Draw the custom website content
   contentDiv.innerHTML = `
     <div class="fake-site" style="background:${bgGradient}; min-height:100vh; color:#e2e8f0; font-family:'Outfit', sans-serif;">
-      <!-- Web site header banner -->
       <div style="border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom: 20px; margin-bottom: 30px; display:flex; justify-content:space-between; align-items:center;">
         <div>
           <h1 style="font-size:2.2rem; color:${accentColor}; margin:0; text-shadow: 0 0 20px rgba(255,255,255,0.1); text-transform:capitalize;">${cleanDomain} Portal</h1>
@@ -209,7 +220,6 @@ function renderWebSite(url) {
         <div style="font-size: 2.5rem;">🌐</div>
       </div>
       
-      <!-- Content columns -->
       <div style="display:grid; grid-template-columns: 2fr 1fr; gap:30px;">
         <div class="glass-card" style="background:rgba(255,255,255,0.02); border-color:rgba(255,255,255,0.1); padding:25px; border-radius:12px;">
           <h2 style="color:${accentColor}; margin-top:0;">${welcome}</h2>
@@ -223,7 +233,6 @@ function renderWebSite(url) {
         </div>
         
         <div>
-          <!-- Right side panel -->
           <div class="glass-card" style="background:rgba(0,0,0,0.3); border-color:rgba(255,255,255,0.08); padding:20px; border-radius:12px; margin-bottom:20px;">
             <h3 style="color:#fff; margin-top:0;">Grid Status</h3>
             <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.9rem;">
@@ -260,8 +269,7 @@ function renderTube(base, query) {
     const videoParam = decodeURIComponent(query.split('v=')[1]);
     const term = videoParam.toLowerCase();
 
-    // Map keywords to relevant stock MP4 video clips
-    let mp4Url = 'https://vjs.zencdn.net/v/oceans.mp4'; // default
+    let mp4Url = 'https://vjs.zencdn.net/v/oceans.mp4';
     let categoryName = 'Special Interest';
 
     if (term.includes('cat') || term.includes('pet') || term.includes('animal') || term.includes('dog') || term.includes('bunny')) {
@@ -277,7 +285,6 @@ function renderTube(base, query) {
       mp4Url = 'https://www.w3schools.com/html/movie.mp4';
       categoryName = 'Wildlife';
     } else {
-      // Rotate between them based on query length for variety
       const urlList = [
         'https://vjs.zencdn.net/v/oceans.mp4',
         'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
@@ -288,7 +295,6 @@ function renderTube(base, query) {
       categoryName = 'Generative Content';
     }
 
-    // Capitalize term for title
     const displayTitle = videoParam.charAt(0).toUpperCase() + videoParam.slice(1);
     const title = displayTitle.length <= 2 ? `Video #${displayTitle}` : `All About "${displayTitle}"`;
     const desc = `A high quality, user-contributed stream exploring the concept of "${displayTitle.toLowerCase()}". Categorized under ${categoryName}.`;
@@ -308,7 +314,6 @@ function renderTube(base, query) {
       </div>
     `;
   } else {
-    // Home
     contentDiv.innerHTML = `
       <div class="dt-header">
         <span style="color:red;">▶</span> DragonTube
@@ -465,28 +470,86 @@ function renderNews(base) {
   const article = base.split('/').pop();
   
   if (article && article !== 'news') {
-    // Generate a unique seeded news article
-    const rand = getSeededRandom(article);
-    const headlines = [
-      "MYSTERIOUS ANOMALY DISCOVERED IN COMMUNITY WHITEBOARD",
-      "NEW MOONS DETECTED ORBITING LOCAL VISITOR PLANETS",
-      "ECONOMY IN TRANSIT: COIN DEMAND HITS RECORD HIGHS",
-      "LOCAL PROGRAMMER UNLOCKS GOLDEN AVATAR"
-    ];
-    const headline = headlines[parseInt(article.replace('article-', '')) % headlines.length] || "BREAKING NEWS FROM THE DIGITAL SECTOR";
+    // Generate a unique seeded news article (Fulfilling custom detailed articles!)
+    const articleName = decodeURIComponent(article.replace('article-', '')).trim();
     
-    contentDiv.innerHTML = `
-      <div class="fake-site" style="background:#090d16; min-height:100vh; color:#e2e8f0;">
-        <div class="dn-header" style="cursor:pointer; border-color:rgba(255,255,255,0.1);" onclick="window.navigate('dragon://news')">
-          <h1 class="dn-title">The Daily Dragon</h1>
-          <div class="dn-date">Providing truth to the digital realm since yesterday.</div>
+    if (articleName === '1' || articleName === '2' || articleName === '3') {
+      // Return static articles
+      const rand = getSeededRandom(articleName);
+      const headlines = [
+        "MYSTERIOUS ANOMALY DISCOVERED IN COMMUNITY WHITEBOARD",
+        "NEW MOONS DETECTED ORBITING LOCAL VISITOR PLANETS",
+        "ECONOMY IN TRANSIT: COIN DEMAND HITS RECORD HIGHS"
+      ];
+      const headline = headlines[parseInt(articleName) - 1] || "BREAKING NEWS FROM THE DIGITAL SECTOR";
+      
+      contentDiv.innerHTML = `
+        <div class="fake-site" style="background:#090d16; min-height:100vh; color:#e2e8f0;">
+          <div class="dn-header" style="cursor:pointer; border-color:rgba(255,255,255,0.1);" onclick="window.navigate('dragon://news')">
+            <h1 class="dn-title">The Daily Dragon</h1>
+            <div class="dn-date">Providing truth to the digital realm since yesterday.</div>
+          </div>
+          <h1 class="dn-headline">${headline}</h1>
+          <div class="dn-article" style="color:#cbd5e1;">
+            <p>Early reports this morning indicate that section ${Math.floor(rand() * 500 + 1)} of the grid has experienced high levels of virtual activity.</p>
+            <p>"It was totally unexpected," an observer commented. "One minute everything was normal, and the next we had digital patterns repeating all over the place."</p>
+            <p>Local authorities are recommending that all users update their profile settings and secure their balances immediately at the shop.</p>
+            <p>We will continue tracking this development as more data comes online. <a href="#" onclick="window.navigate('dragon://wiki/Main_Page')">Read more analysis...</a></p>
+          </div>
         </div>
-        <h1 class="dn-headline">${headline}</h1>
-        <div class="dn-article" style="color:#cbd5e1;">
-          <p>Early reports this morning indicate that section ${Math.floor(rand() * 500 + 1)} of the grid has experienced high levels of virtual activity.</p>
-          <p>"It was totally unexpected," an observer commented. "One minute everything was normal, and the next we had digital patterns repeating all over the place."</p>
-          <p>Local authorities are recommending that all users update their profile settings and secure their balances immediately at the shop.</p>
-          <p>We will continue tracking this development as more data comes online. <a href="#" onclick="window.navigate('dragon://wiki/Main_Page')">Read more analysis...</a></p>
+      `;
+      return;
+    }
+
+    // Procedural generation of a VERY detailed multi-paragraph news article (Seeded!)
+    const rand = getSeededRandom(articleName);
+    const displayTitle = articleName.charAt(0).toUpperCase() + articleName.slice(1);
+    
+    const introPhrases = [
+      `A critical situation has developed regarding **${displayTitle}**, sending shockwaves throughout the local sector.`,
+      `Sensational reports surrounding **${displayTitle}** have triggered emergency meetings among site developers and active users alike.`,
+      `A bizarre series of logs tracking **${displayTitle}** has been confirmed by lead engineers early this morning.`
+    ];
+    const details = [
+      `Eyewitnesses in the chat lobby reported seeing strange characters appearing shortly after the event was registered. "It was like nothing we've seen since the database split of 2026," stated a long-time member.`,
+      `Speculators have begun tracking potential correlation between the activity and local coin earn rates. Several nodes registered a sudden, unexplained spike in Flappy Dragon activity during the exact same timeframe.`,
+      `Official warnings advise users to monitor their balances closely. Diagnostic tools are running at full load to ensure that ledger security remains intact throughout the current node cycle.`
+    ];
+    const outcomes = [
+      `Security units have been deployed to sandbox ${displayTitle.toLowerCase()} until further notice. Authorities urge calm while calculations compile.`,
+      `Initial investigations suggest a possible link to password modal logs. A patch is scheduled to deploy at node midnight.`,
+      `Users are requested to report any anomalies or code drops directly inside the Animal Chat room to aid coordinates mapping.`
+    ];
+
+    contentDiv.innerHTML = `
+      <div class="fake-site" style="background:#090d16; min-height:100vh; color:#e2e8f0; font-family:'Times New Roman', serif;">
+        <!-- Newspaper Header -->
+        <div class="dn-header" style="cursor:pointer; border-color:rgba(255,255,255,0.15);" onclick="window.navigate('dragon://news')">
+          <h1 class="dn-title" style="font-size:3.5rem; letter-spacing: 2px;">The Daily Dragon</h1>
+          <div class="dn-date" style="font-style:italic; font-size:0.9rem; margin-top:5px; color:#94a3b8; text-transform:uppercase; letter-spacing:1px;">Special Investigation Report &bull; Monday Bulletin</div>
+        </div>
+        
+        <!-- Large Headline -->
+        <h1 class="dn-headline" style="font-size: 2.8rem; font-weight:800; line-height:1.1; margin: 20px 0 30px 0; text-transform:uppercase; letter-spacing:-0.5px;">
+          CRITICAL SECTOR REPORT: THE SHOCKING TRUTH BEHIND "${displayTitle.toUpperCase()}"
+        </h1>
+        
+        <!-- Three Column News Article -->
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:30px; line-height:1.6; font-size:1.05rem; text-align:justify; color:#e2e8f0;">
+          <div style="border-right: 1px solid rgba(255,255,255,0.1); padding-right:15px;">
+            <p><span style="font-size:3rem; float:left; line-height:0.8; font-weight:bold; margin-right:8px; color:#38bdf8;">T</span>${seededPick(introPhrases, rand)}</p>
+            <p>Local sensors confirmed that unusual patterns began propagating at coordinates ${Math.floor(rand() * 900 + 100)} shortly after midnight. Early telemetry indicators suggest a substantial node overlap in the system framework.</p>
+          </div>
+          <div style="border-right: 1px solid rgba(255,255,255,0.1); padding-right:15px;">
+            <p>${seededPick(details, rand)}</p>
+            <p>Economists from the Dragon Shop reported that transaction speeds remained surprisingly stable despite the local news panic. "We are keeping a close eye on it," said the lead merchant.</p>
+          </div>
+          <div>
+            <p>${seededPick(outcomes, rand)}</p>
+            <p style="font-weight:bold; font-style:italic; border-top:1px solid rgba(255,255,255,0.15); padding-top:15px; margin-top:20px; color:#94a3b8;">
+              Reported by J. Dragon, Tech Desk. For further research, check the wiki article for <a href="#" onclick="window.navigate('dragon://wiki/${displayTitle.replace(/ /g, '_')}')" style="color:#38bdf8; text-decoration:underline;">${displayTitle}</a>.
+            </p>
+          </div>
         </div>
       </div>
     `;
