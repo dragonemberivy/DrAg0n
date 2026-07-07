@@ -862,8 +862,31 @@
               const userRef = firebase.database().ref('users/' + username.toLowerCase());
               const snapshot = await userRef.once('value');
               if (snapshot.exists()) {
-                errorEl.textContent = "Username is already taken!"; errorEl.style.display = 'block';
-                createBtn.disabled = false; createBtn.textContent = "Enter Website";
+                // If username exists, log them in and restore their data
+                const userData = snapshot.val();
+                localStorage.setItem('drag0n_user', userData.username);
+                localStorage.setItem('drag0n_avatar', userData.avatar || '✨');
+                
+                // Merge DC: keep the higher amount (so they don't lose local refunds/earnings)
+                let localDC = parseInt(localStorage.getItem('drag0n_dc') || '0');
+                let dbDC = userData.dc || 0;
+                let finalDC = Math.max(localDC, dbDC);
+                localStorage.setItem('drag0n_dc', finalDC);
+                
+                // Sync the final DC back to Firebase immediately
+                userRef.child('dc').set(finalDC);
+
+                if(userData.xp !== undefined) localStorage.setItem('drag0n_xp', userData.xp);
+                if(userData.purchases) localStorage.setItem('drag0n_purchases', JSON.stringify(userData.purchases));
+                
+                registerModal.style.display = 'none';
+                updateProfileWidget();
+                
+                const siteModal = document.getElementById('site-password-modal');
+                if(siteModal && siteModal.style.display !== 'none') {
+                  siteModal.style.display = 'none';
+                  document.body.style.overflow = 'auto';
+                }
               } else {
                 await userRef.set({ username: username, avatar: selectedAvatar, created_at: Date.now() });
                 localStorage.setItem('drag0n_user', username);
@@ -871,7 +894,6 @@
                 registerModal.style.display = 'none';
                 updateProfileWidget();
                 
-                // If they created an account from index page after lock
                 const siteModal = document.getElementById('site-password-modal');
                 if(siteModal && siteModal.style.display !== 'none') {
                   siteModal.style.display = 'none';
