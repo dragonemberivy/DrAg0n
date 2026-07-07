@@ -766,7 +766,8 @@
         }
 
         let borderStyle = purchases.avatarBorder === 'fire' ? 'border: 2px solid #ef4444; box-shadow: 0 0 10px #ef4444;' : '';
-        let aHtml = a.startsWith('data:') ? `<img src="${a}" style="width:24px;height:24px;border-radius:50%;vertical-align:middle; ${borderStyle}">` : `<span style="${borderStyle} border-radius:50%; padding:2px;">${a}</span>`;
+        let avatarVal = a || '👤';
+        let aHtml = avatarVal.startsWith('data:') ? `<img src="${avatarVal}" style="width:24px;height:24px;border-radius:50%;vertical-align:middle; ${borderStyle}">` : `<span style="${borderStyle} border-radius:50%; padding:2px;">${avatarVal}</span>`;
         
         let achHtml = achievements.map(ach => `<span title="${ach}" style="font-size:0.8rem; margin-right:2px;">🏅</span>`).join('');
         
