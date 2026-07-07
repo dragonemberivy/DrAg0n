@@ -30,8 +30,26 @@ window.browserForward = () => {
 
 window.navigate = navigate;
 
+// Seeded PRNG for procedural generation
+function getSeededRandom(seedStr) {
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < seedStr.length; i++) {
+    h = Math.imul(h ^ seedStr.charCodeAt(i), 16777619);
+  }
+  return function() {
+    h += 0xe120fc15;
+    let tmp = Math.imul(h ^ (h >>> 15), 1 | h);
+    tmp = (tmp + Math.imul(tmp ^ (tmp >>> 7), 61 | tmp)) ^ tmp;
+    return (((tmp ^ (tmp >>> 14)) >>> 0) / 4294967296);
+  }
+}
+
+// Helper to pick seeded random from array
+function seededPick(arr, randFn) {
+  return arr[Math.floor(randFn() * arr.length)];
+}
+
 function renderPage(url) {
-  // Parse URL
   let base = url;
   let query = '';
   if (url.includes('?')) {
@@ -46,22 +64,24 @@ function renderPage(url) {
     renderWiki(base);
   } else if (base.startsWith('dragon://news')) {
     renderNews(base);
-  } else if (base === 'dragon://weather') {
-    renderWeather();
+  } else if (base.startsWith('dragon://weather')) {
+    renderWeather(base, query);
   } else {
-    contentDiv.innerHTML = `<div class="fake-site"><h1 style="color:red; text-align:center;">404 - Dragon Not Found</h1></div>`;
+    contentDiv.innerHTML = `<div class="fake-site" style="background:#090d16; min-height:100vh;"><h1 style="color:#ef4444; text-align:center;">404 - Dragon Not Found</h1></div>`;
   }
 }
 
-// --- SEARCH ENGINE ---
+// --- SEARCH ENGINE (Infinite Seeded Search Results) ---
 function renderSearch(query) {
-  let searchVal = query ? decodeURIComponent(query.replace('q=', '').replace(/\+/g, ' ')).toLowerCase() : '';
-  
+  let searchVal = query ? decodeURIComponent(query.replace('q=', '').replace(/\+/g, ' ')).trim() : '';
   let resultsHTML = '';
+
   if (searchVal) {
+    const cleanQuery = searchVal.toLowerCase();
     let matches = [];
 
-    if (searchVal.includes('coin') || searchVal.includes('dc') || searchVal.includes('money')) {
+    // 1. Static/Preset matches
+    if (cleanQuery.includes('coin') || cleanQuery.includes('dc') || cleanQuery.includes('money')) {
       matches.push(`
         <div class="ds-result">
           <a href="#" onclick="window.navigate('dragon://wiki/Dragon_Coins')" class="ds-link">DragonWiki: Dragon Coins</a>
@@ -69,8 +89,7 @@ function renderSearch(query) {
         </div>
       `);
     }
-    
-    if (searchVal.includes('game') || searchVal.includes('play') || searchVal.includes('flappy')) {
+    if (cleanQuery.includes('game') || cleanQuery.includes('play') || cleanQuery.includes('flappy') || cleanQuery.includes('snake')) {
       matches.push(`
         <div class="ds-result">
           <a href="#" onclick="window.navigate('dragon://tube/watch?v=1')" class="ds-link">DragonTube - 10 Hours of Flappy Dragon Gameplay</a>
@@ -82,63 +101,49 @@ function renderSearch(query) {
         </div>
       `);
     }
-
-    if (searchVal.includes('news') || searchVal.includes('daily') || searchVal.includes('article')) {
+    if (cleanQuery.includes('weather') || cleanQuery.includes('forecast') || cleanQuery.includes('temp') || cleanQuery.includes('rain')) {
       matches.push(`
         <div class="ds-result">
-          <a href="#" onclick="window.navigate('dragon://news/article-1')" class="ds-link">The Daily Dragon: "I got rich playing Flappy Dragon!"</a>
-          <div class="ds-desc">One local dragon reveals their secret to unlimited wealth using this one weird trick...</div>
+          <a href="#" onclick="window.navigate('dragon://weather?loc=' + encodeURIComponent('${searchVal}'))" class="ds-link">Local Weather Forecast for ${searchVal}</a>
+          <div class="ds-desc">Is it safe to fly in ${searchVal} today? Check the latest atmospheric conditions...</div>
         </div>
       `);
     }
+
+    // 2. Procedural Matches (Infinite Content Generator!)
+    const rand = getSeededRandom(cleanQuery);
+    const numProcedural = 2 + Math.floor(rand() * 3); // Generate 2-4 results for anything!
+
+    const subjects = ["Ancient", "Future", "Secret", "Cursed", "Glow-in-the-dark", "Invisible", "Cybernetic", "Quantum", "Mystical"];
+    const nouns = ["Artifacts", "Portals", "Dragons", "AI Agents", "Virtual Worlds", "Hacking Tools", "Whiteboards", "Void Crystals", "Nebula Cores"];
+    const actions = ["discovered inside the codebase", "powering the Jukebox", "hiding behind the password lock", "fueling the Flappy leaderboards", "found in a local sandbox"];
     
-    if (searchVal.includes('weather') || searchVal.includes('forecast') || searchVal.includes('temp')) {
+    for (let i = 0; i < numProcedural; i++) {
+      const topic = `${seededPick(subjects, rand)} ${seededPick(nouns, rand)}`;
+      const urlTopic = topic.replace(/ /g, '_');
       matches.push(`
         <div class="ds-result">
-          <a href="#" onclick="window.navigate('dragon://weather')" class="ds-link">Local Weather Forecast</a>
-          <div class="ds-desc">Is it safe to fly today? Check the latest atmospheric conditions...</div>
-        </div>
-      `);
-    }
-
-    if (searchVal.includes('planet') || searchVal.includes('space') || searchVal.includes('generator')) {
-      matches.push(`
-        <div class="ds-result">
-          <a href="#" onclick="window.navigate('dragon://tube/watch?v=3')" class="ds-link">DragonTube - Reacting to YOUR Planets!</a>
-          <div class="ds-desc">A deep dive into procedurally generated worlds and the science behind name hashing...</div>
-        </div>
-      `);
-    }
-
-    // Default results if no matches
-    if (matches.length === 0) {
-      matches.push(`
-        <div class="ds-result">
-          <a href="#" onclick="window.navigate('dragon://wiki/Main_Page')" class="ds-link">DragonWiki: Main Page</a>
-          <div class="ds-desc">Explore the encyclopedia of the DrAg0n ecosystem. Find articles on everything from games to pets...</div>
-        </div>
-        <div class="ds-result">
-          <a href="#" onclick="window.navigate('dragon://tube')" class="ds-link">DragonTube: Home</a>
-          <div class="ds-desc">Watch trending videos, tutorials, and music streams shared inside the community...</div>
+          <a href="#" onclick="window.navigate('dragon://wiki/${urlTopic}')" class="ds-link">DragonWiki: ${topic}</a>
+          <div class="ds-desc">A deep dive study on the mysterious ${topic.toLowerCase()} that was recently ${seededPick(actions, rand)}. Read documentation and findings...</div>
         </div>
       `);
     }
 
     resultsHTML = `
       <div class="ds-results">
-        <div style="color:#70757a; margin-bottom: 20px;">About 3,141,592 results (0.42 seconds) for <b>${searchVal}</b></div>
+        <div style="color:#94a3b8; margin-bottom: 20px;">About 3,141,592 results (0.42 seconds) for <b>${searchVal}</b></div>
         ${matches.join('')}
       </div>
     `;
   }
 
   contentDiv.innerHTML = `
-    <div class="fake-site">
+    <div class="fake-site" style="background:#090d16; min-height:100vh;">
       <div class="ds-logo">
-        <span style="color:#4285F4">D</span><span style="color:#EA4335">r</span><span style="color:#FBBC05">a</span><span style="color:#4285F4">g</span><span style="color:#34A853">o</span><span style="color:#EA4335">n</span><span style="color:#70757a; font-size: 2rem;">Search</span>
+        <span style="color:#38bdf8">D</span><span style="color:#818cf8">r</span><span style="color:#fb7185">a</span><span style="color:#38bdf8">g</span><span style="color:#34d399">o</span><span style="color:#f43f5e">n</span><span style="color:#94a3b8; font-size: 2rem;">Search</span>
       </div>
       <form onsubmit="event.preventDefault(); window.navigate('dragon://search?q=' + encodeURIComponent(document.getElementById('ds-in').value));">
-        <input type="text" class="ds-input" id="ds-in" value="${searchVal || ''}" placeholder="Search the tiny web...">
+        <input type="text" class="ds-input" id="ds-in" value="${searchVal}" placeholder="Search for anything...">
         <button class="ds-btn" type="submit">Dragon Search</button>
       </form>
       ${resultsHTML}
@@ -146,14 +151,15 @@ function renderSearch(query) {
   `;
 }
 
-// --- DRAGON TUBE ---
+// --- DRAGON TUBE (Direct MP4 Streams, No YouTube) ---
 function renderTube(base, query) {
   if (query.includes('v=')) {
+    // Royalty-free direct MP4 streams hosted on Mixkit CDN
     const videoIdMap = {
-      '1': 'jfKfPfyJRdk', // Lofi Girl Radio
-      '2': 'dQw4w9WgXcQ', // Rickroll
-      '3': 'i93Z7zljQ7I', // Scale of Universe zoom
-      '4': 'W32qC7U1Y_4'  // Funny compilation
+      '1': 'https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4',
+      '2': 'https://assets.mixkit.co/videos/preview/mixkit-green-cyber-character-glowing-in-dark-40092-large.mp4',
+      '3': 'https://assets.mixkit.co/videos/preview/mixkit-stars-in-space-background-1611-large.mp4',
+      '4': 'https://assets.mixkit.co/videos/preview/mixkit-abstract-glowing-particles-background-1002-large.mp4'
     };
     const titleMap = {
       '1': '10 Hours of Flappy Dragon Gameplay',
@@ -162,28 +168,24 @@ function renderTube(base, query) {
       '4': 'Global Jukebox Fail Compilation'
     };
     const descMap = {
-      '1': 'Relax and study to this endless lo-fi stream featuring cute dragon animations and cozy space backgrounds.',
-      '2': 'A tutorial detailing how to maximize your coin collection. Watch until the end for the ultimate trick!',
-      '3': 'Analyzing the incredible procedural rendering algorithms of the planet generator. Space is truly infinite!',
-      '4': 'A collection of the funniest moments and failures on the Global Jukebox. Turn up the volume!'
+      '1': 'Watch as the dragon navigates beautiful lush forests, seeking out the hidden golden coins.',
+      '2': 'A visual representation of the glowing green cyber-lines running through the site\'s ledger database.',
+      '3': 'Streaming high-resolution footage of the deep space nebula where visitor planets are generated.',
+      '4': 'Abstract glowing failures and glitch lines compiled from Jukebox audio stream issues.'
     };
     
     const v = query.split('=')[1];
-    const ytid = videoIdMap[v] || 'jfKfPfyJRdk';
+    const mp4Url = videoIdMap[v] || videoIdMap['3'];
     const title = titleMap[v] || 'Epic Video';
-    const desc = descMap[v] || 'This is a super cool video playing on the Tiny Internet. Like and subscribe!';
+    const desc = descMap[v] || 'This is a real video streaming directly on the Tiny Internet.';
     
-    // Watch video with a real YouTube iframe embed
     contentDiv.innerHTML = `
       <div class="dt-player-container">
         <div class="dt-header" style="margin-bottom: 20px; cursor:pointer;" onclick="window.navigate('dragon://tube')">
           <span style="color:red;">▶</span> DragonTube
         </div>
-        <div style="position: relative; width: 100%; max-width: 800px; padding-bottom: 56.25%; height: 0; margin: 0 auto 20px auto; background: black; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-          <iframe src="https://www.youtube.com/embed/${ytid}?autoplay=1" 
-                  style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;" 
-                  allow="autoplay; encrypted-media" allowfullscreen>
-          </iframe>
+        <div style="position: relative; width: 100%; max-width: 800px; margin: 0 auto 20px auto; background: black; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.1);">
+          <video src="${mp4Url}" autoplay loop controls style="width: 100%; display: block;"></video>
         </div>
         <h1 style="font-size: 1.5rem; color: white;">${title}</h1>
         <p style="color:#aaa;">1.2M views • 2 days ago</p>
@@ -199,22 +201,22 @@ function renderTube(base, query) {
       </div>
       <div class="dt-grid">
         <div class="dt-card" onclick="window.navigate('dragon://tube/watch?v=1')">
-          <div class="dt-thumb" style="background: linear-gradient(135deg, #1e1b4b, #311042);">🎧</div>
+          <div class="dt-thumb" style="background: linear-gradient(135deg, #1e1b4b, #311042);">🌳</div>
           <div class="dt-title">10 Hours of Flappy Dragon</div>
           <div class="dt-channel">ProGamer</div>
         </div>
         <div class="dt-card" onclick="window.navigate('dragon://tube/watch?v=2')">
-          <div class="dt-thumb" style="background: linear-gradient(135deg, #450a0a, #780202);">💰</div>
+          <div class="dt-thumb" style="background: linear-gradient(135deg, #450a0a, #780202);">🧬</div>
           <div class="dt-title">How to get infinite DC! (Not clickbait)</div>
           <div class="dt-channel">EconomyHax</div>
         </div>
         <div class="dt-card" onclick="window.navigate('dragon://tube/watch?v=3')">
-          <div class="dt-thumb" style="background: linear-gradient(135deg, #022c22, #065f46);">🪐</div>
+          <div class="dt-thumb" style="background: linear-gradient(135deg, #022c22, #065f46);">🌌</div>
           <div class="dt-title">Reacting to YOUR Planets!</div>
           <div class="dt-channel">SpaceExplorer</div>
         </div>
         <div class="dt-card" onclick="window.navigate('dragon://tube/watch?v=4')">
-          <div class="dt-thumb" style="background: linear-gradient(135deg, #172554, #1e3a8a);">🎵</div>
+          <div class="dt-thumb" style="background: linear-gradient(135deg, #172554, #1e3a8a);">✨</div>
           <div class="dt-title">Global Jukebox Fail Compilation</div>
           <div class="dt-channel">FunnyClips</div>
         </div>
@@ -223,7 +225,7 @@ function renderTube(base, query) {
   }
 }
 
-// --- DRAGON WIKI ---
+// --- DRAGON WIKI (Infinite Seeded Wiki Articles) ---
 function renderWiki(base) {
   const article = base.split('/').pop() || 'Main_Page';
   const title = article.replace(/_/g, ' ');
@@ -234,15 +236,15 @@ function renderWiki(base) {
     contentHTML = `
       <h1 class="dw-header">Dragon Coins (DC)</h1>
       <div class="dw-infobox">
-        <div style="background:#ddd; text-align:center; padding:5px; font-weight:bold;">Dragon Coins</div>
+        <div style="background:#1e293b; text-align:center; padding:5px; font-weight:bold; color:white;">Dragon Coins</div>
         <div style="padding:10px; text-align:center;">
           <div style="font-size:4rem; margin-bottom:10px;">🪙</div>
           <i>The official currency of DrAg0n.</i>
         </div>
-        <table style="width:100%; border-collapse:collapse; font-size:0.85rem;">
-          <tr style="border-top:1px solid #ccc;"><td style="font-weight:bold; padding:4px;">Type</td><td style="padding:4px;">Virtual Currency</td></tr>
-          <tr style="border-top:1px solid #ccc;"><td style="font-weight:bold; padding:4px;">Earn Rate</td><td style="padding:4px;">High (Arcade)</td></tr>
-          <tr style="border-top:1px solid #ccc;"><td style="font-weight:bold; padding:4px;">Symbol</td><td style="padding:4px;">DC</td></tr>
+        <table style="width:100%; border-collapse:collapse; font-size:0.85rem; color:#cbd5e1;">
+          <tr style="border-top:1px solid rgba(255,255,255,0.1);"><td style="font-weight:bold; padding:4px;">Type</td><td style="padding:4px;">Virtual Currency</td></tr>
+          <tr style="border-top:1px solid rgba(255,255,255,0.1);"><td style="font-weight:bold; padding:4px;">Earn Rate</td><td style="padding:4px;">High (Arcade)</td></tr>
+          <tr style="border-top:1px solid rgba(255,255,255,0.1);"><td style="font-weight:bold; padding:4px;">Symbol</td><td style="padding:4px;">DC</td></tr>
         </table>
       </div>
       <p><b>Dragon Coins (DC)</b> (also colloquially referred to by users as *DragonBux*) is the primary currency used inside the DrAg0n ecosystem.</p>
@@ -261,15 +263,15 @@ function renderWiki(base) {
     contentHTML = `
       <h1 class="dw-header">Flappy Dragon</h1>
       <div class="dw-infobox">
-        <div style="background:#ddd; text-align:center; padding:5px; font-weight:bold;">Flappy Dragon</div>
+        <div style="background:#1e293b; text-align:center; padding:5px; font-weight:bold; color:white;">Flappy Dragon</div>
         <div style="padding:10px; text-align:center;">
           <div style="font-size:4rem; margin-bottom:10px;">🐉</div>
           <i>The classic side-scrolling game.</i>
         </div>
-        <table style="width:100%; border-collapse:collapse; font-size:0.85rem;">
-          <tr style="border-top:1px solid #ccc;"><td style="font-weight:bold; padding:4px;">Developer</td><td style="padding:4px;">DrAg0n Team</td></tr>
-          <tr style="border-top:1px solid #ccc;"><td style="font-weight:bold; padding:4px;">Genre</td><td style="padding:4px;">Arcade / Avoidance</td></tr>
-          <tr style="border-top:1px solid #ccc;"><td style="font-weight:bold; padding:4px;">Platform</td><td style="padding:4px;">HTML5 Canvas</td></tr>
+        <table style="width:100%; border-collapse:collapse; font-size:0.85rem; color:#cbd5e1;">
+          <tr style="border-top:1px solid rgba(255,255,255,0.1);"><td style="font-weight:bold; padding:4px;">Developer</td><td style="padding:4px;">DrAg0n Team</td></tr>
+          <tr style="border-top:1px solid rgba(255,255,255,0.1);"><td style="font-weight:bold; padding:4px;">Genre</td><td style="padding:4px;">Arcade / Avoidance</td></tr>
+          <tr style="border-top:1px solid rgba(255,255,255,0.1);"><td style="font-weight:bold; padding:4px;">Platform</td><td style="padding:4px;">HTML5 Canvas</td></tr>
         </table>
       </div>
       <p><b>Flappy Dragon</b> is a popular HTML5 arcade game integrated directly into the DrAg0n Arcade. Players control a flying dragon, attempting to navigate through gaps in green pipes without hitting the floor or the obstacles.</p>
@@ -278,40 +280,61 @@ function renderWiki(base) {
       <h2>Rewards</h2>
       <p>Players earn 5 XP and 10 DC instantly for every obstacle successfully passed, making it the most popular speed-farming method for currency on the platform.</p>
     `;
-  } else if (article === 'Main_Page' || !article) {
+  } else if (article === 'Main_Page') {
     contentHTML = `
       <h1 class="dw-header">Welcome to DragonWiki!</h1>
       <p>Welcome to <b>DragonWiki</b>, the community-driven encyclopedia documenting the history, mechanics, currency, and architecture of the DrAg0n website!</p>
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:20px;">
-        <div style="background:#f8f9fa; padding:15px; border:1px solid #c8ccd1; border-radius:8px;">
+        <div style="background:rgba(255,255,255,0.03); padding:15px; border:1px solid rgba(255,255,255,0.1); border-radius:8px;">
           <h3>🪙 Economy</h3>
           <p>Read about the currency <a href="#" onclick="window.navigate('dragon://wiki/Dragon_Coins')">Dragon Coins</a> and what items you can buy at the shop.</p>
         </div>
-        <div style="background:#f8f9fa; padding:15px; border:1px solid #c8ccd1; border-radius:8px;">
+        <div style="background:rgba(255,255,255,0.03); padding:15px; border:1px solid rgba(255,255,255,0.1); border-radius:8px;">
           <h3>🎮 Arcade</h3>
           <p>Explore games like <a href="#" onclick="window.navigate('dragon://wiki/Flappy_Dragon')">Flappy Dragon</a> and how they pay out rewards.</p>
         </div>
       </div>
     `;
   } else {
-    // Dynamic default page
+    // Procedural generation for ANY OTHER page (Infinite Pages!)
+    const rand = getSeededRandom(article);
+    const classifications = ["Quantum Phenomenon", "Virtual Mechanism", "Holographic Concept", "Secret Protocol", "Ancient Relic"];
+    const classes = ["Class-A", "Class-IV", "Level-Max", "Secure-Alpha", "Experimental"];
+    
+    const openingSents = [
+      `is a highly sought-after component located inside the core structure of the DrAg0n portal.`,
+      `represents a unique virtual mechanic first introduced during the 2026 expansion.`,
+      `stands as a legendary community symbol within the chat and arcade communities.`
+    ];
+    const middleSents = [
+      `Experts believe that integrating this object with local DC assets creates an atmospheric shift in the planet generator.`,
+      `According to local database records, its core functions are highly synchronized with the daily unlock passwords.`,
+      `Multiple users have reported discovering hidden tokens near this anomaly during space exploration runs.`
+    ];
+    
     contentHTML = `
       <h1 class="dw-header">${title}</h1>
       <div class="dw-infobox">
-        <div style="background:#ddd; text-align:center; padding:5px; font-weight:bold;">${title}</div>
+        <div style="background:#1e293b; text-align:center; padding:5px; font-weight:bold; color:white;">${title}</div>
         <div style="padding:10px; text-align:center;">
-          <div style="font-size:4rem; margin-bottom:10px;">🌐</div>
-          <i>No custom graphic uploaded.</i>
+          <div style="font-size:4rem; margin-bottom:10px;">🔮</div>
+          <i>A virtual projection.</i>
         </div>
+        <table style="width:100%; border-collapse:collapse; font-size:0.85rem; color:#cbd5e1;">
+          <tr style="border-top:1px solid rgba(255,255,255,0.1);"><td style="font-weight:bold; padding:4px;">Classification</td><td style="padding:4px;">${seededPick(classifications, rand)}</td></tr>
+          <tr style="border-top:1px solid rgba(255,255,255,0.1);"><td style="font-weight:bold; padding:4px;">Threat Level</td><td style="padding:4px;">${seededPick(classes, rand)}</td></tr>
+        </table>
       </div>
-      <p><b>${title}</b> is a topic currently indexed on the Tiny Internet. It was discovered in 2026 by users exploring the local search database.</p>
-      <p>More detailed community research is required to expand this article. Check back later for updates!</p>
+      <p><b>${title}</b> ${seededPick(openingSents, rand)}</p>
+      <p>${seededPick(middleSents, rand)} The anomaly remains under surveillance by the main systems.</p>
+      <h2>Research & History</h2>
+      <p>Historians argue that ${title.toLowerCase()} was created to optimize data flow across the Tiny Internet browser. It is fully cataloged under section ${Math.floor(rand() * 9000 + 1000)} of the database registers.</p>
     `;
   }
 
   contentDiv.innerHTML = `
-    <div class="fake-site" style="background:#f6f6f6; min-height: 100vh;">
-      <div style="display:flex; align-items:center; gap:10px; padding: 20px 40px; background: white; border-bottom: 1px solid #c8ccd1; cursor:pointer;" onclick="window.navigate('dragon://wiki/Main_Page')">
+    <div class="fake-site" style="background:#090d16; min-height: 100vh;">
+      <div style="display:flex; align-items:center; gap:10px; padding: 20px 40px; background: #0b0f19; border-bottom: 1px solid rgba(255,255,255,0.1); cursor:pointer;" onclick="window.navigate('dragon://wiki/Main_Page')">
         <span style="font-size:2rem;">🌐</span>
         <strong style="font-size:1.5rem; font-family:serif;">DragonWiki</strong>
       </div>
@@ -323,48 +346,59 @@ function renderWiki(base) {
   `;
 }
 
-// --- DRAGON NEWS ---
+// --- DRAGON NEWS (Infinite Procedural News Articles) ---
 function renderNews(base) {
   const article = base.split('/').pop();
   
-  if (article && article.startsWith('article')) {
+  if (article && article !== 'news') {
+    // Generate a unique seeded news article
+    const rand = getSeededRandom(article);
+    const headlines = [
+      "MYSTERIOUS ANOMALY DISCOVERED IN COMMUNITY WHITEBOARD",
+      "NEW MOONS DETECTED ORBITING LOCAL VISITOR PLANETS",
+      "ECONOMY IN TRANSIT: COIN DEMAND HITS RECORD HIGHS",
+      "LOCAL PROGRAMMER UNLOCKS GOLDEN AVATAR"
+    ];
+    const headline = headlines[parseInt(article.replace('article-', '')) % headlines.length] || "BREAKING NEWS FROM THE DIGITAL SECTOR";
+    
     contentDiv.innerHTML = `
-      <div class="fake-site">
-        <div class="dn-header" style="cursor:pointer;" onclick="window.navigate('dragon://news')">
+      <div class="fake-site" style="background:#090d16; min-height:100vh; color:#e2e8f0;">
+        <div class="dn-header" style="cursor:pointer; border-color:rgba(255,255,255,0.1);" onclick="window.navigate('dragon://news')">
           <h1 class="dn-title">The Daily Dragon</h1>
           <div class="dn-date">Providing truth to the digital realm since yesterday.</div>
         </div>
-        <h1 class="dn-headline">SHOCKING DISCOVERY: LOCAL DRAGON BECOMES BILLIONAIRE</h1>
-        <div class="dn-article">
-          <p>Reports are flooding in that a local user has amassed over 1,000,000 DC just by playing Flappy Dragon repeatedly for 72 hours straight.</p>
-          <p>"It was easy," the user stated, sipping on a virtual smoothie. "I just kept clicking."</p>
-          <p>Economists are worried this massive influx of DC might inflate the shop prices, making the Golden Crown unaffordable for average citizens.</p>
-          <p>However, the shopkeeper assures everyone that prices will remain stable. <a href="#" onclick="window.navigate('dragon://wiki/Dragon_Coins')">Read more about the economy here.</a></p>
+        <h1 class="dn-headline">${headline}</h1>
+        <div class="dn-article" style="color:#cbd5e1;">
+          <p>Early reports this morning indicate that section ${Math.floor(rand() * 500 + 1)} of the grid has experienced high levels of virtual activity.</p>
+          <p>"It was totally unexpected," an observer commented. "One minute everything was normal, and the next we had digital patterns repeating all over the place."</p>
+          <p>Local authorities are recommending that all users update their profile settings and secure their balances immediately at the shop.</p>
+          <p>We will continue tracking this development as more data comes online. <a href="#" onclick="window.navigate('dragon://wiki/Main_Page')">Read more analysis...</a></p>
         </div>
       </div>
     `;
   } else {
+    // news landing page
     contentDiv.innerHTML = `
-      <div class="fake-site">
-        <div class="dn-header">
+      <div class="fake-site" style="background:#090d16; min-height:100vh; color:#e2e8f0;">
+        <div class="dn-header" style="border-color:rgba(255,255,255,0.1);">
           <h1 class="dn-title">The Daily Dragon</h1>
           <div class="dn-date">Providing truth to the digital realm since yesterday.</div>
         </div>
         
         <div style="max-width:800px; margin: 0 auto; display:grid; grid-template-columns: 2fr 1fr; gap:20px;">
           <div>
-            <img src="https://images.unsplash.com/photo-1517594422361-5e18d4182470?auto=format&fit=crop&q=80&w=800" style="width:100%; filter:grayscale(100%); margin-bottom:10px;">
-            <h2 style="font-family:serif; font-size:2rem;"><a href="#" onclick="window.navigate('dragon://news/article-1')" style="color:black; text-decoration:none;">LOCAL DRAGON BECOMES BILLIONAIRE</a></h2>
-            <p style="font-family:serif;">Economy shaken as user exploits Flappy Dragon mechanics to gain immense wealth...</p>
+            <div style="width:100%; height:250px; background:linear-gradient(45deg, #1e1b4b, #311042); border-radius:12px; margin-bottom:15px; display:flex; align-items:center; justify-content:center; font-size:4rem;">📰</div>
+            <h2 style="font-family:serif; font-size:2rem;"><a href="#" onclick="window.navigate('dragon://news/article-1')" style="color:#38bdf8; text-decoration:none;">MYSTERIOUS ANOMALY DISCOVERED</a></h2>
+            <p style="font-family:serif; color:#cbd5e1;">Grid calculations went wild today as local administrators noticed unusual logs...</p>
           </div>
           <div>
-            <div style="border-bottom:1px solid #ccc; padding-bottom:10px; margin-bottom:10px;">
-              <h3 style="font-family:serif; margin:0;"><a href="#" onclick="window.navigate('dragon://weather')" style="color:black; text-decoration:none;">Weather Forecast</a></h3>
-              <p style="font-family:serif; margin:5px 0;">Warning: Meteor Showers expected.</p>
+            <div style="border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px; margin-bottom:10px;">
+              <h3 style="font-family:serif; margin:0;"><a href="#" onclick="window.navigate('dragon://news/article-2')" style="color:#38bdf8; text-decoration:none;">New Moons Detected</a></h3>
+              <p style="font-family:serif; margin:5px 0; color:#94a3b8;">Astronomers observe procedurally generated clusters.</p>
             </div>
-            <div style="border-bottom:1px solid #ccc; padding-bottom:10px; margin-bottom:10px;">
-              <h3 style="font-family:serif; margin:0;">Sports</h3>
-              <p style="font-family:serif; margin:5px 0;">Cave Clan defeats Forest Clan in Tic-Tac-Toe championship!</p>
+            <div style="border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px; margin-bottom:10px;">
+              <h3 style="font-family:serif; margin:0;"><a href="#" onclick="window.navigate('dragon://news/article-3')" style="color:#38bdf8; text-decoration:none;">Coin Demand Hits Highs</a></h3>
+              <p style="font-family:serif; margin:5px 0; color:#94a3b8;">Shop items are flying off the shelves as players pool DC.</p>
             </div>
           </div>
         </div>
@@ -373,27 +407,49 @@ function renderNews(base) {
   }
 }
 
-// --- DRAGON WEATHER ---
-function renderWeather() {
+// --- DRAGON WEATHER (Infinite Seeded Weather Generator) ---
+function renderWeather(base, query) {
+  let location = "Dragon City";
+  if (query.includes('loc=')) {
+    location = decodeURIComponent(query.split('loc=')[1]);
+  }
+  
+  // Seeded values based on weather location!
+  const rand = getSeededRandom(location);
+  const temp = Math.floor(rand() * 450 - 50); // -50C to 400C!
+  
+  const conditions = ["Heavy Meteor Showers", "Acidic Rainfall", "Molten Solar Flare", "Solar Wind Storms", "Supercooled Freezing Fog", "Pleasant Neon Calm"];
+  const cond = seededPick(conditions, rand);
+  
+  const icons = {
+    "Heavy Meteor Showers": "☄️",
+    "Acidic Rainfall": "🌧️",
+    "Molten Solar Flare": "🔥",
+    "Solar Wind Storms": "💨",
+    "Supercooled Freezing Fog": "🌫️",
+    "Pleasant Neon Calm": "☀️"
+  };
+  const icon = icons[cond] || "☀️";
+
   contentDiv.innerHTML = `
     <div class="fake-site dwx-bg">
-      <div style="font-size: 5rem;">☄️</div>
-      <h1 style="font-size: 3rem; margin:0;">Dragon City</h1>
-      <div class="dwx-temp">400°C</div>
-      <div class="dwx-desc">Heavy Meteor Showers</div>
+      <div style="font-size: 5rem;">${icon}</div>
+      <h1 style="font-size: 3rem; margin:0; text-transform: capitalize;">${location}</h1>
+      <div class="dwx-temp">${temp}°C</div>
+      <div class="dwx-desc">${cond}</div>
       <p style="font-size: 1.2rem; margin-top:20px; opacity:0.8;">
-        Wind: 200 km/h | Humidity: 0% | Visibility: Poor
+        Wind: ${Math.floor(rand() * 300)} km/h | Humidity: ${Math.floor(rand() * 100)}% | Visibility: ${rand() > 0.5 ? "Poor" : "Excellent"}
       </p>
       <div style="margin-top: 50px; display:flex; justify-content:center; gap:20px;">
-        <div style="background:rgba(0,0,0,0.2); padding:20px; border-radius:10px; width:100px;">
+        <div style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); padding:20px; border-radius:10px; width:100px;">
           <div>Tomorrow</div>
           <div style="font-size:2rem; margin:10px 0;">🌋</div>
-          <div>420°C</div>
+          <div>${temp + 10}°C</div>
         </div>
-        <div style="background:rgba(0,0,0,0.2); padding:20px; border-radius:10px; width:100px;">
-          <div>Friday</div>
-          <div style="font-size:2rem; margin:10px 0;">🔥</div>
-          <div>390°C</div>
+        <div style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); padding:20px; border-radius:10px; width:100px;">
+          <div>Next Day</div>
+          <div style="font-size:2rem; margin:10px 0;">❄️</div>
+          <div>${temp - 20}°C</div>
         </div>
       </div>
     </div>

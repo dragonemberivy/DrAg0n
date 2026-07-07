@@ -67,8 +67,8 @@
     #browser-content {
       flex: 1;
       overflow-y: auto;
-      background: #ffffff; /* Faking a bright web page by default */
-      color: #000;
+      background: #090d16; /* Deep dark space background */
+      color: #e2e8f0;      /* Light text */
       position: relative;
     }
 
@@ -79,44 +79,47 @@
     }
 
     /* DragonSearch */
-    .ds-logo { font-size: 4rem; text-align: center; margin-top: 10vh; color: #4285F4; font-weight: bold; }
-    .ds-input { width: 50%; padding: 15px; border-radius: 30px; border: 1px solid #ccc; font-size: 1.2rem; display: block; margin: 20px auto; }
-    .ds-btn { display: block; margin: 0 auto; padding: 10px 20px; background: #f8f9fa; border: 1px solid #f8f9fa; border-radius: 4px; cursor: pointer; }
+    .ds-logo { font-size: 4rem; text-align: center; margin-top: 10vh; color: #38bdf8; font-weight: bold; text-shadow: 0 0 20px rgba(56,189,248,0.3); }
+    .ds-input { width: 50%; padding: 15px; border-radius: 30px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: white; font-size: 1.2rem; display: block; margin: 20px auto; outline: none; }
+    .ds-input:focus { border-color: #38bdf8; box-shadow: 0 0 10px rgba(56,189,248,0.3); }
+    .ds-btn { display: block; margin: 0 auto; padding: 10px 20px; background: rgba(255,255,255,0.08); border: 1px solid var(--border); color: white; border-radius: 20px; cursor: pointer; transition: all 0.2s; }
+    .ds-btn:hover { background: rgba(255,255,255,0.15); border-color: #38bdf8; }
     
     .ds-results { max-width: 800px; margin: 20px auto; }
-    .ds-result { margin-bottom: 20px; }
-    .ds-link { color: #1a0dab; font-size: 1.2rem; text-decoration: none; display: block; margin-bottom: 5px;}
+    .ds-result { margin-bottom: 25px; padding: 15px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; }
+    .ds-link { color: #38bdf8; font-size: 1.2rem; text-decoration: none; display: block; margin-bottom: 5px;}
     .ds-link:hover { text-decoration: underline; }
-    .ds-desc { color: #4d5156; }
+    .ds-desc { color: #94a3b8; font-size: 0.95rem; }
 
     /* DragonTube */
-    .dt-header { background: #282828; color: white; padding: 15px; font-weight: bold; font-size: 1.5rem; display: flex; align-items: center; gap:10px;}
-    .dt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; padding: 20px; background: #0f0f0f; min-height: 100vh;}
-    .dt-card { cursor: pointer; }
-    .dt-thumb { background: #333; height: 140px; border-radius: 12px; margin-bottom: 10px; display:flex; align-items:center; justify-content:center; font-size: 3rem;}
+    .dt-header { background: #111827; color: white; padding: 15px; font-weight: bold; font-size: 1.5rem; display: flex; align-items: center; gap:10px; border-bottom: 1px solid var(--border); }
+    .dt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; padding: 20px; background: #030712; min-height: 100vh;}
+    .dt-card { cursor: pointer; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; transition: all 0.2s; }
+    .dt-card:hover { transform: translateY(-5px); border-color: #38bdf8; background: rgba(56,189,248,0.05); }
+    .dt-thumb { height: 140px; border-radius: 8px; margin-bottom: 10px; display:flex; align-items:center; justify-content:center; font-size: 3rem; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
     .dt-title { color: white; font-weight: bold; font-size: 1rem;}
-    .dt-channel { color: #aaa; font-size: 0.9rem;}
+    .dt-channel { color: #94a3b8; font-size: 0.9rem;}
 
-    .dt-player-container { padding: 20px; background: #0f0f0f; color: white; min-height: 100vh;}
+    .dt-player-container { padding: 20px; background: #030712; color: white; min-height: 100vh;}
     .dt-player { width: 100%; max-width: 800px; height: 450px; background: black; margin: 0 auto 20px auto; display:flex; align-items:center; justify-content:center; color:white; font-size:2rem; animation: pulse 2s infinite;}
     
     @keyframes pulse { 0% { background: #111; } 50% { background: #333; } 100% { background: #111; } }
 
     /* DragonWiki */
-    .dw-header { border-bottom: 1px solid #a2a9b1; padding-bottom: 10px; margin-bottom: 20px; font-size: 2rem; font-family: serif;}
-    .dw-content { font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; background: white; padding: 40px; border: 1px solid #c8ccd1;}
-    .dw-infobox { float: right; width: 250px; background: #f8f9fa; border: 1px solid #a2a9b1; padding: 10px; margin-left: 20px; font-size: 0.9rem;}
+    .dw-header { border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 20px; font-size: 2rem; font-family: serif;}
+    .dw-content { font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(10px); padding: 40px; border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; }
+    .dw-infobox { float: right; width: 250px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255,255,255,0.1); padding: 10px; margin-left: 20px; font-size: 0.9rem; border-radius: 8px;}
     
     /* Daily Dragon News */
-    .dn-header { text-align: center; font-family: "Times New Roman", serif; border-bottom: 4px double #333; padding-bottom: 20px; margin-bottom: 20px; }
-    .dn-title { font-size: 4rem; text-transform: uppercase; margin: 0;}
-    .dn-date { font-style: italic; color: #666;}
-    .dn-article { max-width: 800px; margin: 0 auto; columns: 2; column-gap: 40px; font-family: serif; line-height: 1.6; text-align: justify;}
-    .dn-headline { font-size: 2.5rem; column-span: all; text-align: center; margin-bottom: 20px; font-weight: bold;}
+    .dn-header { text-align: center; font-family: "Times New Roman", serif; border-bottom: 4px double rgba(255,255,255,0.1); padding-bottom: 20px; margin-bottom: 20px; }
+    .dn-title { font-size: 4rem; text-transform: uppercase; margin: 0; color: #fff;}
+    .dn-date { font-style: italic; color: #94a3b8;}
+    .dn-article { max-width: 800px; margin: 0 auto; columns: 2; column-gap: 40px; font-family: serif; line-height: 1.6; text-align: justify; color: #e2e8f0; }
+    .dn-headline { font-size: 2.5rem; column-span: all; text-align: center; margin-bottom: 20px; font-weight: bold; color: #fff; }
 
     /* Dragon Weather */
-    .dwx-bg { background: linear-gradient(to bottom, #4facfe 0%, #00f2fe 100%); color: white; padding: 50px; text-align: center; min-height: 100vh;}
-    .dwx-temp { font-size: 8rem; font-weight: bold; margin: 20px 0;}
+    .dwx-bg { background: linear-gradient(to bottom, #0f172a 0%, #1e1b4b 100%); color: white; padding: 50px; text-align: center; min-height: 100vh;}
+    .dwx-temp { font-size: 8rem; font-weight: bold; margin: 20px 0; text-shadow: 0 0 30px rgba(255,255,255,0.2); }
     .dwx-desc { font-size: 2rem; }
     
   </style>
