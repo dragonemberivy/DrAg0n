@@ -92,10 +92,6 @@ function renderSearch(query) {
     if (cleanQuery.includes('game') || cleanQuery.includes('play') || cleanQuery.includes('flappy') || cleanQuery.includes('snake')) {
       matches.push(`
         <div class="ds-result">
-          <a href="#" onclick="window.navigate('dragon://tube/watch?v=1')" class="ds-link">DragonTube - 10 Hours of Flappy Dragon Gameplay</a>
-          <div class="ds-desc">Watch the ultimate pro player score over 9000 in Flappy Dragon...</div>
-        </div>
-        <div class="ds-result">
           <a href="#" onclick="window.navigate('dragon://wiki/Flappy_Dragon')" class="ds-link">DragonWiki: Flappy Dragon</a>
           <div class="ds-desc">An in-depth article detailing the history, mechanics, and strategies of the popular arcade game...</div>
         </div>
@@ -110,9 +106,18 @@ function renderSearch(query) {
       `);
     }
 
-    // 2. Procedural Matches (Infinite Content Generator!)
+    // 2. Dynamic Video Result related directly to their search term!
+    let videoId = encodeURIComponent(searchVal);
+    matches.push(`
+      <div class="ds-result">
+        <a href="#" onclick="window.navigate('dragon://tube/watch?v=${videoId}')" class="ds-link">DragonTube: Trending Video on "${searchVal}"</a>
+        <div class="ds-desc">Stream this real video covering "${searchVal}" directly inside the browser. No YouTube player required.</div>
+      </div>
+    `);
+
+    // 3. Procedural Matches (Infinite Wiki Content Generator!)
     const rand = getSeededRandom(cleanQuery);
-    const numProcedural = 2 + Math.floor(rand() * 3); // Generate 2-4 results for anything!
+    const numProcedural = 1 + Math.floor(rand() * 2); // Generate 1-2 extra results
 
     const subjects = ["Ancient", "Future", "Secret", "Cursed", "Glow-in-the-dark", "Invisible", "Cybernetic", "Quantum", "Mystical"];
     const nouns = ["Artifacts", "Portals", "Dragons", "AI Agents", "Virtual Worlds", "Hacking Tools", "Whiteboards", "Void Crystals", "Nebula Cores"];
@@ -151,34 +156,44 @@ function renderSearch(query) {
   `;
 }
 
-// --- DRAGON TUBE (Direct MP4 Streams, No YouTube) ---
+// --- DRAGON TUBE (Direct MP4 Streams, Matched to Search Queries!) ---
 function renderTube(base, query) {
   if (query.includes('v=')) {
-    // Royalty-free direct MP4 streams hosted on Mixkit CDN
-    const videoIdMap = {
-      '1': 'https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4',
-      '2': 'https://assets.mixkit.co/videos/preview/mixkit-green-cyber-character-glowing-in-dark-40092-large.mp4',
-      '3': 'https://assets.mixkit.co/videos/preview/mixkit-stars-in-space-background-1611-large.mp4',
-      '4': 'https://assets.mixkit.co/videos/preview/mixkit-abstract-glowing-particles-background-1002-large.mp4'
-    };
-    const titleMap = {
-      '1': '10 Hours of Flappy Dragon Gameplay',
-      '2': 'How to get infinite DC! (Not clickbait)',
-      '3': 'Reacting to YOUR Planets!',
-      '4': 'Global Jukebox Fail Compilation'
-    };
-    const descMap = {
-      '1': 'Watch as the dragon navigates beautiful lush forests, seeking out the hidden golden coins.',
-      '2': 'A visual representation of the glowing green cyber-lines running through the site\'s ledger database.',
-      '3': 'Streaming high-resolution footage of the deep space nebula where visitor planets are generated.',
-      '4': 'Abstract glowing failures and glitch lines compiled from Jukebox audio stream issues.'
-    };
-    
-    const v = query.split('=')[1];
-    const mp4Url = videoIdMap[v] || videoIdMap['3'];
-    const title = titleMap[v] || 'Epic Video';
-    const desc = descMap[v] || 'This is a real video streaming directly on the Tiny Internet.';
-    
+    const videoParam = decodeURIComponent(query.split('v=')[1]);
+    const term = videoParam.toLowerCase();
+
+    // Map keywords to relevant stock MP4 video clips
+    let mp4Url = 'https://assets.mixkit.co/videos/preview/mixkit-abstract-glowing-particles-background-1002-large.mp4'; // default abstract
+    let categoryName = 'Special Interest';
+
+    if (term.includes('cat') || term.includes('pet') || term.includes('animal') || term.includes('dog')) {
+      mp4Url = 'https://assets.mixkit.co/videos/preview/mixkit-kitten-sleeping-on-a-fluffy-white-blanket-41712-large.mp4';
+      categoryName = 'Cute Animals';
+    } else if (term.includes('space') || term.includes('planet') || term.includes('universe') || term.includes('galaxy') || term.includes('star')) {
+      mp4Url = 'https://assets.mixkit.co/videos/preview/mixkit-stars-in-space-background-1611-large.mp4';
+      categoryName = 'Science & Nature';
+    } else if (term.includes('weather') || term.includes('rain') || term.includes('storm') || term.includes('cloud')) {
+      mp4Url = 'https://assets.mixkit.co/videos/preview/mixkit-rain-falling-on-a-window-pane-1823-large.mp4';
+      categoryName = 'Meteorology';
+    } else if (term.includes('coin') || term.includes('dc') || term.includes('money') || term.includes('rich') || term.includes('gold')) {
+      mp4Url = 'https://assets.mixkit.co/videos/preview/mixkit-spinning-gold-coin-on-black-background-48560-large.mp4';
+      categoryName = 'Finance';
+    } else if (term.includes('code') || term.includes('hack') || term.includes('cyber') || term.includes('matrix') || term.includes('net')) {
+      mp4Url = 'https://assets.mixkit.co/videos/preview/mixkit-green-cyber-character-glowing-in-dark-40092-large.mp4';
+      categoryName = 'Technology';
+    } else if (term.includes('dragon') || term.includes('lizard') || term.includes('reptile') || term.includes('monster')) {
+      mp4Url = 'https://assets.mixkit.co/videos/preview/mixkit-chameleon-on-a-branch-40120-large.mp4';
+      categoryName = 'Reptilian Wildlife';
+    } else if (term.includes('game') || term.includes('play') || term.includes('flappy') || term.includes('forest') || term.includes('nature')) {
+      mp4Url = 'https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4';
+      categoryName = 'Nature Loop';
+    }
+
+    // Capitalize term for title
+    const displayTitle = videoParam.charAt(0).toUpperCase() + videoParam.slice(1);
+    const title = displayTitle.length <= 2 ? `Video #${displayTitle}` : `All About "${displayTitle}"`;
+    const desc = `A high quality, user-contributed stream exploring the concept of "${displayTitle.toLowerCase()}". Categorized under ${categoryName}.`;
+
     contentDiv.innerHTML = `
       <div class="dt-player-container">
         <div class="dt-header" style="margin-bottom: 20px; cursor:pointer;" onclick="window.navigate('dragon://tube')">
@@ -200,22 +215,22 @@ function renderTube(base, query) {
         <span style="color:red;">▶</span> DragonTube
       </div>
       <div class="dt-grid">
-        <div class="dt-card" onclick="window.navigate('dragon://tube/watch?v=1')">
+        <div class="dt-card" onclick="window.navigate('dragon://tube/watch?v=forest')">
           <div class="dt-thumb" style="background: linear-gradient(135deg, #1e1b4b, #311042);">🌳</div>
           <div class="dt-title">10 Hours of Flappy Dragon</div>
           <div class="dt-channel">ProGamer</div>
         </div>
-        <div class="dt-card" onclick="window.navigate('dragon://tube/watch?v=2')">
+        <div class="dt-card" onclick="window.navigate('dragon://tube/watch?v=cyber')">
           <div class="dt-thumb" style="background: linear-gradient(135deg, #450a0a, #780202);">🧬</div>
           <div class="dt-title">How to get infinite DC! (Not clickbait)</div>
           <div class="dt-channel">EconomyHax</div>
         </div>
-        <div class="dt-card" onclick="window.navigate('dragon://tube/watch?v=3')">
+        <div class="dt-card" onclick="window.navigate('dragon://tube/watch?v=space')">
           <div class="dt-thumb" style="background: linear-gradient(135deg, #022c22, #065f46);">🌌</div>
           <div class="dt-title">Reacting to YOUR Planets!</div>
           <div class="dt-channel">SpaceExplorer</div>
         </div>
-        <div class="dt-card" onclick="window.navigate('dragon://tube/watch?v=4')">
+        <div class="dt-card" onclick="window.navigate('dragon://tube/watch?v=fails')">
           <div class="dt-thumb" style="background: linear-gradient(135deg, #172554, #1e3a8a);">✨</div>
           <div class="dt-title">Global Jukebox Fail Compilation</div>
           <div class="dt-channel">FunnyClips</div>
