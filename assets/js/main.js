@@ -755,11 +755,12 @@
         let clanTag = purchases.clan ? `<span style="color:#a855f7; font-size:0.7rem; font-weight:bold;">[${purchases.clan}]</span> ` : '';
         let pet = purchases.pet === 'dragon' ? '🐉' : purchases.pet === 'robot' ? '🤖' : '';
         if(pet) {
+          profileWidget.style.position = 'relative';
           if(!document.getElementById('profile-pet')) {
             const petEl = document.createElement('div');
             petEl.id = 'profile-pet';
             petEl.style.cssText = 'position:absolute; top:-15px; right:-15px; font-size:1.5rem; animation: float 3s ease-in-out infinite; pointer-events:none; z-index:100;';
-            document.getElementById('drag0n-profile-widget').appendChild(petEl);
+            profileWidget.appendChild(petEl);
           }
           document.getElementById('profile-pet').innerText = pet;
         }
@@ -933,6 +934,14 @@
       // Owner 1,000 DC Starter Bonus
       if(localStorage.getItem('drag0n_owner') === 'true' && !localStorage.getItem('drag0n_owner_starter')) {
         localStorage.setItem('drag0n_owner_starter', 'true');
+        let currentDC = parseInt(localStorage.getItem('drag0n_dc') || '0');
+        localStorage.setItem('drag0n_dc', currentDC + 1000);
+        setTimeout(() => { if(typeof updateProfileWidget === 'function') updateProfileWidget(); }, 500);
+      }
+
+      // Owner 1,000 DC Refund for the Dragon Pet UI crash
+      if(localStorage.getItem('drag0n_owner') === 'true' && !localStorage.getItem('drag0n_owner_refund')) {
+        localStorage.setItem('drag0n_owner_refund', 'true');
         let currentDC = parseInt(localStorage.getItem('drag0n_dc') || '0');
         localStorage.setItem('drag0n_dc', currentDC + 1000);
         setTimeout(() => { if(typeof updateProfileWidget === 'function') updateProfileWidget(); }, 500);
