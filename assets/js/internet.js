@@ -261,30 +261,31 @@ function renderTube(base, query) {
     const term = videoParam.toLowerCase();
 
     // Map keywords to relevant stock MP4 video clips
-    let mp4Url = 'https://assets.mixkit.co/videos/preview/mixkit-abstract-glowing-particles-background-1002-large.mp4'; // default abstract
+    let mp4Url = 'https://vjs.zencdn.net/v/oceans.mp4'; // default
     let categoryName = 'Special Interest';
 
-    if (term.includes('cat') || term.includes('pet') || term.includes('animal') || term.includes('dog')) {
-      mp4Url = 'https://assets.mixkit.co/videos/preview/mixkit-kitten-sleeping-on-a-fluffy-white-blanket-41712-large.mp4';
+    if (term.includes('cat') || term.includes('pet') || term.includes('animal') || term.includes('dog') || term.includes('bunny')) {
+      mp4Url = 'https://www.w3schools.com/html/mov_bbb.mp4';
       categoryName = 'Cute Animals';
-    } else if (term.includes('space') || term.includes('planet') || term.includes('universe') || term.includes('galaxy') || term.includes('star')) {
-      mp4Url = 'https://assets.mixkit.co/videos/preview/mixkit-stars-in-space-background-1611-large.mp4';
-      categoryName = 'Science & Nature';
-    } else if (term.includes('weather') || term.includes('rain') || term.includes('storm') || term.includes('cloud')) {
-      mp4Url = 'https://assets.mixkit.co/videos/preview/mixkit-rain-falling-on-a-window-pane-1823-large.mp4';
-      categoryName = 'Meteorology';
-    } else if (term.includes('coin') || term.includes('dc') || term.includes('money') || term.includes('rich') || term.includes('gold')) {
-      mp4Url = 'https://assets.mixkit.co/videos/preview/mixkit-spinning-gold-coin-on-black-background-48560-large.mp4';
-      categoryName = 'Finance';
-    } else if (term.includes('code') || term.includes('hack') || term.includes('cyber') || term.includes('matrix') || term.includes('net')) {
-      mp4Url = 'https://assets.mixkit.co/videos/preview/mixkit-green-cyber-character-glowing-in-dark-40092-large.mp4';
-      categoryName = 'Technology';
-    } else if (term.includes('dragon') || term.includes('lizard') || term.includes('reptile') || term.includes('monster')) {
-      mp4Url = 'https://assets.mixkit.co/videos/preview/mixkit-chameleon-on-a-branch-40120-large.mp4';
-      categoryName = 'Reptilian Wildlife';
-    } else if (term.includes('game') || term.includes('play') || term.includes('flappy') || term.includes('forest') || term.includes('nature')) {
-      mp4Url = 'https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4';
-      categoryName = 'Nature Loop';
+    } else if (term.includes('space') || term.includes('planet') || term.includes('universe') || term.includes('galaxy') || term.includes('star') || term.includes('ocean') || term.includes('sea') || term.includes('water')) {
+      mp4Url = 'https://vjs.zencdn.net/v/oceans.mp4';
+      categoryName = 'Oceanic Space';
+    } else if (term.includes('weather') || term.includes('rain') || term.includes('storm') || term.includes('cloud') || term.includes('flower') || term.includes('nature') || term.includes('forest') || term.includes('garden')) {
+      mp4Url = 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4';
+      categoryName = 'Nature & Weather';
+    } else if (term.includes('dragon') || term.includes('lizard') || term.includes('reptile') || term.includes('monster') || term.includes('bear') || term.includes('wild')) {
+      mp4Url = 'https://www.w3schools.com/html/movie.mp4';
+      categoryName = 'Wildlife';
+    } else {
+      // Rotate between them based on query length for variety
+      const urlList = [
+        'https://vjs.zencdn.net/v/oceans.mp4',
+        'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
+        'https://www.w3schools.com/html/mov_bbb.mp4',
+        'https://www.w3schools.com/html/movie.mp4'
+      ];
+      mp4Url = urlList[term.length % urlList.length];
+      categoryName = 'Generative Content';
     }
 
     // Capitalize term for title
