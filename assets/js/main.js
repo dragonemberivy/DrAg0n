@@ -922,12 +922,20 @@
       }
     };
     
-    // Give daily login XP (50)
+    // Give daily login XP (50) and handle Owner Starter Bonus
     window.addEventListener('load', () => {
       const today = new Date().toISOString().split('T')[0];
       if(localStorage.getItem('drag0n_last_login') !== today) {
         localStorage.setItem('drag0n_last_login', today);
         setTimeout(() => window.addXP(50), 2000);
+      }
+      
+      // Owner 1,000 DC Starter Bonus
+      if(localStorage.getItem('drag0n_owner') === 'true' && !localStorage.getItem('drag0n_owner_starter')) {
+        localStorage.setItem('drag0n_owner_starter', 'true');
+        let currentDC = parseInt(localStorage.getItem('drag0n_dc') || '0');
+        localStorage.setItem('drag0n_dc', currentDC + 1000);
+        setTimeout(() => { if(typeof updateProfileWidget === 'function') updateProfileWidget(); }, 500);
       }
     });
 
