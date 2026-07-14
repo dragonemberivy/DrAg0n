@@ -191,11 +191,12 @@ function renderSearch(query) {
   `;
 }
 
-// --- FAKE WEBSITE RENDERER (Infinite Seeded Websites) ---
+// --- FAKE WEBSITE RENDERER (Infinite Seeded Websites!) ---
 function renderWebSite(url) {
   const domain = url.replace('http://', '').replace('https://', '').split('/')[0];
   const cleanDomain = domain.replace('www.', '').split('.')[0];
   
+  // Seeded generation matching the specific domain name
   const rand = getSeededRandom(domain);
   const themeHue = Math.floor(rand() * 360);
   const accentColor = `hsl(${themeHue}, 80%, 60%)`;
@@ -210,36 +211,151 @@ function renderWebSite(url) {
   const p1 = `This system was initialized to store, monitor, and catalog records related to ${cleanDomain}. The network currently registers over ${Math.floor(rand() * 50000 + 100)} active terminals across the sector.`;
   const p2 = `By accessing this ${type.toLowerCase()}, users can run diagnostic reports, query local databases, and sync settings directly to the main server registers. Ensure you keep your DC balance safe at all times.`;
 
+  // Keyword check for interactive widgets and custom logos
+  const term = cleanDomain.toLowerCase();
+  const isHannibal = term.includes('cannibal') || term.includes('hannibal') || term.includes('eat') || term.includes('food') || term.includes('cook');
+  const isSpace = term.includes('space') || term.includes('planet') || term.includes('universe') || term.includes('galaxy') || term.includes('star') || term.includes('moon');
+  const isFinance = term.includes('coin') || term.includes('dc') || term.includes('money') || term.includes('rich') || term.includes('gold') || term.includes('shop') || term.includes('buy') || term.includes('bank');
+  const isWeather = term.includes('weather') || term.includes('rain') || term.includes('storm') || term.includes('cloud') || term.includes('temp') || term.includes('wind');
+  const isGame = term.includes('game') || term.includes('play') || term.includes('flappy') || term.includes('snake') || term.includes('arcade') || term.includes('score');
+
+  let logoEmoji = "🌀";
+  let widgetHTML = "";
+
+  if (isHannibal) {
+    logoEmoji = "🥩";
+    widgetHTML = `
+      <div style="margin-top:20px; padding:15px; background:rgba(220,38,38,0.05); border:1px solid rgba(220,38,38,0.2); border-radius:10px;">
+        <h4 style="margin:0 0 10px 0; color:#f87171;">🍽️ Gourmet Recipe Generator</h4>
+        <p style="font-size:0.9rem; color:#fca5a5; margin-bottom:15px;">Simulate a custom recipe curated by the doctor.</p>
+        <button onclick="
+          const meats = ['Truffle Infused Void-Gel', 'Chameleon Filet', 'Cybernetic Ribeye', 'Slow-cooked database registry'];
+          const sauces = ['FBI Red Reduction', 'Chianti Wine Glaze', 'Acid Rain Jus', 'Daily Password Reduction'];
+          const sides = ['fava beans', 'braised binary chips', 'sauteed memory nodes', 'procedural truffles'];
+          const r = Math.floor(Math.random() * 4);
+          const recipe = meats[r] + ' served with a rich ' + sauces[Math.floor(Math.random() * 4)] + ' and a side of ' + sides[Math.floor(Math.random() * 4)] + '.';
+          alert('Gourmet Recipe: ' + recipe);
+        " style="background:#dc2626; color:#fff; border:none; padding:8px 15px; border-radius:15px; font-weight:bold; cursor:pointer; font-size:0.85rem;">Generate Recipe</button>
+      </div>
+    `;
+  } else if (isSpace) {
+    logoEmoji = "🚀";
+    widgetHTML = `
+      <div style="margin-top:20px; padding:15px; background:rgba(56,189,248,0.05); border:1px solid rgba(56,189,248,0.2); border-radius:10px;">
+        <h4 style="margin:0 0 10px 0; color:#38bdf8;">🛰️ Sector Coordinates Scanner</h4>
+        <p style="font-size:0.9rem; color:#bae6fd; margin-bottom:15px;">Scan nearby orbits for rogue asteroids and anomalies.</p>
+        <button onclick="
+          const x = Math.floor(Math.random() * 9999);
+          const y = Math.floor(Math.random() * 9999);
+          const z = Math.floor(Math.random() * 9999);
+          alert('Scanner Active... Found anomaly at sector: [' + x + ', ' + y + ', ' + z + '] - Threat level: ' + ['Low', 'Moderate', 'High', 'Omega'][Math.floor(Math.random()*4)]);
+        " style="background:#0284c7; color:#fff; border:none; padding:8px 15px; border-radius:15px; font-weight:bold; cursor:pointer; font-size:0.85rem;">Scan Orbit</button>
+      </div>
+    `;
+  } else if (isFinance) {
+    logoEmoji = "💰";
+    widgetHTML = `
+      <div style="margin-top:20px; padding:15px; background:rgba(234,179,8,0.05); border:1px solid rgba(234,179,8,0.2); border-radius:10px;">
+        <h4 style="margin:0 0 10px 0; color:#eab308;">📈 DC Investment Calculator</h4>
+        <p style="font-size:0.9rem; color:#fef08a; margin-bottom:15px;">Project compound growth inside the DrAg0n virtual treasury.</p>
+        <div style="display:flex; gap:10px; margin-bottom:10px;">
+          <input type="number" id="dc-invest-amt" placeholder="DC Amount" value="100" style="width:100px; padding:5px; border-radius:5px; border:1px solid #eab308; background:#000; color:#fff; outline:none;">
+          <button onclick="
+            const amt = parseFloat(document.getElementById('dc-invest-amt').value) || 0;
+            const growth = Math.floor(amt * 1.54);
+            alert('In 30 solar cycles, your ' + amt + ' DC will compound to approximately ' + growth + ' DC! (54% Est. Yield)');
+          " style="background:#ca8a04; color:#fff; border:none; padding:5px 12px; border-radius:5px; font-weight:bold; cursor:pointer; font-size:0.85rem;">Calculate</button>
+        </div>
+      </div>
+    `;
+  } else if (isWeather) {
+    logoEmoji = "⚡";
+    widgetHTML = `
+      <div style="margin-top:20px; padding:15px; background:rgba(16,185,129,0.05); border:1px solid rgba(16,185,129,0.2); border-radius:10px;">
+        <h4 style="margin:0 0 10px 0; color:#10b981;">🌪️ Real-Time Wind Speed Monitor</h4>
+        <p style="font-size:0.9rem; color:#a7f3d0; margin-bottom:15px;">Live atmospheric velocity measurements.</p>
+        <div style="font-size:1.8rem; font-weight:bold; color:#34d399; margin-bottom:10px;" id="live-wind-speed">${Math.floor(Math.random() * 200 + 50)} km/h</div>
+        <button onclick="
+          const sp = Math.floor(Math.random() * 250 + 50);
+          document.getElementById('live-wind-speed').innerText = sp + ' km/h';
+        " style="background:#059669; color:#fff; border:none; padding:8px 15px; border-radius:15px; font-weight:bold; cursor:pointer; font-size:0.85rem;">Update Sensor</button>
+      </div>
+    `;
+  } else if (isGame) {
+    logoEmoji = "🎮";
+    widgetHTML = `
+      <div style="margin-top:20px; padding:15px; background:rgba(168,85,247,0.05); border:1px solid rgba(168,85,247,0.2); border-radius:10px;">
+        <h4 style="margin:0 0 10px 0; color:#c084fc;">🏆 Hall of Fame Submitter</h4>
+        <p style="font-size:0.9rem; color:#e9d5ff; margin-bottom:15px;">Submit your name to enter the local portal ranks.</p>
+        <div style="display:flex; gap:10px; margin-bottom:10px;">
+          <input type="text" id="arcade-sub-name" placeholder="Username" style="width:120px; padding:5px; border-radius:5px; border:1px solid #c084fc; background:#000; color:#fff; outline:none;">
+          <button onclick="
+            const name = document.getElementById('arcade-sub-name').value || 'Anonymous';
+            alert('Congratulations ' + name + '! You have been registered in the Hall of Fame at rank #' + Math.floor(Math.random() * 10 + 2) + '!');
+          " style="background:#9333ea; color:#fff; border:none; padding:5px 12px; border-radius:5px; font-weight:bold; cursor:pointer; font-size:0.85rem;">Submit</button>
+        </div>
+      </div>
+    `;
+  } else {
+    // Default general site widget
+    logoEmoji = "🌀";
+    widgetHTML = `
+      <div style="margin-top:20px; padding:15px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:10px;">
+        <h4 style="margin:0 0 10px 0; color:#fff;">💻 System Sandbox Console</h4>
+        <p style="font-size:0.9rem; color:#ccc; margin-bottom:15px;">Execute a sandbox query protocol.</p>
+        <button onclick="
+          const cmds = ['GET /sys/status HTTP/1.1\\n200 OK', 'SYNC ledger_db... Done.', 'BYPASS password_modal... Failed.', 'DECRYPT void_crystal... Access Denied.'];
+          alert('Console Output:\\n' + cmds[Math.floor(Math.random() * cmds.length)]);
+         " style="background:rgba(255,255,255,0.15); color:#fff; border:1px solid rgba(255,255,255,0.3); padding:8px 15px; border-radius:15px; font-weight:bold; cursor:pointer; font-size:0.85rem;">Execute Command</button>
+      </div>
+    `;
+  }
+
+  // Draw the custom website content
   contentDiv.innerHTML = `
     <div class="fake-site" style="background:${bgGradient}; min-height:100vh; color:#e2e8f0; font-family:'Outfit', sans-serif;">
+      <!-- Web site header banner -->
       <div style="border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom: 20px; margin-bottom: 30px; display:flex; justify-content:space-between; align-items:center;">
         <div>
           <h1 style="font-size:2.2rem; color:${accentColor}; margin:0; text-shadow: 0 0 20px rgba(255,255,255,0.1); text-transform:capitalize;">${cleanDomain} Portal</h1>
           <span style="color:#94a3b8; font-size:0.85rem; text-transform:uppercase; letter-spacing:1px;">${type}</span>
         </div>
-        <div style="font-size: 2.5rem;">🌐</div>
+        <div style="font-size: 2.5rem; filter: drop-shadow(0 0 10px ${accentColor});">${logoEmoji}</div>
       </div>
+
+      <!-- Navigation Bar -->
+      <nav style="display:flex; gap:20px; margin-bottom: 30px; font-size:0.9rem; font-weight:600; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom:15px;">
+        <a href="#" onclick="alert('Already at Home.')" style="color:${accentColor}; text-decoration:none;">Home</a>
+        <a href="#" onclick="alert('Accessing database... Connection timed out.')" style="color:#94a3b8; text-decoration:none; transition: color 0.2s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#94a3b8'">Database</a>
+        <a href="#" onclick="alert('Portals are temporarily closed for maintenance.')" style="color:#94a3b8; text-decoration:none; transition: color 0.2s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#94a3b8'">Portals</a>
+        <a href="#" onclick="alert('Help documentation is available on DragonWiki.')" style="color:#94a3b8; text-decoration:none; transition: color 0.2s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#94a3b8'">Help</a>
+      </nav>
       
+      <!-- Content columns -->
       <div style="display:grid; grid-template-columns: 2fr 1fr; gap:30px;">
-        <div class="glass-card" style="background:rgba(255,255,255,0.02); border-color:rgba(255,255,255,0.1); padding:25px; border-radius:12px;">
-          <h2 style="color:${accentColor}; margin-top:0;">${welcome}</h2>
+        <div class="glass-card" style="background:rgba(255,255,255,0.02); border-color:rgba(255,255,255,0.1); padding:25px; border-radius:12px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);">
+          <h2 style="color:${accentColor}; margin-top:0; font-size: 1.6rem;">${welcome}</h2>
           <p style="font-size:1.1rem; line-height:1.6; color:#cbd5e1;">${p1}</p>
           <p style="font-size:1.1rem; line-height:1.6; color:#cbd5e1;">${p2}</p>
+
+          <!-- Injected Interactive Widget -->
+          ${widgetHTML}
           
           <div style="margin-top: 30px; display:flex; gap:10px;">
-            <button onclick="alert('Accessing diagnostic logs for ${cleanDomain}...')" style="background:${accentColor}; color:#000; border:none; padding:10px 20px; border-radius:20px; font-weight:bold; cursor:pointer;">Run Diagnostics</button>
-            <button onclick="window.navigate('dragon://search')" style="background:rgba(255,255,255,0.08); color:#fff; border:1px solid rgba(255,255,255,0.2); padding:10px 20px; border-radius:20px; cursor:pointer;">Search Web</button>
+            <button onclick="alert('Accessing diagnostic logs for ${cleanDomain}... All systems check.')" style="background:${accentColor}; color:#000; border:none; padding:10px 20px; border-radius:20px; font-weight:bold; cursor:pointer; box-shadow: 0 0 15px ${accentColor}; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">Run Diagnostics</button>
+            <button onclick="window.navigate('dragon://search')" style="background:rgba(255,255,255,0.08); color:#fff; border:1px solid rgba(255,255,255,0.2); padding:10px 20px; border-radius:20px; cursor:pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">Search Web</button>
           </div>
         </div>
         
         <div>
-          <div class="glass-card" style="background:rgba(0,0,0,0.3); border-color:rgba(255,255,255,0.08); padding:20px; border-radius:12px; margin-bottom:20px;">
-            <h3 style="color:#fff; margin-top:0;">Grid Status</h3>
-            <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.9rem;">
+          <!-- Right side panel -->
+          <div class="glass-card" style="background:rgba(0,0,0,0.3); border-color:rgba(255,255,255,0.08); padding:20px; border-radius:12px; margin-bottom:20px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);">
+            <h3 style="color:#fff; margin-top:0; font-size:1.2rem; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px;">Grid Status</h3>
+            <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:0.9rem;">
               <span style="color:#94a3b8;">System Load</span>
               <span style="color:#34d399; font-weight:bold;">${Math.floor(rand() * 40 + 10)}%</span>
             </div>
-            <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.9rem;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:0.9rem;">
               <span style="color:#94a3b8;">Ledger Sync</span>
               <span style="color:#34d399; font-weight:bold;">Active</span>
             </div>
@@ -249,16 +365,21 @@ function renderWebSite(url) {
             </div>
           </div>
           
-          <div class="glass-card" style="background:rgba(255,255,255,0.02); border-color:rgba(255,255,255,0.1); padding:20px; border-radius:12px;">
-            <h3 style="color:#fff; margin-top:0;">Related Links</h3>
-            <ul style="padding-left:20px; margin:0; font-size:0.95rem;">
-              <li style="margin-bottom:10px;"><a href="#" onclick="window.navigate('dragon://wiki/Main_Page')" style="color:${accentColor};">DragonWiki Home</a></li>
-              <li style="margin-bottom:10px;"><a href="#" onclick="window.navigate('dragon://tube')" style="color:${accentColor};">DragonTube Videos</a></li>
-              <li><a href="#" onclick="window.navigate('dragon://weather')" style="color:${accentColor};">Weather Forecast</a></li>
+          <div class="glass-card" style="background:rgba(255,255,255,0.02); border-color:rgba(255,255,255,0.1); padding:20px; border-radius:12px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);">
+            <h3 style="color:#fff; margin-top:0; font-size:1.2rem; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px;">Related Links</h3>
+            <ul style="padding-left:20px; margin:0; font-size:0.95rem; line-height: 1.8;">
+              <li style="margin-bottom:8px;"><a href="#" onclick="window.navigate('dragon://wiki/Main_Page')" style="color:${accentColor}; text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">DragonWiki Home</a></li>
+              <li style="margin-bottom:8px;"><a href="#" onclick="window.navigate('dragon://tube')" style="color:${accentColor}; text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">DragonTube Videos</a></li>
+              <li><a href="#" onclick="window.navigate('dragon://weather')" style="color:${accentColor}; text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Weather Forecast</a></li>
             </ul>
           </div>
         </div>
       </div>
+
+      <!-- Footer -->
+      <footer style="margin-top: 60px; border-top: 1px solid rgba(255,255,255,0.08); padding-top:20px; text-align:center; font-size:0.8rem; color:#64748b;">
+        &copy; 2026 ${cleanDomain.toUpperCase()} Corp. All virtual registers synced. Secured by Tiny Internet Protocol.
+      </footer>
     </div>
   `;
 }
