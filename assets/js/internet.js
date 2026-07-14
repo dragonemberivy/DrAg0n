@@ -504,22 +504,107 @@ function renderNews(base) {
     // Procedural generation of a VERY detailed multi-paragraph news article (Seeded!)
     const rand = getSeededRandom(articleName);
     const displayTitle = articleName.charAt(0).toUpperCase() + articleName.slice(1);
-    
-    const introPhrases = [
+    const term = articleName.toLowerCase();
+
+    // Default general templates
+    let intros = [
       `A critical situation has developed regarding **${displayTitle}**, sending shockwaves throughout the local sector.`,
       `Sensational reports surrounding **${displayTitle}** have triggered emergency meetings among site developers and active users alike.`,
       `A bizarre series of logs tracking **${displayTitle}** has been confirmed by lead engineers early this morning.`
     ];
-    const details = [
+    let details = [
       `Eyewitnesses in the chat lobby reported seeing strange characters appearing shortly after the event was registered. "It was like nothing we've seen since the database split of 2026," stated a long-time member.`,
       `Speculators have begun tracking potential correlation between the activity and local coin earn rates. Several nodes registered a sudden, unexplained spike in Flappy Dragon activity during the exact same timeframe.`,
       `Official warnings advise users to monitor their balances closely. Diagnostic tools are running at full load to ensure that ledger security remains intact throughout the current node cycle.`
     ];
-    const outcomes = [
+    let outcomes = [
       `Security units have been deployed to sandbox ${displayTitle.toLowerCase()} until further notice. Authorities urge calm while calculations compile.`,
       `Initial investigations suggest a possible link to password modal logs. A patch is scheduled to deploy at node midnight.`,
       `Users are requested to report any anomalies or code drops directly inside the Animal Chat room to aid coordinates mapping.`
     ];
+
+    // Theme matching based on keywords!
+    if (term.includes('cannibal') || term.includes('hannibal') || term.includes('eat') || term.includes('food') || term.includes('cook') || term.includes('flesh')) {
+      intros = [
+        `A highly disturbing culinary investigation has been launched regarding **${displayTitle}**, shocking food critics across the grid.`,
+        `Sensational reports surrounding the exotic taste profiles of **${displayTitle}** have triggered emergency health inspections in the lower sector.`,
+        `Fears of clandestine kitchen operations related to **${displayTitle}** have been confirmed by law enforcement officers early this morning.`
+      ];
+      details = [
+        `Inspectors discovered highly unusual menus containing custom gourmet recipes that seem to violate standard safety registers. "The flavor profile is incredibly sophisticated, but the source of the protein remains unidentified," noted a forensic specialist.`,
+        `Speculators suggest the mysterious dinner parties were hosted by a brilliant local doctor under FBI surveillance. Several guests reported a strange sense of memory loss shortly after dessert was served.`,
+        `Official warnings advise citizens to refuse invitations to private tasting events. Several culinary databases are running full diagnostics to locate the origin of the gourmet menu drops.`
+      ];
+      outcomes = [
+        `Special forces have sealed off the local kitchen sandbox until further notice. Authorities warn that anyone attempting to download the recipes will have their profile locked.`,
+        `Investigations suggest a possible link to a psychiatrist who escaped custody. A patch to the lobby security locks has been deployed at node midnight.`,
+        `Users are requested to report any strange tasting invites or weird gourmet code drops directly inside the Animal Chat room.`
+      ];
+    } else if (term.includes('space') || term.includes('planet') || term.includes('alien') || term.includes('universe') || term.includes('star') || term.includes('galaxy') || term.includes('moon')) {
+      intros = [
+        `Astronomers have detected high-frequency orbital anomalies originating from **${displayTitle}**, sending cosmic research units into high alert.`,
+        `Sensational interstellar reports surrounding **${displayTitle}** have triggered emergency deep-space scans from the observatory.`,
+        `A mysterious cosmic cloud tracking **${displayTitle}** has been confirmed by lead navigation pilots early this morning.`
+      ];
+      details = [
+        `Telescopes registered a massive energy surge within the local coordinate grid. "We are seeing planetary rotation cycles speed up by 400%, which shouldn't be physically possible," explained a stellar researcher.`,
+        `Speculators believe a nearby hyper-gravitational collapse is drawing asteroid fields directly toward the generator. Several sectors reported witnessing meteor showers lighting up the sky.`,
+        `Official warnings advise pilots to secure their spacecraft immediately. Space navigation systems are running at maximum capacity to avoid drifting into the gravitational well.`
+      ];
+      outcomes = [
+        `Cosmic security units have sandboxed the affected coordinates until further notice. Celestial computations are compiling to predict the orbital trajectory.`,
+        `Astronomers suggest the phenomenon might be linked to a newborn star system. A grid patch is scheduled to deploy at node midnight.`,
+        `Users are requested to report any unidentified flying objects or cosmic radiation leaks directly inside the Space Explorer dashboard.`
+      ];
+    } else if (term.includes('coin') || term.includes('dc') || term.includes('money') || term.includes('rich') || term.includes('gold') || term.includes('shop') || term.includes('buy') || term.includes('bank')) {
+      intros = [
+        `A massive ledger surge has been registered regarding **${displayTitle}**, triggering emergency economic assessments.`,
+        `Sensational financial reports surrounding **${displayTitle}** have sparked high-volume trading panics inside the local shop sector.`,
+        `A sudden currency transfer involving **${displayTitle}** has been flagged by automated treasury audits early this morning.`
+      ];
+      details = [
+        `Auditors discovered millions of gold coins flowing through undocumented terminals. "We are looking at unprecedented levels of coin farming that could completely destabilize shop pricing," reported a bank representative.`,
+        `Speculators suggest a single local dragon has cornered the market on VIP badges and avatar borders, locking up the community capital. Trading volumes hit all-time highs within the hour.`,
+        `Official warnings advise users to lock their virtual vaults. Diagnostic tools are tracing the ledger records to check for transaction leaks.`
+      ];
+      outcomes = [
+        `Treasury codes have been temporarily sandboxed until the audit is complete. Authorities assure that shop item prices will remain pegged to standard rates.`,
+        `Economists suggest a patch to the coin payout multiplier will deploy at node midnight. DC balances are secure.`,
+        `Users are requested to report any ledger discrepancies or double-payout glitches directly inside the shop portal.`
+      ];
+    } else if (term.includes('weather') || term.includes('rain') || term.includes('storm') || term.includes('cloud') || term.includes('temp') || term.includes('wind')) {
+      intros = [
+        `Severe atmospheric pressure drops have been registered around **${displayTitle}**, prompting immediate storm evacuations.`,
+        `Sensational weather patterns surrounding **${displayTitle}** have triggered emergency warnings from the climate desk.`,
+        `A massive storm system tracking **${displayTitle}** has been confirmed by satellite telemetry early this morning.`
+      ];
+      details = [
+        `Meteorologists reported acidic precipitation levels rising rapidly near the grid borders. "We are recording wind speeds surpassing 300 km/h, which poses an extreme threat to flying dragons," warned a radar officer.`,
+        `Speculators believe a solar flare collision is superheating the lower atmosphere, vaporizing local moisture levels. Temperature readings peaked at record levels.`,
+        `Official warnings advise all users to remain indoors. Weather stations are running full diagnostic scans to track the movement of the storm front.`
+      ];
+      outcomes = [
+        `Atmospheric sandboxes have been initialized to dissipate the heat dome. Air traffic remains grounded until further notice.`,
+        `Climatologists suggest the weather front will clear by tomorrow afternoon. A grid environmental update will deploy at node midnight.`,
+        `Users are requested to report any microburst occurrences or meteor impacts directly to the weather station.`
+      ];
+    } else if (term.includes('game') || term.includes('play') || term.includes('flappy') || term.includes('snake') || term.includes('arcade') || term.includes('score')) {
+      intros = [
+        `A competitive database breach has been registered regarding **${displayTitle}**, shaking up the weekly arcade leaderboards.`,
+        `Sensational high-score runs surrounding **${displayTitle}** have triggered emergency score-validation reviews.`,
+        `A bizarre gameplay technique involving **${displayTitle}** has been flagged by lobby referees early this morning.`
+      ];
+      details = [
+        `Referees confirmed a local player completed an entire run without registering a single collision frame. "The precision is mechanical; we are checking if the inputs were automated," stated an arcade host.`,
+        `Speculators suggest players are forming secret factions to pool XP and manipulate the top tier ranks, locked out of average reach. Lobby traffic reached record density today.`,
+        `Official warnings advise competitive players to review the tournament guidelines. Diagnostic checkers are monitoring active play sessions in real-time.`
+      ];
+      outcomes = [
+        `The affected arcade leaderboards have been sandboxed until validation finishes. High scores are temporarily frozen.`,
+        `Lobby hosts suggest a security update targeting input delays will deploy at node midnight.`,
+        `Users are requested to report any physics glitches or abnormal score updates directly in the Arcade chat.`
+      ];
+    }
 
     contentDiv.innerHTML = `
       <div class="fake-site" style="background:#090d16; min-height:100vh; color:#e2e8f0; font-family:'Times New Roman', serif;">
@@ -537,7 +622,7 @@ function renderNews(base) {
         <!-- Three Column News Article -->
         <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:30px; line-height:1.6; font-size:1.05rem; text-align:justify; color:#e2e8f0;">
           <div style="border-right: 1px solid rgba(255,255,255,0.1); padding-right:15px;">
-            <p><span style="font-size:3rem; float:left; line-height:0.8; font-weight:bold; margin-right:8px; color:#38bdf8;">T</span>${seededPick(introPhrases, rand)}</p>
+            <p><span style="font-size:3rem; float:left; line-height:0.8; font-weight:bold; margin-right:8px; color:#38bdf8;">T</span>${seededPick(intros, rand)}</p>
             <p>Local sensors confirmed that unusual patterns began propagating at coordinates ${Math.floor(rand() * 900 + 100)} shortly after midnight. Early telemetry indicators suggest a substantial node overlap in the system framework.</p>
           </div>
           <div style="border-right: 1px solid rgba(255,255,255,0.1); padding-right:15px;">
