@@ -809,10 +809,11 @@
           <line x1="14" y1="26" x2="5" y2="26" stroke="#64748b" stroke-width="1.5"/>
           <line x1="50" y1="23" x2="58" y2="21" stroke="#64748b" stroke-width="1.5"/>
           <line x1="50" y1="26" x2="59" y2="26" stroke="#64748b" stroke-width="1.5"/>
-          <circle cx="27" cy="21" r="3.5" fill="#0f172a"/>
-          <circle cx="26" cy="19.5" r="1" fill="#fff"/>
-          <circle cx="37" cy="21" r="3.5" fill="#0f172a"/>
-          <circle cx="36" cy="19.5" r="1" fill="#fff"/>
+          <!-- Warm simple black oval eyes with cute highlights -->
+          <ellipse cx="27" cy="21" rx="2" ry="3.2" fill="#334155"/>
+          <circle cx="26" cy="19.5" r="0.8" fill="#fff"/>
+          <ellipse cx="37" cy="21" rx="2" ry="3.2" fill="#334155"/>
+          <circle cx="36" cy="19.5" r="0.8" fill="#fff"/>
           <path d="M30 25 Q32 27 32 25 Q32 27 34 25" stroke="#334155" stroke-width="1.5" fill="none"/>
           <path class="pet-tail" d="M44 40 Q58 32 46 22 C44 20, 48 18, 50 20 Q62 30 46 44 Z" fill="#fb923c" stroke="#334155" stroke-width="1.5"/>
           <circle class="pet-paw paw-fl" cx="24" cy="50" r="4" fill="#f1f5f9" stroke="#334155" stroke-width="2"/>
@@ -832,10 +833,13 @@
           <path d="M39 15 Q46 6 42 4 Q39 6 37 13 Z" fill="#facc15" stroke="#3b0764" stroke-width="1.5"/>
           <circle cx="24" cy="25" r="2.5" fill="#ec4899" opacity="0.7"/>
           <circle cx="40" cy="25" r="2.5" fill="#ec4899" opacity="0.7"/>
-          <circle cx="28" cy="21" r="3.5" fill="#facc15" stroke="#3b0764" stroke-width="1"/>
-          <circle cx="27" cy="19.5" r="1.2" fill="#fff"/>
-          <circle cx="36" cy="21" r="3.5" fill="#facc15" stroke="#3b0764" stroke-width="1"/>
-          <circle cx="35" cy="19.5" r="1.2" fill="#fff"/>
+          <!-- Warm baby-dragon violet eyes with double glints -->
+          <circle cx="28" cy="21" r="3" fill="#3b0764"/>
+          <circle cx="27" cy="19.8" r="0.9" fill="#fff"/>
+          <circle cx="28.5" cy="21.8" r="0.4" fill="#fff"/>
+          <circle cx="36" cy="21" r="3" fill="#3b0764"/>
+          <circle cx="35" cy="19.8" r="0.9" fill="#fff"/>
+          <circle cx="36.5" cy="21.8" r="0.4" fill="#fff"/>
           <path d="M30 25 Q32 28 34 25" stroke="#3b0764" stroke-width="1.5" fill="none"/>
           <path class="pet-tail-dragon" d="M45 42 Q54 48 58 42 L55 38 Z" fill="#a855f7" stroke="#3b0764" stroke-width="2"/>
           <circle class="pet-paw paw-fl" cx="24" cy="50" r="4" fill="#7e22ce" stroke="#3b0764" stroke-width="2"/>
@@ -849,8 +853,10 @@
           <rect x="18" y="28" width="28" height="18" rx="6" fill="#06b6d4" stroke="#083344" stroke-width="2"/>
           <rect x="23" y="32" width="18" height="10" rx="2" fill="#22d3ee" opacity="0.3"/>
           <rect class="pet-head" x="22" y="14" width="20" height="16" rx="5" fill="#06b6d4" stroke="#083344" stroke-width="2"/>
+          <!-- Glowing visor with happy neon cyan ^ ^ eyes inside -->
           <rect x="24" y="18" width="16" height="6" rx="2" fill="#ec4899" filter="drop-shadow(0 0 4px #ec4899)"/>
-          <line x1="26" y1="19" x2="38" y2="19" stroke="#fff" stroke-width="1" opacity="0.6"/>
+          <path d="M26 22 L28 19 L30 22" stroke="#22d3ee" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M34 22 L36 19 L38 22" stroke="#22d3ee" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
           <path class="pet-ear-left" d="M22 16 L16 8 Q12 14 18 20 Z" fill="#0891b2" stroke="#083344" stroke-width="1.5"/>
           <path class="pet-ear-right" d="M42 16 L48 8 Q52 14 46 20 Z" fill="#0891b2" stroke="#083344" stroke-width="1.5"/>
           <path class="pet-tail-cyber" d="M46 36 L56 26" stroke="#0891b2" stroke-width="3.5" stroke-linecap="round"/>
@@ -869,10 +875,11 @@
           <path d="M24 16 C21 12, 18 4, 23 6 C26 8, 26 12, 24 16 Z" fill="#fda4af"/>
           <path class="pet-ear-right" d="M39 18 C44 12, 48 0, 40 4 C36 8, 36 14, 39 18 Z" fill="#f1f5f9" stroke="#475569" stroke-width="1.5"/>
           <path d="M40 16 C43 12, 46 4, 41 6 C38 8, 38 12, 40 16 Z" fill="#fda4af"/>
-          <circle cx="28" cy="23" r="3.5" fill="#e11d48"/>
-          <circle cx="27" cy="21.5" r="1" fill="#fff"/>
-          <circle cx="36" cy="23" r="3.5" fill="#e11d48"/>
-          <circle cx="35" cy="21.5" r="1" fill="#fff"/>
+          <!-- Warm sweet brown eyes with cute glints -->
+          <circle cx="28" cy="23" r="2.5" fill="#334155"/>
+          <circle cx="27.2" cy="21.8" r="0.8" fill="#fff"/>
+          <circle cx="36" cy="23" r="2.5" fill="#334155"/>
+          <circle cx="35.2" cy="21.8" r="0.8" fill="#fff"/>
           <circle cx="23" cy="27" r="2" fill="#fbcfe8"/>
           <circle cx="41" cy="27" r="2" fill="#fbcfe8"/>
           <path d="M29 34 L35 38 L35 34 L29 38 Z" fill="#ec4899" stroke="#be185d" stroke-width="1"/>
@@ -908,10 +915,9 @@
           <polygon points="20,13 14,6 23,11" fill="#7c2d12"/>
           <polygon points="46,16 54,4 39,12" fill="#f97316" stroke="#7c2d12" stroke-width="2"/>
           <polygon points="44,13 50,6 41,11" fill="#7c2d12"/>
-          <circle cx="26" cy="22" r="3" fill="#431407"/>
-          <circle cx="25" cy="20.5" r="0.8" fill="#fff"/>
-          <circle cx="38" cy="22" r="3" fill="#431407"/>
-          <circle cx="37" cy="20.5" r="0.8" fill="#fff"/>
+          <!-- Happy closed kitsune-style smiling eyes -->
+          <path d="M23 21 Q26 24 29 21" stroke="#431407" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path d="M35 21 Q38 24 41 21" stroke="#431407" stroke-width="2" fill="none" stroke-linecap="round"/>
           <circle cx="21" cy="26" r="2.5" fill="#fdba74"/>
           <circle cx="43" cy="26" r="2.5" fill="#fdba74"/>
           <polygon points="31,27 33,27 32,29" fill="#000"/>
@@ -932,12 +938,9 @@
           <path class="pet-wing wing-left" d="M18 32 C12 24, 10 36, 16 44 Z" fill="#78350f" stroke="#451a03" stroke-width="1.5"/>
           <path class="pet-wing wing-right" d="M46 32 C52 24, 54 36, 48 44 Z" fill="#78350f" stroke="#451a03" stroke-width="1.5"/>
           <ellipse class="pet-head" cx="32" cy="22" rx="14" ry="8" fill="#d97706" stroke="#451a03" stroke-width="1.5"/>
-          <circle cx="26" cy="22" r="5" fill="#fef3c7" stroke="#451a03" stroke-width="1"/>
-          <circle cx="26" cy="22" r="3.5" fill="#000"/>
-          <circle cx="25" cy="20.5" r="1" fill="#fff"/>
-          <circle cx="38" cy="22" r="5" fill="#fef3c7" stroke="#451a03" stroke-width="1"/>
-          <circle cx="38" cy="22" r="3.5" fill="#000"/>
-          <circle cx="37" cy="20.5" r="1" fill="#fff"/>
+          <!-- Sweet sleeping baby owl eyes -->
+          <path d="M22 22 Q26 25 30 22" stroke="#451a03" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path d="M34 22 Q38 25 42 22" stroke="#451a03" stroke-width="2.5" fill="none" stroke-linecap="round"/>
           <polygon points="32,24 30,29 34,29" fill="#f59e0b" stroke="#451a03" stroke-width="1"/>
         </svg>
       `;
@@ -950,8 +953,8 @@
           <path d="M30 26 Q36 10 40 10 Q38 20 34 26 Z" fill="#64748b" stroke="#1e293b" stroke-width="1.5"/>
           <path class="pet-tail-shark" d="M12 36 L2 28 L4 44 Z" fill="#64748b" stroke="#1e293b" stroke-width="1.5"/>
           <path d="M34 32 Q32 34 34 36 M37 32 Q35 34 37 36" stroke="#334155" stroke-width="1.5" fill="none"/>
-          <circle cx="46" cy="31" r="2.5" fill="#000"/>
-          <circle cx="45.5" cy="29.8" r="0.7" fill="#fff"/>
+          <!-- Sweet winking/smiling curved shark eye -->
+          <path d="M43 31 Q45 33 47 31" stroke="#1e293b" stroke-width="2" fill="none" stroke-linecap="round"/>
           <path d="M44 34 Q46 36 48 34" stroke="#e11d48" stroke-width="1.5" fill="none"/>
         </svg>
       `;
@@ -964,8 +967,9 @@
           <path d="M45 16 L56 2 L49 14 Z" fill="#facc15" stroke="#d97706" stroke-width="1.5"/>
           <path d="M36 14 Q28 22 34 28" stroke="#f472b6" stroke-width="4.5" fill="none" stroke-linecap="round"/>
           <path class="pet-tail" d="M19 38 Q8 32 12 46" stroke="#f472b6" stroke-width="4" fill="none" stroke-linecap="round"/>
-          <circle cx="45" cy="22" r="3" fill="#475569"/>
-          <circle cx="44.2" cy="20.8" r="0.8" fill="#fff"/>
+          <!-- Content winking eyelashes unicorn eye -->
+          <path d="M42 21 Q45 24 47 21" stroke="#db2777" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path d="M41.5 22.5 L40.5 24.5 M46.5 22.5 L47.5 24.5" stroke="#db2777" stroke-width="1.5" stroke-linecap="round"/>
           <path d="M43 25 Q45 27 47 25" stroke="#db2777" stroke-width="1" fill="none"/>
         </svg>
       `;
