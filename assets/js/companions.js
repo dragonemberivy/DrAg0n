@@ -169,6 +169,14 @@
       0%, 100% { transform: scaleY(1); }
       50% { transform: scaleY(0.4); }
     }
+    @keyframes dragon-wing-left-flap {
+      0%, 100% { transform: rotate(0deg); }
+      50% { transform: rotate(-22deg); }
+    }
+    @keyframes dragon-wing-right-flap {
+      0%, 100% { transform: rotate(0deg); }
+      50% { transform: rotate(22deg); }
+    }
     @keyframes head-bob {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(2px); }
@@ -243,6 +251,14 @@
       transform-origin: 42px 28px;
       animation: wing-flutter 0.3s infinite ease-in-out 0.15s;
     }
+    .walking .dragon-wing-left {
+      transform-origin: 22px 34px;
+      animation: dragon-wing-left-flap 0.3s infinite ease-in-out;
+    }
+    .walking .dragon-wing-right {
+      transform-origin: 42px 34px;
+      animation: dragon-wing-right-flap 0.3s infinite ease-in-out 0.15s;
+    }
     .running .wing-left {
       transform-origin: 22px 28px;
       animation: wing-flutter 0.15s infinite ease-in-out;
@@ -250,6 +266,14 @@
     .running .wing-right {
       transform-origin: 42px 28px;
       animation: wing-flutter 0.15s infinite ease-in-out 0.08s;
+    }
+    .running .dragon-wing-left {
+      transform-origin: 22px 34px;
+      animation: dragon-wing-left-flap 0.15s infinite ease-in-out;
+    }
+    .running .dragon-wing-right {
+      transform-origin: 42px 34px;
+      animation: dragon-wing-right-flap 0.15s infinite ease-in-out 0.08s;
     }
 
     .idle .pet-head {
@@ -824,8 +848,9 @@
       svgContent = `
         <svg class="pet-svg" viewBox="0 0 64 64" width="48" height="48" style="overflow: visible;">
           <ellipse cx="32" cy="50" rx="14" ry="3" fill="rgba(0,0,0,0.2)"/>
-          <path class="pet-wing wing-left" d="M22 28 C12 22, 10 12, 18 8 C22 12, 24 20, 22 28 Z" fill="#d946ef" stroke="#4a044e" stroke-width="1.5"/>
-          <path class="pet-wing wing-right" d="M42 28 C52 22, 54 12, 46 8 C42 12, 40 20, 42 28 Z" fill="#d946ef" stroke="#4a044e" stroke-width="1.5"/>
+          <!-- Dragon wings attached to shoulders, extending outwards horizontally -->
+          <path class="dragon-wing-left" d="M22 34 C12 32, 4 20, 2 22 C6 30, 14 34, 18 38 Z" fill="#d946ef" stroke="#4a044e" stroke-width="1.5"/>
+          <path class="dragon-wing-right" d="M42 34 C52 32, 60 20, 62 22 C58 30, 50 34, 46 38 Z" fill="#d946ef" stroke="#4a044e" stroke-width="1.5"/>
           <path d="M18 36 C18 28, 46 28, 46 36 C46 44, 40 48, 32 48 C24 48, 18 44, 18 36 Z" fill="#a855f7" stroke="#3b0764" stroke-width="2"/>
           <path d="M26 36 C26 31, 38 31, 38 36 C38 42, 35 46, 32 46 C29 46, 26 42, 26 36 Z" fill="#fdf4ff" opacity="0.8"/>
           <path class="pet-head" d="M20 22 C20 14, 44 14, 44 22 C44 30, 40 32, 32 32 C24 32, 20 30, 20 22 Z" fill="#a855f7" stroke="#3b0764" stroke-width="2"/>
