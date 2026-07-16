@@ -168,14 +168,25 @@
           background: rgba(0, 20, 10, 0.8) !important;
         }
         @keyframes pineapple-dance {
-          0% { transform: translateY(0) rotate(0deg) scale(1); }
-          25% { transform: translateY(-20px) rotate(15deg) scale(1.1); }
-          50% { transform: translateY(0) rotate(0deg) scale(1); }
-          75% { transform: translateY(-20px) rotate(-15deg) scale(1.1); }
-          100% { transform: translateY(0) rotate(0deg) scale(1); }
+          0%, 100% {
+            transform: translateX(0) rotate(0deg) skewX(0deg) scale(1);
+            transform-origin: bottom center;
+          }
+          20% {
+            transform: translateX(-40px) rotate(-12deg) skewX(8deg) scaleY(0.9) scaleX(1.1);
+          }
+          40% {
+            transform: translateX(0) rotate(0deg) skewX(0deg) scaleY(1.05) scaleX(0.95);
+          }
+          60% {
+            transform: translateX(40px) rotate(12deg) skewX(-8deg) scaleY(0.9) scaleX(1.1);
+          }
+          80% {
+            transform: translateX(0) rotate(0deg) skewX(0deg) scaleY(1.05) scaleX(0.95);
+          }
         }
         .dancing-pineapple {
-          animation: pineapple-dance 1s infinite ease-in-out;
+          animation: pineapple-dance 1.2s infinite ease-in-out;
         }
         .poll-btn {
           background: rgba(255, 255, 255, 0.1);
