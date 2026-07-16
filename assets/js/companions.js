@@ -793,132 +793,195 @@
     if (type === 'cat') {
       svgContent = `
         <svg class="pet-svg" viewBox="0 0 64 64" width="48" height="48" style="overflow: visible;">
-          <ellipse cx="32" cy="38" rx="16" ry="12" fill="#f8fafc" stroke="#475569" stroke-width="2"/>
-          <path d="M22 34 Q18 36 22 38" fill="#fda4af" opacity="0.6"/>
-          <path d="M42 34 Q46 36 42 38" fill="#fda4af" opacity="0.6"/>
-          <circle class="pet-head" cx="32" cy="22" r="10" fill="#f8fafc" stroke="#475569" stroke-width="2"/>
-          <polygon points="23,15 27,9 31,15" fill="#fda4af" stroke="#475569" stroke-width="2"/>
-          <polygon points="41,15 37,9 33,15" fill="#fda4af" stroke="#475569" stroke-width="2"/>
-          <circle cx="28" cy="21" r="1.5" fill="#0f172a"/>
-          <circle cx="36" cy="21" r="1.5" fill="#0f172a"/>
-          <path d="M31 24 Q32 25 33 24" stroke="#475569" stroke-width="1.5" fill="none"/>
-          <path class="pet-tail" d="M46 42 Q54 36 50 26" stroke="#475569" stroke-width="3" fill="none" stroke-linecap="round"/>
-          <circle class="pet-paw paw-fl" cx="24" cy="50" r="3.5" fill="#e2e8f0" stroke="#475569" stroke-width="2"/>
-          <circle class="pet-paw paw-fr" cx="40" cy="50" r="3.5" fill="#e2e8f0" stroke="#475569" stroke-width="2"/>
+          <ellipse cx="32" cy="50" rx="14" ry="3" fill="rgba(0,0,0,0.15)"/>
+          <path d="M18 36 C18 28, 46 28, 46 36 C46 44, 42 48, 32 48 C22 48, 18 44, 18 36 Z" fill="#f8fafc" stroke="#334155" stroke-width="2"/>
+          <path d="M38 32 C42 32, 46 36, 44 42 C40 44, 38 40, 38 32 Z" fill="#fb923c"/>
+          <path d="M22 38 Q32 41 42 38" stroke="#ef4444" stroke-width="2.5" fill="none"/>
+          <circle cx="32" cy="40" r="3.5" fill="#f59e0b" stroke="#d97706" stroke-width="1"/>
+          <path class="pet-head" d="M18 22 C18 14, 46 14, 46 22 C46 30, 42 32, 32 32 C22 32, 18 30, 18 22 Z" fill="#f8fafc" stroke="#334155" stroke-width="2"/>
+          <path d="M19 15 L12 4 L23 11 Z" fill="#f8fafc" stroke="#334155" stroke-width="2"/>
+          <path d="M19 15 L12 4 L23 11 Z" fill="#fda4af" transform="scale(0.85) translate(4, 3)"/>
+          <path d="M45 15 L52 4 L41 11 Z" fill="#f8fafc" stroke="#334155" stroke-width="2"/>
+          <path d="M45 15 L52 4 L41 11 Z" fill="#fda4af" transform="scale(0.85) translate(8, 3)"/>
+          <circle cx="23" cy="25" r="2.5" fill="#fda4af" opacity="0.8"/>
+          <circle cx="41" cy="25" r="2.5" fill="#fda4af" opacity="0.8"/>
+          <line x1="14" y1="23" x2="6" y2="21" stroke="#64748b" stroke-width="1.5"/>
+          <line x1="14" y1="26" x2="5" y2="26" stroke="#64748b" stroke-width="1.5"/>
+          <line x1="50" y1="23" x2="58" y2="21" stroke="#64748b" stroke-width="1.5"/>
+          <line x1="50" y1="26" x2="59" y2="26" stroke="#64748b" stroke-width="1.5"/>
+          <circle cx="27" cy="21" r="3.5" fill="#0f172a"/>
+          <circle cx="26" cy="19.5" r="1" fill="#fff"/>
+          <circle cx="37" cy="21" r="3.5" fill="#0f172a"/>
+          <circle cx="36" cy="19.5" r="1" fill="#fff"/>
+          <path d="M30 25 Q32 27 32 25 Q32 27 34 25" stroke="#334155" stroke-width="1.5" fill="none"/>
+          <path class="pet-tail" d="M44 40 Q58 32 46 22 C44 20, 48 18, 50 20 Q62 30 46 44 Z" fill="#fb923c" stroke="#334155" stroke-width="1.5"/>
+          <circle class="pet-paw paw-fl" cx="24" cy="50" r="4" fill="#f1f5f9" stroke="#334155" stroke-width="2"/>
+          <circle class="pet-paw paw-fr" cx="40" cy="50" r="4" fill="#f1f5f9" stroke="#334155" stroke-width="2"/>
         </svg>
       `;
     } else if (type === 'dragon') {
       svgContent = `
         <svg class="pet-svg" viewBox="0 0 64 64" width="48" height="48" style="overflow: visible;">
-          <path class="pet-wing wing-left" d="M22 28 Q10 16 18 10 Q24 18 22 28" fill="#d946ef" stroke="#701a75" stroke-width="1.5" opacity="0.9"/>
-          <path class="pet-wing wing-right" d="M42 28 Q54 16 46 10 Q40 18 42 28" fill="#d946ef" stroke="#701a75" stroke-width="1.5" opacity="0.9"/>
-          <ellipse cx="32" cy="38" rx="15" ry="12" fill="#a855f7" stroke="#3b0764" stroke-width="2"/>
-          <circle class="pet-head" cx="32" cy="22" r="10" fill="#a855f7" stroke="#3b0764" stroke-width="2"/>
-          <path d="M25 15 L20 6 L27 13" fill="#facc15" stroke="#3b0764" stroke-width="1.5"/>
-          <path d="M39 15 L44 6 L37 13" fill="#facc15" stroke="#3b0764" stroke-width="1.5"/>
-          <circle cx="28" cy="21" r="1.5" fill="#facc15"/>
-          <circle cx="36" cy="21" r="1.5" fill="#facc15"/>
-          <path class="pet-tail-dragon" d="M45 42 Q52 48 58 42" stroke="#a855f7" stroke-width="4" fill="none" stroke-linecap="round"/>
-          <circle class="pet-paw paw-fl" cx="24" cy="50" r="3.5" fill="#7e22ce" stroke="#3b0764" stroke-width="2"/>
-          <circle class="pet-paw paw-fr" cx="40" cy="50" r="3.5" fill="#7e22ce" stroke="#3b0764" stroke-width="2"/>
+          <ellipse cx="32" cy="50" rx="14" ry="3" fill="rgba(0,0,0,0.2)"/>
+          <path class="pet-wing wing-left" d="M22 28 C12 22, 10 12, 18 8 C22 12, 24 20, 22 28 Z" fill="#d946ef" stroke="#4a044e" stroke-width="1.5"/>
+          <path class="pet-wing wing-right" d="M42 28 C52 22, 54 12, 46 8 C42 12, 40 20, 42 28 Z" fill="#d946ef" stroke="#4a044e" stroke-width="1.5"/>
+          <path d="M18 36 C18 28, 46 28, 46 36 C46 44, 40 48, 32 48 C24 48, 18 44, 18 36 Z" fill="#a855f7" stroke="#3b0764" stroke-width="2"/>
+          <path d="M26 36 C26 31, 38 31, 38 36 C38 42, 35 46, 32 46 C29 46, 26 42, 26 36 Z" fill="#fdf4ff" opacity="0.8"/>
+          <path class="pet-head" d="M20 22 C20 14, 44 14, 44 22 C44 30, 40 32, 32 32 C24 32, 20 30, 20 22 Z" fill="#a855f7" stroke="#3b0764" stroke-width="2"/>
+          <path d="M25 15 Q18 6 22 4 Q25 6 27 13 Z" fill="#facc15" stroke="#3b0764" stroke-width="1.5"/>
+          <path d="M39 15 Q46 6 42 4 Q39 6 37 13 Z" fill="#facc15" stroke="#3b0764" stroke-width="1.5"/>
+          <circle cx="24" cy="25" r="2.5" fill="#ec4899" opacity="0.7"/>
+          <circle cx="40" cy="25" r="2.5" fill="#ec4899" opacity="0.7"/>
+          <circle cx="28" cy="21" r="3.5" fill="#facc15" stroke="#3b0764" stroke-width="1"/>
+          <circle cx="27" cy="19.5" r="1.2" fill="#fff"/>
+          <circle cx="36" cy="21" r="3.5" fill="#facc15" stroke="#3b0764" stroke-width="1"/>
+          <circle cx="35" cy="19.5" r="1.2" fill="#fff"/>
+          <path d="M30 25 Q32 28 34 25" stroke="#3b0764" stroke-width="1.5" fill="none"/>
+          <path class="pet-tail-dragon" d="M45 42 Q54 48 58 42 L55 38 Z" fill="#a855f7" stroke="#3b0764" stroke-width="2"/>
+          <circle class="pet-paw paw-fl" cx="24" cy="50" r="4" fill="#7e22ce" stroke="#3b0764" stroke-width="2"/>
+          <circle class="pet-paw paw-fr" cx="40" cy="50" r="4" fill="#7e22ce" stroke="#3b0764" stroke-width="2"/>
         </svg>
       `;
     } else if (type === 'cyber_puppy') {
       svgContent = `
         <svg class="pet-svg" viewBox="0 0 64 64" width="48" height="48" style="overflow: visible;">
-          <rect x="18" y="28" width="28" height="18" rx="4" fill="#06b6d4" stroke="#083344" stroke-width="2"/>
-          <rect class="pet-head" x="22" y="14" width="20" height="16" rx="3" fill="#06b6d4" stroke="#083344" stroke-width="2"/>
-          <rect x="24" y="18" width="16" height="5" rx="1" fill="#ec4899" filter="drop-shadow(0 0 4px #ec4899)"/>
-          <rect class="pet-ear-left" x="18" y="10" width="4" height="10" rx="1" fill="#0891b2"/>
-          <rect class="pet-ear-right" x="42" y="10" width="4" height="10" rx="1" fill="#0891b2"/>
-          <line class="pet-tail-cyber" x1="46" y1="36" x2="56" y2="28" stroke="#0891b2" stroke-width="3" stroke-linecap="round"/>
-          <rect class="pet-paw paw-fl" x="22" y="46" width="6" height="6" rx="1.5" fill="#22d3ee" stroke="#083344" stroke-width="2"/>
-          <rect class="pet-paw paw-fr" x="36" y="46" width="6" height="6" rx="1.5" fill="#22d3ee" stroke="#083344" stroke-width="2"/>
+          <ellipse cx="32" cy="50" rx="14" ry="3" fill="rgba(0,0,0,0.3)"/>
+          <rect x="18" y="28" width="28" height="18" rx="6" fill="#06b6d4" stroke="#083344" stroke-width="2"/>
+          <rect x="23" y="32" width="18" height="10" rx="2" fill="#22d3ee" opacity="0.3"/>
+          <rect class="pet-head" x="22" y="14" width="20" height="16" rx="5" fill="#06b6d4" stroke="#083344" stroke-width="2"/>
+          <rect x="24" y="18" width="16" height="6" rx="2" fill="#ec4899" filter="drop-shadow(0 0 4px #ec4899)"/>
+          <line x1="26" y1="19" x2="38" y2="19" stroke="#fff" stroke-width="1" opacity="0.6"/>
+          <path class="pet-ear-left" d="M22 16 L16 8 Q12 14 18 20 Z" fill="#0891b2" stroke="#083344" stroke-width="1.5"/>
+          <path class="pet-ear-right" d="M42 16 L48 8 Q52 14 46 20 Z" fill="#0891b2" stroke="#083344" stroke-width="1.5"/>
+          <path class="pet-tail-cyber" d="M46 36 L56 26" stroke="#0891b2" stroke-width="3.5" stroke-linecap="round"/>
+          <circle cx="56" cy="26" r="3.5" fill="#ec4899" filter="drop-shadow(0 0 4px #ec4899)"/>
+          <rect class="pet-paw paw-fl" x="22" y="46" width="6" height="6" rx="2" fill="#22d3ee" stroke="#083344" stroke-width="2"/>
+          <rect class="pet-paw paw-fr" x="36" y="46" width="6" height="6" rx="2" fill="#22d3ee" stroke="#083344" stroke-width="2"/>
         </svg>
       `;
     } else if (type === 'bunny') {
       svgContent = `
         <svg class="pet-svg" viewBox="0 0 64 64" width="48" height="48" style="overflow: visible;">
-          <ellipse cx="32" cy="40" rx="14" ry="10" fill="#f1f5f9" stroke="#475569" stroke-width="2"/>
-          <circle class="pet-head" cx="32" cy="24" r="9" fill="#f1f5f9" stroke="#475569" stroke-width="2"/>
-          <ellipse cx="28" cy="12" rx="3" ry="8" fill="#f1f5f9" stroke="#475569" stroke-width="2" transform="rotate(-10 28 12)"/>
-          <ellipse cx="36" cy="12" rx="3" ry="8" fill="#f1f5f9" stroke="#475569" stroke-width="2" transform="rotate(10 36 12)"/>
-          <ellipse cx="28" cy="12" rx="1.5" ry="5" fill="#fda4af" transform="rotate(-10 28 12)"/>
-          <ellipse cx="36" cy="12" rx="1.5" ry="5" fill="#fda4af" transform="rotate(10 36 12)"/>
-          <circle cx="29" cy="23" r="1.2" fill="#e11d48"/>
-          <circle cx="35" cy="23" r="1.2" fill="#e11d48"/>
-          <circle class="pet-tail-puff" cx="17" cy="43" r="4.5" fill="#f8fafc" stroke="#475569" stroke-width="1.5"/>
+          <ellipse cx="32" cy="50" rx="13" ry="3" fill="rgba(0,0,0,0.1)"/>
+          <path d="M20 38 C20 30, 44 30, 44 38 C44 46, 38 48, 32 48 C26 48, 20 46, 20 38 Z" fill="#f1f5f9" stroke="#475569" stroke-width="2"/>
+          <path class="pet-head" d="M22 24 C22 17, 42 17, 42 24 C42 31, 38 33, 32 33 C26 33, 22 31, 22 24 Z" fill="#f1f5f9" stroke="#475569" stroke-width="2"/>
+          <path class="pet-ear-left" d="M25 18 C20 12, 16 0, 24 4 C28 8, 28 14, 25 18 Z" fill="#f1f5f9" stroke="#475569" stroke-width="1.5"/>
+          <path d="M24 16 C21 12, 18 4, 23 6 C26 8, 26 12, 24 16 Z" fill="#fda4af"/>
+          <path class="pet-ear-right" d="M39 18 C44 12, 48 0, 40 4 C36 8, 36 14, 39 18 Z" fill="#f1f5f9" stroke="#475569" stroke-width="1.5"/>
+          <path d="M40 16 C43 12, 46 4, 41 6 C38 8, 38 12, 40 16 Z" fill="#fda4af"/>
+          <circle cx="28" cy="23" r="3.5" fill="#e11d48"/>
+          <circle cx="27" cy="21.5" r="1" fill="#fff"/>
+          <circle cx="36" cy="23" r="3.5" fill="#e11d48"/>
+          <circle cx="35" cy="21.5" r="1" fill="#fff"/>
+          <circle cx="23" cy="27" r="2" fill="#fbcfe8"/>
+          <circle cx="41" cy="27" r="2" fill="#fbcfe8"/>
+          <path d="M29 34 L35 38 L35 34 L29 38 Z" fill="#ec4899" stroke="#be185d" stroke-width="1"/>
+          <circle class="pet-tail-puff" cx="17" cy="42" r="5" fill="#f8fafc" stroke="#475569" stroke-width="1.5"/>
         </svg>
       `;
     } else if (type === 'frog') {
       svgContent = `
         <svg class="pet-svg" viewBox="0 0 64 64" width="48" height="48" style="overflow: visible;">
-          <ellipse cx="32" cy="40" rx="16" ry="10" fill="#22c55e" stroke="#14532d" stroke-width="2"/>
-          <circle cx="24" cy="30" r="5" fill="#22c55e" stroke="#14532d" stroke-width="2"/>
-          <circle cx="40" cy="30" r="5" fill="#22c55e" stroke="#14532d" stroke-width="2"/>
-          <circle cx="24" cy="30" r="2" fill="#000"/>
-          <circle cx="40" cy="30" r="2" fill="#000"/>
-          <path d="M26 40 Q32 44 38 40" stroke="#14532d" stroke-width="2" fill="none"/>
-          <circle cx="20" cy="38" r="2" fill="#ef4444" opacity="0.6"/>
-          <circle cx="44" cy="38" r="2" fill="#ef4444" opacity="0.6"/>
+          <ellipse cx="32" cy="50" rx="14" ry="2.5" fill="rgba(0,0,0,0.15)"/>
+          <path d="M16 38 C16 28, 48 28, 48 38 C48 48, 42 50, 32 50 C22 50, 16 48, 16 38 Z" fill="#4ade80" stroke="#166534" stroke-width="2"/>
+          <ellipse cx="32" cy="41" rx="10" ry="7" fill="#bbf7d0"/>
+          <circle cx="23" cy="28" r="6" fill="#4ade80" stroke="#166534" stroke-width="2"/>
+          <circle cx="23" cy="28" r="4.5" fill="#000"/>
+          <circle cx="21.5" cy="26.5" r="1.5" fill="#fff"/>
+          <circle cx="39" cy="28" r="6" fill="#4ade80" stroke="#166534" stroke-width="2"/>
+          <circle cx="39" cy="28" r="4.5" fill="#000"/>
+          <circle cx="37.5" cy="26.5" r="1.5" fill="#fff"/>
+          <circle cx="18" cy="36" r="2" fill="#ef4444" opacity="0.6"/>
+          <circle cx="46" cy="36" r="2" fill="#ef4444" opacity="0.6"/>
+          <path d="M28 36 Q32 39 36 36" stroke="#166534" stroke-width="2" fill="none"/>
         </svg>
       `;
     } else if (type === 'fox') {
       svgContent = `
         <svg class="pet-svg" viewBox="0 0 64 64" width="48" height="48" style="overflow: visible;">
-          <ellipse cx="32" cy="38" rx="15" ry="11" fill="#ea580c" stroke="#431407" stroke-width="2"/>
-          <ellipse cx="32" cy="38" rx="10" ry="7" fill="#f8fafc"/>
-          <polygon points="18,18 46,18 32,32" fill="#ea580c" stroke="#431407" stroke-width="2"/>
-          <polygon points="22,18 42,18 32,28" fill="#f8fafc"/>
-          <polygon points="18,18 14,8 24,14" fill="#ea580c" stroke="#431407" stroke-width="2"/>
-          <polygon points="46,18 50,8 38,14" fill="#ea580c" stroke="#431407" stroke-width="2"/>
-          <circle cx="32" cy="30" r="2" fill="#000"/>
-          <path class="pet-tail" d="M46 42 Q58 48 52 30" stroke="#ea580c" stroke-width="6" fill="none" stroke-linecap="round"/>
-          <path class="pet-tail-tip" d="M52 30 Q54 27 50 25" stroke="#f8fafc" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+          <ellipse cx="32" cy="50" rx="13" ry="3" fill="rgba(0,0,0,0.15)"/>
+          <path d="M18 36 C18 28, 46 28, 46 36 C46 44, 42 48, 32 48 C22 48, 18 44, 18 36 Z" fill="#f97316" stroke="#7c2d12" stroke-width="2"/>
+          <path d="M26 36 C26 31, 38 31, 38 36 C38 41, 35 45, 32 45 C29 45, 26 41, 26 36 Z" fill="#f8fafc"/>
+          <path class="pet-head" d="M16 22 C16 13, 48 13, 48 22 C48 31, 40 33, 32 33 C24 33, 16 31, 16 22 Z" fill="#f97316" stroke="#7c2d12" stroke-width="2"/>
+          <path class="pet-head" d="M24 26 C24 23, 40 23, 40 26 C40 31, 32 32, 32 32 Z" fill="#f8fafc"/>
+          <polygon points="18,16 10,4 25,12" fill="#f97316" stroke="#7c2d12" stroke-width="2"/>
+          <polygon points="20,13 14,6 23,11" fill="#7c2d12"/>
+          <polygon points="46,16 54,4 39,12" fill="#f97316" stroke="#7c2d12" stroke-width="2"/>
+          <polygon points="44,13 50,6 41,11" fill="#7c2d12"/>
+          <circle cx="26" cy="22" r="3" fill="#431407"/>
+          <circle cx="25" cy="20.5" r="0.8" fill="#fff"/>
+          <circle cx="38" cy="22" r="3" fill="#431407"/>
+          <circle cx="37" cy="20.5" r="0.8" fill="#fff"/>
+          <circle cx="21" cy="26" r="2.5" fill="#fdba74"/>
+          <circle cx="43" cy="26" r="2.5" fill="#fdba74"/>
+          <polygon points="31,27 33,27 32,29" fill="#000"/>
+          <path class="pet-tail" d="M45 42 Q58 48 54 30 L48 36 Z" fill="#f97316" stroke="#7c2d12" stroke-width="1.5"/>
+          <path class="pet-tail" d="M54 30 Q56 26 50 24 L48 36 Z" fill="#f8fafc" stroke="#7c2d12" stroke-width="1"/>
+          <circle class="pet-paw paw-fl" cx="24" cy="50" r="4" fill="#431407" stroke="#7c2d12" stroke-width="2"/>
+          <circle class="pet-paw paw-fr" cx="40" cy="50" r="4" fill="#431407" stroke="#7c2d12" stroke-width="2"/>
         </svg>
       `;
     } else if (type === 'owl') {
       svgContent = `
         <svg class="pet-svg" viewBox="0 0 64 64" width="48" height="48" style="overflow: visible;">
-          <ellipse cx="32" cy="36" rx="15" ry="14" fill="#78350f" stroke="#451a03" stroke-width="2"/>
-          <ellipse cx="32" cy="39" rx="10" ry="9" fill="#fef3c7"/>
-          <path class="pet-wing wing-left" d="M18 32 Q10 24 16 42" stroke="#78350f" stroke-width="4.5" fill="none" stroke-linecap="round"/>
-          <path class="pet-wing wing-right" d="M46 32 Q54 24 48 42" stroke="#78350f" stroke-width="4.5" fill="none" stroke-linecap="round"/>
-          <circle class="pet-head" cx="25" cy="24" r="6.5" fill="#fef3c7" stroke="#451a03" stroke-width="1.5"/>
-          <circle class="pet-head" cx="39" cy="24" r="6.5" fill="#fef3c7" stroke="#451a03" stroke-width="1.5"/>
-          <circle cx="25" cy="24" r="2.5" fill="#000"/>
-          <circle cx="39" cy="24" r="2.5" fill="#000"/>
-          <polygon points="32,26 30,31 34,31" fill="#f59e0b" stroke="#451a03" stroke-width="1"/>
+          <ellipse cx="32" cy="50" rx="12" ry="2.5" fill="rgba(0,0,0,0.2)"/>
+          <path d="M18 36 C18 24, 46 24, 46 36 C46 48, 40 50, 32 50 C24 50, 18 48, 18 36 Z" fill="#78350f" stroke="#451a03" stroke-width="2"/>
+          <path d="M24 36 C24 30, 40 30, 40 36 C40 44, 32 46, 32 46 C32 46, 24 44, 24 36 Z" fill="#fef3c7"/>
+          <path d="M29 37 Q32 39 35 37" stroke="#b45309" stroke-width="1.5" fill="none"/>
+          <path d="M27 41 Q32 43 37 41" stroke="#b45309" stroke-width="1.5" fill="none"/>
+          <path class="pet-wing wing-left" d="M18 32 C12 24, 10 36, 16 44 Z" fill="#78350f" stroke="#451a03" stroke-width="1.5"/>
+          <path class="pet-wing wing-right" d="M46 32 C52 24, 54 36, 48 44 Z" fill="#78350f" stroke="#451a03" stroke-width="1.5"/>
+          <ellipse class="pet-head" cx="32" cy="22" rx="14" ry="8" fill="#d97706" stroke="#451a03" stroke-width="1.5"/>
+          <circle cx="26" cy="22" r="5" fill="#fef3c7" stroke="#451a03" stroke-width="1"/>
+          <circle cx="26" cy="22" r="3.5" fill="#000"/>
+          <circle cx="25" cy="20.5" r="1" fill="#fff"/>
+          <circle cx="38" cy="22" r="5" fill="#fef3c7" stroke="#451a03" stroke-width="1"/>
+          <circle cx="38" cy="22" r="3.5" fill="#000"/>
+          <circle cx="37" cy="20.5" r="1" fill="#fff"/>
+          <polygon points="32,24 30,29 34,29" fill="#f59e0b" stroke="#451a03" stroke-width="1"/>
         </svg>
       `;
     } else if (type === 'shark') {
       svgContent = `
         <svg class="pet-svg" viewBox="0 0 64 64" width="48" height="48" style="overflow: visible;">
-          <path d="M12 36 Q32 20 52 36 Q32 44 12 36" fill="#64748b" stroke="#1e293b" stroke-width="2"/>
-          <path d="M16 36 Q32 42 48 36 Q32 36 16 36" fill="#f8fafc"/>
-          <path d="M32 26 L38 12 L42 24 Z" fill="#64748b" stroke="#1e293b" stroke-width="2"/>
-          <path class="pet-tail-shark" d="M12 36 L4 30 L6 42 Z" fill="#64748b" stroke="#1e293b" stroke-width="2"/>
-          <circle cx="44" cy="32" r="1.5" fill="#000"/>
+          <ellipse cx="32" cy="50" rx="15" ry="3" fill="rgba(0,0,0,0.2)"/>
+          <path d="M10 36 C10 24, 54 24, 54 36 C54 44, 32 44, 10 36 Z" fill="#64748b" stroke="#1e293b" stroke-width="2"/>
+          <path d="M14 36 Q32 42 50 36 Q32 34 14 36" fill="#f8fafc"/>
+          <path d="M30 26 Q36 10 40 10 Q38 20 34 26 Z" fill="#64748b" stroke="#1e293b" stroke-width="1.5"/>
+          <path class="pet-tail-shark" d="M12 36 L2 28 L4 44 Z" fill="#64748b" stroke="#1e293b" stroke-width="1.5"/>
+          <path d="M34 32 Q32 34 34 36 M37 32 Q35 34 37 36" stroke="#334155" stroke-width="1.5" fill="none"/>
+          <circle cx="46" cy="31" r="2.5" fill="#000"/>
+          <circle cx="45.5" cy="29.8" r="0.7" fill="#fff"/>
+          <path d="M44 34 Q46 36 48 34" stroke="#e11d48" stroke-width="1.5" fill="none"/>
         </svg>
       `;
     } else if (type === 'unicorn') {
       svgContent = `
         <svg class="pet-svg" viewBox="0 0 64 64" width="48" height="48" style="overflow: visible;">
-          <ellipse cx="28" cy="38" rx="14" ry="10" fill="#fdf2f8" stroke="#db2777" stroke-width="2"/>
-          <ellipse class="pet-head" cx="42" cy="24" rx="8" ry="7" fill="#fdf2f8" stroke="#db2777" stroke-width="2" transform="rotate(-15 42 24)"/>
-          <polygon points="46,18 56,6 48,15" fill="#facc15" stroke="#d97706" stroke-width="1.5"/>
-          <path d="M36 18 Q32 28 36 34" stroke="#f472b6" stroke-width="3" fill="none"/>
-          <path class="pet-tail" d="M14 38 Q6 34 10 46" stroke="#f472b6" stroke-width="3" fill="none" stroke-linecap="round"/>
-          <circle cx="44" cy="22" r="1.5" fill="#db2777"/>
+          <ellipse cx="32" cy="50" rx="14" ry="2.5" fill="rgba(0,0,0,0.1)"/>
+          <path d="M18 38 C18 28, 44 28, 44 38 C44 46, 38 48, 32 48 C26 48, 18 46, 18 38 Z" fill="#fdf2f8" stroke="#db2777" stroke-width="2"/>
+          <path class="pet-head" d="M34 22 C34 14, 52 14, 52 22 C52 28, 46 30, 42 30 C38 30, 34 28, 34 22 Z" fill="#fdf2f8" stroke="#db2777" stroke-width="2"/>
+          <path d="M45 16 L56 2 L49 14 Z" fill="#facc15" stroke="#d97706" stroke-width="1.5"/>
+          <path d="M36 14 Q28 22 34 28" stroke="#f472b6" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+          <path class="pet-tail" d="M19 38 Q8 32 12 46" stroke="#f472b6" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <circle cx="45" cy="22" r="3" fill="#475569"/>
+          <circle cx="44.2" cy="20.8" r="0.8" fill="#fff"/>
+          <path d="M43 25 Q45 27 47 25" stroke="#db2777" stroke-width="1" fill="none"/>
         </svg>
       `;
     } else if (type === 'slime') {
       svgContent = `
         <svg class="pet-svg" viewBox="0 0 64 64" width="48" height="48" style="overflow: visible;">
-          <path d="M16 46 Q16 26 32 26 Q48 26 48 46 Q32 50 16 46 Z" fill="#22c55e" stroke="#15803d" stroke-width="2" opacity="0.95" filter="drop-shadow(0 0 4px #22c55e)"/>
-          <circle cx="26" cy="38" r="2.5" fill="#15803d"/>
-          <circle cx="38" cy="38" r="2.5" fill="#15803d"/>
-          <path d="M30 42 Q32 44 34 42" stroke="#15803d" stroke-width="1.5" fill="none"/>
+          <ellipse cx="32" cy="50" rx="14" ry="3" fill="rgba(0,0,0,0.2)"/>
+          <path d="M14 46 C12 36, 16 22, 32 22 C48 22, 52 36, 50 46 C38 49, 26 49, 14 46 Z" fill="#22c55e" stroke="#15803d" stroke-width="2" opacity="0.9" filter="drop-shadow(0 0 6px #22c55e)"/>
+          <circle cx="22" cy="38" r="3.5" fill="#f43f5e" opacity="0.5"/>
+          <circle cx="42" cy="38" r="3.5" fill="#f43f5e" opacity="0.5"/>
+          <circle cx="26" cy="34" r="3" fill="#14532d"/>
+          <circle cx="25.5" cy="33" r="0.8" fill="#fff"/>
+          <circle cx="38" cy="34" r="3" fill="#14532d"/>
+          <circle cx="37.5" cy="33" r="0.8" fill="#fff"/>
+          <path d="M30 38 Q32 40 34 38" stroke="#14532d" stroke-width="2" fill="none"/>
+          <path d="M32 22 Q28 14 32 10 Q36 14 32 22 Z" fill="#4ade80" stroke="#166534" stroke-width="1"/>
         </svg>
       `;
     }
