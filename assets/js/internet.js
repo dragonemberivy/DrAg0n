@@ -68,6 +68,8 @@ function renderPage(url) {
     renderNews(base);
   } else if (base.startsWith('dragon://weather')) {
     renderWeather(base, query);
+  } else if (base.startsWith('dragon://ai')) {
+    renderAI(base, query);
   } else {
     contentDiv.innerHTML = `<div class="fake-site" style="background:#090d16; min-height:100vh;"><h1 style="color:#ef4444; text-align:center;">404 - Dragon Not Found</h1></div>`;
   }
@@ -186,6 +188,11 @@ function renderSearch(query) {
         <input type="text" class="ds-input" id="ds-in" value="${searchVal}" placeholder="Search for anything...">
         <button class="ds-btn" type="submit">Dragon Search</button>
       </form>
+      <div style="text-align: center; margin-top: 10px; margin-bottom: 20px;">
+        <span style="font-size: 0.95rem; color: #c084fc; filter: drop-shadow(0 0 5px rgba(168,85,247,0.3));">✨ Try the new </span>
+        <a href="#" onclick="window.navigate('dragon://ai')" style="color: #a855f7; font-weight: bold; text-decoration: underline;">DragonAI Story Writer</a>
+        <span style="font-size: 0.95rem; color: #c084fc;"> to generate unique, formal stories for any prompt!</span>
+      </div>
       ${resultsHTML}
     </div>
   `;
@@ -834,6 +841,153 @@ function renderWeather(base, query) {
           <div style="font-size:2rem; margin:10px 0;">❄️</div>
           <div>${temp - 20}°C</div>
         </div>
+      </div>
+    </div>
+  `;
+}
+
+// --- DRAGONAI STORY WRITER (Infinite Story Compiler!) ---
+function renderAI(base, query) {
+  let promptVal = '';
+  if (query && query.includes('p=')) {
+    promptVal = decodeURIComponent(query.split('p=')[1].split('&')[0].replace(/\+/g, ' ')).trim();
+  }
+
+  if (promptVal) {
+    // Show spinner and then trigger story loader
+    contentDiv.innerHTML = `
+      <div class="fake-site" style="background:#090d16; min-height:100vh; color:#e2e8f0; font-family:'Outfit', sans-serif;">
+        <div style="display:flex; align-items:center; gap:10px; padding: 20px 40px; background: #0b0f19; border-bottom: 1px solid rgba(255,255,255,0.1); cursor:pointer;" onclick="window.navigate('dragon://search')">
+          <span style="font-size:2rem;">🔮</span>
+          <strong style="font-size:1.5rem; font-family:'Outfit', sans-serif;">DragonAI</strong>
+        </div>
+        
+        <div style="max-width:800px; margin: 40px auto; text-align:center;" id="ai-container">
+          <div class="glass-card" style="padding:40px; border-radius:15px; background:rgba(255,255,255,0.02); border:1px solid rgba(168,85,247,0.3); max-width:600px; margin:0 auto;">
+            <div style="font-size:3rem; animation: spin 2s linear infinite; margin-bottom:20px; display:inline-block;">🌀</div>
+            <h3 style="color:#c084fc; margin-top:0;">Synthesizing Unique Story Narrative...</h3>
+            <p style="color:#94a3b8; font-size:0.9rem;">Initializing semantic vectors & mapping formal lexical structures...</p>
+            <div style="width:100%; max-width:400px; height:6px; background:rgba(255,255,255,0.05); border-radius:3px; margin:20px auto; overflow:hidden;">
+              <div style="width:0%; height:100%; background:linear-gradient(90deg, #c084fc, #a855f7); border-radius:3px; animation: loadBar 0.8s forwards;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <style>
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes loadBar { 0% { width: 0%; } 100% { width: 100%; } }
+      </style>
+    `;
+
+    setTimeout(() => {
+      const storyHTML = generateFormalStory(promptVal);
+      const container = document.getElementById('ai-container');
+      if (container) {
+        container.innerHTML = storyHTML;
+      }
+    }, 850);
+  } else {
+    // Render Story Input UI
+    contentDiv.innerHTML = `
+      <div class="fake-site" style="background:#090d16; min-height:100vh; color:#e2e8f0; font-family:'Outfit', sans-serif;">
+        <div style="display:flex; align-items:center; gap:10px; padding: 20px 40px; background: #0b0f19; border-bottom: 1px solid rgba(255,255,255,0.1); cursor:pointer;" onclick="window.navigate('dragon://search')">
+          <span style="font-size:2rem;">🔮</span>
+          <strong style="font-size:1.5rem; font-family:'Outfit', sans-serif;">DragonAI Story Writer</strong>
+        </div>
+        
+        <div style="max-width:600px; margin: 40px auto;">
+          <div class="glass-card" style="padding:35px; background:rgba(255,255,255,0.02); border:1px solid rgba(168,85,247,0.3); border-radius:15px; box-shadow: 0 10px 40px rgba(0,0,0,0.6);">
+            <h2 style="color:#c084fc; margin-top:0; font-size:1.8rem; text-shadow:0 0 10px rgba(168,85,247,0.2);">Narrative Generation Protocol</h2>
+            <p style="color:#94a3b8; font-size:0.95rem; margin-bottom:25px;">Enter any concept, characters, or actions below. The system will compile a formal, highly structured narrative document based on your prompt.</p>
+            
+            <form onsubmit="event.preventDefault(); window.navigate('dragon://ai?p=' + encodeURIComponent(document.getElementById('ai-prompt').value));">
+              <label style="display:block; font-size:0.85rem; font-weight:bold; color:#cbd5e1; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Concept Prompt</label>
+              <textarea id="ai-prompt" placeholder="e.g. A cybernetic dragon collecting gold coins in a space forest..." required style="width:100%; height:120px; padding:15px; border-radius:10px; border:1px solid rgba(255,255,255,0.1); background:#05070c; color:#fff; font-size:1.05rem; line-height:1.5; resize:none; outline:none; margin-bottom:20px;" onfocus="this.style.borderColor='#c084fc'"></textarea>
+              
+              <div style="margin-bottom:25px;">
+                <label style="display:block; font-size:0.85rem; font-weight:bold; color:#cbd5e1; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Tone Formulation</label>
+                <div style="display:flex; justify-content:space-between; color:#94a3b8; font-size:0.8rem; margin-bottom:5px;">
+                  <span>Understandable</span>
+                  <span>Formal Analytical</span>
+                </div>
+                <input type="range" min="1" max="3" value="3" disabled style="width:100%; accent-color:#a855f7;">
+              </div>
+              
+              <button type="submit" style="width:100%; background:linear-gradient(135deg, #c084fc, #a855f7); color:#fff; border:none; padding:15px; border-radius:25px; font-weight:bold; font-size:1.1rem; cursor:pointer; box-shadow: 0 4px 15px rgba(168,85,247,0.4); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">Compile Narrative</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+}
+
+function generateFormalStory(prompt) {
+  const stopwords = new Set(['a', 'an', 'the', 'is', 'are', 'was', 'were', 'to', 'for', 'in', 'on', 'at', 'by', 'with', 'about', 'against', 'of', 'and', 'but', 'or', 'so', 'if', 'that', 'this', 'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'me', 'him', 'her', 'us', 'them', 'my', 'your', 'his', 'its', 'our', 'their', 'can', 'will', 'should', 'would', 'could', 'may', 'might', 'must', 'write', 'prompt', 'story', 'ai', 'feature', 'create', 'unique', 'about', 'like', 'how', 'what']);
+  
+  const words = prompt.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(w => w && !stopwords.has(w));
+  
+  let k1 = words[0] || 'subject';
+  let k2 = words[1] || 'secondary elements';
+  let k3 = words[2] || 'environmental assets';
+  let k4 = words[3] || 'operational vectors';
+
+  // Capitalize for cleaner rendering
+  k1 = k1.charAt(0).toUpperCase() + k1.slice(1);
+  k2 = k2.charAt(0).toUpperCase() + k2.slice(1);
+  k3 = k3.charAt(0).toUpperCase() + k3.slice(1);
+  k4 = k4.charAt(0).toUpperCase() + k4.slice(1);
+
+  const rand = getSeededRandom(prompt);
+
+  const titles = [
+    `The Chronicles of ${k1}: A Formal Inquiry into ${k2} and ${k3}`,
+    `Case File: Detailed Observation of the ${k1} Phenomenon`,
+    `A Formal Report on the Systemic Integration of ${k1} and ${k2}`
+  ];
+
+  const intros = [
+    `In the compiled archives of virtual history, few subject files command as much formal investigation as the progression of **${k1}**. Originating from standard database sectors, this narrative marks a documented epoch. Key researchers have long noted the structural influence of **${k2}** in determining the behavioral parameters of the subject.`,
+    `Under formal review by the sector directors, the chronicle of **${k1}** stands as a primary case study. Initial logs indicate that the integration of **${k2}** played a decisive role in shaping the environmental conditions surrounding the main subject. The following account details the formal sequence of operations.`,
+    `System registers from the node terminal have recorded a unique series of events regarding **${k1}**. Academic researchers suggest that the co-existence of **${k2}** created a notable stabilization wave, which was subsequently analyzed to ensure baseline integrity.`
+  ];
+
+  const bodies = [
+    `Historical logs record that during the core cycles, the subject (**${k1}**) initiated a series of systematic integrations. Observers noted that when **${k1}** intersected with **${k3}**, it produced an immediate, measurable stabilization. This event was not merely a random divergence; rather, it established a formal precedent for how **${k2}** interacts with primary portal frameworks under high-load conditions.`,
+    `Detailed tactical logs show that the progression of **${k1}** was accelerated by external vectors linked to **${k3}**. Observers monitoring the grid noted that **${k2}** was successfully synthesized as a result of this action, confirming theoretical models proposed in previous cycles.`,
+    `Operational archives verify that **${k1}** maintained structural alignment despite significant turbulence from **${k3}**. This resilient behavior is attributed directly to the systemic support of **${k2}**, which acted as a stabilizing agent during the peak integration phases. (Reference: ${k4} register logs).`
+  ];
+
+  const conclusions = [
+    `In conclusion, the documented trajectory of **${k1}** offers critical insights into the integration of **${k2}** and **${k3}**. These findings have been formally logged into the system archives. Future operations within this sector are advised to refer to this record to maintain structural equilibrium.`,
+    `Ultimately, the events surrounding **${k1}** serve as a standard reference point for similar portal configurations. The correlation between **${k2}** and **${k3}** is now a matter of public archive, establishing a clear protocol for upcoming exploration teams.`,
+    `As a final note, the resolution of the **${k1}** incident confirms that **${k2}** and **${k3}** remain highly responsive to systematic inputs. The board has formally certified this log, concluding the investigative cycle for this period.`
+  ];
+
+  const pickedTitle = seededPick(titles, rand);
+  const pickedIntro = seededPick(intros, rand);
+  const pickedBody = seededPick(bodies, rand);
+  const pickedConclusion = seededPick(conclusions, rand);
+
+  return `
+    <div class="glass-card" style="text-align:left; padding:35px; background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.1); border-radius:12px; max-width:700px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+      <div style="font-size:0.8rem; color:#a855f7; text-transform:uppercase; font-weight:bold; margin-bottom:10px; letter-spacing:1px;">DragonAI Generated Story Document</div>
+      <h2 style="color:#fff; margin-top:0; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:15px; font-family:'Times New Roman', serif; font-size:1.8rem;">${pickedTitle}</h2>
+      
+      <div style="line-height:1.7; font-size:1.05rem; color:#cbd5e1; font-family:'Times New Roman', serif;">
+        <h4 style="color:#a855f7; margin-bottom:5px; text-transform:uppercase; font-size:0.85rem;">I. Preface & Historical Context</h4>
+        <p style="margin-top:0; margin-bottom:20px; text-align:justify;">${pickedIntro}</p>
+
+        <h4 style="color:#a855f7; margin-bottom:5px; text-transform:uppercase; font-size:0.85rem;">II. Narrative Breakdown</h4>
+        <p style="margin-top:0; margin-bottom:20px; text-align:justify;">${pickedBody}</p>
+
+        <h4 style="color:#a855f7; margin-bottom:5px; text-transform:uppercase; font-size:0.85rem;">III. Concluding Summary</h4>
+        <p style="margin-top:0; margin-bottom:0; text-align:justify;">${pickedConclusion}</p>
+      </div>
+      
+      <div style="margin-top:30px; display:flex; gap:10px;">
+        <button onclick="window.navigate('dragon://ai')" style="background:rgba(255,255,255,0.08); color:#fff; border:1px solid rgba(255,255,255,0.2); padding:8px 15px; border-radius:20px; cursor:pointer;">Generate Another</button>
+        <button onclick="window.navigate('dragon://search')" style="background:#a855f7; color:#fff; border:none; padding:8px 15px; border-radius:20px; cursor:pointer; font-weight:bold;">Search Engine</button>
       </div>
     </div>
   `;
