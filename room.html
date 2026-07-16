@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pet Playground - DrAg0n</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <style>
+    body {
+      background: #080c14;
+      overflow-x: hidden;
+    }
+    .playground-container {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 24px;
+      max-width: 1400px;
+      margin: 80px auto 40px auto;
+      padding: 0 20px;
+    }
+    @media (max-width: 1100px) {
+      .playground-container {
+        grid-template-columns: 1fr;
+      }
+    }
+    /* Status Dashboard */
+    .stats-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+      border-radius: 24px;
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+    .pet-profile {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .pet-avatar-frame {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(236, 72, 153, 0.2), rgba(139, 92, 246, 0.2));
+      border: 2px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .level-badge {
+      position: absolute;
+      bottom: -5px;
+      right: -5px;
+      background: var(--accent);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 10px;
+      border: 1.5px solid #080c14;
+    }
+    .stat-bars-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 160px);
+      gap: 16px;
+    }
+    @media (max-width: 768px) {
+      .stat-bars-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .stat-bar-container {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .stat-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+    .bar-bg {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 10px;
+      width: 100%;
+      transition: width 0.3s ease;
+    }
+    .care-buttons {
+      display: flex;
+      gap: 12px;
+    }
+    .care-btn {
+      padding: 10px 16px;
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      border: none;
+    }
+    .btn-feed {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+    }
+    .btn-feed:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
+    }
+    .btn-play {
+      background: linear-gradient(135deg, #ec4899, #d946ef);
+      color: white;
+      box-shadow: 0 4px 12px rgba(236, 72, 153, 0.2);
+    }
+    .btn-play:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(236, 72, 153, 0.3);
+    }
+
+    /* Room Canvas */
+    .room-canvas-container {
+      position: relative;
+      background: radial-gradient(circle at center, #111827 0%, #030712 100%);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 28px;
+      height: 520px;
+      box-shadow: inset 0 0 40px rgba(0,0,0,0.8);
+      overflow: hidden;
+    }
+    .canvas-grid-floor {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 120px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.01) 0%, rgba(255,255,255,0.03) 100%);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* Furniture styles */
+    .furniture-item {
+      position: absolute;
+      cursor: grab;
+      user-select: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform 0.1s ease;
+      z-index: 50;
+    }
+    .furniture-item:active {
+      cursor: grabbing;
+      transform: scale(1.05);
+    }
+    .furniture-icon {
+      font-size: 3.5rem;
+      filter: drop-shadow(0 8px 16px rgba(0,0,0,0.5));
+    }
+    .furniture-label {
+      font-size: 0.7rem;
+      background: rgba(0, 0, 0, 0.7);
+      color: #94a3b8;
+      padding: 2px 6px;
+      border-radius: 6px;
+      margin-top: 4px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      pointer-events: none;
+    }
+    .furniture-item:hover .furniture-label {
+      opacity: 1;
+    }
+
+    /* Side Panel Tabs */
+    .side-tabs-container {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+      border-radius: 24px;
+      display: flex;
+      flex-direction: column;
+      height: 600px;
+      overflow: hidden;
+    }
+    .tab-header {
+      display: flex;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 16px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: all 0.2s ease;
+    }
+    .tab-btn.active {
+      color: var(--accent);
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 2px solid var(--accent);
+    }
+    .tab-view-content {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: none;
+    }
+    .tab-view-content.active {
+      display: block;
+    }
+
+    /* Journal Elements */
+    .journal-entry {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      font-size: 0.88rem;
+    }
+    .journal-date {
+      color: var(--accent);
+      font-weight: 800;
+      font-size: 0.75rem;
+      margin-bottom: 4px;
+    }
+
+    /* Chat Elements */
+    .chat-messages {
+      height: 380px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding-right: 4px;
+      margin-bottom: 16px;
+    }
+    .chat-msg {
+      max-width: 80%;
+      padding: 10px 14px;
+      border-radius: 16px;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+    .msg-user {
+      align-self: flex-end;
+      background: var(--accent);
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+    .msg-pet {
+      align-self: flex-start;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255,255,255,0.06);
+      color: var(--text-main);
+      border-bottom-left-radius: 4px;
+    }
+    .chat-input-bar {
+      display: flex;
+      gap: 8px;
+    }
+    .chat-input {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: white;
+      outline: none;
+      font-size: 0.9rem;
+    }
+    .chat-send-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 0 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.2s ease;
+    }
+    .chat-send-btn:hover {
+      background: #9333ea;
+    }
+
+    /* Particle float styling */
+    .float-emoji {
+      position: absolute;
+      font-size: 1.5rem;
+      pointer-events: none;
+      z-index: 1000;
+      animation: float-up 1.5s forwards ease-out;
+    }
+    @keyframes float-up {
+      0% { transform: translateY(0) scale(0.5); opacity: 1; }
+      100% { transform: translateY(-80px) scale(1.2); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Return Home Link -->
+  <a href="index.html" style="position: absolute; top: 1.5rem; left: 2rem; text-decoration: none; font-size: 1.1rem; color: var(--accent); z-index: 100000; font-weight: 600;">← Return to Home</a>
+
+  <div class="playground-container">
+    
+    <!-- LEFT SIDE: Playground & Stats -->
+    <div>
+      
+      <!-- Care Dashboard -->
+      <div class="stats-card">
+        <div class="pet-profile">
+          <div class="pet-avatar-frame">
+            <span id="header-avatar" style="font-size: 2.2rem;">🐱</span>
+            <div class="level-badge" id="companion-level-label">Lvl 1</div>
+          </div>
+          <div>
+            <h2 id="companion-name-label" style="margin: 0; font-size: 1.5rem; font-weight: 800;">Screen Pet</h2>
+            <p id="xp-text" style="margin: 4px 0 0 0; font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">EXP: 0/100</p>
+          </div>
+        </div>
+
+        <!-- Progress meters -->
+        <div class="stat-bars-grid">
+          <div class="stat-bar-container">
+            <div class="stat-label">
+              <span>🔋 Energy</span>
+              <span id="val-energy">100%</span>
+            </div>
+            <div class="bar-bg">
+              <div class="bar-fill" id="fill-energy" style="background: #10b981;"></div>
+            </div>
+          </div>
+          <div class="stat-bar-container">
+            <div class="stat-label">
+              <span>💖 Happiness</span>
+              <span id="val-happiness">100%</span>
+            </div>
+            <div class="bar-bg">
+              <div class="bar-fill" id="fill-happiness" style="background: #06b6d4;"></div>
+            </div>
+          </div>
+          <div class="stat-bar-container">
+            <div class="stat-label">
+              <span>⭐ Friendship</span>
+              <span id="val-friendship">0%</span>
+            </div>
+            <div class="bar-bg">
+              <div class="bar-fill" id="fill-friendship" style="background: #ec4899;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Care Interactions -->
+        <div class="care-buttons">
+          <button class="care-btn btn-feed" onclick="feedPet()">🍖 Feed Treat (5 DC)</button>
+          <button class="care-btn btn-play" onclick="playWithPet()">🧶 Play Time (5 DC)</button>
+        </div>
+      </div>
+
+      <!-- Playground Room Area -->
+      <div class="room-canvas-container" id="room-canvas">
+        <div class="canvas-grid-floor"></div>
+        
+        <!-- Furniture items dynamically loaded -->
+        <div id="furniture-layer"></div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT SIDE: Chat & Logs -->
+    <div class="side-tabs-container">
+      <div class="tab-header">
+        <button class="tab-btn active" onclick="switchTab('chat')">💬 Chat</button>
+        <button class="tab-btn" onclick="switchTab('journal')">📖 Pet Journal</button>
+      </div>
+
+      <!-- Chat View -->
+      <div class="tab-view-content active" id="view-chat">
+        <div class="chat-messages" id="chat-box">
+          <div class="chat-msg msg-pet" id="chat-initial-greeting">Hello! I am happy to play with you today!</div>
+        </div>
+        <div class="chat-input-bar">
+          <input type="text" class="chat-input" id="user-msg-input" placeholder="Type a message..." onkeydown="if(event.key === 'Enter') sendChatMessage()">
+          <button class="chat-send-btn" onclick="sendChatMessage()">Send</button>
+        </div>
+      </div>
+
+      <!-- Journal View -->
+      <div class="tab-view-content" id="view-journal">
+        <div id="journal-entries-container">
+          <div style="text-align: center; color: var(--text-muted); margin-top: 50px;">No journal logs recorded yet.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="assets/js/companions.js"></script>
+  <script>
+    let activePet = 'cat';
+    let stats = { level: 1, xp: 0, energy: 100, happiness: 100, friendship: 0 };
+    
+    // Furniture positioning & dragging setup
+    const furnitureConfig = {
+      furniture_royal_bed: { name: 'Royal Canopy Bed', icon: '🛌', width: 90, height: 90, defaultX: 100, defaultY: 300 },
+      furniture_gamer_console: { name: 'Neon Gamer Console', icon: '🎮', width: 80, height: 90, defaultX: 280, defaultY: 300 },
+      furniture_disco_ball: { name: 'Party Disco Ball', icon: '🪩', width: 80, height: 80, defaultX: 480, defaultY: 80 },
+      furniture_buffet_bowl: { name: 'Gourmet Buffet Bowl', icon: '🥣', width: 70, height: 60, defaultX: 650, defaultY: 330 }
+    };
+
+    // Chatbot responses per pet
+    const petPersonalities = {
+      cat: {
+        greeting: "Meow~ Hello there! Have you brought me any delicious fish or treats? *purrs*",
+        replies: [
+          "I was thinking about taking a long nap on that cozy bed... meow.",
+          "Chasing the laser pointer is my absolute favorite, but eating is a close second!",
+          "Make sure you scratch me behind my ears, please! *purrs*",
+          "You're a very nice human. I think I'll tolerate you~"
+        ]
+      },
+      dragon: {
+        greeting: "Kneel, mortal! Ignis the Great demands shiny treasures and roasted meat! Rawr!",
+        replies: [
+          "My wings feel majestic today. I could cover the entire sky in flames!",
+          "This room is cozy, but it lacks a hoard of gold coins. Bring me more DC!",
+          "Do you dare to touch a dragon's tail? Beware of my sparks!",
+          "Perhaps I will let you ride on my back... once I reach level 10!"
+        ]
+      },
+      cyber_puppy: {
+        greeting: "SYSTEM BOOT: Hello Owner! [Status: Friendly]. visor_leds=ON. Woof-bot ready!",
+        replies: [
+          "Scanning room... Gamer console energy levels at 98.4%. Let's compute!",
+          "My cyber-wag protocol is functioning at maximum efficiency.",
+          "Error 404: Treats not found in input sector. Please deploy code 'Feed'.",
+          "Ping check: Latency is low, bond levels are exceptionally high!"
+        ]
+      },
+      bunny: {
+        greeting: "Hi hi! *wiggles nose* I'm hopping around super fast today! Do you want to play?",
+        replies: [
+          "Yay! Playground time! Let's jump as high as the clouds!",
+          "Mmm, those treats taste like fresh clover. My tummy is so happy!",
+          "My ears twitch when you send messages. You're so fast at typing!",
+          "Let's dance under the disco ball together!"
+        ]
+      },
+      frog: {
+        greeting: "Ribbit! Hello traveler. The weather is cool and perfect for relaxing. Croak.",
+        replies: [
+          "Just sitting here, looking at the water. It's a peaceful life, ribbit.",
+          "If you feed me, I might catch a fly for you. Just kidding, buffet treats are better!",
+          "Jump, jump, splash. That is my daily workout routine.",
+          "You're doing great today. Keep up the good work! Croak."
+        ]
+      },
+      fox: {
+        greeting: "Hehehe, hi! *winks* Did you hide my yarn ball? I love a good game of hide-and-seek!",
+        replies: [
+          "My fluffy tail keeps me warm. Want to feel how soft it is?",
+          "I saw a mouse earlier but I let it go. We foxes are very friendly, you know!",
+          "Let's play a trick on the other pets! I have some ideas...",
+          "You look busy. Can I sit on your shoulder?"
+        ]
+      },
+      owl: {
+        greeting: "Hoo-hoot! Welcome to our sanctuary. Let us ponder the mysteries of the night sky.",
+        replies: [
+          "A wise pet knows that regular naps keep the mind sharp.",
+          "Did you know that stars are distant suns? The cosmos is truly magnificent.",
+          "Reading under the quiet light is my favorite activity. hoo.",
+          "Thank you for taking care of us. Your friendship is highly valued."
+        ]
+      },
+      shark: {
+        greeting: "Duuun-dun... Dun-dun... Rawr! Just kidding, I'm a friendly shark! Nice to meet you!",
+        replies: [
+          "Water temperature is perfect! Let's swim around in circles.",
+          "I love showing off my wide smile. It's not scary, is it?",
+          "My gills feel so clean today. Swim, swim, swim!",
+          "If I bite your cursor, it's just a love bite! *chomps*"
+        ]
+      },
+      unicorn: {
+        greeting: "Greetings, magic friend! *sprinkles sparkles* The stars are shining bright today!",
+        replies: [
+          "I dreamed of flying over a beautiful pastel rainbow last night.",
+          "My horn glows whenever you buy cool items in the shop!",
+          "Let's create some magic sparkles together!",
+          "You have a kind heart. I can feel your positive energy."
+        ]
+      },
+      slime: {
+        greeting: "Gloop glub! *squish* Hello! I'm squishy green jelly. *wiggles leaf*",
+        replies: [
+          "Gloop... Bouncing around is so much fun!",
+          "Squish... I think I left a little jelly trail on the bed.",
+          "Gourmet food makes me wiggle and bubble! Yum!",
+          "Gloop, thank you for being my friend."
+        ]
+      }
+    };
+
+    // Load active companion, statistics and biome page setup
+    document.addEventListener("DOMContentLoaded", () => {
+      activePet = localStorage.getItem('activeCompanion') || 'cat';
+      
+      // Override pet coordinates target to wander inside room canvas
+      const canvas = document.getElementById('room-canvas');
+      const rect = canvas.getBoundingClientRect();
+      
+      // Center the pet in the room floor initially
+      window.overridePetTarget = {
+        x: rect.left + 450,
+        y: rect.top + 350
+      };
+
+      loadStats();
+      loadFurniture();
+      loadJournal();
+      updateUI();
+      initDragAndDrop();
+      startAILoop();
+
+      // Slow stats drain loop
+      setInterval(() => {
+        stats.energy = Math.max(0, stats.energy - 1);
+        stats.happiness = Math.max(0, stats.happiness - 1);
+        saveStats();
+        updateUI();
+      }, 15000);
+
+      // Setup initial chatbot text
+      const petProfile = petPersonalities[activePet] || petPersonalities['cat'];
+      document.getElementById('chat-initial-greeting').textContent = petProfile.greeting;
+      document.getElementById('header-avatar').textContent = getPetIcon(activePet);
+      document.getElementById('companion-name-label').textContent = activePet.toUpperCase().replace('_', ' ');
+    });
+
+    function getPetIcon(type) {
+      const icons = { cat:'🐱', dragon:'🐉', cyber_puppy:'🤖', bunny:'🐰', frog:'🐸', fox:'🦊', owl:'🦉', shark:'🦈', unicorn:'🦄', slime:'👾' };
+      return icons[type] || '🐱';
+    }
+
+    // Care mechanics
+    function loadStats() {
+      const stored = localStorage.getItem(`companionStats_${activePet}`);
+      if (stored) {
+        stats = JSON.parse(stored);
+      } else {
+        stats = { level: 1, xp: 0, energy: 100, happiness: 100, friendship: 0 };
+        saveStats();
+      }
+    }
+
+    function saveStats() {
+      localStorage.setItem(`companionStats_${activePet}`, JSON.stringify(stats));
+    }
+
+    function updateUI() {
+      document.getElementById('companion-level-label').textContent = `Lvl ${stats.level}`;
+      document.getElementById('xp-text').textContent = `EXP: ${stats.xp}/${stats.level * 100}`;
+      
+      document.getElementById('val-energy').textContent = `${stats.energy}%`;
+      document.getElementById('fill-energy').style.width = `${stats.energy}%`;
+      
+      document.getElementById('val-happiness').textContent = `${stats.happiness}%`;
+      document.getElementById('fill-happiness').style.width = `${stats.happiness}%`;
+      
+      document.getElementById('val-friendship').textContent = `${stats.friendship}%`;
+      document.getElementById('fill-friendship').style.width = `${stats.friendship}%`;
+    }
+
+    function feedPet() {
+      let dc = parseInt(localStorage.getItem('drag0n_dc') || '0');
+      if (dc < 5) {
+        alert("You need at least 5 Dragon Coins (DC) to feed your pet! Play games or search the web to earn more.");
+        return;
+      }
+      
+      dc -= 5;
+      localStorage.setItem('drag0n_dc', dc);
+      
+      stats.energy = Math.min(100, stats.energy + 25);
+      stats.happiness = Math.min(100, stats.happiness + 10);
+      saveStats();
+      updateUI();
+      
+      // Update global header dc balance display if exists
+      const pwDc = document.getElementById('pw-dc');
+      if (pwDc) pwDc.textContent = `${dc} DC`;
+
+      emitParticles('🥣');
+      window.addPetJournalEntry(activePet, "Spiff fed me some Gourmet treats! Yum, my energy is restored!");
+      loadJournal();
+
+      // Trigger temporary eating animation by overriding target to food bowl (if exists)
+      const bowl = document.getElementById('furniture-furniture_buffet_bowl');
+      if (bowl) {
+        walkToFurniture('furniture_buffet_bowl', 'eating');
+      }
+    }
+
+    function playWithPet() {
+      let dc = parseInt(localStorage.getItem('drag0n_dc') || '0');
+      if (dc < 5) {
+        alert("You need at least 5 Dragon Coins (DC) to play with your pet!");
+        return;
+      }
+
+      dc -= 5;
+      localStorage.setItem('drag0n_dc', dc);
+
+      stats.energy = Math.max(0, stats.energy - 10);
+      stats.friendship = Math.min(100, stats.friendship + 15);
+      
+      // Add EXP
+      stats.xp += 25;
+      checkLevelUp();
+      
+      saveStats();
+      updateUI();
+
+      const pwDc = document.getElementById('pw-dc');
+      if (pwDc) pwDc.textContent = `${dc} DC`;
+
+      emitParticles('🧶');
+      window.addPetJournalEntry(activePet, "We spent time playing with the Yarn ball. I feel closer to Spiff now!");
+      loadJournal();
+
+      const toy = document.getElementById('furniture-furniture_gamer_console');
+      if (toy) {
+        walkToFurniture('furniture_gamer_console', 'gaming');
+      }
+    }
+
+    function checkLevelUp() {
+      const needed = stats.level * 100;
+      if (stats.xp >= needed) {
+        stats.xp -= needed;
+        stats.level += 1;
+        saveStats();
+        
+        // Sparkles and level up effect
+        alert(`✨ LEVEL UP! Your pet evolved to Level ${stats.level}! A new accessory was unlocked! ✨`);
+        emitParticles('✨');
+        
+        // Re-spawn companion to trigger the accessory overlay
+        const existing = document.getElementById('screen-companion');
+        if (existing) existing.remove();
+        // companions.js has spawnPet exposed
+        if (typeof window.spawnPet === 'function') {
+          window.spawnPet(activePet);
+        }
+      }
+    }
+
+    function emitParticles(emoji) {
+      const canvas = document.getElementById('room-canvas');
+      const pet = document.getElementById('screen-companion');
+      if (!pet) return;
+
+      const pRect = pet.getBoundingClientRect();
+      const cRect = canvas.getBoundingClientRect();
+
+      for (let i = 0; i < 5; i++) {
+        const el = document.createElement('div');
+        el.className = 'float-emoji';
+        el.textContent = emoji;
+        el.style.left = `${(pRect.left - cRect.left) + 15 + (Math.random() - 0.5) * 40}px`;
+        el.style.top = `${(pRect.top - cRect.top) + (Math.random() - 0.5) * 40}px`;
+        canvas.appendChild(el);
+        setTimeout(() => el.remove(), 1500);
+      }
+    }
+
+    // Furniture Loading and Dragging
+    function loadFurniture() {
+      const layer = document.getElementById('furniture-layer');
+      layer.innerHTML = '';
+      
+      const purchases = JSON.parse(localStorage.getItem('drag0n_purchases') || '{}');
+      
+      Object.keys(furnitureConfig).forEach(key => {
+        // Check if furniture owned in purchases
+        if (purchases[key] === true) {
+          const item = furnitureConfig[key];
+          const savedPos = JSON.parse(localStorage.getItem(`room_furniture_pos_${key}`));
+          
+          const el = document.createElement('div');
+          el.className = 'furniture-item';
+          el.id = `furniture-${key}`;
+          
+          const posX = savedPos ? savedPos.left : item.defaultX;
+          const posY = savedPos ? savedPos.top : item.defaultY;
+          
+          el.style.left = `${posX}px`;
+          el.style.top = `${posY}px`;
+          
+          el.innerHTML = `
+            <span class="furniture-icon">${item.icon}</span>
+            <span class="furniture-label">${item.name}</span>
+          `;
+          
+          layer.appendChild(el);
+        }
+      });
+    }
+
+    function initDragAndDrop() {
+      const canvas = document.getElementById('room-canvas');
+      let activeDragEl = null;
+      let offsetX = 0;
+      let offsetY = 0;
+
+      canvas.addEventListener('mousedown', e => {
+        const item = e.target.closest('.furniture-item');
+        if (item) {
+          activeDragEl = item;
+          const cRect = canvas.getBoundingClientRect();
+          const iRect = item.getBoundingClientRect();
+          offsetX = e.clientX - iRect.left;
+          offsetY = e.clientY - iRect.top;
+        }
+      });
+
+      window.addEventListener('mousemove', e => {
+        if (activeDragEl) {
+          const cRect = canvas.getBoundingClientRect();
+          let left = e.clientX - cRect.left - offsetX;
+          let top = e.clientY - cRect.top - offsetY;
+
+          // Constraints
+          left = Math.max(10, Math.min(cRect.width - 90, left));
+          top = Math.max(10, Math.min(cRect.height - 90, top));
+
+          activeDragEl.style.left = `${left}px`;
+          activeDragEl.style.top = `${top}px`;
+        }
+      });
+
+      window.addEventListener('mouseup', () => {
+        if (activeDragEl) {
+          const key = activeDragEl.id.replace('furniture-', '');
+          const left = parseInt(activeDragEl.style.left);
+          const top = parseInt(activeDragEl.style.top);
+          
+          localStorage.setItem(`room_furniture_pos_${key}`, JSON.stringify({ left, top }));
+          activeDragEl = null;
+        }
+      });
+    }
+
+    // Autonomous Pet AI wandering and interactions
+    let currentTask = 'wander';
+    let currentTaskTimer = 0;
+
+    function startAILoop() {
+      setInterval(() => {
+        const canvas = document.getElementById('room-canvas');
+        if (!canvas) return;
+        
+        const cRect = canvas.getBoundingClientRect();
+        const pet = document.getElementById('screen-companion');
+        if (!pet) return;
+
+        // Skip AI actions if pet is actively sleeping/eating
+        if (currentTaskTimer > 0) {
+          currentTaskTimer--;
+          // Emit action particles
+          if (currentTask === 'sleeping') {
+            emitSingleParticle('💤');
+          } else if (currentTask === 'eating') {
+            emitSingleParticle('🍔');
+          } else if (currentTask === 'dancing') {
+            emitSingleParticle('🎵');
+          } else if (currentTask === 'gaming') {
+            emitSingleParticle('🎮');
+          }
+          return;
+        }
+
+        // Decide next action:
+        // 40% wander, 60% interact with furniture if owned
+        const purchases = JSON.parse(localStorage.getItem('drag0n_purchases') || '{}');
+        const ownedItems = Object.keys(furnitureConfig).filter(k => purchases[k] === true);
+
+        if (Math.random() < 0.6 && ownedItems.length > 0) {
+          // Select random furniture to visit
+          const targetKey = ownedItems[Math.floor(Math.random() * ownedItems.length)];
+          const actionMap = {
+            furniture_royal_bed: 'sleeping',
+            furniture_gamer_console: 'gaming',
+            furniture_disco_ball: 'dancing',
+            furniture_buffet_bowl: 'eating'
+          };
+          walkToFurniture(targetKey, actionMap[targetKey]);
+        } else {
+          // Wander to random coordinate on floor
+          const randomX = Math.random() * (cRect.width - 100) + 50;
+          const randomY = Math.random() * 100 + 350; // Constrain to floor level
+          
+          window.overridePetTarget = {
+            x: cRect.left + randomX,
+            y: cRect.top + randomY
+          };
+          currentTask = 'wander';
+        }
+      }, 4000);
+    }
+
+    function walkToFurniture(key, targetTask) {
+      const canvas = document.getElementById('room-canvas');
+      const cRect = canvas.getBoundingClientRect();
+      const el = document.getElementById(`furniture-${key}`);
+      if (!el) return;
+
+      const fLeft = parseInt(el.style.left);
+      const fTop = parseInt(el.style.top);
+
+      window.overridePetTarget = {
+        x: cRect.left + fLeft + 35,
+        y: cRect.top + fTop + 45
+      };
+
+      currentTask = targetTask;
+      currentTaskTimer = 4; // Stay interacting for 16 seconds
+    }
+
+    function emitSingleParticle(emoji) {
+      const canvas = document.getElementById('room-canvas');
+      const pet = document.getElementById('screen-companion');
+      if (!pet) return;
+
+      const pRect = pet.getBoundingClientRect();
+      const cRect = canvas.getBoundingClientRect();
+
+      const el = document.createElement('div');
+      el.className = 'float-emoji';
+      el.textContent = emoji;
+      el.style.left = `${(pRect.left - cRect.left) + 20}px`;
+      el.style.top = `${(pRect.top - cRect.top) - 10}px`;
+      canvas.appendChild(el);
+      setTimeout(() => el.remove(), 1500);
+    }
+
+    // Tabs Manager
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-view-content').forEach(view => view.classList.remove('active'));
+
+      event.target.classList.add('active');
+      document.getElementById(`view-${tabId}`).classList.add('active');
+      if (tabId === 'journal') loadJournal();
+    }
+
+    // Journal Manager
+    function loadJournal() {
+      const container = document.getElementById('journal-entries-container');
+      const journal = JSON.parse(localStorage.getItem(`companionJournal_${activePet}`) || '[]');
+      
+      if (journal.length === 0) {
+        container.innerHTML = `<div style="text-align: center; color: var(--text-muted); margin-top: 50px;">No journal logs recorded yet. Wander around other pages to compile diary logs!</div>`;
+        return;
+      }
+
+      container.innerHTML = journal.map(entry => `
+        <div class="journal-entry">
+          <div class="journal-date">${entry.date}</div>
+          <div style="font-weight: 500;">${entry.text}</div>
+        </div>
+      `).join('');
+    }
+
+    // Chatbot Engine
+    function sendChatMessage() {
+      const input = document.getElementById('user-msg-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      appendMessage(text, 'user');
+      input.value = '';
+
+      // Generate pet reply
+      setTimeout(() => {
+        const personality = petPersonalities[activePet] || petPersonalities['cat'];
+        const replies = personality.replies;
+        let replyText = replies[Math.floor(Math.random() * replies.length)];
+        
+        // Handle hello keywords
+        if (text.toLowerCase().includes('hello') || text.toLowerCase().includes('hi')) {
+          replyText = personality.greeting;
+        }
+
+        appendMessage(replyText, 'pet');
+      }, 600);
+    }
+
+    function appendMessage(text, sender) {
+      const box = document.getElementById('chat-box');
+      const msg = document.createElement('div');
+      msg.className = `chat-msg msg-${sender}`;
+      msg.textContent = text;
+      box.appendChild(msg);
+      box.scrollTop = box.scrollHeight;
+    }
+  </script>
+</body>
+</html>

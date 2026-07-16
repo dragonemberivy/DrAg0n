@@ -1015,6 +1015,33 @@
       `;
     }
 
+    const stats = JSON.parse(localStorage.getItem(`companionStats_${type}`) || '{"level":1,"xp":0,"energy":100,"happiness":100,"friendship":0}');
+    if (stats.level >= 5) {
+      let accSvg = '';
+      if (type === 'cat') {
+        accSvg = `<polygon points="26,14 38,14 32,2" fill="#6366f1" stroke="#312e81" stroke-width="1"/><ellipse cx="32" cy="14" rx="7" ry="2.5" fill="#4f46e5" stroke="#312e81" stroke-width="1"/><circle cx="32" cy="2" r="1.5" fill="#facc15"/>`;
+      } else if (type === 'dragon') {
+        accSvg = `<path d="M24,14 L24,8 L28,12 L32,8 L36,12 L40,8 L40,14 Z" fill="#fbbf24" stroke="#78350f" stroke-width="1"/><circle cx="24" cy="7" r="0.8" fill="#ef4444"/><circle cx="32" cy="7" r="0.8" fill="#ef4444"/><circle cx="40" cy="7" r="0.8" fill="#ef4444"/>`;
+      } else if (type === 'cyber_puppy') {
+        accSvg = `<ellipse cx="32" cy="8" rx="8" ry="2.5" fill="none" stroke="#22d3ee" stroke-width="2" filter="drop-shadow(0 0 3px #22d3ee)"/>`;
+      } else if (type === 'bunny') {
+        accSvg = `<path d="M26,16 L38,24 M38,16 L26,24" stroke="#ec4899" stroke-width="4" stroke-linecap="round"/><circle cx="32" cy="20" r="3" fill="#db2777"/>`;
+      } else if (type === 'frog') {
+        accSvg = `<rect x="27" y="10" width="10" height="8" fill="#1e293b" stroke="#000" stroke-width="1"/><ellipse cx="32" cy="18" rx="8" ry="2" fill="#1e293b" stroke="#000" stroke-width="1"/>`;
+      } else if (type === 'fox') {
+        accSvg = `<path d="M22,14 C22,8 42,8 42,14 Z" fill="#15803d" stroke="#14532d" stroke-width="1"/><path d="M22,14 Q32,18 44,14" stroke="#16a34a" stroke-width="2" fill="none"/>`;
+      } else if (type === 'owl') {
+        accSvg = `<circle cx="26" cy="22" r="4.5" fill="none" stroke="#b45309" stroke-width="1.5"/><circle cx="38" cy="22" r="4.5" fill="none" stroke-linecap="round" stroke="#b45309" stroke-width="1.5"/><line x1="30.5" y1="22" x2="33.5" y2="22" stroke="#b45309" stroke-width="1.5"/>`;
+      } else if (type === 'shark') {
+        accSvg = `<circle cx="46" cy="31" r="3.5" fill="#1e293b"/><line x1="38" y1="26" x2="52" y2="34" stroke="#1e293b" stroke-width="2"/>`;
+      } else if (type === 'unicorn') {
+        accSvg = `<circle cx="32" cy="40" r="3.5" fill="#a855f7" filter="drop-shadow(0 0 3px #ec4899)"/>`;
+      } else if (type === 'slime') {
+        accSvg = `<path d="M28,20 C26,14 38,14 36,20 Z" fill="#ef4444" stroke="#991b1b" stroke-width="1"/><rect x="29" y="18" width="6" height="4" fill="#f8fafc" stroke="#991b1b" stroke-width="1"/>`;
+      }
+      svgContent = svgContent.replace('</svg>', `${accSvg}</svg>`);
+    }
+
     container.innerHTML = svgContent;
     document.body.appendChild(container);
   }
@@ -1113,8 +1140,8 @@
 
     // Determine motion target:
     // If a toy is on the screen, the pet targets the toy!
-    let targetX = mouseX - 24;
-    let targetY = mouseY - 40;
+    let targetX = (window.overridePetTarget ? window.overridePetTarget.x : mouseX) - 24;
+    let targetY = (window.overridePetTarget ? window.overridePetTarget.y : mouseY) - 40;
     let chasingToy = false;
 
     if (activeToy && activeToy !== 'laser') {
@@ -1232,6 +1259,15 @@
   // Initialization & Storage Reloads
   requestAnimationFrame(tick);
 
+  window.addPetJournalEntry = function(type, message) {
+    const journalKey = `companionJournal_${type}`;
+    const journal = JSON.parse(localStorage.getItem(journalKey) || '[]');
+    const dateStr = new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    journal.unshift({ date: dateStr, text: message });
+    if (journal.length > 50) journal.pop();
+    localStorage.setItem(journalKey, JSON.stringify(journal));
+  };
+
   setTimeout(() => {
     highlightActiveMascot();
     
@@ -1239,5 +1275,30 @@
     const storedBiome = localStorage.getItem('activeBiome') || 'none';
     applyBiome(storedBiome);
     highlightActiveBiome();
+
+    // Auto log page visit to pet journal
+    const activeCompanion = localStorage.getItem('activeCompanion') || 'cat';
+    const pagePath = window.location.pathname;
+    const pageName = pagePath.substring(pagePath.lastIndexOf('/') + 1) || 'index.html';
+    if (!sessionStorage.getItem(`visited_${pageName}`)) {
+      sessionStorage.setItem(`visited_${pageName}`, 'true');
+      let activityText = '';
+      if (pageName === 'index.html') {
+        activityText = "I followed you back to the home page! It's so bright here.";
+      } else if (pageName === 'games.html') {
+        activityText = "We visited the Arcade! I sat next to the keyboard while you played games.";
+      } else if (pageName === 'shop.html') {
+        activityText = "We went window shopping at the Store! So many shiny badges and items.";
+      } else if (pageName === 'chat.html') {
+        activityText = "We checked the Animal Chat. I saw other cool creatures messaging each other!";
+      } else if (pageName === 'club.html') {
+        activityText = "We joined the Book Club. That dancing cowboy pineapple is neon-tastic!";
+      } else if (pageName === 'room.html') {
+        activityText = "I hopped into the Pet Room! It feels nice to stretch my paws here.";
+      }
+      if (activityText) {
+        window.addPetJournalEntry(activeCompanion, activityText);
+      }
+    }
   }, 100);
 })();

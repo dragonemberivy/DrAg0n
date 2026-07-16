@@ -2,7 +2,7 @@ const fs = require('fs');
 const jsdom = require('jsdom');
 const { JSDOM } = jsdom;
 
-const pages = ['index.html', 'games.html', 'shop.html', 'chat.html', 'club.html'];
+const pages = ['index.html', 'games.html', 'shop.html', 'chat.html', 'club.html', 'room.html'];
 
 console.log("Starting comprehensive syntax and runtime validation...");
 
