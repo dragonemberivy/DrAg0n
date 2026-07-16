@@ -167,26 +167,9 @@
           border-color: #0f0 !important;
           background: rgba(0, 20, 10, 0.8) !important;
         }
-        @keyframes pineapple-dance {
-          0%, 100% {
-            transform: translateX(0) rotate(0deg) skewX(0deg) scale(1);
-            transform-origin: bottom center;
-          }
-          20% {
-            transform: translateX(-40px) rotate(-12deg) skewX(8deg) scaleY(0.9) scaleX(1.1);
-          }
-          40% {
-            transform: translateX(0) rotate(0deg) skewX(0deg) scaleY(1.05) scaleX(0.95);
-          }
-          60% {
-            transform: translateX(40px) rotate(12deg) skewX(-8deg) scaleY(0.9) scaleX(1.1);
-          }
-          80% {
-            transform: translateX(0) rotate(0deg) skewX(0deg) scaleY(1.05) scaleX(0.95);
-          }
-        }
         .dancing-pineapple {
-          animation: pineapple-dance 1.2s infinite ease-in-out;
+          /* Animation is built into the GIF file itself! */
+          display: block;
         }
         .poll-btn {
           background: rgba(255, 255, 255, 0.1);
@@ -216,7 +199,7 @@
 
         <div id="poll-results" style="display: none; flex-direction: column; align-items: center;">
           <h3 style="color: #4ade80; text-shadow: 0 0 10px #4ade80; font-size: 2rem; margin-bottom: 1rem;">You voted! Pineapple Wins!</h3>
-          <img src="assets/images/neon_pineapple.png" alt="Dancing Neon Pineapple" class="dancing-pineapple" style="width: 200px; margin-top: 1rem;">
+          <img src="assets/images/neon_pineapple.gif" alt="Dancing Neon Pineapple" class="dancing-pineapple" style="width: 200px; margin-top: 1rem;">
         </div>
       </div>
       
