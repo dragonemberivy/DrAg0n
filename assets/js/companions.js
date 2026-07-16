@@ -848,9 +848,9 @@
       svgContent = `
         <svg class="pet-svg" viewBox="0 0 64 64" width="48" height="48" style="overflow: visible;">
           <ellipse cx="32" cy="50" rx="14" ry="3" fill="rgba(0,0,0,0.2)"/>
-          <!-- Dragon wings attached to shoulders, extending outwards horizontally -->
-          <path class="dragon-wing-left" d="M22 34 C12 32, 4 20, 2 22 C6 30, 14 34, 18 38 Z" fill="#d946ef" stroke="#4a044e" stroke-width="1.5"/>
-          <path class="dragon-wing-right" d="M42 34 C52 32, 60 20, 62 22 C58 30, 50 34, 46 38 Z" fill="#d946ef" stroke="#4a044e" stroke-width="1.5"/>
+          <!-- Dragon wings attached to shoulders, extending outwards horizontally (Wings of Fire style) -->
+          <path class="dragon-wing-left" d="M22 34 C12 30, -6 18, -16 20 C-12 28, -6 36, -8 40 C-2 36, 6 36, 10 38 C14 36, 16 37, 20 38 Z" fill="#d946ef" stroke="#4a044e" stroke-width="1.5"/>
+          <path class="dragon-wing-right" d="M42 34 C52 30, 70 18, 80 20 C76 28, 70 36, 72 40 C66 36, 58 36, 54 38 C50 36, 48 37, 44 38 Z" fill="#d946ef" stroke="#4a044e" stroke-width="1.5"/>
           <path d="M18 36 C18 28, 46 28, 46 36 C46 44, 40 48, 32 48 C24 48, 18 44, 18 36 Z" fill="#a855f7" stroke="#3b0764" stroke-width="2"/>
           <path d="M26 36 C26 31, 38 31, 38 36 C38 42, 35 46, 32 46 C29 46, 26 42, 26 36 Z" fill="#fdf4ff" opacity="0.8"/>
           <path class="pet-head" d="M20 22 C20 14, 44 14, 44 22 C44 30, 40 32, 32 32 C24 32, 20 30, 20 22 Z" fill="#a855f7" stroke="#3b0764" stroke-width="2"/>
