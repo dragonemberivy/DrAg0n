@@ -706,6 +706,25 @@
       }
     });
 
+    const existingBtn = document.getElementById('toy-put-away');
+    if (existingBtn) existingBtn.remove();
+
+    if (type) {
+      // Create a small floating put-away button when a toy is active
+      const putAway = document.createElement('button');
+      putAway.id = 'toy-put-away';
+      putAway.innerHTML = '📥 Put away Toy';
+      putAway.style.cssText = 'position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(15,23,42,0.9); border: 1px solid rgba(255,255,255,0.15); color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; z-index: 100003; font-weight: bold; backdrop-filter: blur(8px); display: flex; align-items: center; gap: 6px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); transition: all 0.2s ease;';
+      putAway.onclick = (e) => {
+        e.stopPropagation();
+        removeToy();
+        highlightActiveToy(null);
+      };
+      putAway.onmouseover = () => { putAway.style.backgroundColor = '#ef4444'; };
+      putAway.onmouseout = () => { putAway.style.backgroundColor = 'rgba(15,23,42,0.9)'; };
+      document.body.appendChild(putAway);
+    }
+
     // Handle Laser pointer styling
     if (type === 'laser') {
       document.body.classList.add('laser-active-cursor');
@@ -757,6 +776,8 @@
   function removeToy() {
     const existing = document.getElementById('pet-toy');
     if (existing) existing.remove();
+    const btn = document.getElementById('toy-put-away');
+    if (btn) btn.remove();
     activeToy = null;
     document.body.classList.remove('laser-active-cursor');
     laserDot.style.display = 'none';
