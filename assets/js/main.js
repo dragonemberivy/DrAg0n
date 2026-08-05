@@ -1000,6 +1000,71 @@
     }
 
     // HTML5 TRAVEL AUDIO PLAYER LOGIC
+    const travelPlaylist = [
+      { title: "1. #BoxBaddhalaiPoye Full Video Song", url: "assets/audio/travel_playlist/#BoxBaddhalaiPoye Full Video Song With Lyrics ｜ DJ Full Video Songs ｜ Allu Arjun ｜ Pooja Hegde ｜ DSP.webm" },
+      { title: "2. A Million Dreams", url: "assets/audio/travel_playlist/A Million Dreams.webm" },
+      { title: "3. ABC", url: "assets/audio/travel_playlist/ABC.webm" },
+      { title: "4. Aankh Marey (Simmba)", url: "assets/audio/travel_playlist/Aankh Marey (From ＂Simmba＂).webm" },
+      { title: "5. Believer", url: "assets/audio/travel_playlist/Believer.webm" },
+      { title: "6. Bhool Bhulaiyaa 2 Title Track", url: "assets/audio/travel_playlist/Bhool Bhulaiyaa 2 Title Track.webm" },
+      { title: "7. Billie Jean", url: "assets/audio/travel_playlist/Billie Jean.webm" },
+      { title: "8. Blank Space (Taylor's Version)", url: "assets/audio/travel_playlist/Blank Space (Taylor's Version).webm" },
+      { title: "9. Box Badhalai Poyi", url: "assets/audio/travel_playlist/Box Badhalai Poyi.webm" },
+      { title: "10. Sunny Road to Salina", url: "assets/audio/travel_playlist/CHRISTOPHE-Sunny Road to Salina.webm" },
+      { title: "11. Counting Stars", url: "assets/audio/travel_playlist/Counting Stars.webm" },
+      { title: "12. Dance Monkey", url: "assets/audio/travel_playlist/Dance Monkey.webm" },
+      { title: "13. Day Of Anger", url: "assets/audio/travel_playlist/Day Of Anger.webm" },
+      { title: "14. Demons", url: "assets/audio/travel_playlist/Demons.webm" },
+      { title: "15. Dippam Dappam", url: "assets/audio/travel_playlist/Dippam Dappam (Telugu) (From ＂Kanmani Rambo Khatija＂).webm" },
+      { title: "16. Dj Waley Babu", url: "assets/audio/travel_playlist/Dj Waley Babu.webm" },
+      { title: "17. Dynamite", url: "assets/audio/travel_playlist/Dynamite.webm" },
+      { title: "18. Empire State Of Mind", url: "assets/audio/travel_playlist/Empire State Of Mind.webm" },
+      { title: "19. Follow Follow", url: "assets/audio/travel_playlist/Follow Follow Full Video ｜ Nannaku Prematho ｜ Junior NTR ｜ Rakul Preet Singh ｜ Latest Telugu Songs.webm" },
+      { title: "20. Ghungroo (WAR)", url: "assets/audio/travel_playlist/Ghungroo (From ＂WAR＂).webm" },
+      { title: "21. Grenade (Acoustic)", url: "assets/audio/travel_playlist/Grenade (Acoustic).webm" },
+      { title: "22. Halo", url: "assets/audio/travel_playlist/Halo.webm" },
+      { title: "23. Happy", url: "assets/audio/travel_playlist/Happy (From ＂Despicable Me 2＂).webm" },
+      { title: "24. Hey Jude", url: "assets/audio/travel_playlist/Hey Jude (Remastered 2015).webm" },
+      { title: "25. Hoyna Hoyna", url: "assets/audio/travel_playlist/Hoyna Hoyna (From ＂Gang Leader＂).webm" },
+      { title: "26. Illegal Weapon 2.0", url: "assets/audio/travel_playlist/Illegal Weapon 2.0 (From ＂Street Dancer 3D＂).webm" },
+      { title: "27. Jai Jai Shivshankar", url: "assets/audio/travel_playlist/Jai Jai Shivshankar (From ＂WAR＂).webm" },
+      { title: "28. Jalebi Baby", url: "assets/audio/travel_playlist/Jalebi Baby.webm" },
+      { title: "29. Kala Chashma", url: "assets/audio/travel_playlist/Kala Chashma.webm" },
+      { title: "30. Kalaavathi", url: "assets/audio/travel_playlist/Kalaavathi.webm" },
+      { title: "31. Kinni Kinni", url: "assets/audio/travel_playlist/Kinni Kinni.webm" },
+      { title: "32. Levitating", url: "assets/audio/travel_playlist/Levitating (feat. DaBaby).webm" },
+      { title: "33. Metallica - Ecstasy Of Gold", url: "assets/audio/travel_playlist/Metallica - Ecstasy Of Gold.webm" },
+      { title: "34. Muqabla", url: "assets/audio/travel_playlist/Muqabla (From ＂Street Dancer 3D＂).webm" },
+      { title: "35. Naatu Naatu", url: "assets/audio/travel_playlist/Naatu Naatu.webm" },
+      { title: "36. Paparazzi", url: "assets/audio/travel_playlist/Paparazzi.webm" },
+      { title: "37. Poker Face", url: "assets/audio/travel_playlist/Poker Face.webm" },
+      { title: "38. Pranavalaya", url: "assets/audio/travel_playlist/Pranavalaya.webm" },
+      { title: "39. Radioactive", url: "assets/audio/travel_playlist/Radioactive.webm" },
+      { title: "40. Roar", url: "assets/audio/travel_playlist/Roar.webm" },
+      { title: "41. Royals", url: "assets/audio/travel_playlist/Royals.webm" },
+      { title: "42. Saiyaara", url: "assets/audio/travel_playlist/Saiyaara (Movie： Saiyaara).webm" },
+      { title: "43. Samajavaragamana", url: "assets/audio/travel_playlist/Samajavaragamana.webm" },
+      { title: "44. Seeti Maar", url: "assets/audio/travel_playlist/Seeti Maar.webm" },
+      { title: "45. Señorita", url: "assets/audio/travel_playlist/Señorita.webm" },
+      { title: "46. Sirivennela", url: "assets/audio/travel_playlist/Sirivennela.webm" },
+      { title: "47. Somewhere Only We Know", url: "assets/audio/travel_playlist/Somewhere Only We Know.webm" },
+      { title: "48. Sugar", url: "assets/audio/travel_playlist/Sugar.webm" },
+      { title: "49. The Ecstasy of Gold", url: "assets/audio/travel_playlist/The Ecstasy of Gold - L'Estasi dell'Oro.webm" },
+      { title: "50. The Good, The Bad And The Ugly", url: "assets/audio/travel_playlist/The Good, The Bad And The Ugly (2004 Remaster).webm" },
+      { title: "51. Thunder", url: "assets/audio/travel_playlist/Thunder.webm" },
+      { title: "52. Unwritten", url: "assets/audio/travel_playlist/Unwritten.webm" },
+      { title: "53. Uptown Funk", url: "assets/audio/travel_playlist/Uptown Funk.webm" },
+      { title: "54. Vikram (Title Track)", url: "assets/audio/travel_playlist/Vikram (Title Track).webm" },
+      { title: "55. Waka Waka", url: "assets/audio/travel_playlist/Waka Waka (Esto es Africa).webm" },
+      { title: "56. Watermelon Sugar", url: "assets/audio/travel_playlist/Watermelon Sugar.webm" },
+      { title: "57. Whatever It Takes", url: "assets/audio/travel_playlist/Whatever It Takes.webm" },
+      { title: "58. Yellow", url: "assets/audio/travel_playlist/Yellow.webm" },
+      { title: "59. Zorba's Dance", url: "assets/audio/travel_playlist/Zorba the Greek： Zorba's Dance.webm" },
+      { title: "60. Master of Puppets (Instrumental)", url: "assets/audio/travel_playlist/master of puppets - Metallica (instrumental).webm" }
+    ];
+
+    let currentTrackIdx = 0;
+
     window.toggleTravelAudio = function() {
       const audio = document.getElementById('travel-audio-element');
       const btn = document.getElementById('travel-play-btn');
@@ -1018,26 +1083,42 @@
       }
     };
 
-    window.changeTravelTrack = function(src) {
+    window.changeTravelTrack = function(index) {
       const audio = document.getElementById('travel-audio-element');
       const source = document.getElementById('travel-audio-source');
       const titleSpan = document.getElementById('travel-track-title');
       const btn = document.getElementById('travel-play-btn');
       const select = document.getElementById('travel-track-select');
       
+      currentTrackIdx = parseInt(index);
+      const track = travelPlaylist[currentTrackIdx] || travelPlaylist[0];
+
       if (!audio || !source) return;
       const isPlaying = !audio.paused;
-      source.src = src;
+      source.src = track.url;
       audio.load();
-      if (select) {
-        const text = select.options[select.selectedIndex].text;
-        if (titleSpan) titleSpan.textContent = text;
-      }
+      if (titleSpan) titleSpan.textContent = track.title;
+      if (select) select.value = currentTrackIdx;
+
       if (isPlaying) {
         audio.play().then(() => {
           if (btn) btn.innerHTML = '⏸ Pause';
         }).catch(e => {});
       }
+    };
+
+    window.nextTravelTrack = function() {
+      const nextIdx = (currentTrackIdx + 1) % travelPlaylist.length;
+      window.changeTravelTrack(nextIdx);
+      const audio = document.getElementById('travel-audio-element');
+      if (audio) audio.play().catch(e => {});
+    };
+
+    window.prevTravelTrack = function() {
+      const prevIdx = (currentTrackIdx - 1 + travelPlaylist.length) % travelPlaylist.length;
+      window.changeTravelTrack(prevIdx);
+      const audio = document.getElementById('travel-audio-element');
+      if (audio) audio.play().catch(e => {});
     };
 
     window.setTravelVolume = function(val) {
@@ -1065,8 +1146,8 @@
           <div style="display:flex; align-items:center; gap:8px;">
             <span style="font-size:1.3rem;">✈️</span>
             <div>
-              <strong style="color:var(--accent, #38bdf8); font-size:0.95rem; display:block; font-family:'Outfit', sans-serif;">Travel Music Recording</strong>
-              <span id="travel-track-title" style="font-size:0.75rem; color:#94a3b8; display:block;">Track 1: Travel Journey</span>
+              <strong style="color:var(--accent, #38bdf8); font-size:0.9rem; display:block; font-family:'Outfit', sans-serif;">Travel Playlist (60 Tracks)</strong>
+              <span id="travel-track-title" style="font-size:0.7rem; color:#94a3b8; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px;">1. #BoxBaddhalaiPoye</span>
             </div>
           </div>
           <div style="display:flex; gap:6px;">
@@ -1076,24 +1157,19 @@
         </div>
 
         <div id="music-player-iframe-container" style="display:flex; flex-direction:column; gap:10px; transition: all 0.3s ease;">
-          <audio id="travel-audio-element" loop style="display:none;">
-            <source id="travel-audio-source" src="assets/audio/travel_playlist/Believer.webm" type="audio/webm">
+          <audio id="travel-audio-element" style="display:none;" onended="window.nextTravelTrack()">
+            <source id="travel-audio-source" src="${travelPlaylist[0].url}" type="audio/webm">
           </audio>
 
-          <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(0,0,0,0.3); padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.08);">
+          <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(0,0,0,0.3); padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.08); gap:6px;">
+            <button onclick="window.prevTravelTrack()" style="background:rgba(255,255,255,0.1); border:none; color:white; padding:4px 8px; border-radius:6px; cursor:pointer; font-size:0.8rem;" title="Previous">⏮</button>
             <button id="travel-play-btn" onclick="window.toggleTravelAudio()" style="background:#38bdf8; border:none; color:#0f172a; padding:6px 14px; border-radius:20px; font-weight:bold; cursor:pointer; font-size:0.85rem; display:flex; align-items:center; gap:4px;">
               ▶ Play
             </button>
+            <button onclick="window.nextTravelTrack()" style="background:rgba(255,255,255,0.1); border:none; color:white; padding:4px 8px; border-radius:6px; cursor:pointer; font-size:0.8rem;" title="Next">⏭</button>
             
-            <select id="travel-track-select" onchange="window.changeTravelTrack(this.value)" style="background:rgba(15,23,42,0.9); color:white; border:1px solid rgba(255,255,255,0.2); padding:5px 8px; border-radius:6px; font-size:0.75rem; max-width:145px; cursor:pointer;">
-              <option value="assets/audio/travel_playlist/Believer.webm">1. Believer</option>
-              <option value="assets/audio/travel_playlist/Counting Stars.webm">2. Counting Stars</option>
-              <option value="assets/audio/travel_playlist/Dance Monkey.webm">3. Dance Monkey</option>
-              <option value="assets/audio/travel_playlist/Radioactive.webm">4. Radioactive</option>
-              <option value="assets/audio/travel_playlist/Paparazzi.webm">5. Paparazzi</option>
-              <option value="assets/audio/travel_playlist/Pranavalaya.webm">6. Pranavalaya</option>
-              <option value="assets/audio/travel_playlist/Sirivennela.webm">7. Sirivennela</option>
-              <option value="assets/audio/travel_playlist/Day Of Anger.webm">8. Day Of Anger</option>
+            <select id="travel-track-select" onchange="window.changeTravelTrack(this.value)" style="background:rgba(15,23,42,0.9); color:white; border:1px solid rgba(255,255,255,0.2); padding:5px 8px; border-radius:6px; font-size:0.75rem; max-width:130px; cursor:pointer;">
+              ${travelPlaylist.map((t, idx) => `<option value="${idx}">${t.title}</option>`).join('')}
             </select>
           </div>
 
@@ -1103,7 +1179,7 @@
               <input type="range" id="travel-volume-slider" min="0" max="1" step="0.05" value="0.7" oninput="window.setTravelVolume(this.value)" style="width:70px; accent-color:#38bdf8; cursor:pointer;">
             </div>
             <a href="https://music.youtube.com/playlist?list=PLsWhDTkT5AxzWUi6TbQZoIryJFL4-Lly-" target="_blank" style="color:#38bdf8; text-decoration:none; font-weight:bold; font-size:0.75rem; display:flex; align-items:center; gap:2px;">
-              YouTube Playlist ↗
+              YouTube Link ↗
             </a>
           </div>
         </div>
