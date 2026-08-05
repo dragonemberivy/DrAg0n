@@ -15,24 +15,20 @@
   <!-- THEME TOGGLE -->
   <div id="theme-toggle" style="position: fixed; top: 2rem; right: 200px; font-size: 1.5rem; cursor: pointer; z-index: 100000; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 50%; border: 1px solid var(--border); width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;">🌙</div>
 
-  <!-- GLOBAL JUKEBOX -->
-  <div id="lofi-player" class="glass-card" style="position:fixed; bottom:20px; right:20px; width:300px; padding:15px; display:flex; flex-direction:column; gap:10px; z-index:99999; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+  <!-- TRAVEL MUSIC PLAYER (YOUTUBE MUSIC) -->
+  <div id="music-player" class="glass-card" style="position:fixed; bottom:20px; right:20px; width:340px; background:rgba(15, 23, 42, 0.92); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,0.15); border-radius:16px; padding:12px 15px; z-index:99999; box-shadow:0 10px 30px rgba(0,0,0,0.5); display:flex; flex-direction:column; gap:8px;">
     <div style="display:flex; justify-content:space-between; align-items:center;">
-      <strong style="color:var(--accent); font-size:1.1rem;">🎧 Global Jukebox</strong>
-      <button onclick="document.getElementById('lofi-player').style.display='none'" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer;">&times;</button>
-    </div>
-    <iframe id="jukebox-iframe" width="100%" height="80" src="https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=0&loop=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen style="border-radius:8px;"></iframe>
-    <div style="display:flex; flex-direction:column; gap:5px; margin-top:5px;">
-      <select id="jukebox-preset" style="padding:5px; background:rgba(0,0,0,0.5); border:1px solid var(--border); color:white; border-radius:4px; font-size:0.8rem;" onchange="document.getElementById('jukebox-input').value = this.value;">
-        <option value="" disabled selected>Select a song...</option>
-        <option value="nE5P0h-J24w">Master of Puppets (Instrumental)</option>
-        <option value="J1rOfVst-EQ">Bhool Bhulaiyaa 2 Title Track</option>
-        <option value="jfKfPfyJRdk">Lofi Girl Radio</option>
-      </select>
-      <div style="display:flex; gap:5px;">
-        <input type="text" id="jukebox-input" placeholder="Custom YouTube ID..." style="flex:1; padding:5px; background:rgba(0,0,0,0.5); border:1px solid var(--border); color:white; border-radius:4px; font-size:0.8rem;">
-        <button onclick="window.queueSong()" style="background:var(--accent); border:none; padding:5px; color:white; border-radius:4px; cursor:pointer; font-size:0.8rem; font-weight:bold;">Queue (50 DC)</button>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:1.2rem;">✈️</span>
+        <strong style="color:var(--accent, #38bdf8); font-size:0.9rem;">Travel Playlist (YouTube Music)</strong>
       </div>
+      <div style="display:flex; gap:6px;">
+        <button onclick="window.toggleMusicPlayer()" id="music-toggle-btn" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:white; padding:3px 8px; border-radius:6px; cursor:pointer; font-size:0.75rem;" title="Minimize / Expand">➖ Minimize</button>
+        <button onclick="document.getElementById('music-player').style.display='none'" style="background:transparent; border:none; color:var(--text-muted, #94a3b8); cursor:pointer; font-size:1.1rem;" title="Close">&times;</button>
+      </div>
+    </div>
+    <div id="music-player-iframe-container" style="transition: all 0.3s ease;">
+      <iframe id="youtube-playlist-iframe" width="100%" height="180" src="https://www.youtube.com/embed/videoseries?list=PLsWhDTkT5AxzWUi6TbQZoIryJFL4-Lly-" title="YouTube Music Travel Playlist" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:10px; border:none; width:100%;"></iframe>
     </div>
   </div>
 

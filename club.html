@@ -15,13 +15,21 @@
   <!-- THEME TOGGLE -->
   <div id="theme-toggle" style="position: fixed; top: 2rem; right: 200px; font-size: 1.5rem; cursor: pointer; z-index: 100000; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 50%; border: 1px solid var(--border); width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;">🌙</div>
 
-  <!-- LOFI PLAYER -->
-  <div id="lofi-player" class="glass-card" style="position:fixed; bottom:20px; right:20px; padding:10px 15px; display:flex; align-items:center; gap:10px; z-index:99999; border-radius: 30px;">
-    <span style="font-size:1.2rem;">🎧</span>
-    <audio id="lofi-audio" loop>
-      <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3" type="audio/mpeg">
-    </audio>
-    <button id="lofi-play" style="padding:5px 12px; font-size:0.8rem; border-radius: 20px;">Play</button>
+  <!-- TRAVEL MUSIC PLAYER (YOUTUBE MUSIC) -->
+  <div id="music-player" class="glass-card" style="position:fixed; bottom:20px; right:20px; width:340px; background:rgba(15, 23, 42, 0.92); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,0.15); border-radius:16px; padding:12px 15px; z-index:99999; box-shadow:0 10px 30px rgba(0,0,0,0.5); display:flex; flex-direction:column; gap:8px;">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:1.2rem;">✈️</span>
+        <strong style="color:var(--accent, #38bdf8); font-size:0.9rem;">Travel Playlist (YouTube Music)</strong>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <button onclick="window.toggleMusicPlayer()" id="music-toggle-btn" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:white; padding:3px 8px; border-radius:6px; cursor:pointer; font-size:0.75rem;" title="Minimize / Expand">➖ Minimize</button>
+        <button onclick="document.getElementById('music-player').style.display='none'" style="background:transparent; border:none; color:var(--text-muted, #94a3b8); cursor:pointer; font-size:1.1rem;" title="Close">&times;</button>
+      </div>
+    </div>
+    <div id="music-player-iframe-container" style="transition: all 0.3s ease;">
+      <iframe id="youtube-playlist-iframe" width="100%" height="180" src="https://www.youtube.com/embed/videoseries?list=PLsWhDTkT5AxzWUi6TbQZoIryJFL4-Lly-" title="YouTube Music Travel Playlist" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:10px; border:none; width:100%;"></iframe>
+    </div>
   </div>
 
   <a href="index.html" style="position: absolute; top: 2rem; left: 2rem; text-decoration: none; font-size: 1.2rem; color: var(--accent); z-index: 100000;">← Return to Home</a>
@@ -146,6 +154,100 @@
           </div>
         </div>
 
+      </div>
+
+      <!-- FREE LEGAL PUBLIC DOMAIN BOOKS SECTION -->
+      <div class="glass-card" style="border-color: rgba(56, 189, 248, 0.4); margin-top: 2rem;">
+        <h3 style="color: #38bdf8; font-size: 1.6rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 8px;">
+          🏛️ Free Public Domain Classics Library (Read Online Legally)
+        </h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">
+          These timeless classics are 100% free of copyright restrictions. Click any book to read its full text legally online via Project Gutenberg!
+        </p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1.2rem;">
+          
+          <div class="glass-card" style="padding: 12px; text-align: center; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <span style="background: #38bdf8; color: #0f172a; font-weight: 800; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; text-transform: uppercase;">Public Domain</span>
+              <img src="https://covers.openlibrary.org/b/id/14578051-M.jpg" alt="Sherlock Holmes" style="width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: 8px; margin: 8px 0;">
+              <h4 style="font-size: 1rem; margin-bottom: 2px; color: #fff;">Sherlock Holmes</h4>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">Arthur Conan Doyle</p>
+            </div>
+            <a href="https://www.gutenberg.org/ebooks/1661" target="_blank" style="display: block; background: rgba(56, 189, 248, 0.2); border: 1px solid rgba(56, 189, 248, 0.5); color: #38bdf8; text-decoration: none; padding: 6px; border-radius: 6px; font-weight: bold; font-size: 0.8rem;">📖 Read Free Online</a>
+          </div>
+
+          <div class="glass-card" style="padding: 12px; text-align: center; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <span style="background: #e879f9; color: #0f172a; font-weight: 800; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; text-transform: uppercase;">Public Domain</span>
+              <img src="https://covers.openlibrary.org/b/id/14577884-M.jpg" alt="Dracula" style="width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: 8px; margin: 8px 0;">
+              <h4 style="font-size: 1rem; margin-bottom: 2px; color: #fff;">Dracula</h4>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">Bram Stoker</p>
+            </div>
+            <a href="https://www.gutenberg.org/ebooks/345" target="_blank" style="display: block; background: rgba(232, 121, 249, 0.2); border: 1px solid rgba(232, 121, 249, 0.5); color: #e879f9; text-decoration: none; padding: 6px; border-radius: 6px; font-weight: bold; font-size: 0.8rem;">📖 Read Free Online</a>
+          </div>
+
+          <div class="glass-card" style="padding: 12px; text-align: center; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <span style="background: #4ade80; color: #0f172a; font-weight: 800; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; text-transform: uppercase;">Public Domain</span>
+              <img src="https://covers.openlibrary.org/b/id/14577908-M.jpg" alt="Frankenstein" style="width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: 8px; margin: 8px 0;">
+              <h4 style="font-size: 1rem; margin-bottom: 2px; color: #fff;">Frankenstein</h4>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">Mary Shelley</p>
+            </div>
+            <a href="https://www.gutenberg.org/ebooks/84" target="_blank" style="display: block; background: rgba(74, 222, 128, 0.2); border: 1px solid rgba(74, 222, 128, 0.5); color: #4ade80; text-decoration: none; padding: 6px; border-radius: 6px; font-weight: bold; font-size: 0.8rem;">📖 Read Free Online</a>
+          </div>
+
+          <div class="glass-card" style="padding: 12px; text-align: center; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <span style="background: #fbbf24; color: #0f172a; font-weight: 800; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; text-transform: uppercase;">Public Domain</span>
+              <img src="https://covers.openlibrary.org/b/id/14577897-M.jpg" alt="Alice in Wonderland" style="width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: 8px; margin: 8px 0;">
+              <h4 style="font-size: 1rem; margin-bottom: 2px; color: #fff;">Alice in Wonderland</h4>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">Lewis Carroll</p>
+            </div>
+            <a href="https://www.gutenberg.org/ebooks/11" target="_blank" style="display: block; background: rgba(251, 191, 36, 0.2); border: 1px solid rgba(251, 191, 36, 0.5); color: #fbbf24; text-decoration: none; padding: 6px; border-radius: 6px; font-weight: bold; font-size: 0.8rem;">📖 Read Free Online</a>
+          </div>
+
+          <div class="glass-card" style="padding: 12px; text-align: center; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <span style="background: #f43f5e; color: #fff; font-weight: 800; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; text-transform: uppercase;">Public Domain</span>
+              <img src="https://covers.openlibrary.org/b/id/14577892-M.jpg" alt="The Wizard of Oz" style="width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: 8px; margin: 8px 0;">
+              <h4 style="font-size: 1rem; margin-bottom: 2px; color: #fff;">Wizard of Oz</h4>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">L. Frank Baum</p>
+            </div>
+            <a href="https://www.gutenberg.org/ebooks/55" target="_blank" style="display: block; background: rgba(244, 63, 94, 0.2); border: 1px solid rgba(244, 63, 94, 0.5); color: #f43f5e; text-decoration: none; padding: 6px; border-radius: 6px; font-weight: bold; font-size: 0.8rem;">📖 Read Free Online</a>
+          </div>
+
+          <div class="glass-card" style="padding: 12px; text-align: center; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <span style="background: #a855f7; color: #fff; font-weight: 800; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; text-transform: uppercase;">Public Domain</span>
+              <img src="https://covers.openlibrary.org/b/id/14577912-M.jpg" alt="Dr. Jekyll & Mr. Hyde" style="width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: 8px; margin: 8px 0;">
+              <h4 style="font-size: 1rem; margin-bottom: 2px; color: #fff;">Dr. Jekyll & Hyde</h4>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">R. L. Stevenson</p>
+            </div>
+            <a href="https://www.gutenberg.org/ebooks/43" target="_blank" style="display: block; background: rgba(168, 85, 247, 0.2); border: 1px solid rgba(168, 85, 247, 0.5); color: #a855f7; text-decoration: none; padding: 6px; border-radius: 6px; font-weight: bold; font-size: 0.8rem;">📖 Read Free Online</a>
+          </div>
+
+          <div class="glass-card" style="padding: 12px; text-align: center; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <span style="background: #38bdf8; color: #0f172a; font-weight: 800; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; text-transform: uppercase;">Public Domain</span>
+              <img src="https://covers.openlibrary.org/b/id/14560865-M.jpg" alt="Count of Monte Cristo" style="width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: 8px; margin: 8px 0;">
+              <h4 style="font-size: 1rem; margin-bottom: 2px; color: #fff;">Count of Monte Cristo</h4>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">Alexandre Dumas</p>
+            </div>
+            <a href="https://www.gutenberg.org/ebooks/1184" target="_blank" style="display: block; background: rgba(56, 189, 248, 0.2); border: 1px solid rgba(56, 189, 248, 0.5); color: #38bdf8; text-decoration: none; padding: 6px; border-radius: 6px; font-weight: bold; font-size: 0.8rem;">📖 Read Free Online</a>
+          </div>
+
+          <div class="glass-card" style="padding: 12px; text-align: center; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <span style="background: #34d399; color: #0f172a; font-weight: 800; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; text-transform: uppercase;">Public Domain</span>
+              <img src="https://covers.openlibrary.org/b/id/14577900-M.jpg" alt="Peter Pan" style="width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: 8px; margin: 8px 0;">
+              <h4 style="font-size: 1rem; margin-bottom: 2px; color: #fff;">Peter Pan</h4>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">J. M. Barrie</p>
+            </div>
+            <a href="https://www.gutenberg.org/ebooks/16" target="_blank" style="display: block; background: rgba(52, 211, 153, 0.2); border: 1px solid rgba(52, 211, 153, 0.5); color: #34d399; text-decoration: none; padding: 6px; border-radius: 6px; font-weight: bold; font-size: 0.8rem;">📖 Read Free Online</a>
+          </div>
+
+        </div>
       </div>
     </section>
 

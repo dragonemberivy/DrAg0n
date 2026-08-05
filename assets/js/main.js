@@ -531,9 +531,21 @@
     
     // A. 30 Book Schedule Generator
     const masterBookList = [
+      { "title": "Sherlock Holmes", "author": "Sir Arthur Conan Doyle", "img": "https://covers.openlibrary.org/b/id/14578051-M.jpg", "gutenbergUrl": "https://www.gutenberg.org/ebooks/1661", "publicDomain": true },
+      { "title": "Dracula", "author": "Bram Stoker", "img": "https://covers.openlibrary.org/b/id/14577884-M.jpg", "gutenbergUrl": "https://www.gutenberg.org/ebooks/345", "publicDomain": true },
+      { "title": "Frankenstein", "author": "Mary Shelley", "img": "https://covers.openlibrary.org/b/id/14577908-M.jpg", "gutenbergUrl": "https://www.gutenberg.org/ebooks/84", "publicDomain": true },
+      { "title": "Alice in Wonderland", "author": "Lewis Carroll", "img": "https://covers.openlibrary.org/b/id/14577897-M.jpg", "gutenbergUrl": "https://www.gutenberg.org/ebooks/11", "publicDomain": true },
+      { "title": "The Wizard of Oz", "author": "L. Frank Baum", "img": "https://covers.openlibrary.org/b/id/14577892-M.jpg", "gutenbergUrl": "https://www.gutenberg.org/ebooks/55", "publicDomain": true },
+      { "title": "Dr. Jekyll & Mr. Hyde", "author": "Robert Louis Stevenson", "img": "https://covers.openlibrary.org/b/id/14577912-M.jpg", "gutenbergUrl": "https://www.gutenberg.org/ebooks/43", "publicDomain": true },
+      { "title": "Peter and Wendy", "author": "J. M. Barrie", "img": "https://covers.openlibrary.org/b/id/14577900-M.jpg", "gutenbergUrl": "https://www.gutenberg.org/ebooks/16", "publicDomain": true },
+      { "title": "The Count of Monte Cristo", "author": "Alexandre Dumas", "img": "https://covers.openlibrary.org/b/id/14560865-M.jpg", "gutenbergUrl": "https://www.gutenberg.org/ebooks/1184", "publicDomain": true },
+      { "title": "The Three Musketeers", "author": "Alexandre Dumas", "img": "https://covers.openlibrary.org/b/id/14577915-M.jpg", "gutenbergUrl": "https://www.gutenberg.org/ebooks/1257", "publicDomain": true },
+      { "title": "20,000 Leagues Under Sea", "author": "Jules Verne", "img": "https://covers.openlibrary.org/b/id/14577920-M.jpg", "gutenbergUrl": "https://www.gutenberg.org/ebooks/164", "publicDomain": true },
+      { "title": "Treasure Island", "author": "Robert Louis Stevenson", "img": "https://covers.openlibrary.org/b/id/14577925-M.jpg", "gutenbergUrl": "https://www.gutenberg.org/ebooks/120", "publicDomain": true },
+      { "title": "Picture of Dorian Gray", "author": "Oscar Wilde", "img": "https://covers.openlibrary.org/b/id/14577930-M.jpg", "gutenbergUrl": "https://www.gutenberg.org/ebooks/174", "publicDomain": true },
+      { "title": "A Princess of Mars", "author": "Edgar Rice Burroughs", "img": "https://covers.openlibrary.org/b/id/12678945-M.jpg", "gutenbergUrl": "https://www.gutenberg.org/ebooks/62", "publicDomain": true },
       { "title": "The Hunger Games", "img": "https://covers.openlibrary.org/b/id/12646537-M.jpg" },
       { "title": "I Am Malala", "img": "https://covers.openlibrary.org/b/id/9358664-M.jpg" },
-      { "title": "The Count of Monte Cristo", "img": "https://covers.openlibrary.org/b/id/14560865-M.jpg" },
       { "title": "A Wrinkle in Time", "img": "https://covers.openlibrary.org/b/id/8709146-M.jpg" },
       { "title": "The Hobbit", "img": "https://covers.openlibrary.org/b/id/14627509-M.jpg" },
       { "title": "Ender's Game", "img": "https://covers.openlibrary.org/b/id/12996033-M.jpg" },
@@ -541,26 +553,14 @@
       { "title": "Legendborn", "img": "https://covers.openlibrary.org/b/id/10323535-M.jpg" },
       { "title": "The Golden Compass", "img": "https://covers.openlibrary.org/b/id/2762159-M.jpg" },
       { "title": "Divergent", "img": "https://covers.openlibrary.org/b/id/13274634-M.jpg" },
-      { "title": "Dry", "img": "https://covers.openlibrary.org/b/id/8813046-M.jpg" },
-      { "title": "City of Bones", "img": "https://covers.openlibrary.org/b/id/10121449-M.jpg" },
-      { "title": "A Murder Most Unladylike", "img": "https://images.unsplash.com/photo-1544716278-e513176f20b5?w=150&q=80" },
       { "title": "Coraline", "img": "https://covers.openlibrary.org/b/id/14171421-M.jpg" },
       { "title": "Wonder", "img": "https://covers.openlibrary.org/b/id/8223160-M.jpg" },
-      { "title": "Truly Devious", "img": "https://covers.openlibrary.org/b/id/8367745-M.jpg" },
-      { "title": "Amari and the Night Brothers", "img": "https://covers.openlibrary.org/b/id/12714908-M.jpg" },
       { "title": "The Book Thief", "img": "https://covers.openlibrary.org/b/id/8153054-M.jpg" },
-      { "title": "Legend", "img": "https://covers.openlibrary.org/b/id/8243083-M.jpg" },
-      { "title": "Scythe", "img": "https://covers.openlibrary.org/b/id/8184999-M.jpg" },
       { "title": "Cinder", "img": "https://covers.openlibrary.org/b/id/6998634-M.jpg" },
       { "title": "The Outsiders", "img": "https://covers.openlibrary.org/b/id/7263662-M.jpg" },
-      { "title": "The First Adventure", "img": "https://covers.openlibrary.org/b/id/409304-M.jpg" },
-      { "title": "A Series of Unfortunate Events", "img": "https://images.unsplash.com/photo-1544716278-e513176f20b5?w=150&q=80" },
       { "title": "The Graveyard Book", "img": "https://covers.openlibrary.org/b/id/7099583-M.jpg" },
       { "title": "Bridge to Terabithia", "img": "https://covers.openlibrary.org/b/id/12627341-M.jpg" },
-      { "title": "Out of My Mind", "img": "https://covers.openlibrary.org/b/id/8803535-M.jpg" },
-      { "title": "Shadow and Bone", "img": "https://covers.openlibrary.org/b/id/13816048-M.jpg" },
-      { "title": "The Lightning Queen", "img": "https://covers.openlibrary.org/b/id/7393350-M.jpg" },
-      { "title": "Throne of glass", "img": "https://covers.openlibrary.org/b/id/13312488-M.jpg" }
+      { "title": "Shadow and Bone", "img": "https://covers.openlibrary.org/b/id/13816048-M.jpg" }
     ];
 
     const bookContainer = document.getElementById('book-schedule-container');
@@ -571,19 +571,28 @@
         div.className = 'book-item';
         div.style.cssText = 'text-align: center; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: transform 0.2s; position: relative;';
         
+        let pdBadge = book.publicDomain ? `<div style="position: absolute; top: 0; left: 0; background: #38bdf8; color: #0f172a; font-weight: bold; padding: 2px 4px; font-size: 0.55rem; border-radius: 8px 0 8px 0; z-index: 2;">FREE</div>` : '';
         let readBadge = book.read ? `<div style="position: absolute; top: 0; right: 0; background: #4ade80; color: #111; font-weight: bold; padding: 2px 5px; font-size: 0.6rem; border-radius: 0 8px 0 8px; z-index: 2;">✅ READ</div>` : '';
         
         div.innerHTML = `
+          ${pdBadge}
           ${readBadge}
           <div style="font-size: 0.7rem; color: #a855f7; font-weight: bold; margin-bottom: 2px;">Book ${index + 1}</div>
           <img src="${book.img}" alt="${book.title}" style="width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: 4px; margin-bottom: 0.5rem; pointer-events: none; opacity: ${book.read ? '0.6' : '1'}">
           <p style="font-size: 0.8rem; font-weight: bold; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; color: ${book.read ? '#aaa' : '#fff'};">${book.title}</p>
         `;
         div.addEventListener('mouseenter', () => {
-          audio.currentTime = 0;
-          audio.volume = 0.2;
-          audio.play().catch(e => {});
+          if (audio) {
+            audio.currentTime = 0;
+            audio.volume = 0.2;
+            audio.play().catch(e => {});
+          }
         });
+        if (book.gutenbergUrl) {
+          div.addEventListener('click', () => {
+            window.open(book.gutenbergUrl, '_blank');
+          });
+        }
         bookContainer.appendChild(div);
       });
     }
@@ -990,26 +999,44 @@
       });
     }
 
-    // LOFI PLAYER
-    const lofiAudio = document.getElementById('lofi-audio');
-    const lofiBtn = document.getElementById('lofi-play');
-    if(lofiBtn && lofiAudio) {
-      // Remember state
-      if(sessionStorage.getItem('lofi_playing') === 'true') {
-        lofiAudio.play().catch(()=>{});
-        lofiBtn.textContent = 'Pause';
-      }
-      lofiBtn.addEventListener('click', () => {
-        if(lofiAudio.paused) {
-          lofiAudio.play();
-          lofiBtn.textContent = 'Pause';
-          sessionStorage.setItem('lofi_playing', 'true');
+    // TRAVEL MUSIC PLAYER (YOUTUBE MUSIC)
+    window.toggleMusicPlayer = function() {
+      const container = document.getElementById('music-player-iframe-container');
+      const btn = document.getElementById('music-toggle-btn');
+      if (container) {
+        if (container.style.display === 'none') {
+          container.style.display = 'block';
+          if (btn) btn.textContent = '➖ Minimize';
         } else {
-          lofiAudio.pause();
-          lofiBtn.textContent = 'Play';
-          sessionStorage.setItem('lofi_playing', 'false');
+          container.style.display = 'none';
+          if (btn) btn.textContent = '▶️ Expand';
         }
-      });
+      }
+    };
+
+    const travelPlayerHTML = `
+      <div id="music-player" class="glass-card" style="position:fixed; bottom:20px; right:20px; width:340px; background:rgba(15, 23, 42, 0.92); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,0.15); border-radius:16px; padding:12px 15px; z-index:99999; box-shadow:0 10px 30px rgba(0,0,0,0.5); display:flex; flex-direction:column; gap:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:1.2rem;">✈️</span>
+            <strong style="color:var(--accent, #38bdf8); font-size:0.9rem;">Travel Playlist (YouTube Music)</strong>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <button onclick="window.toggleMusicPlayer()" id="music-toggle-btn" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:white; padding:3px 8px; border-radius:6px; cursor:pointer; font-size:0.75rem;" title="Minimize / Expand">➖ Minimize</button>
+            <button onclick="document.getElementById('music-player').style.display='none'" style="background:transparent; border:none; color:var(--text-muted, #94a3b8); cursor:pointer; font-size:1.1rem;" title="Close">&times;</button>
+          </div>
+        </div>
+        <div id="music-player-iframe-container" style="transition: all 0.3s ease;">
+          <iframe id="youtube-playlist-iframe" width="100%" height="180" src="https://www.youtube.com/embed/videoseries?list=PLsWhDTkT5AxzWUi6TbQZoIryJFL4-Lly-" title="YouTube Music Travel Playlist" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:10px; border:none; width:100%;"></iframe>
+        </div>
+      </div>
+    `;
+
+    const existingLofi = document.getElementById('lofi-player');
+    if (existingLofi) {
+      existingLofi.outerHTML = travelPlayerHTML;
+    } else if (!document.getElementById('music-player')) {
+      document.body.insertAdjacentHTML('beforeend', travelPlayerHTML);
     }
 
     // CHAT NOTIFICATIONS (On Index)
