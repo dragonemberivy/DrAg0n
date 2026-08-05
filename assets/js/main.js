@@ -999,13 +999,58 @@
       });
     }
 
-    // TRAVEL MUSIC PLAYER (YOUTUBE MUSIC)
+    // HTML5 TRAVEL AUDIO PLAYER LOGIC
+    window.toggleTravelAudio = function() {
+      const audio = document.getElementById('travel-audio-element');
+      const btn = document.getElementById('travel-play-btn');
+      if (!audio || !btn) return;
+      if (audio.paused) {
+        audio.play().then(() => {
+          btn.innerHTML = '⏸ Pause';
+          sessionStorage.setItem('travel_audio_playing', 'true');
+        }).catch(err => {
+          console.log('Audio playback prevented or failed:', err);
+        });
+      } else {
+        audio.pause();
+        btn.innerHTML = '▶ Play';
+        sessionStorage.setItem('travel_audio_playing', 'false');
+      }
+    };
+
+    window.changeTravelTrack = function(src) {
+      const audio = document.getElementById('travel-audio-element');
+      const source = document.getElementById('travel-audio-source');
+      const titleSpan = document.getElementById('travel-track-title');
+      const btn = document.getElementById('travel-play-btn');
+      const select = document.getElementById('travel-track-select');
+      
+      if (!audio || !source) return;
+      const isPlaying = !audio.paused;
+      source.src = src;
+      audio.load();
+      if (select) {
+        const text = select.options[select.selectedIndex].text;
+        if (titleSpan) titleSpan.textContent = text;
+      }
+      if (isPlaying) {
+        audio.play().then(() => {
+          if (btn) btn.innerHTML = '⏸ Pause';
+        }).catch(e => {});
+      }
+    };
+
+    window.setTravelVolume = function(val) {
+      const audio = document.getElementById('travel-audio-element');
+      if (audio) audio.volume = parseFloat(val);
+    };
+
     window.toggleMusicPlayer = function() {
       const container = document.getElementById('music-player-iframe-container');
       const btn = document.getElementById('music-toggle-btn');
       if (container) {
         if (container.style.display === 'none') {
-          container.style.display = 'block';
+          container.style.display = 'flex';
           if (btn) btn.textContent = '➖ Minimize';
         } else {
           container.style.display = 'none';
@@ -1015,28 +1060,72 @@
     };
 
     const travelPlayerHTML = `
-      <div id="music-player" class="glass-card" style="position:fixed; bottom:20px; right:20px; width:340px; background:rgba(15, 23, 42, 0.92); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,0.15); border-radius:16px; padding:12px 15px; z-index:99999; box-shadow:0 10px 30px rgba(0,0,0,0.5); display:flex; flex-direction:column; gap:8px;">
+      <div id="music-player" class="glass-card" style="position:fixed; bottom:20px; right:20px; width:340px; background:rgba(15, 23, 42, 0.95); backdrop-filter:blur(14px); border:1px solid rgba(255,255,255,0.15); border-radius:18px; padding:14px 16px; z-index:99999; box-shadow:0 12px 35px rgba(0,0,0,0.6); display:flex; flex-direction:column; gap:10px;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <div style="display:flex; align-items:center; gap:8px;">
-            <span style="font-size:1.2rem;">✈️</span>
-            <strong style="color:var(--accent, #38bdf8); font-size:0.9rem;">Travel Playlist (YouTube Music)</strong>
+            <span style="font-size:1.3rem;">✈️</span>
+            <div>
+              <strong style="color:var(--accent, #38bdf8); font-size:0.95rem; display:block; font-family:'Outfit', sans-serif;">Travel Music Recording</strong>
+              <span id="travel-track-title" style="font-size:0.75rem; color:#94a3b8; display:block;">Track 1: Travel Journey</span>
+            </div>
           </div>
           <div style="display:flex; gap:6px;">
             <button onclick="window.toggleMusicPlayer()" id="music-toggle-btn" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:white; padding:3px 8px; border-radius:6px; cursor:pointer; font-size:0.75rem;" title="Minimize / Expand">➖ Minimize</button>
             <button onclick="document.getElementById('music-player').style.display='none'" style="background:transparent; border:none; color:var(--text-muted, #94a3b8); cursor:pointer; font-size:1.1rem;" title="Close">&times;</button>
           </div>
         </div>
-        <div id="music-player-iframe-container" style="transition: all 0.3s ease;">
-          <iframe id="youtube-playlist-iframe" width="100%" height="180" src="https://www.youtube.com/embed/videoseries?list=PLsWhDTkT5AxzWUi6TbQZoIryJFL4-Lly-" title="YouTube Music Travel Playlist" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:10px; border:none; width:100%;"></iframe>
+
+        <div id="music-player-iframe-container" style="display:flex; flex-direction:column; gap:10px; transition: all 0.3s ease;">
+          <audio id="travel-audio-element" loop style="display:none;">
+            <source id="travel-audio-source" src="audio.mp3" type="audio/mpeg">
+          </audio>
+
+          <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(0,0,0,0.3); padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.08);">
+            <button id="travel-play-btn" onclick="window.toggleTravelAudio()" style="background:#38bdf8; border:none; color:#0f172a; padding:6px 14px; border-radius:20px; font-weight:bold; cursor:pointer; font-size:0.85rem; display:flex; align-items:center; gap:4px;">
+              ▶ Play
+            </button>
+            
+            <select id="travel-track-select" onchange="window.changeTravelTrack(this.value)" style="background:rgba(15,23,42,0.9); color:white; border:1px solid rgba(255,255,255,0.2); padding:5px 8px; border-radius:6px; font-size:0.75rem; max-width:140px; cursor:pointer;">
+              <option value="audio.mp3">Track 1: Travel Journey</option>
+              <option value="fdtl/91_Elven_Glade.mp3">Track 2: Elven Glade</option>
+              <option value="fdtl/347_Elven_Procession.mp3">Track 3: Acoustic Wander</option>
+              <option value="fdtl/506_The_Verdant_Dark.mp3">Track 4: Verdant Path</option>
+            </select>
+          </div>
+
+          <div style="display:flex; align-items:center; justify-content:space-between; font-size:0.75rem; color:#94a3b8;">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span>🔊</span>
+              <input type="range" id="travel-volume-slider" min="0" max="1" step="0.05" value="0.7" oninput="window.setTravelVolume(this.value)" style="width:70px; accent-color:#38bdf8; cursor:pointer;">
+            </div>
+            <a href="https://music.youtube.com/playlist?list=PLsWhDTkT5AxzWUi6TbQZoIryJFL4-Lly-" target="_blank" style="color:#38bdf8; text-decoration:none; font-weight:bold; font-size:0.75rem; display:flex; align-items:center; gap:2px;">
+              YouTube Playlist ↗
+            </a>
+          </div>
         </div>
       </div>
     `;
 
     const existingLofi = document.getElementById('lofi-player');
+    const existingPlayer = document.getElementById('music-player');
     if (existingLofi) {
       existingLofi.outerHTML = travelPlayerHTML;
-    } else if (!document.getElementById('music-player')) {
+    } else if (existingPlayer) {
+      existingPlayer.outerHTML = travelPlayerHTML;
+    } else {
       document.body.insertAdjacentHTML('beforeend', travelPlayerHTML);
+    }
+
+    if (sessionStorage.getItem('travel_audio_playing') === 'true') {
+      setTimeout(() => {
+        const audio = document.getElementById('travel-audio-element');
+        const btn = document.getElementById('travel-play-btn');
+        if (audio && btn) {
+          audio.play().then(() => {
+            btn.innerHTML = '⏸ Pause';
+          }).catch(() => {});
+        }
+      }, 300);
     }
 
     // CHAT NOTIFICATIONS (On Index)
