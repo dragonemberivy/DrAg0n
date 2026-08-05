@@ -1077,7 +1077,7 @@
 
         <div id="music-player-iframe-container" style="display:flex; flex-direction:column; gap:10px; transition: all 0.3s ease;">
           <audio id="travel-audio-element" loop style="display:none;">
-            <source id="travel-audio-source" src="audio.mp3" type="audio/mpeg">
+            <source id="travel-audio-source" src="assets/audio/travel_playlist/Believer.webm" type="audio/webm">
           </audio>
 
           <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(0,0,0,0.3); padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.08);">
@@ -1085,11 +1085,15 @@
               ▶ Play
             </button>
             
-            <select id="travel-track-select" onchange="window.changeTravelTrack(this.value)" style="background:rgba(15,23,42,0.9); color:white; border:1px solid rgba(255,255,255,0.2); padding:5px 8px; border-radius:6px; font-size:0.75rem; max-width:140px; cursor:pointer;">
-              <option value="audio.mp3">Track 1: Travel Journey</option>
-              <option value="fdtl/91_Elven_Glade.mp3">Track 2: Elven Glade</option>
-              <option value="fdtl/347_Elven_Procession.mp3">Track 3: Acoustic Wander</option>
-              <option value="fdtl/506_The_Verdant_Dark.mp3">Track 4: Verdant Path</option>
+            <select id="travel-track-select" onchange="window.changeTravelTrack(this.value)" style="background:rgba(15,23,42,0.9); color:white; border:1px solid rgba(255,255,255,0.2); padding:5px 8px; border-radius:6px; font-size:0.75rem; max-width:145px; cursor:pointer;">
+              <option value="assets/audio/travel_playlist/Believer.webm">1. Believer</option>
+              <option value="assets/audio/travel_playlist/Counting Stars.webm">2. Counting Stars</option>
+              <option value="assets/audio/travel_playlist/Dance Monkey.webm">3. Dance Monkey</option>
+              <option value="assets/audio/travel_playlist/Radioactive.webm">4. Radioactive</option>
+              <option value="assets/audio/travel_playlist/Paparazzi.webm">5. Paparazzi</option>
+              <option value="assets/audio/travel_playlist/Pranavalaya.webm">6. Pranavalaya</option>
+              <option value="assets/audio/travel_playlist/Sirivennela.webm">7. Sirivennela</option>
+              <option value="assets/audio/travel_playlist/Day Of Anger.webm">8. Day Of Anger</option>
             </select>
           </div>
 
