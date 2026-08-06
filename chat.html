@@ -54,13 +54,25 @@
   <main class="container">
     <!-- ANIMAL CHATROOM SECTION -->
     <section id="chat-section">
-      <div class="glass-card" style="max-width: 600px; margin: 0 auto; border-color: rgba(56, 189, 248, 0.4);">
+      <div class="glass-card" style="max-width: 640px; margin: 0 auto; border-color: rgba(56, 189, 248, 0.4); padding: 1.75rem;">
+        
+        <!-- Live Channel Info Bar -->
+        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(11, 14, 23, 0.6); padding: 0.6rem 1rem; border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 1rem;">
+          <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; font-weight: 800;">
+            <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #34d399; box-shadow: 0 0 10px #34d399;"></span>
+            <span id="chat-status-text" style="color: #ffffff;">Join a Channel</span>
+          </div>
+          <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">
+            Dragon Bot Commands Active
+          </div>
+        </div>
+
         <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
           <select id="chat-room-select" style="flex:1; margin:0;">
             <option value="" disabled selected>Select Room Channel</option>
-            <option value="Forest">🌲 Forest</option>
-            <option value="Cave">🕳️ Cave</option>
-            <option value="Ocean">🌊 Ocean</option>
+            <option value="Forest">🌲 Forest Channel</option>
+            <option value="Cave">🕳️ Cave Channel</option>
+            <option value="Ocean">🌊 Ocean Channel</option>
           </select>
           <select id="chat-profile-select" style="flex:1; margin:0;">
             <option value="Dragon" selected>🐲 Dragon (Default)</option>
@@ -70,13 +82,24 @@
           </select>
         </div>
 
-        <div id="chat-messages">
+        <div id="chat-messages" style="height: 340px; overflow-y: auto; background: rgba(11, 14, 23, 0.5); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 1rem; margin-bottom: 1rem;">
           <div style="text-align: center; color: var(--text-muted); margin-top: 120px;">
             Select a room channel above to join the live chat.
           </div>
         </div>
 
-        <div style="display: flex; gap: 10px; margin-top: 1rem;">
+        <!-- Quick Stickers & Action Chips -->
+        <div style="display: flex; gap: 0.4rem; overflow-x: auto; padding-bottom: 0.5rem; margin-bottom: 0.75rem;" id="chat-quick-stickers">
+          <button onclick="window.sendQuickSticker('🔥 Rawr Fire!')" style="padding: 0.3rem 0.7rem; font-size: 0.75rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 9999px; box-shadow: none;">🔥 Fire</button>
+          <button onclick="window.sendQuickSticker('🎉 Party Time!')" style="padding: 0.3rem 0.7rem; font-size: 0.75rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 9999px; box-shadow: none;">🎉 Party</button>
+          <button onclick="window.sendQuickSticker('🐉 Dragon Power!')" style="padding: 0.3rem 0.7rem; font-size: 0.75rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 9999px; box-shadow: none;">🐉 Dragon</button>
+          <button onclick="window.sendQuickSticker('💎 Sparkling Gem!')" style="padding: 0.3rem 0.7rem; font-size: 0.75rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 9999px; box-shadow: none;">💎 Gem</button>
+          <button onclick="window.sendQuickSticker('/roll')" style="padding: 0.3rem 0.7rem; font-size: 0.75rem; background: rgba(56,189,248,0.15); color: #38bdf8; border: 1px solid rgba(56,189,248,0.3); border-radius: 9999px; box-shadow: none;">🎲 Roll Die</button>
+          <button onclick="window.sendQuickSticker('/flip')" style="padding: 0.3rem 0.7rem; font-size: 0.75rem; background: rgba(251,191,36,0.15); color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); border-radius: 9999px; box-shadow: none;">🪙 Flip Coin</button>
+          <button onclick="window.sendQuickSticker('/joke')" style="padding: 0.3rem 0.7rem; font-size: 0.75rem; background: rgba(192,132,252,0.15); color: #c084fc; border: 1px solid rgba(192,132,252,0.3); border-radius: 9999px; box-shadow: none;">💡 Tell Joke</button>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
           <input type="text" id="chat-input-field" placeholder="Select a room channel to chat..."
             style="margin:0; flex: 1;" disabled>
           <button id="chat-send-btn" disabled>Send</button>

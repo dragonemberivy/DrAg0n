@@ -430,14 +430,17 @@
 
     function enterRoom(roomKey) {
       currentRoom = roomKey;
-      chatMsgs.innerHTML = `<div style="text-align:center;color:#4ade80;margin-top:10px;">Joined ${ROOMS[roomKey].name}! Type a message below.</div>`;
+      chatMsgs.innerHTML = `<div style="text-align:center;color:#34d399;margin-top:10px;font-weight:700;">🟢 Joined ${ROOMS[roomKey].name} Channel! Type a message below.</div>`;
 
       const savedUser = localStorage.getItem('drag0n_user');
       currentProfile = savedUser || (chatProfSel && chatProfSel.value ? chatProfSel.value : 'Dragon') || 'Dragon';
 
+      const statusEl = document.getElementById('chat-status-text');
+      if (statusEl) statusEl.textContent = `Connected: ${ROOMS[roomKey].name} Channel`;
+
       if(chatInp) {
         chatInp.disabled = false;
-        chatInp.placeholder = "Type a message...";
+        chatInp.placeholder = "Type a message or use /roll, /flip, /joke...";
       }
       if(chatBtn) {
         chatBtn.disabled = false;
@@ -465,14 +468,43 @@
       });
     }
 
+    // QUICK STICKERS & COMMAND CHIPS
+    window.sendQuickSticker = function(stickerText) {
+      if (!currentRoom) {
+        alert("Please select a room channel first!");
+        return;
+      }
+      if (chatInp) {
+        chatInp.value = stickerText;
+        sendMessage();
+      }
+    };
+
     // SEND MESSAGE
     if(chatBtn) { chatBtn.onclick = sendMessage; }
     if(chatInp) { chatInp.onkeypress = e => { if (e.key === "Enter") sendMessage(); }; }
 
     function sendMessage() {
       if (!currentRoom || !currentProfile) return;
-      const text = chatInp.value.trim();
+      let text = chatInp.value.trim();
       if (!text) return;
+
+      // Handle Dragon Bot Commands
+      if (text.toLowerCase() === '/roll') {
+        const rollVal = Math.floor(Math.random() * 100) + 1;
+        text = `🎲 [Dice Roll] rolled ${rollVal}/100!`;
+      } else if (text.toLowerCase() === '/flip') {
+        const coin = Math.random() < 0.5 ? 'Heads 🪙' : 'Tails 🪙';
+        text = `🪙 [Coin Flip] Result: ${coin}!`;
+      } else if (text.toLowerCase() === '/joke') {
+        const dragonJokes = [
+          "Why are dragons great musicians? Because they really know how to scale!",
+          "What do dragons eat for dinner? Fire-grilled cheese!",
+          "How do dragons send messages? By thermal mail!",
+          "Why did the dragon cross the road? To get to the hoard on the other side!"
+        ];
+        text = `💡 [Dragon Joke] ${dragonJokes[Math.floor(Math.random() * dragonJokes.length)]}`;
+      }
 
       if (messagesRef) {
         try {
@@ -482,33 +514,43 @@
             timestamp: Date.now()
           });
         } catch (e) {
-          // If Firebase push fails, just display it locally
           displayMessage(currentProfile, text, Date.now());
         }
       } else {
-        // Fallback: display message locally if no Firebase ref
         displayMessage(currentProfile, text, Date.now());
       }
 
+      if (window.addXP) window.addXP(5);
       chatInp.value = "";
     }
 
-    // DISPLAY
+    // DISPLAY WITH REACTION BUTTONS
     function displayMessage(profile, text, ts) {
-      const pColor = { Dragon: '#ef4444', Cat: '#a8a29e', Dog: '#d97706', Kitsune: '#f97316' }[profile] || '#fff';
+      const pColor = { Dragon: '#ef4444', Cat: '#a8a29e', Dog: '#d97706', Kitsune: '#f97316' }[profile] || '#38bdf8';
       const time = new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-      // Clean default join msg if it's the first real msg
       if (chatMsgs.innerHTML.includes("Joined")) {
         chatMsgs.innerHTML = "";
       }
 
       const div = document.createElement('div');
       div.className = 'message';
+      div.style.cssText = 'display:flex; flex-direction:column; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); padding:8px 12px; border-radius:12px; margin-bottom:8px;';
 
       const escapedText = text.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
 
-      div.innerHTML = `<span class="profile-name" style="color:${pColor};">${profile}:</span><span>${escapedText}</span><span class="timestamp">${time}</span>`;
+      div.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <strong style="color:${pColor}; font-size:0.88rem;">${profile}</strong>
+          <span style="font-size:0.7rem; color:#64748b;">${time}</span>
+        </div>
+        <div style="font-size:0.95rem; color:#f8fafc; word-break:break-word;">${escapedText}</div>
+        <div style="display:flex; gap:6px; margin-top:6px; opacity:0.8;">
+          <button onclick="this.textContent = (parseInt(this.textContent || '0')+1) + ' ❤️'" style="background:rgba(255,255,255,0.05); border:none; color:#cbd5e1; padding:2px 8px; border-radius:9999px; font-size:0.7rem; cursor:pointer; box-shadow:none;">❤️ 0</button>
+          <button onclick="this.textContent = (parseInt(this.textContent || '0')+1) + ' 🔥'" style="background:rgba(255,255,255,0.05); border:none; color:#cbd5e1; padding:2px 8px; border-radius:9999px; font-size:0.7rem; cursor:pointer; box-shadow:none;">🔥 0</button>
+          <button onclick="this.textContent = (parseInt(this.textContent || '0')+1) + ' 🐉'" style="background:rgba(255,255,255,0.05); border:none; color:#cbd5e1; padding:2px 8px; border-radius:9999px; font-size:0.7rem; cursor:pointer; box-shadow:none;">🐉 0</button>
+        </div>
+      `;
       chatMsgs.appendChild(div);
       chatMsgs.scrollTop = chatMsgs.scrollHeight;
     }
