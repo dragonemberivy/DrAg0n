@@ -326,19 +326,41 @@
       gap: 2rem;
     }
 
+    /* TAB CONTROL BUTTONS */
+    .tab-pill-active {
+      background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%) !important;
+      color: #0b0e17 !important;
+      border: none !important;
+      box-shadow: 0 4px 20px rgba(56, 189, 248, 0.35) !important;
+    }
+
+    .tab-pill-inactive {
+      background: rgba(255, 255, 255, 0.05) !important;
+      color: var(--text-muted) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      box-shadow: none !important;
+    }
+
+    .tab-pill-inactive:hover {
+      color: #ffffff !important;
+      background: rgba(255, 255, 255, 0.1) !important;
+      border-color: rgba(56, 189, 248, 0.3) !important;
+    }
+
     /* BADGES */
     .badge {
       display: inline-flex;
       align-items: center;
       gap: 0.35rem;
-      padding: 0.4rem 1rem;
+      padding: 0.4rem 0.9rem;
       border-radius: 9999px;
       font-size: 0.75rem;
       font-weight: 800;
       color: #fff;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.06em;
       box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      margin: 4px;
     }
 
     /* MEMORY GAME */

@@ -51,110 +51,31 @@
     </p>
   </header>
 
-  <main class="container">
+    <!-- CATEGORY FILTER PILLS -->
+    <div style="display: flex; justify-content: center; gap: 0.6rem; margin-bottom: 2.5rem; flex-wrap: wrap;" id="games-filter-bar">
+      <button onclick="filterGames('all')" id="gtab-all" class="tab-pill-active" style="padding: 0.6rem 1.5rem; font-size: 0.85rem; border-radius: 9999px; font-weight: 800; cursor: pointer;">🎮 All Games</button>
+      <button onclick="filterGames('mini')" id="gtab-mini" class="tab-pill-inactive" style="padding: 0.6rem 1.5rem; font-size: 0.85rem; border-radius: 9999px; font-weight: 800; cursor: pointer;">🐉 Arcade Classics</button>
+      <button onclick="filterGames('multi')" id="gtab-multi" class="tab-pill-inactive" style="padding: 0.6rem 1.5rem; font-size: 0.85rem; border-radius: 9999px; font-weight: 800; cursor: pointer;">⚔️ Multiplayer & Squads</button>
+      <button onclick="filterGames('epic')" id="gtab-epic" class="tab-pill-inactive" style="padding: 0.6rem 1.5rem; font-size: 0.85rem; border-radius: 9999px; font-weight: 800; cursor: pointer;">🔥 Epic Action & Story</button>
+    </div>
+
     <!-- GAMES SECTION -->
     <section id="games-section">
-      <div class="games-grid">
-
-      <div class="glass-card" style="border-color: rgba(14, 165, 233, 0.4);">
-        <h3 style="color: #0ea5e9;">🐉 Flappy Dragon</h3>
-        <p style="color: var(--text-muted); font-size: 0.9rem;">Fly high and earn XP!</p>
-        <div id="flappy-game-container" style="margin-top: 10px; display:flex; justify-content:center;"></div>
-      </div>
-
-
-      <div class="glass-card" style="border-color: rgba(99, 102, 241, 0.4);">
-        <h3 style="color: #6366f1;">⚔️ Multiplayer Tic-Tac-Toe</h3>
-        <p style="color: var(--text-muted); font-size: 0.9rem;">Play online against others!</p>
-        
-        <div id="ttt-lobby-ui" style="margin-top: 10px;">
-          <button onclick="window.createTTTGame()" style="background:#4f46e5; border:none; padding:8px 12px; color:white; border-radius:4px; cursor:pointer;">Create Game</button>
-          <div style="margin-top: 10px; font-size: 0.9rem;">
-            Or enter Game ID: <input type="text" id="ttt-join-id" style="width: 80px; padding:4px; background:rgba(0,0,0,0.5); color:white; border:1px solid #4f46e5;">
-            <button onclick="window.joinTTTGame()" style="background:#4338ca; border:none; padding:5px 10px; color:white; border-radius:4px; cursor:pointer;">Join</button>
-          </div>
-        </div>
-        
-        <div id="ttt-game-ui" style="display:none; margin-top: 10px; text-align:center;">
-          <h4 id="ttt-status" style="color:#fbbf24; margin-bottom:10px;">Waiting for opponent...</h4>
-          <h5 id="ttt-room-id" style="color:var(--text-muted); font-size:0.7rem;"></h5>
-          <div style="display:grid; grid-template-columns: repeat(3, 50px); gap:5px; justify-content:center; margin:0 auto;">
-            <div class="ttt-cell" onclick="window.playTTTMove(0)" style="width:50px; height:50px; background:rgba(255,255,255,0.1); border:1px solid #4f46e5; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer;"></div>
-            <div class="ttt-cell" onclick="window.playTTTMove(1)" style="width:50px; height:50px; background:rgba(255,255,255,0.1); border:1px solid #4f46e5; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer;"></div>
-            <div class="ttt-cell" onclick="window.playTTTMove(2)" style="width:50px; height:50px; background:rgba(255,255,255,0.1); border:1px solid #4f46e5; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer;"></div>
-            <div class="ttt-cell" onclick="window.playTTTMove(3)" style="width:50px; height:50px; background:rgba(255,255,255,0.1); border:1px solid #4f46e5; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer;"></div>
-            <div class="ttt-cell" onclick="window.playTTTMove(4)" style="width:50px; height:50px; background:rgba(255,255,255,0.1); border:1px solid #4f46e5; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer;"></div>
-            <div class="ttt-cell" onclick="window.playTTTMove(5)" style="width:50px; height:50px; background:rgba(255,255,255,0.1); border:1px solid #4f46e5; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer;"></div>
-            <div class="ttt-cell" onclick="window.playTTTMove(6)" style="width:50px; height:50px; background:rgba(255,255,255,0.1); border:1px solid #4f46e5; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer;"></div>
-            <div class="ttt-cell" onclick="window.playTTTMove(7)" style="width:50px; height:50px; background:rgba(255,255,255,0.1); border:1px solid #4f46e5; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer;"></div>
-            <div class="ttt-cell" onclick="window.playTTTMove(8)" style="width:50px; height:50px; background:rgba(255,255,255,0.1); border:1px solid #4f46e5; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer;"></div>
-          </div>
-          <button onclick="window.leaveTTTGame()" style="background:#ef4444; border:none; padding:5px 10px; color:white; border-radius:4px; cursor:pointer; margin-top:15px;">Leave Game</button>
-        </div>
-      </div>
-
-
-      <div class="glass-card" style="border-color: rgba(236, 72, 153, 0.4);">
-        <h3 style="color: #ec4899;">🐍 Neon Snake</h3>
-        <p style="color: var(--text-muted); font-size: 0.9rem;">Classic Snake with a modern twist!</p>
-        <div id="snake-game-container" style="margin-top: 1rem;"></div>
-      </div>
-
-
-        <!-- Game -0.5: FC 24 Ultimate Squad Builder -->
-        <div class="glass-card" style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2.5rem; text-align: center; border-color: rgba(251, 191, 36, 0.4); background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(217, 70, 239, 0.1));">
-          <div style="font-size: 3rem; margin-bottom: 0.5rem; filter: drop-shadow(0 0 10px rgba(251,191,36,0.5));">🏆</div>
-          <h3 style="font-size: 2.2rem; margin-bottom: 0.5rem; background: linear-gradient(135deg, #fbbf24 0%, #d946ef 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-style: italic;">FC 24 Ultimate Squad Builder</h3>
-          <p style="color: var(--text-muted); max-width: 600px; margin-bottom: 1.5rem;">
-            Open packs, unlock legendary footballers and modern stars, build chemistry links, and create your ultimate 4-3-3 squad builder dream team!
-          </p>
-          <a href="fc24-squad-builder.html" style="text-decoration: none;">
-            <button style="font-size: 1.2rem; padding: 0.75rem 2.5rem; border-radius: 50px; background: linear-gradient(135deg, #fbbf24, #d946ef); box-shadow: 0 4px 20px rgba(251,191,36,0.3); border: none; font-weight: bold; cursor: pointer; color: white;">
-              Launch Squad Builder ⚽
-            </button>
-          </a>
+      
+      <!-- MINI GAMES & ARCADE CLASSICS -->
+      <div class="games-grid gcat-mini" style="margin-bottom: 2rem;">
+        <div class="glass-card" style="border-color: rgba(14, 165, 233, 0.4);">
+          <h3 style="color: #0ea5e9;">🐉 Flappy Dragon</h3>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">Fly high and earn XP!</p>
+          <div id="flappy-game-container" style="margin-top: 10px; display:flex; justify-content:center;"></div>
         </div>
 
-        <!-- Game 0.5: Slice Master -->
-        <div class="glass-card" style="grid-column: 1 / -1; padding: 1.5rem;">
-          <h3>Slice Master</h3>
-          <p style="margin-bottom: 1rem;">Slice through everything in your path! Click inside to play.</p>
-          <div style="position: relative; width: 100%; padding-bottom: 56.25%; height: 0; border-radius: 12px; overflow: hidden; border: 2px solid var(--border); background: #000;">
-            <iframe src="https://slicemasterfree.github.io/" 
-                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; filter: invert(0.9) hue-rotate(240deg) saturate(4) contrast(1.2);" 
-                    allowfullscreen="true" scrolling="no">
-            </iframe>
-          </div>
+        <div class="glass-card" style="border-color: rgba(236, 72, 153, 0.4);">
+          <h3 style="color: #ec4899;">🐍 Neon Snake</h3>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">Classic Snake with a modern twist!</p>
+          <div id="snake-game-container" style="margin-top: 1rem;"></div>
         </div>
 
-        <!-- Game 0.75: From Darkness To Light -->
-        <div class="glass-card" style="grid-column: 1 / -1; padding: 1.5rem;">
-          <h3>From Darkness To Light</h3>
-          <p style="margin-bottom: 1rem;">A 2D procedural narrative-action game. Survive the depths and uncover the story!</p>
-          <div style="position: relative; width: 100%; padding-bottom: 56.25%; height: 0; border-radius: 12px; overflow: hidden; border: 2px solid var(--border); background: #000;">
-            <iframe id="fdtl-iframe" src="fdtl/index.html" 
-                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;" 
-                    allowfullscreen="true" scrolling="no">
-            </iframe>
-            
-            <div id="fdtl-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; cursor: pointer;">
-              <h2 style="font-size: 3rem; margin: 0; color: #fff;">READY TO PLAY</h2>
-              <p style="font-size: 1.2rem; color: #aaa; margin: 1rem 0;">Click here to start and enable controls!</p>
-            </div>
-            
-            <script>
-              document.getElementById('fdtl-overlay').addEventListener('click', function() {
-                this.style.display = 'none';
-                const frame = document.getElementById('fdtl-iframe');
-                if(frame.contentWindow) frame.contentWindow.focus();
-              });
-            </script>
-          </div>
-          <button onclick="document.getElementById('fdtl-iframe').requestFullscreen()" style="margin-top: 1.5rem; width: 100%; background: rgba(0, 187, 255, 0.1); border-color: rgba(0, 187, 255, 0.5);">Play Fullscreen</button>
-        </div>
-
-
-        <!-- Game 1: Number Guessing -->
         <div class="glass-card">
           <h3>Number Guessing</h3>
           <p>Guess a number between <strong>1</strong> and <strong>100</strong>.</p>
@@ -167,7 +88,6 @@
           <button onclick="resetGuessGame()" style="background: rgba(255,255,255,0.1); width: 100%;">Restart</button>
         </div>
 
-        <!-- Game 2: Rock Paper Scissors -->
         <div class="glass-card">
           <h3>Rock Paper Scissors</h3>
           <p>Can you beat the computer?</p>
@@ -176,13 +96,56 @@
             <button onclick="playRPS('paper')" style="flex:1;">Paper</button>
             <button onclick="playRPS('scissors')" style="flex:1;">Scissors</button>
           </div>
-          <div id="rpsResult"
-            style="padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 8px; text-align: center; font-weight: 600;">
-            Make a choice!</div>
+          <div id="rpsResult" style="padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 8px; text-align: center; font-weight: 600;">Make a choice!</div>
+        </div>
+      </div>
+
+      <!-- MULTIPLAYER & SQUAD BUILDER -->
+      <div class="gcat-multi" style="margin-bottom: 2rem;">
+        <div class="glass-card" style="margin-bottom: 2rem; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2.5rem; text-align: center; border-color: rgba(251, 191, 36, 0.4); background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(217, 70, 239, 0.1));">
+          <div style="font-size: 3rem; margin-bottom: 0.5rem; filter: drop-shadow(0 0 10px rgba(251,191,36,0.5));">🏆</div>
+          <h3 style="font-size: 2.2rem; margin-bottom: 0.5rem; background: linear-gradient(135deg, #fbbf24 0%, #d946ef 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-style: italic;">FC 24 Ultimate Squad Builder</h3>
+          <p style="color: var(--text-muted); max-width: 600px; margin-bottom: 1.5rem;">
+            Open packs, unlock legendary footballers and modern stars, build chemistry links, and create your ultimate 4-3-3 squad builder dream team!
+          </p>
+          <a href="fc24-squad-builder.html" style="text-decoration: none;">
+            <button style="font-size: 1.1rem; padding: 0.75rem 2.5rem; border-radius: 50px; background: linear-gradient(135deg, #fbbf24, #d946ef); box-shadow: 0 4px 20px rgba(251,191,36,0.3); border: none; font-weight: bold; cursor: pointer; color: white;">
+              Launch Squad Builder ⚽
+            </button>
+          </a>
         </div>
 
-        <!-- Game 3: Memory Game -->
-        <div class="glass-card" style="grid-column: 1 / -1;">
+        <div class="glass-card" style="border-color: rgba(99, 102, 241, 0.4); margin-bottom: 2rem;">
+          <h3 style="color: #6366f1;">⚔️ Multiplayer Tic-Tac-Toe</h3>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">Play online against others!</p>
+          
+          <div id="ttt-lobby-ui" style="margin-top: 10px;">
+            <button onclick="window.createTTTGame()" style="background:#4f46e5; border:none; padding:8px 16px; color:white; border-radius:9999px; cursor:pointer;">Create Game</button>
+            <div style="margin-top: 10px; font-size: 0.9rem;">
+              Or enter Game ID: <input type="text" id="ttt-join-id" style="width: 100px; padding:6px; background:rgba(0,0,0,0.5); color:white; border:1px solid #4f46e5; border-radius:8px;">
+              <button onclick="window.joinTTTGame()" style="background:#4338ca; border:none; padding:6px 14px; color:white; border-radius:9999px; cursor:pointer;">Join</button>
+            </div>
+          </div>
+          
+          <div id="ttt-game-ui" style="display:none; margin-top: 10px; text-align:center;">
+            <h4 id="ttt-status" style="color:#fbbf24; margin-bottom:10px;">Waiting for opponent...</h4>
+            <h5 id="ttt-room-id" style="color:var(--text-muted); font-size:0.7rem;"></h5>
+            <div style="display:grid; grid-template-columns: repeat(3, 50px); gap:5px; justify-content:center; margin:0 auto;">
+              <div class="ttt-cell" onclick="window.playTTTMove(0)" style="width:50px; height:50px; background:rgba(255,255,255,0.1); border:1px solid #4f46e5; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer;"></div>
+              <div class="ttt-cell" onclick="window.playTTTMove(1)" style="width:50px; height:50px; background:rgba(255,255,255,0.1); border:1px solid #4f46e5; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer;"></div>
+              <div class="ttt-cell" onclick="window.playTTTMove(2)" style="width:50px; height:50px; background:rgba(255,255,255,0.1); border:1px solid #4f46e5; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer;"></div>
+              <div class="ttt-cell" onclick="window.playTTTMove(3)" style="width:50px; height:50px; background:rgba(255,255,255,0.1); border:1px solid #4f46e5; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer;"></div>
+              <div class="ttt-cell" onclick="window.playTTTMove(4)" style="width:50px; height:50px; background:rgba(255,255,255,0.1); border:1px solid #4f46e5; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer;"></div>
+              <div class="ttt-cell" onclick="window.playTTTMove(5)" style="width:50px; height:50px; background:rgba(255,255,255,0.1); border:1px solid #4f46e5; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer;"></div>
+              <div class="ttt-cell" onclick="window.playTTTMove(6)" style="width:50px; height:50px; background:rgba(255,255,255,0.1); border:1px solid #4f46e5; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer;"></div>
+              <div class="ttt-cell" onclick="window.playTTTMove(7)" style="width:50px; height:50px; background:rgba(255,255,255,0.1); border:1px solid #4f46e5; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer;"></div>
+              <div class="ttt-cell" onclick="window.playTTTMove(8)" style="width:50px; height:50px; background:rgba(255,255,255,0.1); border:1px solid #4f46e5; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer;"></div>
+            </div>
+            <button onclick="window.leaveTTTGame()" style="background:#ef4444; border:none; padding:6px 14px; color:white; border-radius:9999px; cursor:pointer; margin-top:15px;">Leave Game</button>
+          </div>
+        </div>
+
+        <div class="glass-card">
           <h3>Memory Match (<span style="opacity:0.3; font-size: 1rem;">Code: fruits</span>)</h3>
           <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
             <div id="memory-game" class="memory-board" style="flex: 1; min-width: 300px;"></div>
@@ -192,43 +155,79 @@
                 Matches: <span id="memory-matches" style="color: var(--accent); font-weight: bold;">0</span>/8
               </div>
               <button onclick="createMemoryBoard()" class="mb-4">Restart Game</button>
-
-              <div
-                style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; border: 1px solid var(--border);">
-                <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">Secret Unlock Code:</p>
-                <div class="flex-center gap-2">
-                  <input type="text" id="memoryCodeInput" placeholder="Enter code" style="margin:0;">
-                  <button onclick="revealMemoryCards()">Reveal</button>
-                </div>
-              </div>
             </div>
           </div>
         </div>
+      </div>
 
+      <!-- ACTION & STORY GAMES -->
+      <div class="gcat-epic" style="margin-bottom: 2rem;">
+        <div class="glass-card" style="margin-bottom: 2rem; padding: 1.5rem;">
+          <h3>Slice Master</h3>
+          <p style="margin-bottom: 1rem;">Slice through everything in your path! Click inside to play.</p>
+          <div style="position: relative; width: 100%; padding-bottom: 56.25%; height: 0; border-radius: 16px; overflow: hidden; border: 1px solid var(--border); background: #000;">
+            <iframe src="https://slicemasterfree.github.io/" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; filter: invert(0.9) hue-rotate(240deg) saturate(4) contrast(1.2);" allowfullscreen="true" scrolling="no"></iframe>
+          </div>
+        </div>
+
+        <div class="glass-card" style="padding: 1.5rem;">
+          <h3>From Darkness To Light</h3>
+          <p style="margin-bottom: 1rem;">A 2D procedural narrative-action game. Survive the depths and uncover the story!</p>
+          <div style="position: relative; width: 100%; padding-bottom: 56.25%; height: 0; border-radius: 16px; overflow: hidden; border: 1px solid var(--border); background: #000;">
+            <iframe id="fdtl-iframe" src="fdtl/index.html" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;" allowfullscreen="true" scrolling="no"></iframe>
+            <div id="fdtl-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; cursor: pointer;">
+              <h2 style="font-size: 3rem; margin: 0; color: #fff;">READY TO PLAY</h2>
+              <p style="font-size: 1.2rem; color: #aaa; margin: 1rem 0;">Click here to start and enable controls!</p>
+            </div>
+            <script>
+              document.getElementById('fdtl-overlay').addEventListener('click', function() {
+                this.style.display = 'none';
+                const frame = document.getElementById('fdtl-iframe');
+                if(frame.contentWindow) frame.contentWindow.focus();
+              });
+            </script>
+          </div>
+          <button onclick="document.getElementById('fdtl-iframe').requestFullscreen()" style="margin-top: 1.5rem; width: 100%; background: rgba(0, 187, 255, 0.1); border-color: rgba(0, 187, 255, 0.5);">Play Fullscreen</button>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <script>
+    function filterGames(cat) {
+      const mini = document.querySelector('.gcat-mini');
+      const multi = document.querySelector('.gcat-multi');
+      const epic = document.querySelector('.gcat-epic');
+
+      if (mini) mini.style.display = (cat === 'all' || cat === 'mini') ? 'grid' : 'none';
+      if (multi) multi.style.display = (cat === 'all' || cat === 'multi') ? 'block' : 'none';
+      if (epic) epic.style.display = (cat === 'all' || cat === 'epic') ? 'block' : 'none';
+
+      document.getElementById('gtab-all').className = cat === 'all' ? 'tab-pill-active' : 'tab-pill-inactive';
+      document.getElementById('gtab-mini').className = cat === 'mini' ? 'tab-pill-active' : 'tab-pill-inactive';
+      document.getElementById('gtab-multi').className = cat === 'multi' ? 'tab-pill-active' : 'tab-pill-inactive';
+      document.getElementById('gtab-epic').className = cat === 'epic' ? 'tab-pill-active' : 'tab-pill-inactive';
+    }
+  </script>
         <!-- Game 4: Fun Color SVG -->
         <div class="glass-card">
           <h3>Fun Color!</h3>
-          <p>Click the flower parts to paint them.</p>
-          <div style="display: flex; gap: 1rem; align-items: start;">
+          <p style="color: var(--text-muted); font-size: 0.9rem;">Click the flower parts to paint them.</p>
+          <div style="display: flex; gap: 1rem; align-items: start; margin-top: 10px;">
             <div style="flex: 1;">
-              <label style="font-size:0.8rem;">Red: <input type="range" id="rSlider" min="0" max="255" value="255"
-                  style="width:100%;"></label>
-              <label style="font-size:0.8rem;">Green: <input type="range" id="gSlider" min="0" max="255" value="100"
-                  style="width:100%;"></label>
-              <label style="font-size:0.8rem;">Blue: <input type="range" id="bSlider" min="0" max="255" value="200"
-                  style="width:100%;"></label>
-              <div id="colorPreview"
-                style="height: 40px; border-radius: 8px; border: 1px solid var(--border); margin: 10px 0;"></div>
-              <button id="undoBtn" style="width: 100%; background: rgba(255,255,255,0.1);">Undo</button>
+              <label style="font-size:0.8rem; color:#94a3b8;">Red: <input type="range" id="rSlider" min="0" max="255" value="255" style="width:100%; margin:4px 0;"></label>
+              <label style="font-size:0.8rem; color:#94a3b8;">Green: <input type="range" id="gSlider" min="0" max="255" value="100" style="width:100%; margin:4px 0;"></label>
+              <label style="font-size:0.8rem; color:#94a3b8;">Blue: <input type="range" id="bSlider" min="0" max="255" value="200" style="width:100%; margin:4px 0;"></label>
+              <div id="colorPreview" style="height: 30px; border-radius: 8px; border: 1px solid var(--border); margin: 8px 0;"></div>
+              <button id="undoBtn" style="width: 100%; background: rgba(255,255,255,0.1); font-size: 0.85rem; padding: 6px;">Undo</button>
             </div>
 
-            <div id="svgContainer" style="background: white; border-radius: 12px; padding: 10px;">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="160" height="160"
-                style="cursor:pointer; user-select:none;">
+            <div id="svgContainer" style="background: white; border-radius: 12px; padding: 8px;">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="130" height="130" style="cursor:pointer; user-select:none;">
                 <circle cx="200" cy="200" r="190" fill="#fff" stroke="#000" stroke-width="4" />
                 <g stroke="#000" stroke-width="4" fill="#fff">
-                  <path class="colorable"
-                    d="M200 20 L230 90 L270 90 L240 140 L270 190 L220 180 L200 230 L180 180 L130 190 L160 140 L130 90 L170 90 Z" />
+                  <path class="colorable" d="M200 20 L230 90 L270 90 L240 140 L270 190 L220 180 L200 230 L180 180 L130 190 L160 140 L130 90 L170 90 Z" />
                 </g>
                 <g stroke="#000" stroke-width="4" fill="#fff">
                   <ellipse class="colorable" cx="200" cy="140" rx="30" ry="60" />
@@ -236,12 +235,6 @@
                   <ellipse class="colorable" cx="140" cy="200" rx="30" ry="60" transform="rotate(-60 140 200)" />
                 </g>
                 <circle class="colorable" cx="200" cy="200" r="40" fill="#fff" stroke="#000" stroke-width="4" />
-                <g stroke="#000" stroke-width="4" fill="#fff">
-                  <path class="colorable" d="M200 80 Q210 100 200 120 Q190 100 200 80 Z" />
-                  <path class="colorable" d="M230 140 Q245 150 230 160 Q215 150 230 140 Z" />
-                  <path class="colorable" d="M170 140 Q155 150 170 160 Q185 150 170 140 Z" />
-                  <path class="colorable" d="M200 260 Q210 280 200 300 Q190 280 200 260 Z" />
-                </g>
               </svg>
             </div>
           </div>
@@ -249,7 +242,6 @@
 
       </div>
     </section>
-
   </main>
 
   <!-- ALL SCRIPTS (Consolidated) -->
