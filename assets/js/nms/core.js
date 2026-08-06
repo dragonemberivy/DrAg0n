@@ -218,92 +218,122 @@
     window.astronautGroup = new THREE.Group();
     window.astronautGroup.position.y = -1;
 
-    // Body
-    const bodyMat = new THREE.MeshStandardMaterial({ color: 0xdddddf, roughness: 0.8 });
-    const bodyGeo = new THREE.CylinderGeometry(0.8, 0.8, 2.5, 16);
-    const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
-    bodyMesh.position.y = 1.25;
-    window.astronautGroup.add(bodyMesh);
+    // -----------------------------------------------------------------
+    // REALISTIC HIGH-DETAIL 3D ASTRONAUT MODEL
+    // -----------------------------------------------------------------
+    window.astronautGroup = new THREE.Group();
+    window.astronautGroup.position.y = -1.5;
 
-    // Helmet
-    const helmetGeo = new THREE.SphereGeometry(0.7, 16, 16);
-    const helmetMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1, metalness: 0.8 });
+    // Suit Torso Armor
+    const torsoGeo = new THREE.CylinderGeometry(0.85, 0.75, 2.2, 16);
+    const torsoMat = new THREE.MeshStandardMaterial({ color: 0xeeeef2, roughness: 0.3, metalness: 0.2 });
+    const torsoMesh = new THREE.Mesh(torsoGeo, torsoMat);
+    torsoMesh.position.y = 1.4;
+    window.astronautGroup.add(torsoMesh);
+
+    // Chest Control Module
+    const chestModGeo = new THREE.BoxGeometry(0.7, 0.7, 0.3);
+    const chestModMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.8, roughness: 0.2 });
+    const chestModMesh = new THREE.Mesh(chestModGeo, chestModMat);
+    chestModMesh.position.set(0, 1.6, -0.45);
+    
+    // Status LEDs on chest
+    const ledGeo = new THREE.SphereGeometry(0.06, 8, 8);
+    const led1 = new THREE.Mesh(ledGeo, new THREE.MeshBasicMaterial({ color: 0x34d399 }));
+    led1.position.set(-0.2, 0.1, -0.16);
+    const led2 = new THREE.Mesh(ledGeo, new THREE.MeshBasicMaterial({ color: 0x38bdf8 }));
+    led2.position.set(0.2, 0.1, -0.16);
+    chestModMesh.add(led1);
+    chestModMesh.add(led2);
+    window.astronautGroup.add(chestModMesh);
+
+    // Helmet Dome
+    const helmetGeo = new THREE.SphereGeometry(0.75, 32, 32);
+    const helmetMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.15, metalness: 0.5 });
     const helmetMesh = new THREE.Mesh(helmetGeo, helmetMat);
-    helmetMesh.position.y = 2.8;
+    helmetMesh.position.y = 2.9;
     window.astronautGroup.add(helmetMesh);
     
-    // Visor
-    const visorGeo = new THREE.SphereGeometry(0.6, 16, 16, 0, Math.PI * 2, 0, Math.PI/2.5);
-    const visorMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.0, metalness: 1.0 });
+    // Gold Reflective Visor
+    const visorGeo = new THREE.SphereGeometry(0.68, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2.3);
+    const visorMat = new THREE.MeshStandardMaterial({ 
+      color: 0xffb703, 
+      roughness: 0.05, 
+      metalness: 0.95, 
+      envMapIntensity: 2.0 
+    });
     const visorMesh = new THREE.Mesh(visorGeo, visorMat);
-    visorMesh.position.set(0, 2.8, -0.15);
+    visorMesh.position.set(0, 2.9, -0.12);
     visorMesh.rotation.x = Math.PI / 8;
     window.astronautGroup.add(visorMesh);
 
-    // Jetpack / Backpack
-    const packGeo = new THREE.BoxGeometry(1.2, 1.5, 0.6);
-    const packMat = new THREE.MeshStandardMaterial({ color: 0x444444 });
+    // Helmet Headlamp Spotlight
+    const headlampLight = new THREE.SpotLight(0x38bdf8, 2, 30, Math.PI / 6, 0.5);
+    headlampLight.position.set(0, 3.1, -0.6);
+    headlampLight.target.position.set(0, 2.0, -10);
+    window.astronautGroup.add(headlampLight);
+    window.astronautGroup.add(headlampLight.target);
+
+    // Life-Support Backpack & Oxygen Cylinders
+    const packGeo = new THREE.BoxGeometry(1.3, 1.6, 0.65);
+    const packMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.4, metalness: 0.6 });
     const packMesh = new THREE.Mesh(packGeo, packMat);
-    packMesh.position.set(0, 1.8, 0.6);
+    packMesh.position.set(0, 1.7, 0.7);
+
+    const cylGeo = new THREE.CylinderGeometry(0.2, 0.2, 1.2, 12);
+    const cylMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.8 });
+    const cylL = new THREE.Mesh(cylGeo, cylMat);
+    cylL.position.set(-0.45, 0, 0.35);
+    const cylR = new THREE.Mesh(cylGeo, cylMat);
+    cylR.position.set(0.45, 0, 0.35);
+    packMesh.add(cylL);
+    packMesh.add(cylR);
     window.astronautGroup.add(packMesh);
 
-    // Handheld Multi-Tool Gun
-    const gunGeo = new THREE.BoxGeometry(0.3, 0.4, 1.2);
-    const gunMat = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.8 });
+    // High-Tech Multi-Tool Weapon
+    const gunGeo = new THREE.BoxGeometry(0.25, 0.35, 1.4);
+    const gunMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.9, roughness: 0.1 });
     const gunMesh = new THREE.Mesh(gunGeo, gunMat);
-    gunMesh.position.set(0.7, 1.5, 0.4); // Right-hand position
+    gunMesh.position.set(0.75, 1.5, -0.5);
     
-    // Glowing Barrel
-    const barrelGeo = new THREE.CylinderGeometry(0.1, 0.1, 0.4);
+    const barrelGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.5);
     barrelGeo.rotateX(Math.PI / 2);
-    const barrelMat = new THREE.MeshBasicMaterial({ color: 0x00ffcc });
+    const barrelMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
     const barrelMesh = new THREE.Mesh(barrelGeo, barrelMat);
-    barrelMesh.position.set(0, 0.1, -0.6);
+    barrelMesh.position.set(0, 0.05, -0.7);
     gunMesh.add(barrelMesh);
-    
     window.astronautGroup.add(gunMesh);
 
-    // Glowing Jetpack Ring
-    const ringGeo = new THREE.TorusGeometry(0.3, 0.05, 8, 16);
-    const ringMat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
-    const ringMesh = new THREE.Mesh(ringGeo, ringMat);
-    ringMesh.position.set(0, 1.8, 0.85);
-    window.astronautGroup.add(ringMesh);
-
-    // Jetpack exhaust nozzles (hidden until jetpack fires)
-    const exhaustGeo = new THREE.ConeGeometry(0.12, 0.6, 6);
+    // Jetpack Exhaust Nozzles
+    const exhaustGeo = new THREE.ConeGeometry(0.15, 0.7, 12);
     exhaustGeo.rotateX(Math.PI);
-    const exhaustMat = new THREE.MeshBasicMaterial({ color: 0xff7700, transparent: true, opacity: 0, blending: THREE.AdditiveBlending });
+    const exhaustMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0, blending: THREE.AdditiveBlending });
     window.jetpackExhaustL = new THREE.Mesh(exhaustGeo, exhaustMat.clone());
     window.jetpackExhaustR = new THREE.Mesh(exhaustGeo, exhaustMat.clone());
-    window.jetpackExhaustL.position.set(-0.4, 0.6, 0.85);
-    window.jetpackExhaustR.position.set(0.4, 0.6, 0.85);
+    window.jetpackExhaustL.position.set(-0.45, 0.6, 0.95);
+    window.jetpackExhaustR.position.set(0.45, 0.6, 0.95);
     window.astronautGroup.add(window.jetpackExhaustL);
     window.astronautGroup.add(window.jetpackExhaustR);
 
     yawObject.add(window.astronautGroup);
 
-
-    // Alien Mount Group (Hidden until 'E' is pressed)
+    // Alien Mount Group
     window.alienMountGroup = new THREE.Group();
     window.alienMountGroup.visible = false;
     window.alienMountGroup.position.y = -1;
 
-    // Beast Body
     const beastGeo = new THREE.BoxGeometry(2, 2.5, 6);
     const beastMat = new THREE.MeshStandardMaterial({ color: 0x4b5563, roughness: 0.9, flatShading: true });
     const beastMesh = new THREE.Mesh(beastGeo, beastMat);
     beastMesh.position.y = 1.25;
     window.alienMountGroup.add(beastMesh);
     
-    // Add glowing spots
     const spotGeo = new THREE.SphereGeometry(0.3, 8, 8);
     const spotMat = new THREE.MeshBasicMaterial({ color: 0x10b981 });
     const spot1 = new THREE.Mesh(spotGeo, spotMat); spot1.position.set(1.1, 1.5, 2);
     const spot2 = new THREE.Mesh(spotGeo, spotMat); spot2.position.set(-1.1, 1.5, 2);
     window.alienMountGroup.add(spot1); window.alienMountGroup.add(spot2);
 
-    // Add tiny rider on top
     const rider = window.astronautGroup.clone();
     rider.position.set(0, 3.5, 0.5);
     rider.scale.set(0.8, 0.8, 0.8);
@@ -311,63 +341,53 @@
 
     yawObject.add(window.alienMountGroup);
 
-    // Spaceship Group
+    // -----------------------------------------------------------------
+    // REALISTIC HIGH-DETAIL SCI-FI STARSHIP MODEL
+    // -----------------------------------------------------------------
     window.spaceshipGroup = new THREE.Group();
-    window.spaceshipGroup.visible = false; // Hidden at start
+    window.spaceshipGroup.visible = false;
     
-    // Hull
-    const hullGeo = new THREE.CylinderGeometry(0.5, 1.5, 5, 8);
+    // Main Sleek Fuselage
+    const hullGeo = new THREE.ConeGeometry(1.6, 6.5, 16);
     hullGeo.rotateX(Math.PI / 2);
-    const hullMat = new THREE.MeshStandardMaterial({ color: 0xaa3333, metalness: 0.5 });
+    const hullMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.85, roughness: 0.15 });
     const hullMesh = new THREE.Mesh(hullGeo, hullMat);
     window.spaceshipGroup.add(hullMesh);
-    
-    const fireGeo = new THREE.ConeGeometry(2, 6, 8, 1, true);
-    fireGeo.rotateX(Math.PI);
-    const fireMat = new THREE.MeshBasicMaterial({ 
-        color: 0xff4400, 
-        transparent: true, 
-        opacity: 0, 
-        blending: THREE.AdditiveBlending,
-        side: THREE.DoubleSide
-    });
-    window.reentryMesh = new THREE.Mesh(fireGeo, fireMat);
-    window.reentryMesh.position.z = -3;
-    window.spaceshipGroup.add(window.reentryMesh);
 
-    // Cockpit
-    const shipVisorGeo = new THREE.SphereGeometry(1, 16, 16);
-    shipVisorGeo.scale(1, 0.5, 1.5);
-    const shipVisorMat = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 1.0, roughness: 0.1 });
-    const shipVisorMesh = new THREE.Mesh(shipVisorGeo, shipVisorMat);
-    shipVisorMesh.position.set(0, 0.5, -0.5);
-    window.spaceshipGroup.add(shipVisorMesh);
+    // Glass Canopy Bubble
+    const canopyGeo = new THREE.SphereGeometry(1.1, 32, 16);
+    canopyGeo.scale(0.8, 0.6, 1.8);
+    const canopyMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, metalness: 0.9, roughness: 0.05, transparent: true, opacity: 0.7 });
+    const canopyMesh = new THREE.Mesh(canopyGeo, canopyMat);
+    canopyMesh.position.set(0, 0.6, -0.6);
+    window.spaceshipGroup.add(canopyMesh);
 
-    // Wings
-    const wingGeo = new THREE.BoxGeometry(6, 0.2, 2);
-    const wingMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+    // Swept Delta Wings
+    const wingGeo = new THREE.BoxGeometry(7.5, 0.15, 2.5);
+    const wingMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.7, roughness: 0.3 });
     const wingMesh = new THREE.Mesh(wingGeo, wingMat);
-    wingMesh.position.set(0, 0, 1);
+    wingMesh.position.set(0, -0.1, 1.2);
     window.spaceshipGroup.add(wingMesh);
 
-    // Thrusters
-    const thrusterGeo = new THREE.CylinderGeometry(0.6, 0.4, 1, 8);
-    thrusterGeo.rotateX(Math.PI / 2);
-    const thrusterMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
-    const thrusterMesh1 = new THREE.Mesh(thrusterGeo, thrusterMat);
-    thrusterMesh1.position.set(-1.5, 0, 2.5);
-    const thrusterMesh2 = new THREE.Mesh(thrusterGeo, thrusterMat);
-    thrusterMesh2.position.set(1.5, 0, 2.5);
-    window.spaceshipGroup.add(thrusterMesh1);
-    window.spaceshipGroup.add(thrusterMesh2);
+    // Dual Ion Engine Nacelles
+    const nacelleGeo = new THREE.CylinderGeometry(0.55, 0.45, 2.8, 16);
+    nacelleGeo.rotateX(Math.PI / 2);
+    const nacelleMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.9 });
+    const nacelleL = new THREE.Mesh(nacelleGeo, nacelleMat);
+    nacelleL.position.set(-1.8, 0.1, 2.2);
+    const nacelleR = new THREE.Mesh(nacelleGeo, nacelleMat);
+    nacelleR.position.set(1.8, 0.1, 2.2);
+    window.spaceshipGroup.add(nacelleL);
+    window.spaceshipGroup.add(nacelleR);
 
-    // Engine Glow
-    const glowGeo = new THREE.SphereGeometry(0.4, 8, 8);
-    const glowMat = new THREE.MeshBasicMaterial({ color: 0xff8800 });
-    const glow1 = new THREE.Mesh(glowGeo, glowMat);
-    glow1.position.set(-1.5, 0, 3);
-    const glow2 = new THREE.Mesh(glowGeo, glowMat);
-    glow2.position.set(1.5, 0, 3);
+    // Ion Plasma Engine Glow Exhausts
+    const plasmaGlowGeo = new THREE.CylinderGeometry(0.42, 0.1, 1.5, 16, 1, true);
+    plasmaGlowGeo.rotateX(Math.PI / 2);
+    const plasmaGlowMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending, side: THREE.DoubleSide });
+    const glow1 = new THREE.Mesh(plasmaGlowGeo, plasmaGlowMat);
+    glow1.position.set(-1.8, 0.1, 3.8);
+    const glow2 = new THREE.Mesh(plasmaGlowGeo, plasmaGlowMat);
+    glow2.position.set(1.8, 0.1, 3.8);
     window.spaceshipGroup.add(glow1);
     window.spaceshipGroup.add(glow2);
 

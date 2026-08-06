@@ -16,15 +16,80 @@ if (flappyContainer) {
   
   const dragon = {
     x: 50, y: 150, w: 34, h: 26,
-    radius: 12, speed: 0, gravity: 0.25, jump: 4.6, rotation: 0,
+    radius: 14, speed: 0, gravity: 0.25, jump: 4.6, rotation: 0,
+    particles: [],
     draw: function() {
       ctx.save();
       ctx.translate(this.x, this.y);
       ctx.rotate(this.rotation);
-      ctx.font = '24px Arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('🐉', 0, 0); // Flappy Dragon!
+
+      // Fire Thruster Trail
+      if (state.current === state.game) {
+        this.particles.push({ x: -14, y: Math.random()*6 - 3, r: Math.random()*5 + 3, opacity: 1, color: Math.random() < 0.5 ? '#ef4444' : '#fbbf24' });
+      }
+      for (let i = this.particles.length - 1; i >= 0; i--) {
+        const p = this.particles[i];
+        p.x -= 2;
+        p.opacity -= 0.08;
+        if (p.opacity <= 0) {
+          this.particles.splice(i, 1);
+          continue;
+        }
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.opacity;
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+
+      // Realistic Metallic Dragon Body
+      const wingFlap = Math.sin(frames * 0.2) * 8;
+      
+      // Wing (Back)
+      ctx.fillStyle = '#b91c1c';
+      ctx.beginPath();
+      ctx.moveTo(-4, -2);
+      ctx.lineTo(-18, -14 + wingFlap);
+      ctx.lineTo(-2, -6);
+      ctx.fill();
+
+      // Body Gradient (Crimson to Ember)
+      const bGrad = ctx.createRadialGradient(0, 0, 2, 0, 0, 16);
+      bGrad.addColorStop(0, '#f87171');
+      bGrad.addColorStop(0.6, '#dc2626');
+      bGrad.addColorStop(1, '#7f1d1d');
+      ctx.fillStyle = bGrad;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 16, 12, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Wing (Front)
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.moveTo(-2, 0);
+      ctx.lineTo(-16, -16 - wingFlap);
+      ctx.lineTo(4, -4);
+      ctx.fill();
+
+      // Glowing Eye
+      ctx.fillStyle = '#fef08a';
+      ctx.beginPath();
+      ctx.arc(8, -4, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#000';
+      ctx.beginPath();
+      ctx.arc(9, -4, 1.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Snout & Fire Horn
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath();
+      ctx.moveTo(12, -6);
+      ctx.lineTo(18, -10);
+      ctx.lineTo(14, -2);
+      ctx.fill();
+
       ctx.restore();
     },
     update: function() {
@@ -43,9 +108,9 @@ if (flappyContainer) {
         }
         
         if (this.speed >= this.jump) {
-          this.rotation = 90 * Math.PI / 180;
+          this.rotation = 70 * Math.PI / 180;
         } else {
-          this.rotation = -25 * Math.PI / 180;
+          this.rotation = -20 * Math.PI / 180;
         }
       }
     },
@@ -54,22 +119,29 @@ if (flappyContainer) {
   
   const pipes = {
     position: [],
-    w: 53, h: 400, gap: 85, dx: 2,
+    w: 53, h: 400, gap: 90, dx: 2,
     draw: function() {
       for (let i = 0; i < this.position.length; i++) {
         let p = this.position[i];
         let topYPos = p.y;
         let bottomYPos = p.y + this.h + this.gap;
         
-        ctx.fillStyle = '#73bf2e';
-        ctx.strokeStyle = '#558022';
-        ctx.lineWidth = 2;
+        // Realistic Obsidian Volcanic Pillars
+        const pillarGrad = ctx.createLinearGradient(p.x, 0, p.x + this.w, 0);
+        pillarGrad.addColorStop(0, '#1e293b');
+        pillarGrad.addColorStop(0.3, '#334155');
+        pillarGrad.addColorStop(0.7, '#0f172a');
+        pillarGrad.addColorStop(1, '#020617');
+
+        ctx.fillStyle = pillarGrad;
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 1.5;
         
-        // Top pipe
+        // Top Pipe
         ctx.fillRect(p.x, topYPos, this.w, this.h);
         ctx.strokeRect(p.x, topYPos, this.w, this.h);
         
-        // Bottom pipe
+        // Bottom Pipe
         ctx.fillRect(p.x, bottomYPos, this.w, this.h);
         ctx.strokeRect(p.x, bottomYPos, this.w, this.h);
       }
@@ -96,7 +168,7 @@ if (flappyContainer) {
         if (p.x + this.w <= 0) {
           this.position.shift();
           score += 1;
-          if(window.addXP) window.addXP(5); // Instantly award XP/DC for passing a pipe
+          if(window.addXP) window.addXP(5);
         }
       }
     },
@@ -105,14 +177,32 @@ if (flappyContainer) {
   
   const bg = {
     draw: function() {
-      ctx.fillStyle = '#ded895';
-      ctx.fillRect(0, canvas.height - 112, canvas.width, 112); // Ground
+      // Twilight Sky Gradient
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      skyGrad.addColorStop(0, '#0b0e17');
+      skyGrad.addColorStop(0.6, '#1e1b4b');
+      skyGrad.addColorStop(1, '#312e81');
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Distant Floating Planet Silhouette
+      ctx.fillStyle = 'rgba(56, 189, 248, 0.15)';
+      ctx.beginPath();
+      ctx.arc(220, 80, 45, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Terrain Ground
+      const groundGrad = ctx.createLinearGradient(0, canvas.height - 112, 0, canvas.height);
+      groundGrad.addColorStop(0, '#0f172a');
+      groundGrad.addColorStop(1, '#020617');
+      ctx.fillStyle = groundGrad;
+      ctx.fillRect(0, canvas.height - 112, canvas.width, 112);
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.3)';
+      ctx.beginPath(); ctx.moveTo(0, canvas.height - 112); ctx.lineTo(canvas.width, canvas.height - 112); ctx.stroke();
     }
   }
 
   function draw() {
-    ctx.fillStyle = '#71c5cf';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
     bg.draw();
     pipes.draw();
     dragon.draw();

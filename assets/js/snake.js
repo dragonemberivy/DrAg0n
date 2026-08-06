@@ -99,18 +99,64 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function draw() {
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    // Food
-    ctx.fillStyle = '#ec4899';
-    ctx.shadowBlur = 10;
+    // Cyberpunk Canvas Background Grid
+    ctx.fillStyle = '#0b0e17';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.08)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < canvas.width; x += gridSize) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+    }
+    for (let y = 0; y < canvas.height; y += gridSize) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+    }
+
+    // Glowing Neon Food Target
+    ctx.save();
+    ctx.shadowBlur = 15;
     ctx.shadowColor = '#ec4899';
-    ctx.fillRect(food.x, food.y, gridSize-1, gridSize-1);
+    const fGrad = ctx.createRadialGradient(food.x + gridSize/2, food.y + gridSize/2, 2, food.x + gridSize/2, food.y + gridSize/2, gridSize/2);
+    fGrad.addColorStop(0, '#f472b6');
+    fGrad.addColorStop(1, '#db2777');
+    ctx.fillStyle = fGrad;
+    ctx.beginPath();
+    ctx.arc(food.x + gridSize/2, food.y + gridSize/2, (gridSize/2) - 1, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
     
-    // Snake
-    ctx.shadowBlur = 0;
+    // Snake Body with Glowing Rounded Scales & Head Eyes
     snake.forEach((segment, i) => {
-      ctx.fillStyle = i === 0 ? '#38bdf8' : '#818cf8';
-      ctx.fillRect(segment.x, segment.y, gridSize-1, gridSize-1);
+      ctx.save();
+      if (i === 0) {
+        // Head
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = '#38bdf8';
+        const hGrad = ctx.createRadialGradient(segment.x + gridSize/2, segment.y + gridSize/2, 2, segment.x + gridSize/2, segment.y + gridSize/2, gridSize/2);
+        hGrad.addColorStop(0, '#7dd3fc');
+        hGrad.addColorStop(1, '#0284c7');
+        ctx.fillStyle = hGrad;
+        ctx.beginPath();
+        ctx.arc(segment.x + gridSize/2, segment.y + gridSize/2, (gridSize/2), 0, Math.PI * 2);
+        ctx.fill();
+
+        // Glowing Snake Eyes
+        ctx.fillStyle = '#fef08a';
+        ctx.beginPath();
+        ctx.arc(segment.x + 4, segment.y + 4, 2, 0, Math.PI * 2);
+        ctx.arc(segment.x + 11, segment.y + 4, 2, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        // Body Segments
+        const sGrad = ctx.createRadialGradient(segment.x + gridSize/2, segment.y + gridSize/2, 1, segment.x + gridSize/2, segment.y + gridSize/2, gridSize/2);
+        sGrad.addColorStop(0, '#a5b4fc');
+        sGrad.addColorStop(1, '#4f46e5');
+        ctx.fillStyle = sGrad;
+        ctx.beginPath();
+        ctx.arc(segment.x + gridSize/2, segment.y + gridSize/2, (gridSize/2) - 1, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
     });
   }
 
