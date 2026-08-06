@@ -430,14 +430,23 @@
 
     function enterRoom(roomKey) {
       currentRoom = roomKey;
-      chatMsgs.innerHTML = `<div style="text-align:center;color:#4ade80;margin-top:10px;">Joined ${ROOMS[roomKey].name}! Select a profile to type.</div>`;
+      chatMsgs.innerHTML = `<div style="text-align:center;color:#4ade80;margin-top:10px;">Joined ${ROOMS[roomKey].name}! Type a message below.</div>`;
+
+      const savedUser = localStorage.getItem('drag0n_user');
+      currentProfile = savedUser || (chatProfSel && chatProfSel.value ? chatProfSel.value : 'Dragon') || 'Dragon';
+
+      if(chatInp) {
+        chatInp.disabled = false;
+        chatInp.placeholder = "Type a message...";
+      }
+      if(chatBtn) {
+        chatBtn.disabled = false;
+      }
 
       // Attempt to load from Firebase if configured
       try {
         messagesRef = db.ref(`rooms/${roomKey}/messages`);
         typingRef = db.ref(`rooms/${roomKey}/typing`);
-
-        chatProfSel.disabled = false;
 
         messagesRef.limitToLast(100).on("child_added", snap => {
           const m = snap.val();
@@ -446,30 +455,14 @@
 
       } catch (e) {
         console.warn("Firebase not fully configured. Falling back to local visual layout for now.");
-        chatProfSel.disabled = false;
       }
     }
 
-    // PROFILE SELECTION
-    const savedUser = localStorage.getItem('drag0n_user');
-    const savedAvatar = localStorage.getItem('drag0n_avatar');
-
+    // PROFILE SELECTION (OPTIONAL SWAP)
     if(chatProfSel) {
-      if (savedUser) {
-        // Auto-login to chat
-        currentProfile = savedUser;
-        chatProfSel.style.display = 'none'; // hide selector
-        if(chatInp) chatInp.disabled = false;
-        if(chatBtn) chatBtn.disabled = false;
-        if(chatInp) chatInp.placeholder = "Type a message...";
-      } else {
-        chatProfSel.addEventListener("change", () => {
-          currentProfile = chatProfSel.value;
-          chatInp.disabled = false;
-          chatBtn.disabled = false;
-          chatInp.placeholder = "Type a message...";
-        });
-      }
+      chatProfSel.addEventListener("change", () => {
+        currentProfile = chatProfSel.value;
+      });
     }
 
     // SEND MESSAGE
