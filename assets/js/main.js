@@ -1141,18 +1141,18 @@
     };
 
     const travelPlayerHTML = `
-      <div id="music-player" class="glass-card" style="position:fixed; bottom:20px; right:20px; width:340px; background:rgba(15, 23, 42, 0.95); backdrop-filter:blur(14px); border:1px solid rgba(255,255,255,0.15); border-radius:18px; padding:14px 16px; z-index:99999; box-shadow:0 12px 35px rgba(0,0,0,0.6); display:flex; flex-direction:column; gap:10px;">
+      <div id="music-player" style="position:fixed; bottom:24px; right:24px; width:340px; background:rgba(18, 24, 38, 0.88); backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px); border:1px solid rgba(255,255,255,0.12); border-radius:24px; padding:16px; z-index:99999; box-shadow:0 20px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15); display:flex; flex-direction:column; gap:12px;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-          <div style="display:flex; align-items:center; gap:8px;">
-            <span style="font-size:1.3rem;">✈️</span>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div style="width:36px; height:36px; border-radius:9999px; background:linear-gradient(135deg, rgba(56,189,248,0.2), rgba(192,132,252,0.2)); border:1px solid rgba(56,189,248,0.3); display:flex; align-items:center; justify-content:center; font-size:1.1rem; box-shadow:0 0 15px rgba(56,189,248,0.2);">🎵</div>
             <div>
-              <strong style="color:var(--accent, #38bdf8); font-size:0.9rem; display:block; font-family:'Outfit', sans-serif;">Travel Playlist (60 Tracks)</strong>
-              <span id="travel-track-title" style="font-size:0.7rem; color:#94a3b8; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px;">1. #BoxBaddhalaiPoye</span>
+              <strong style="color:#ffffff; font-size:0.88rem; display:block; font-family:'Outfit', sans-serif; font-weight:800; letter-spacing:-0.01em;">Travel Audio Player</strong>
+              <span id="travel-track-title" style="font-size:0.72rem; color:#94a3b8; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:180px;">1. #BoxBaddhalaiPoye</span>
             </div>
           </div>
           <div style="display:flex; gap:6px;">
-            <button onclick="window.toggleMusicPlayer()" id="music-toggle-btn" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:white; padding:3px 8px; border-radius:6px; cursor:pointer; font-size:0.75rem;" title="Minimize / Expand">➖ Minimize</button>
-            <button onclick="document.getElementById('music-player').style.display='none'" style="background:transparent; border:none; color:var(--text-muted, #94a3b8); cursor:pointer; font-size:1.1rem;" title="Close">&times;</button>
+            <button onclick="window.toggleMusicPlayer()" id="music-toggle-btn" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#e2e8f0; padding:4px 10px; border-radius:9999px; cursor:pointer; font-size:0.72rem; font-weight:700;" title="Minimize / Expand">➖ Minimize</button>
+            <button onclick="document.getElementById('music-player').style.display='none'" style="background:transparent; border:none; color:#64748b; cursor:pointer; font-size:1.1rem; padding:2px 6px;" title="Close">&times;</button>
           </div>
         </div>
 
@@ -1161,25 +1161,25 @@
             <source id="travel-audio-source" src="${travelPlaylist[0].url}" type="audio/webm">
           </audio>
 
-          <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(0,0,0,0.3); padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.08); gap:6px;">
-            <button onclick="window.prevTravelTrack()" style="background:rgba(255,255,255,0.1); border:none; color:white; padding:4px 8px; border-radius:6px; cursor:pointer; font-size:0.8rem;" title="Previous">⏮</button>
-            <button id="travel-play-btn" onclick="window.toggleTravelAudio()" style="background:#38bdf8; border:none; color:#0f172a; padding:6px 14px; border-radius:20px; font-weight:bold; cursor:pointer; font-size:0.85rem; display:flex; align-items:center; gap:4px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(11,14,23,0.6); padding:8px 12px; border-radius:14px; border:1px solid rgba(255,255,255,0.08); gap:8px;">
+            <button onclick="window.prevTravelTrack()" style="background:rgba(255,255,255,0.08); border:none; color:white; padding:5px 10px; border-radius:9999px; cursor:pointer; font-size:0.8rem; box-shadow:none;" title="Previous">⏮</button>
+            <button id="travel-play-btn" onclick="window.toggleTravelAudio()" style="background:linear-gradient(135deg, #38bdf8, #818cf8); border:none; color:#0b0e17; padding:6px 16px; border-radius:9999px; font-weight:800; cursor:pointer; font-size:0.82rem; display:flex; align-items:center; gap:4px; box-shadow:0 4px 15px rgba(56,189,248,0.3);">
               ▶ Play
             </button>
-            <button onclick="window.nextTravelTrack()" style="background:rgba(255,255,255,0.1); border:none; color:white; padding:4px 8px; border-radius:6px; cursor:pointer; font-size:0.8rem;" title="Next">⏭</button>
+            <button onclick="window.nextTravelTrack()" style="background:rgba(255,255,255,0.08); border:none; color:white; padding:5px 10px; border-radius:9999px; cursor:pointer; font-size:0.8rem; box-shadow:none;" title="Next">⏭</button>
             
-            <select id="travel-track-select" onchange="window.changeTravelTrack(this.value)" style="background:rgba(15,23,42,0.9); color:white; border:1px solid rgba(255,255,255,0.2); padding:5px 8px; border-radius:6px; font-size:0.75rem; max-width:130px; cursor:pointer;">
+            <select id="travel-track-select" onchange="window.changeTravelTrack(this.value)" style="background:rgba(11,14,23,0.9); color:white; border:1px solid rgba(255,255,255,0.15); padding:6px 10px; border-radius:10px; font-size:0.75rem; max-width:130px; cursor:pointer; margin:0;">
               ${travelPlaylist.map((t, idx) => `<option value="${idx}">${t.title}</option>`).join('')}
             </select>
           </div>
 
           <div style="display:flex; align-items:center; justify-content:space-between; font-size:0.75rem; color:#94a3b8;">
-            <div style="display:flex; align-items:center; gap:6px;">
+            <div style="display:flex; align-items:center; gap:8px;">
               <span>🔊</span>
-              <input type="range" id="travel-volume-slider" min="0" max="1" step="0.05" value="0.7" oninput="window.setTravelVolume(this.value)" style="width:70px; accent-color:#38bdf8; cursor:pointer;">
+              <input type="range" id="travel-volume-slider" min="0" max="1" step="0.05" value="0.7" oninput="window.setTravelVolume(this.value)" style="width:75px; accent-color:#38bdf8; cursor:pointer; margin:0;">
             </div>
-            <a href="https://music.youtube.com/playlist?list=PLsWhDTkT5AxzWUi6TbQZoIryJFL4-Lly-" target="_blank" style="color:#38bdf8; text-decoration:none; font-weight:bold; font-size:0.75rem; display:flex; align-items:center; gap:2px;">
-              YouTube Link ↗
+            <a href="https://music.youtube.com/playlist?list=PLsWhDTkT5AxzWUi6TbQZoIryJFL4-Lly-" target="_blank" style="color:#38bdf8; text-decoration:none; font-weight:700; font-size:0.75rem; display:flex; align-items:center; gap:2px;">
+              Original YouTube ↗
             </a>
           </div>
         </div>

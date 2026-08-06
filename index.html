@@ -78,62 +78,115 @@
     </div>
   </nav>
 
-  <!-- HEADER -->
-  <header style="padding: 3rem 1rem 2rem;">
-    <h1 style="font-size: 4.5rem; margin-bottom: 0.5rem;"><span class="gradient-text">DrAg0n</span></h1>
-    <p style="font-size: 1.2rem; color: var(--text-muted); max-width: 650px; margin: 0 auto 1.5rem;">
-      Welcome to your futuristic personal world. Play mini-games, care for your dragon pet, explore space, and read free classic books!
+  <!-- HERO HEADER -->
+  <header style="padding: 3.5rem 1rem 2.5rem; text-align: center; position: relative;">
+    <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); padding: 0.4rem 1.25rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 800; color: #38bdf8; letter-spacing: 0.08em; margin-bottom: 1.2rem; box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);">
+      ✨ NEXT-GEN INTERACTIVE WORLD 2026
+    </div>
+    
+    <h1 style="font-size: clamp(2.8rem, 6vw, 4.6rem); font-weight: 800; margin-bottom: 0.8rem; letter-spacing: -0.04em;">
+      Welcome to <span class="gradient-text">DrAg0n Universe</span>
+    </h1>
+    
+    <p style="font-size: 1.15rem; color: var(--text-muted); max-width: 680px; margin: 0 auto 2rem; line-height: 1.6;">
+      Play retro & 3D games, care for your virtual dragon pet, explore procedural space galaxies, build dream football squads, and read free public domain books!
     </p>
 
-    <div id="clock-container">
+    <div style="display: flex; gap: 1rem; justify-content: center; align-items: center; flex-wrap: wrap; margin-bottom: 2rem;">
+      <a href="games.html" style="text-decoration: none;">
+        <button style="background: linear-gradient(135deg, #38bdf8, #818cf8); color: #0b0e17; font-weight: 800; padding: 0.85rem 2rem; font-size: 1rem;">
+          🕹️ Launch Arcade
+        </button>
+      </a>
+      <a href="room.html" style="text-decoration: none;">
+        <button style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #fff; font-weight: 700; padding: 0.85rem 2rem; font-size: 1rem;">
+          🛋️ Visit Dragon Pet
+        </button>
+      </a>
+    </div>
+
+    <div id="clock-container" style="margin-top: 1rem;">
       <div id="clock">Loading time...</div>
     </div>
   </header>
 
   <main class="container">
 
-    <!-- NAVIGATION GRID -->
-    <div class="nav-grid">
-      <a href="internet.html" class="nav-card" style="background: linear-gradient(135deg, rgba(74, 222, 128, 0.1), rgba(34, 197, 94, 0.1)); border-color: rgba(34, 197, 94, 0.3);">
-        <div class="nav-card-icon">🌎</div>
-        <h3 class="nav-card-title" style="background: linear-gradient(45deg, #4ade80, #22c55e); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Tiny Internet</h3>
-        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem;">Browse the fake web</p>
+    <!-- TRENDY LAUNCHER GRID -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 1.5rem; margin-bottom: 4rem;">
+      
+      <a href="games.html" class="glass-card" style="text-decoration: none; text-align: left; padding: 1.75rem; border-color: rgba(56, 189, 248, 0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+          <div style="font-size: 2.8rem; filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.4));">🕹️</div>
+          <span style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.05em;">ARCADE</span>
+        </div>
+        <h3 style="font-size: 1.4rem; margin-bottom: 0.4rem; color: #fff;">Arcade Hub</h3>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin: 0;">Flappy Dragon, Snake, Tic-Tac-Toe & Slice Master.</p>
       </a>
-      <a href="planet.html" class="nav-card" style="background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(14, 165, 233, 0.1)); border-color: rgba(14, 165, 233, 0.3);">
-        <div class="nav-card-icon">🪐</div>
-        <h3 class="nav-card-title" style="background: linear-gradient(45deg, #38bdf8, #0ea5e9); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">My Planet</h3>
-        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem;">Your unique world</p>
+
+      <a href="room.html" class="glass-card" style="text-decoration: none; text-align: left; padding: 1.75rem; border-color: rgba(236, 72, 153, 0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+          <div style="font-size: 2.8rem; filter: drop-shadow(0 0 12px rgba(236, 72, 153, 0.4));">🛋️</div>
+          <span style="background: rgba(236, 72, 153, 0.15); color: #f472b6; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.05em;">VIRTUAL PET</span>
+        </div>
+        <h3 style="font-size: 1.4rem; margin-bottom: 0.4rem; color: #fff;">Pet Room</h3>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin: 0;">Care, feed, play toys, and customize your dragon pet.</p>
       </a>
-      <a href="space-game.html" class="nav-card">
-        <div class="nav-card-icon">🚀</div>
-        <h3 class="nav-card-title">Space Explorer</h3>
-        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem;">A procedural universe</p>
+
+      <a href="space-game.html" class="glass-card" style="text-decoration: none; text-align: left; padding: 1.75rem; border-color: rgba(168, 85, 247, 0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+          <div style="font-size: 2.8rem; filter: drop-shadow(0 0 12px rgba(168, 85, 247, 0.4));">🚀</div>
+          <span style="background: rgba(168, 85, 247, 0.15); color: #c084fc; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.05em;">3D UNIVERSE</span>
+        </div>
+        <h3 style="font-size: 1.4rem; margin-bottom: 0.4rem; color: #fff;">Space Explorer</h3>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin: 0;">Fly starships, mine planets, and explore deep space.</p>
       </a>
-      <a href="shop.html" class="nav-card" style="background: linear-gradient(135deg, rgba(234, 179, 8, 0.1), rgba(245, 158, 11, 0.1)); border-color: rgba(245, 158, 11, 0.3);">
-        <div class="nav-card-icon">🛍️</div>
-        <h3 class="nav-card-title" style="background: linear-gradient(45deg, #eab308, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Store</h3>
-        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem;">Spend Dragon Coins</p>
+
+      <a href="fc24-squad-builder.html" class="glass-card" style="text-decoration: none; text-align: left; padding: 1.75rem; border-color: rgba(251, 191, 36, 0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+          <div style="font-size: 2.8rem; filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.4));">⚽</div>
+          <span style="background: rgba(251, 191, 36, 0.15); color: #fbbf24; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.05em;">SPORTS</span>
+        </div>
+        <h3 style="font-size: 1.4rem; margin-bottom: 0.4rem; color: #fff;">FC24 Squad Builder</h3>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin: 0;">Open packs, build chemistry, and assemble dream XI.</p>
       </a>
-      <a href="games.html" class="nav-card">
-        <div class="nav-card-icon">🕹️</div>
-        <h3 class="nav-card-title">Arcade</h3>
-        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem;">Mini-games & More</p>
+
+      <a href="club.html" class="glass-card" style="text-decoration: none; text-align: left; padding: 1.75rem; border-color: rgba(52, 211, 153, 0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+          <div style="font-size: 2.8rem; filter: drop-shadow(0 0 12px rgba(52, 211, 153, 0.4));">📚</div>
+          <span style="background: rgba(52, 211, 153, 0.15); color: #34d399; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.05em;">LIBRARY</span>
+        </div>
+        <h3 style="font-size: 1.4rem; margin-bottom: 0.4rem; color: #fff;">Book Club</h3>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin: 0;">Read public domain classics free online & track goals.</p>
       </a>
-      <a href="chat.html" class="nav-card">
-        <div class="nav-card-icon">💬</div>
-        <h3 class="nav-card-title">Animal Chat</h3>
-        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem;">Connect in the wild</p>
+
+      <a href="chat.html" class="glass-card" style="text-decoration: none; text-align: left; padding: 1.75rem; border-color: rgba(129, 140, 248, 0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+          <div style="font-size: 2.8rem; filter: drop-shadow(0 0 12px rgba(129, 140, 248, 0.4));">💬</div>
+          <span style="background: rgba(129, 140, 248, 0.15); color: #818cf8; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.05em;">COMMUNITY</span>
+        </div>
+        <h3 style="font-size: 1.4rem; margin-bottom: 0.4rem; color: #fff;">Animal Chat</h3>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin: 0;">Connect live in wild room channels with avatar badges.</p>
       </a>
-      <a href="club.html" class="nav-card" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(236, 72, 153, 0.1)); border-color: rgba(236, 72, 153, 0.3);">
-        <div class="nav-card-icon">📚</div>
-        <h3 class="nav-card-title" style="background: linear-gradient(45deg, #a855f7, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Book Club</h3>
-        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem;">Reviews & Polls</p>
+
+      <a href="shop.html" class="glass-card" style="text-decoration: none; text-align: left; padding: 1.75rem; border-color: rgba(245, 158, 11, 0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+          <div style="font-size: 2.8rem; filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.4));">🛒</div>
+          <span style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.05em;">STORE</span>
+        </div>
+        <h3 style="font-size: 1.4rem; margin-bottom: 0.4rem; color: #fff;">Dragon Shop</h3>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin: 0;">Unlock golden chat names, VIP crowns, and pet items.</p>
       </a>
-      <a href="room.html" class="nav-card" style="background: linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(244, 63, 94, 0.1)); border-color: rgba(244, 63, 94, 0.3);">
-        <div class="nav-card-icon">🏠</div>
-        <h3 class="nav-card-title" style="background: linear-gradient(45deg, #ec4899, #f43f5e); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Pet Room</h3>
-        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem;">Wander, feed & chat</p>
+
+      <a href="planet.html" class="glass-card" style="text-decoration: none; text-align: left; padding: 1.75rem; border-color: rgba(14, 165, 233, 0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+          <div style="font-size: 2.8rem; filter: drop-shadow(0 0 12px rgba(14, 165, 233, 0.4));">🪐</div>
+          <span style="background: rgba(14, 165, 233, 0.15); color: #38bdf8; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.05em;">WORLD</span>
+        </div>
+        <h3 style="font-size: 1.4rem; margin-bottom: 0.4rem; color: #fff;">My Planet</h3>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin: 0;">Analyze your procedural home planet terrain & flora.</p>
       </a>
+
     </div>
 
     <!-- IMAGES SECTION -->
