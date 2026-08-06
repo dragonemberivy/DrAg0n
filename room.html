@@ -11,12 +11,31 @@
       background: #080c14;
       overflow-x: hidden;
     }
+    .top-nav {
+      height: 70px;
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    .top-nav-logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.4rem; text-decoration: none; color: white; }
+    .top-nav-links { display: flex; gap: 20px; }
+    .top-nav-link { color: #94a3b8; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: color 0.2s; }
+    .top-nav-link:hover, .top-nav-link.active { color: #38bdf8; }
+    .top-nav-actions { display: flex; align-items: center; gap: 15px; }
+    .profile-pill { background: rgba(255,255,255,0.05); padding: 5px 12px; border-radius: 20px; display: flex; align-items: center; gap: 8px; border: 1px solid rgba(255,255,255,0.1); }
     .playground-container {
       display: grid;
       grid-template-columns: 1fr 380px;
       gap: 24px;
       max-width: 1400px;
-      margin: 80px auto 40px auto;
+      margin: 20px auto 40px auto;
       padding: 0 20px;
     }
     @media (max-width: 1100px) {
@@ -48,64 +67,60 @@
       height: 70px;
       border-radius: 50%;
       background: linear-gradient(135deg, rgba(236, 72, 153, 0.2), rgba(139, 92, 246, 0.2));
-      border: 2px solid var(--accent);
       display: flex;
       align-items: center;
       justify-content: center;
       position: relative;
+      border: 1px solid rgba(255,255,255,0.1);
     }
     .level-badge {
       position: absolute;
-      bottom: -5px;
-      right: -5px;
-      background: var(--accent);
+      bottom: -6px;
+      background: #ec4899;
       color: white;
-      font-size: 0.75rem;
+      font-size: 0.65rem;
       font-weight: 800;
-      padding: 2px 6px;
-      border-radius: 10px;
-      border: 1.5px solid #080c14;
+      padding: 2px 8px;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
     }
-    .stat-bars-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 160px);
-      gap: 16px;
-    }
-    @media (max-width: 768px) {
-      .stat-bars-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-    .stat-bar-container {
+    .status-bars {
       display: flex;
-      flex-direction: column;
-      gap: 6px;
+      gap: 20px;
+      flex-wrap: wrap;
     }
-    .stat-label {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--text-muted);
+    .stat-box {
+      width: 120px;
+    }
+    .stat-header {
       display: flex;
       justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 600;
     }
-    .bar-bg {
+    .progress-track {
       height: 8px;
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255,255,255,0.05);
       border-radius: 10px;
       overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.05);
     }
-    .bar-fill {
+    .progress-fill {
       height: 100%;
       border-radius: 10px;
-      width: 100%;
-      transition: width 0.3s ease;
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .care-buttons {
+    .fill-hunger { background: linear-gradient(90deg, #f59e0b, #ef4444); }
+    .fill-energy { background: linear-gradient(90deg, #3b82f6, #06b6d4); }
+    .fill-happiness { background: linear-gradient(90deg, #ec4899, #8b5cf6); }
+    .action-controls {
       display: flex;
-      gap: 12px;
+      gap: 10px;
     }
-    .care-btn {
-      padding: 10px 16px;
+    .btn-care {
+      padding: 10px 18px;
       border-radius: 14px;
       font-weight: 700;
       font-size: 0.9rem;
@@ -160,41 +175,22 @@
       position: absolute;
       cursor: grab;
       user-select: none;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      transition: transform 0.1s ease;
       z-index: 50;
+      transition: transform 0.1s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .furniture-item:active {
       cursor: grabbing;
-      transform: scale(1.05);
+      transform: scale(1.08);
     }
-    .furniture-icon {
-      font-size: 3.5rem;
-      filter: drop-shadow(0 8px 16px rgba(0,0,0,0.5));
-    }
-    .furniture-label {
-      font-size: 0.7rem;
-      background: rgba(0, 0, 0, 0.7);
-      color: #94a3b8;
-      padding: 2px 6px;
-      border-radius: 6px;
-      margin-top: 4px;
-      opacity: 0;
-      transition: opacity 0.2s ease;
-      pointer-events: none;
-    }
-    .furniture-item:hover .furniture-label {
-      opacity: 1;
-    }
-    .remove-furniture-btn {
+    .furniture-item .remove-furniture-btn {
       position: absolute;
       top: -8px;
       right: -8px;
       background: #ef4444;
       color: white;
-      border: none;
       width: 20px;
       height: 20px;
       border-radius: 50%;
@@ -344,8 +340,33 @@
 </head>
 <body>
 
-  <!-- Return Home Link -->
-  <a href="index.html" style="position: absolute; top: 1.5rem; left: 2rem; text-decoration: none; font-size: 1.1rem; color: var(--accent); z-index: 100000; font-weight: 600;">← Return to Home</a>
+  <!-- UNIFIED SLEEK TOP NAVBAR -->
+  <nav class="top-nav">
+    <a href="index.html" class="top-nav-logo">
+      <span style="font-size: 1.8rem; filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.5));">🐉</span>
+      <span class="gradient-text">DrAg0n</span>
+    </a>
+    <div class="top-nav-links">
+      <a href="index.html" class="top-nav-link">🏠 Home</a>
+      <a href="games.html" class="top-nav-link">🕹️ Arcade</a>
+      <a href="club.html" class="top-nav-link">📚 Books & Club</a>
+      <a href="room.html" class="top-nav-link active">🛋️ Pet Room</a>
+      <a href="space-game.html" class="top-nav-link">🚀 Space Explorer</a>
+      <a href="fc24-squad-builder.html" class="top-nav-link">⚽ Squad Builder</a>
+      <a href="chat.html" class="top-nav-link">💬 Chat</a>
+    </div>
+    <div class="top-nav-actions">
+      <a href="shop.html" style="background: linear-gradient(135deg, #eab308, #f59e0b); padding: 7px 16px; border-radius: 20px; font-weight: bold; color: #0f172a; text-decoration: none; font-size: 0.85rem; box-shadow: 0 4px 15px rgba(234,179,8,0.3); display: flex; align-items: center; gap: 4px;">🛒 Shop</a>
+      <div id="profile-widget" class="profile-pill">
+        <span id="pw-avatar" style="font-size: 1.2rem;">👤</span>
+        <div style="display: flex; flex-direction: column;">
+          <span id="pw-name" style="font-weight: bold; color: var(--accent); font-size: 0.85rem;">Profile</span>
+          <span id="pw-dc" style="color: #eab308; font-size: 0.75rem; font-weight: bold;">0 DC</span>
+        </div>
+      </div>
+      <div id="theme-toggle" style="font-size: 1.2rem; cursor: pointer; background: rgba(255,255,255,0.08); border-radius: 50%; border: 1px solid var(--border); width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">🌙</div>
+    </div>
+  </nav>
 
   <div class="playground-container">
     

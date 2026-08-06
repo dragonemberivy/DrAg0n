@@ -797,7 +797,7 @@
     if(profileWidget) {
       profileWidget.addEventListener('click', () => {
         if(!localStorage.getItem('drag0n_user')) {
-          registerModal.style.display = 'flex';
+          if (registerModal) registerModal.style.display = 'flex';
         } else {
           alert('You are already registered as ' + localStorage.getItem('drag0n_user') + '!');
         }
@@ -806,7 +806,7 @@
 
     if(document.getElementById('close-register-btn')) {
       document.getElementById('close-register-btn').addEventListener('click', () => {
-        registerModal.style.display = 'none';
+        if (registerModal) registerModal.style.display = 'none';
       });
     }
 

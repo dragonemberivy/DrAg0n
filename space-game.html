@@ -46,25 +46,7 @@
 <body>
   <div onclick="window.findEgg('egg3', this)" style="position:absolute; top:50px; left:50px; font-size:0.5rem; cursor:pointer; z-index:10; opacity:0.1;">🪙</div>
 
-  <!-- THEME TOGGLE -->
-  <div id="theme-toggle" style="position: fixed; top: 2rem; right: 200px; font-size: 1.5rem; cursor: pointer; z-index: 100000; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 50%; border: 1px solid var(--border); width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;">🌙</div>
 
-  <!-- TRAVEL MUSIC PLAYER (YOUTUBE MUSIC) -->
-  <div id="music-player" class="glass-card" style="position:fixed; bottom:20px; right:20px; width:340px; background:rgba(15, 23, 42, 0.92); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,0.15); border-radius:16px; padding:12px 15px; z-index:99999; box-shadow:0 10px 30px rgba(0,0,0,0.5); display:flex; flex-direction:column; gap:8px;">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-      <div style="display:flex; align-items:center; gap:8px;">
-        <span style="font-size:1.2rem;">✈️</span>
-        <strong style="color:var(--accent, #38bdf8); font-size:0.9rem;">Travel Playlist (YouTube Music)</strong>
-      </div>
-      <div style="display:flex; gap:6px;">
-        <button onclick="window.toggleMusicPlayer()" id="music-toggle-btn" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:white; padding:3px 8px; border-radius:6px; cursor:pointer; font-size:0.75rem;" title="Minimize / Expand">➖ Minimize</button>
-        <button onclick="document.getElementById('music-player').style.display='none'" style="background:transparent; border:none; color:var(--text-muted, #94a3b8); cursor:pointer; font-size:1.1rem;" title="Close">&times;</button>
-      </div>
-    </div>
-    <div id="music-player-iframe-container" style="transition: all 0.3s ease;">
-      <iframe id="youtube-playlist-iframe" width="100%" height="180" src="https://www.youtube.com/embed/videoseries?list=PLsWhDTkT5AxzWUi6TbQZoIryJFL4-Lly-" title="YouTube Music Travel Playlist" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:10px; border:none; width:100%;"></iframe>
-    </div>
-  </div>
 
   <a href="index.html" class="back-btn" id="back-home-btn">← Back Home</a>
 
