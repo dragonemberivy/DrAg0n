@@ -2741,18 +2741,31 @@
         if (jBar) jBar.style.width = jetpackFuel + '%';
     }
 
-    // --- Phase 6: Pulse Drive ---
+    // --- Phase 6: Hyperdrive Pulse Warp ---
     if (isFlying) {
-        pulseDriveActive = keys.shift && pulseFuel > 0;
+        pulseDriveActive = (keys.shift || keys.j) && pulseFuel > 0;
         if (pulseDriveActive) {
-            pulseFuel = Math.max(0, pulseFuel - 25 * dt);
+            pulseFuel = Math.max(0, pulseFuel - 20 * dt);
+            if (camera) {
+                camera.fov = THREE.MathUtils.lerp(camera.fov, 115, dt * 10);
+                camera.updateProjectionMatrix();
+            }
         } else {
-            pulseFuel = Math.min(100, pulseFuel + 10 * dt);
+            pulseFuel = Math.min(100, pulseFuel + 12 * dt);
+            if (camera && camera.fov > 75.5) {
+                camera.fov = THREE.MathUtils.lerp(camera.fov, 75, dt * 8);
+                camera.updateProjectionMatrix();
+            }
         }
-        // Cyan tint on re-entry mesh during pulse
+        // Cyan plasma streak on re-entry mesh during hyperdrive pulse
         if (window.reentryMesh) {
-            if (pulseDriveActive) window.reentryMesh.material.color.set(0x00ffff);
-            else window.reentryMesh.material.color.set(0xff4400);
+            if (pulseDriveActive) {
+                window.reentryMesh.material.color.set(0x38bdf8);
+                window.reentryMesh.scale.set(1.5, 3.0, 1.5);
+            } else {
+                window.reentryMesh.material.color.set(0xff4400);
+                window.reentryMesh.scale.set(1.0, 1.0, 1.0);
+            }
         }
         const pBar = document.getElementById('nms-pulse-bar');
         if (pBar) pBar.style.width = pulseFuel + '%';

@@ -1289,6 +1289,18 @@
     localStorage.setItem(journalKey, JSON.stringify(journal));
   };
 
+  window.dragonFireTrick = function() {
+    for (let i = 0; i < 25; i++) {
+      createFireParticle(petX + 24, petY + 15);
+    }
+  };
+
+  window.getDragonEvolutionTitle = function(lvl) {
+    if (lvl >= 10) return "🐲 Ancient Mythic Dragon";
+    if (lvl >= 5) return "🐉 Winged Drake Dragon";
+    return "🐣 Hatchling Baby Dragon";
+  };
+
   setTimeout(() => {
     highlightActiveMascot();
     

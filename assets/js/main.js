@@ -555,6 +555,21 @@
       chatMsgs.scrollTop = chatMsgs.scrollHeight;
     }
 
+    // BOOK CLUB QUIZ GAME
+    window.answerBookQuiz = function(idx) {
+      const resEl = document.getElementById('quiz-result-msg');
+      if (!resEl) return;
+      resEl.style.display = 'block';
+      if (idx === 0) {
+        resEl.style.color = '#34d399';
+        resEl.textContent = '🎉 Correct! Sir Arthur Conan Doyle created Sherlock Holmes! +50 Dragon Coins & XP Earned!';
+        if (window.addXP) window.addXP(50);
+      } else {
+        resEl.style.color = '#ef4444';
+        resEl.textContent = '❌ Not quite! Sir Arthur Conan Doyle created Sherlock Holmes. Try again!';
+      }
+    };
+
     // CLEANUP
     window.addEventListener("beforeunload", () => {
       if (typingRef && currentRoom) typingRef.child(userId).remove();
