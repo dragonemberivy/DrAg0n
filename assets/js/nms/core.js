@@ -395,7 +395,8 @@
 
     scene.add(yawObject);
 
-    renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
+    renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     renderer.setSize(container.clientWidth, container.clientHeight);
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
@@ -1613,6 +1614,7 @@
     if(!camera || !renderer) return;
     camera.aspect = container.clientWidth / container.clientHeight;
     camera.updateProjectionMatrix();
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     renderer.setSize(container.clientWidth, container.clientHeight);
   }
 
