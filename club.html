@@ -10,57 +10,35 @@
 </head>
 
 <body>
-  <div onclick="window.findEgg('egg5', this)" style="position:absolute; top:200px; left:100px; font-size:0.5rem; cursor:pointer; z-index:10; opacity:0.1;">🪙</div>
-
   <!-- UNIFIED SLEEK TOP NAVBAR -->
   <nav class="top-nav">
     <a href="index.html" class="top-nav-logo">
-      <span style="font-size: 1.8rem; filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.5));">🐉</span>
-      <span class="gradient-text">DrAg0n</span>
+      <span class="gradient-text" style="font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em;">DRAG0N</span>
     </a>
     <div class="top-nav-links">
-      <a href="index.html" class="top-nav-link">🏠 Home</a>
-      <a href="games.html" class="top-nav-link">🕹️ Arcade</a>
-      <a href="club.html" class="top-nav-link active">📚 Books & Club</a>
-      <a href="room.html" class="top-nav-link">🛋️ Pet Room</a>
-      <a href="space-game.html" class="top-nav-link">🚀 Space Explorer</a>
-      <a href="fc24-squad-builder.html" class="top-nav-link">⚽ Squad Builder</a>
-      <a href="chat.html" class="top-nav-link">💬 Chat</a>
+      <a href="index.html" class="top-nav-link">Home</a>
+      <a href="games.html" class="top-nav-link">Arcade</a>
+      <a href="club.html" class="top-nav-link active">Books & Club</a>
+      <a href="room.html" class="top-nav-link">Pet Room</a>
+      <a href="space-game.html" class="top-nav-link">Space Explorer</a>
+      <a href="fc24-squad-builder.html" class="top-nav-link">Squad Builder</a>
+      <a href="chat.html" class="top-nav-link">Chat</a>
     </div>
     <div class="top-nav-actions">
-      <a href="shop.html" style="background: linear-gradient(135deg, #eab308, #f59e0b); padding: 7px 16px; border-radius: 20px; font-weight: bold; color: #0f172a; text-decoration: none; font-size: 0.85rem; box-shadow: 0 4px 15px rgba(234,179,8,0.3); display: flex; align-items: center; gap: 4px;">🛒 Shop</a>
+      <a href="shop.html" style="background: linear-gradient(135deg, #eab308, #f59e0b); padding: 7px 18px; border-radius: 20px; font-weight: 800; color: #0f172a; text-decoration: none; font-size: 0.85rem; box-shadow: 0 4px 15px rgba(234,179,8,0.3);">Shop</a>
       <div id="profile-widget" class="profile-pill">
-        <span id="pw-avatar" style="font-size: 1.2rem;">👤</span>
         <div style="display: flex; flex-direction: column;">
           <span id="pw-name" style="font-weight: bold; color: var(--accent); font-size: 0.85rem;">Profile</span>
           <span id="pw-dc" style="color: #eab308; font-size: 0.75rem; font-weight: bold;">0 DC</span>
         </div>
       </div>
-      <div id="theme-toggle" style="font-size: 1.2rem; cursor: pointer; background: rgba(255,255,255,0.08); border-radius: 50%; border: 1px solid var(--border); width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">🌙</div>
     </div>
   </nav>
-
-  <!-- SITE-WIDE PASSWORD LOCK -->
-  <div id="site-password-modal"
-    style="display:flex; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.95); z-index:100000; align-items:center; justify-content:center; backdrop-filter:blur(10px);">
-    <div class="glass-card"
-      style="text-align:center; min-width: 320px; transform: scale(1); box-shadow: 0 20px 50px rgba(56, 189, 248, 0.3); border: 1px solid rgba(56, 189, 248, 0.5);">
-      <h2 style="font-size: 3rem; margin-bottom: 0.5rem;">🔒</h2>
-      <h3 id="modal-title" style="margin-bottom: 1rem; font-size: 1.5rem;">Site Locked</h3>
-      <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">Please enter the daily flavor to
-        enter.</p>
-      <input type="password" id="site-pw-input" placeholder="Password..."
-        style="margin-bottom:1rem; width:100%; text-align: center; font-size: 1.1rem; padding: 12px;">
-      <p id="site-modal-error" style="color: #ef4444; font-size: 0.9rem; margin-bottom: 1rem; display:none;">Incorrect
-        daily password!</p>
-      <button id="site-unlock-btn" style="width: 100%; font-size: 1.1rem; padding: 12px;">Unlock Website</button>
-    </div>
-  </div>
 
   <!-- HEADER -->
   <header style="padding: 3rem 1rem 2rem; text-align: center; position: relative;">
     <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3); padding: 0.4rem 1.25rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 800; color: #c084fc; letter-spacing: 0.08em; margin-bottom: 1.2rem; box-shadow: 0 0 20px rgba(168, 85, 247, 0.2);">
-      📚 PUBLIC DOMAIN LIBRARY & BOOK CLUB
+      PUBLIC DOMAIN LIBRARY & BOOK CLUB
     </div>
     <h1 style="font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 800; margin-bottom: 0.8rem;"><span class="gradient-text">Books & Club</span></h1>
     <p style="font-size: 1.15rem; color: var(--text-muted); max-width: 620px; margin: 0 auto; line-height: 1.6;">
@@ -90,7 +68,7 @@
         
         <!-- Book of the Month -->
         <div class="glass-card" style="border-color: rgba(168, 85, 247, 0.4); display: flex; flex-direction: column; align-items: center; text-align: center;">
-          <h3 style="color: #a855f7; margin-bottom: 1rem;">🌟 Book of the Month</h3>
+          <h3 style="color: #a855f7; margin-bottom: 1rem;">Book of the Month</h3>
           <img src="https://images.unsplash.com/photo-1629196914275-f7e48b488ddc?w=300&q=80" alt="Book Cover" style="width: 150px; border-radius: 8px; margin-bottom: 1rem; object-fit: cover; aspect-ratio: 2/3; animation: pulseGlow 3s infinite alternate;">
           
           <!-- Star Rating -->
@@ -109,12 +87,12 @@
           
           <!-- Countdown Timer -->
           <div style="background: rgba(168, 85, 247, 0.2); border: 1px solid rgba(168, 85, 247, 0.5); padding: 0.8rem; border-radius: 8px; width: 100%; text-align: center; margin-bottom: 1.5rem;">
-             <h5 style="color: #e879f9; margin-bottom: 0.2rem; font-size: 0.9rem;">⏳ Next Meeting In:</h5>
+             <h5 style="color: #e879f9; margin-bottom: 0.2rem; font-size: 0.9rem;">Next Meeting In:</h5>
              <div id="meeting-countdown" style="font-size: 1.2rem; font-weight: bold; color: #fff;">Calculating...</div>
           </div>
 
           <div style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; width: 100%; text-align: left;">
-            <h5 style="color: #fbbf24; margin-bottom: 0.5rem;">📅 Reading Schedule</h5>
+            <h5 style="color: #fbbf24; margin-bottom: 0.5rem;">Reading Schedule</h5>
             <ul style="list-style: none; padding: 0; font-size: 0.9rem; margin: 0;">
               <li style="margin-bottom: 0.5rem;"><strong>Week 1:</strong> Chapters 1 - 9</li>
               <li style="margin-bottom: 0.5rem;"><strong>Week 2:</strong> Chapters 10 - 18</li>
@@ -127,8 +105,8 @@
         <!-- Literary Quiz Challenge Card -->
         <div class="glass-card" style="border-color: rgba(56, 189, 248, 0.4); text-align: center; display: flex; flex-direction: column; justify-content: space-between;">
           <div>
-            <h3 style="color: #38bdf8; margin-bottom: 0.5rem;">💡 Book Club Quiz Challenge</h3>
-            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Test your knowledge on public domain classics and earn +50 Dragon Coins & the 📜 Scholar Badge!</p>
+            <h3 style="color: #38bdf8; margin-bottom: 0.5rem;">Book Club Quiz Challenge</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Test your knowledge on public domain classics and earn +50 Dragon Coins & the Scholar Badge!</p>
             
             <div id="book-quiz-box" style="background: rgba(11, 14, 23, 0.6); padding: 1.25rem; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); text-align: left;">
               <h4 id="quiz-question-text" style="color: #fff; font-size: 1rem; margin-bottom: 1rem;">1. Who created the famous detective Sherlock Holmes?</h4>

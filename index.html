@@ -48,40 +48,35 @@
 </head>
 
 <body>
-  <div onclick="window.findEgg('egg1', this)" style="position:absolute; bottom:50px; left:10px; font-size:0.5rem; cursor:pointer; z-index:10; opacity:0.1;">🪙</div>
-
   <!-- UNIFIED SLEEK TOP NAVBAR -->
   <nav class="top-nav">
     <a href="index.html" class="top-nav-logo">
-      <span style="font-size: 1.8rem; filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.5));">🐉</span>
-      <span class="gradient-text">DrAg0n</span>
+      <span class="gradient-text" style="font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em;">DRAG0N</span>
     </a>
     <div class="top-nav-links">
-      <a href="index.html" class="top-nav-link active">🏠 Home</a>
-      <a href="games.html" class="top-nav-link">🕹️ Arcade</a>
-      <a href="club.html" class="top-nav-link">📚 Books & Club</a>
-      <a href="room.html" class="top-nav-link">🛋️ Pet Room</a>
-      <a href="space-game.html" class="top-nav-link">🚀 Space Explorer</a>
-      <a href="fc24-squad-builder.html" class="top-nav-link">⚽ Squad Builder</a>
-      <a href="chat.html" class="top-nav-link">💬 Chat</a>
+      <a href="index.html" class="top-nav-link active">Home</a>
+      <a href="games.html" class="top-nav-link">Arcade</a>
+      <a href="club.html" class="top-nav-link">Books & Club</a>
+      <a href="room.html" class="top-nav-link">Pet Room</a>
+      <a href="space-game.html" class="top-nav-link">Space Explorer</a>
+      <a href="fc24-squad-builder.html" class="top-nav-link">Squad Builder</a>
+      <a href="chat.html" class="top-nav-link">Chat</a>
     </div>
     <div class="top-nav-actions">
-      <a href="shop.html" style="background: linear-gradient(135deg, #eab308, #f59e0b); padding: 7px 16px; border-radius: 20px; font-weight: bold; color: #0f172a; text-decoration: none; font-size: 0.85rem; box-shadow: 0 4px 15px rgba(234,179,8,0.3); display: flex; align-items: center; gap: 4px;">🛒 Shop</a>
+      <a href="shop.html" style="background: linear-gradient(135deg, #eab308, #f59e0b); padding: 7px 18px; border-radius: 20px; font-weight: 800; color: #0f172a; text-decoration: none; font-size: 0.85rem; box-shadow: 0 4px 15px rgba(234,179,8,0.3);">Shop</a>
       <div id="profile-widget" class="profile-pill">
-        <span id="pw-avatar" style="font-size: 1.2rem;">👤</span>
         <div style="display: flex; flex-direction: column;">
           <span id="pw-name" style="font-weight: bold; color: var(--accent); font-size: 0.85rem;">Profile</span>
           <span id="pw-dc" style="color: #eab308; font-size: 0.75rem; font-weight: bold;">0 DC</span>
         </div>
       </div>
-      <div id="theme-toggle" style="font-size: 1.2rem; cursor: pointer; background: rgba(255,255,255,0.08); border-radius: 50%; border: 1px solid var(--border); width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">🌙</div>
     </div>
   </nav>
 
   <!-- HERO HEADER -->
   <header style="padding: 3.5rem 1rem 2.5rem; text-align: center; position: relative;">
     <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); padding: 0.4rem 1.25rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 800; color: #38bdf8; letter-spacing: 0.08em; margin-bottom: 1.2rem; box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);">
-      ✨ NEXT-GEN INTERACTIVE WORLD 2026
+      NEXT-GEN INTERACTIVE WORLD 2026
     </div>
     
     <h1 style="font-size: clamp(2.8rem, 6vw, 4.6rem); font-weight: 800; margin-bottom: 0.8rem; letter-spacing: -0.04em;">
@@ -95,12 +90,12 @@
     <div style="display: flex; gap: 1rem; justify-content: center; align-items: center; flex-wrap: wrap; margin-bottom: 2rem;">
       <a href="games.html" style="text-decoration: none;">
         <button style="background: linear-gradient(135deg, #38bdf8, #818cf8); color: #0b0e17; font-weight: 800; padding: 0.85rem 2rem; font-size: 1rem;">
-          🕹️ Launch Arcade
+          Launch Arcade
         </button>
       </a>
       <a href="room.html" style="text-decoration: none;">
         <button style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #fff; font-weight: 700; padding: 0.85rem 2rem; font-size: 1rem;">
-          🛋️ Visit Dragon Pet
+          Visit Dragon Pet
         </button>
       </a>
     </div>
@@ -115,13 +110,13 @@
     <!-- SEGMENTED DASHBOARD TAB CONTROL -->
     <div style="display: flex; justify-content: center; gap: 0.6rem; margin-bottom: 2.5rem; flex-wrap: wrap;" id="dashboard-tab-bar">
       <button onclick="switchTab('apps')" id="tab-btn-apps" class="tab-pill-active" style="padding: 0.65rem 1.6rem; border-radius: 9999px; font-weight: 800; font-size: 0.9rem; cursor: pointer;">
-        🚀 Apps & Playgrounds
+        Apps & Playgrounds
       </button>
       <button onclick="switchTab('studio')" id="tab-btn-studio" class="tab-pill-inactive" style="padding: 0.65rem 1.6rem; border-radius: 9999px; font-weight: 800; font-size: 0.9rem; cursor: pointer;">
-        🎨 Creative Studio & Gallery
+        Creative Studio & Gallery
       </button>
       <button onclick="switchTab('world')" id="tab-btn-world" class="tab-pill-inactive" style="padding: 0.65rem 1.6rem; border-radius: 9999px; font-weight: 800; font-size: 0.9rem; cursor: pointer;">
-        🌟 About Me & Features
+        About Me & Features
       </button>
     </div>
 
@@ -131,7 +126,6 @@
         
         <a href="games.html" class="glass-card" style="text-decoration: none; text-align: left; padding: 1.75rem; border-color: rgba(56, 189, 248, 0.3);">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-            <div style="font-size: 2.8rem; filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.4));">🕹️</div>
             <span style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.05em;">ARCADE</span>
           </div>
           <h3 style="font-size: 1.4rem; margin-bottom: 0.4rem; color: #fff;">Arcade Hub</h3>
@@ -140,7 +134,6 @@
 
         <a href="room.html" class="glass-card" style="text-decoration: none; text-align: left; padding: 1.75rem; border-color: rgba(236, 72, 153, 0.3);">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-            <div style="font-size: 2.8rem; filter: drop-shadow(0 0 12px rgba(236, 72, 153, 0.4));">🛋️</div>
             <span style="background: rgba(236, 72, 153, 0.15); color: #f472b6; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.05em;">VIRTUAL PET</span>
           </div>
           <h3 style="font-size: 1.4rem; margin-bottom: 0.4rem; color: #fff;">Pet Room</h3>
@@ -149,7 +142,6 @@
 
         <a href="space-game.html" class="glass-card" style="text-decoration: none; text-align: left; padding: 1.75rem; border-color: rgba(168, 85, 247, 0.3);">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-            <div style="font-size: 2.8rem; filter: drop-shadow(0 0 12px rgba(168, 85, 247, 0.4));">🚀</div>
             <span style="background: rgba(168, 85, 247, 0.15); color: #c084fc; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.05em;">3D UNIVERSE</span>
           </div>
           <h3 style="font-size: 1.4rem; margin-bottom: 0.4rem; color: #fff;">Space Explorer</h3>
@@ -158,7 +150,6 @@
 
         <a href="fc24-squad-builder.html" class="glass-card" style="text-decoration: none; text-align: left; padding: 1.75rem; border-color: rgba(251, 191, 36, 0.3);">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-            <div style="font-size: 2.8rem; filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.4));">⚽</div>
             <span style="background: rgba(251, 191, 36, 0.15); color: #fbbf24; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.05em;">SPORTS</span>
           </div>
           <h3 style="font-size: 1.4rem; margin-bottom: 0.4rem; color: #fff;">FC24 Squad Builder</h3>
@@ -167,7 +158,6 @@
 
         <a href="club.html" class="glass-card" style="text-decoration: none; text-align: left; padding: 1.75rem; border-color: rgba(52, 211, 153, 0.3);">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-            <div style="font-size: 2.8rem; filter: drop-shadow(0 0 12px rgba(52, 211, 153, 0.4));">📚</div>
             <span style="background: rgba(52, 211, 153, 0.15); color: #34d399; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.05em;">LIBRARY</span>
           </div>
           <h3 style="font-size: 1.4rem; margin-bottom: 0.4rem; color: #fff;">Book Club</h3>
@@ -176,7 +166,6 @@
 
         <a href="chat.html" class="glass-card" style="text-decoration: none; text-align: left; padding: 1.75rem; border-color: rgba(129, 140, 248, 0.3);">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-            <div style="font-size: 2.8rem; filter: drop-shadow(0 0 12px rgba(129, 140, 248, 0.4));">💬</div>
             <span style="background: rgba(129, 140, 248, 0.15); color: #818cf8; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.05em;">COMMUNITY</span>
           </div>
           <h3 style="font-size: 1.4rem; margin-bottom: 0.4rem; color: #fff;">Animal Chat</h3>
@@ -185,7 +174,6 @@
 
         <a href="shop.html" class="glass-card" style="text-decoration: none; text-align: left; padding: 1.75rem; border-color: rgba(245, 158, 11, 0.3);">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-            <div style="font-size: 2.8rem; filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.4));">🛒</div>
             <span style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.05em;">STORE</span>
           </div>
           <h3 style="font-size: 1.4rem; margin-bottom: 0.4rem; color: #fff;">Dragon Shop</h3>
@@ -194,7 +182,6 @@
 
         <a href="planet.html" class="glass-card" style="text-decoration: none; text-align: left; padding: 1.75rem; border-color: rgba(14, 165, 233, 0.3);">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-            <div style="font-size: 2.8rem; filter: drop-shadow(0 0 12px rgba(14, 165, 233, 0.4));">🪐</div>
             <span style="background: rgba(14, 165, 233, 0.15); color: #38bdf8; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.05em;">WORLD</span>
           </div>
           <h3 style="font-size: 1.4rem; margin-bottom: 0.4rem; color: #fff;">My Planet</h3>
@@ -209,12 +196,12 @@
       
       <!-- GLOBAL WHITEBOARD -->
       <div class="glass-card" style="margin-bottom: 3rem; text-align: center; border-color: rgba(56, 189, 248, 0.3);">
-        <h2 style="font-size: 2rem; margin-bottom: 0.5rem;"><span class="gradient-text">🎨 Live Canvas Whiteboard</span></h2>
+        <h2 style="font-size: 2rem; margin-bottom: 0.5rem;"><span class="gradient-text">Live Canvas Whiteboard</span></h2>
         <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Draw together in real-time! All strokes sync across users live.</p>
         <canvas id="whiteboard-canvas" width="700" height="340" style="background: rgba(11, 14, 23, 0.8); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; cursor: crosshair; touch-action: none; max-width:100%; box-shadow: inset 0 0 20px rgba(0,0,0,0.6);"></canvas>
         <div style="margin-top: 1rem; display: flex; justify-content: center; align-items: center; gap: 1rem; flex-wrap: wrap;">
           <label style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted);">Brush Color: <input type="color" id="wb-color" value="#38bdf8" style="width: 45px; height: 32px; border:none; cursor:pointer; vertical-align: middle; border-radius: 6px;"></label>
-          <button onclick="document.getElementById('whiteboard-canvas').getContext('2d').clearRect(0,0,700,340); if(typeof firebase !== 'undefined') firebase.database().ref('whiteboard').remove();" style="padding: 0.5rem 1.2rem; font-size: 0.85rem;">Clear Canvas 🧹</button>
+          <button onclick="document.getElementById('whiteboard-canvas').getContext('2d').clearRect(0,0,700,340); if(typeof firebase !== 'undefined') firebase.database().ref('whiteboard').remove();" style="padding: 0.5rem 1.2rem; font-size: 0.85rem;">Clear Canvas</button>
         </div>
       </div>
 
@@ -238,18 +225,18 @@
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
 
         <div class="glass-card" style="border-color: rgba(168, 85, 247, 0.3);">
-          <h3 style="color: #c084fc; font-size: 1.4rem; margin-bottom: 1rem;">📚 Recommended Reading</h3>
+          <h3 style="color: #c084fc; font-size: 1.4rem; margin-bottom: 1rem;">Recommended Reading</h3>
           <ul style="list-style-type: none; padding-left: 0;">
-            <li style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-weight: 600;">📖 Hidden World of Changers</li>
-            <li style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-weight: 600;">⚡ Percy Jackson Series</li>
-            <li style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-weight: 600;">🐶 Dogman Series</li>
-            <li style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-weight: 600;">❓ Why? 1,111 Answers to Everything</li>
-            <li style="padding: 10px 0; font-weight: 600;">💎 Amulet Series</li>
+            <li style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-weight: 600;">Hidden World of Changers</li>
+            <li style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-weight: 600;">Percy Jackson Series</li>
+            <li style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-weight: 600;">Dogman Series</li>
+            <li style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-weight: 600;">Why? 1,111 Answers to Everything</li>
+            <li style="padding: 10px 0; font-weight: 600;">Amulet Series</li>
           </ul>
         </div>
 
         <div class="glass-card" style="border-color: rgba(56, 189, 248, 0.3);">
-          <h3 style="color: #38bdf8; font-size: 1.4rem; margin-bottom: 1rem;">✨ Profile Attributes</h3>
+          <h3 style="color: #38bdf8; font-size: 1.4rem; margin-bottom: 1rem;">Profile Attributes</h3>
           <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1.5rem;">
             <span class="badge" style="background: linear-gradient(135deg, #f59e0b, #d97706);">Coins</span>
             <span class="badge" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">Loyal</span>
@@ -275,7 +262,7 @@
 
     <!-- FOOTER SPONSOR / ADVERT -->
     <div class="glass-card" style="text-align: center; margin-top: 3rem; margin-bottom: 3rem; background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(11, 14, 23, 0.4)); border-color: rgba(34, 197, 94, 0.3);">
-      <h3 style="color: #4ade80; font-size: 1.4rem; margin-bottom: 0.5rem;">🌱 Spotlight</h3>
+      <h3 style="color: #4ade80; font-size: 1.4rem; margin-bottom: 0.5rem;">Spotlight</h3>
       <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto 0.5rem;">Dedicated to companies harnessing nature's bounty to make the world a better place.</p>
       <p style="font-weight: 800; font-size: 1.2rem; color: #ffffff; margin: 0;">Choose natural. Choose Sasya.</p>
     </div>

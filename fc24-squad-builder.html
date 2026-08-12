@@ -1132,7 +1132,7 @@
       <!-- Interactive 3D Pitch Console (fills screen) -->
       <div style="display:flex; flex-direction:column; align-items:center; position:relative; background:rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.05); padding:0.8rem; border-radius:8px; flex:1; overflow:hidden;">
         <div style="display:flex; justify-content:space-between; width:100%; font-size:0.8rem; color:#fbbf24; font-weight:700; margin-bottom:4px; padding:0 4px;">
-          <span id="gameplay-title-mode">🎮 3D FULLSCREEN SOCCER GAMEPLAY (FIFA MODE)</span>
+          <span id="gameplay-title-mode">3D FULLSCREEN SOCCER GAMEPLAY (FIFA MODE)</span>
           <span id="match-timer-display" style="color:#d946ef; font-family:monospace; font-size:0.95rem; font-weight:800;">TIME: 0:00 (1')</span>
         </div>
         
@@ -1146,17 +1146,17 @@
         </div>
         
         <div style="margin-top:8px; font-size:0.7rem; color:var(--text-gray); text-align:center; line-height:1.4; display:flex; justify-content:center; gap:15px; flex-wrap: wrap;">
-          <span>🕹️ <b>Move</b>: WASD / Arrows</span>
-          <span>🎯 <b>Pass</b>: Click / press <b>/</b></span>
-          <span>⚡ <b>Shoot</b>: Click Goal / press <b>.</b></span>
-          <span>🛡️ <b>Shield</b>: Hold <b>,</b></span>
-          <span>⚔️ <b>Tackle</b>: press <b>M</b></span>
-          <span>✨ <b>Skills</b>: press <b>Q</b> (Roulette), <b>E</b> (Rainbow Flick), <b>C</b> (Stepover)</span>
+          <span><b>Move</b>: WASD / Arrows</span>
+          <span><b>Pass</b>: Click / press <b>/</b></span>
+          <span><b>Shoot</b>: Click Goal / press <b>.</b></span>
+          <span><b>Shield</b>: Hold <b>,</b></span>
+          <span><b>Tackle</b>: press <b>M</b></span>
+          <span><b>Skills</b>: press <b>Q</b> (Roulette), <b>E</b> (Rainbow Flick), <b>C</b> (Stepover)</span>
         </div>
       </div>
       
       <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:0.8rem;">
-        <button id="start-match-btn" onclick="startSimulatedMatch()">Kick Off ⚽</button>
+        <button id="start-match-btn" onclick="startSimulatedMatch()">Kick Off</button>
         <button id="close-match-btn" class="secondary-btn" onclick="closeMatchCenter()" style="display:none;">Leave Match Center</button>
       </div>
     </div>
@@ -1165,28 +1165,25 @@
   <!-- UNIFIED SLEEK TOP NAVBAR -->
   <nav class="top-nav">
     <a href="index.html" class="top-nav-logo">
-      <span style="font-size: 1.8rem; filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.5));">🐉</span>
-      <span class="gradient-text">DrAg0n</span>
+      <span class="gradient-text" style="font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em;">DRAG0N</span>
     </a>
     <div class="top-nav-links">
-      <a href="index.html" class="top-nav-link">🏠 Home</a>
-      <a href="games.html" class="top-nav-link">🕹️ Arcade</a>
-      <a href="club.html" class="top-nav-link">📚 Books & Club</a>
-      <a href="room.html" class="top-nav-link">🛋️ Pet Room</a>
-      <a href="space-game.html" class="top-nav-link">🚀 Space Explorer</a>
-      <a href="fc24-squad-builder.html" class="top-nav-link active">⚽ Squad Builder</a>
-      <a href="chat.html" class="top-nav-link">💬 Chat</a>
+      <a href="index.html" class="top-nav-link">Home</a>
+      <a href="games.html" class="top-nav-link">Arcade</a>
+      <a href="club.html" class="top-nav-link">Books & Club</a>
+      <a href="room.html" class="top-nav-link">Pet Room</a>
+      <a href="space-game.html" class="top-nav-link">Space Explorer</a>
+      <a href="fc24-squad-builder.html" class="top-nav-link active">Squad Builder</a>
+      <a href="chat.html" class="top-nav-link">Chat</a>
     </div>
     <div class="top-nav-actions">
-      <a href="shop.html" style="background: linear-gradient(135deg, #eab308, #f59e0b); padding: 7px 16px; border-radius: 20px; font-weight: bold; color: #0f172a; text-decoration: none; font-size: 0.85rem; box-shadow: 0 4px 15px rgba(234,179,8,0.3); display: flex; align-items: center; gap: 4px;">🛒 Shop</a>
+      <a href="shop.html" style="background: linear-gradient(135deg, #eab308, #f59e0b); padding: 7px 18px; border-radius: 20px; font-weight: 800; color: #0f172a; text-decoration: none; font-size: 0.85rem; box-shadow: 0 4px 15px rgba(234,179,8,0.3);">Shop</a>
       <div id="profile-widget" class="profile-pill">
-        <span id="pw-avatar" style="font-size: 1.2rem;">👤</span>
         <div style="display: flex; flex-direction: column;">
           <span id="pw-name" style="font-weight: bold; color: var(--accent); font-size: 0.85rem;">Profile</span>
           <span id="pw-dc" style="color: #eab308; font-size: 0.75rem; font-weight: bold;">0 DC</span>
         </div>
       </div>
-      <div id="theme-toggle" style="font-size: 1.2rem; cursor: pointer; background: rgba(255,255,255,0.08); border-radius: 50%; border: 1px solid var(--border); width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">🌙</div>
     </div>
   </nav>
 
@@ -1198,12 +1195,12 @@
     
     <div class="header-controls">
       <div style="display:flex; align-items:center; gap:8px; font-weight:800; background:rgba(255,255,255,0.05); padding:0.5rem 1rem; border-radius:8px; border:1px solid rgba(255,255,255,0.1);">
-        <span style="color:#fbbf24;">🪙 Dragonbux:</span>
+        <span style="color:#fbbf24;">Dragonbux:</span>
         <span id="dragonbux-val" style="color:#fff;">150</span>
       </div>
-      <button class="secondary-btn" id="launch-match-btn" onclick="openMatchCenter()">🎮 Play Match</button>
-      <button id="sound-mute-btn" class="secondary-btn" onclick="toggleSoundMute()">🔊 Sound On</button>
-      <button id="open-pack-btn" onclick="openPack()">🎁 Open Legends Pack (100 DB)</button>
+      <button class="secondary-btn" id="launch-match-btn" onclick="openMatchCenter()">Play Match</button>
+      <button id="sound-mute-btn" class="secondary-btn" onclick="toggleSoundMute()">Sound On</button>
+      <button id="open-pack-btn" onclick="openPack()">Open Legends Pack (100 DB)</button>
     </div>
   </header>
 

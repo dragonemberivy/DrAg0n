@@ -10,40 +10,35 @@
 </head>
 
 <body>
-  <div onclick="window.findEgg('egg2', this)" style="position:absolute; top:300px; right:10px; font-size:0.5rem; cursor:pointer; z-index:10; opacity:0.1;">🪙</div>
-
   <!-- UNIFIED SLEEK TOP NAVBAR -->
   <nav class="top-nav">
     <a href="index.html" class="top-nav-logo">
-      <span style="font-size: 1.8rem; filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.5));">🐉</span>
-      <span class="gradient-text">DrAg0n</span>
+      <span class="gradient-text" style="font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em;">DRAG0N</span>
     </a>
     <div class="top-nav-links">
-      <a href="index.html" class="top-nav-link">🏠 Home</a>
-      <a href="games.html" class="top-nav-link active">🕹️ Arcade</a>
-      <a href="club.html" class="top-nav-link">📚 Books & Club</a>
-      <a href="room.html" class="top-nav-link">🛋️ Pet Room</a>
-      <a href="space-game.html" class="top-nav-link">🚀 Space Explorer</a>
-      <a href="fc24-squad-builder.html" class="top-nav-link">⚽ Squad Builder</a>
-      <a href="chat.html" class="top-nav-link">💬 Chat</a>
+      <a href="index.html" class="top-nav-link">Home</a>
+      <a href="games.html" class="top-nav-link active">Arcade</a>
+      <a href="club.html" class="top-nav-link">Books & Club</a>
+      <a href="room.html" class="top-nav-link">Pet Room</a>
+      <a href="space-game.html" class="top-nav-link">Space Explorer</a>
+      <a href="fc24-squad-builder.html" class="top-nav-link">Squad Builder</a>
+      <a href="chat.html" class="top-nav-link">Chat</a>
     </div>
     <div class="top-nav-actions">
-      <a href="shop.html" style="background: linear-gradient(135deg, #eab308, #f59e0b); padding: 7px 16px; border-radius: 20px; font-weight: bold; color: #0f172a; text-decoration: none; font-size: 0.85rem; box-shadow: 0 4px 15px rgba(234,179,8,0.3); display: flex; align-items: center; gap: 4px;">🛒 Shop</a>
+      <a href="shop.html" style="background: linear-gradient(135deg, #eab308, #f59e0b); padding: 7px 18px; border-radius: 20px; font-weight: 800; color: #0f172a; text-decoration: none; font-size: 0.85rem; box-shadow: 0 4px 15px rgba(234,179,8,0.3);">Shop</a>
       <div id="profile-widget" class="profile-pill">
-        <span id="pw-avatar" style="font-size: 1.2rem;">👤</span>
         <div style="display: flex; flex-direction: column;">
           <span id="pw-name" style="font-weight: bold; color: var(--accent); font-size: 0.85rem;">Profile</span>
           <span id="pw-dc" style="color: #eab308; font-size: 0.75rem; font-weight: bold;">0 DC</span>
         </div>
       </div>
-      <div id="theme-toggle" style="font-size: 1.2rem; cursor: pointer; background: rgba(255,255,255,0.08); border-radius: 50%; border: 1px solid var(--border); width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">🌙</div>
     </div>
   </nav>
 
   <!-- HEADER -->
   <header style="padding: 3rem 1rem 2rem; text-align: center; position: relative;">
     <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); padding: 0.4rem 1.25rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 800; color: #38bdf8; letter-spacing: 0.08em; margin-bottom: 1.2rem; box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);">
-      🕹️ RETRO & NEXT-GEN MINI GAMES
+      RETRO & NEXT-GEN MINI GAMES
     </div>
     <h1 style="font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 800; margin-bottom: 0.8rem;"><span class="gradient-text">Arcade Realm</span></h1>
     <p style="font-size: 1.15rem; color: var(--text-muted); max-width: 620px; margin: 0 auto; line-height: 1.6;">
@@ -53,10 +48,10 @@
 
     <!-- CATEGORY FILTER PILLS -->
     <div style="display: flex; justify-content: center; gap: 0.6rem; margin-bottom: 2.5rem; flex-wrap: wrap;" id="games-filter-bar">
-      <button onclick="filterGames('all')" id="gtab-all" class="tab-pill-active" style="padding: 0.6rem 1.5rem; font-size: 0.85rem; border-radius: 9999px; font-weight: 800; cursor: pointer;">🎮 All Games</button>
-      <button onclick="filterGames('mini')" id="gtab-mini" class="tab-pill-inactive" style="padding: 0.6rem 1.5rem; font-size: 0.85rem; border-radius: 9999px; font-weight: 800; cursor: pointer;">🐉 Arcade Classics</button>
-      <button onclick="filterGames('multi')" id="gtab-multi" class="tab-pill-inactive" style="padding: 0.6rem 1.5rem; font-size: 0.85rem; border-radius: 9999px; font-weight: 800; cursor: pointer;">⚔️ Multiplayer & Squads</button>
-      <button onclick="filterGames('epic')" id="gtab-epic" class="tab-pill-inactive" style="padding: 0.6rem 1.5rem; font-size: 0.85rem; border-radius: 9999px; font-weight: 800; cursor: pointer;">🔥 Epic Action & Story</button>
+      <button onclick="filterGames('all')" id="gtab-all" class="tab-pill-active" style="padding: 0.6rem 1.5rem; font-size: 0.85rem; border-radius: 9999px; font-weight: 800; cursor: pointer;">All Games</button>
+      <button onclick="filterGames('mini')" id="gtab-mini" class="tab-pill-inactive" style="padding: 0.6rem 1.5rem; font-size: 0.85rem; border-radius: 9999px; font-weight: 800; cursor: pointer;">Arcade Classics</button>
+      <button onclick="filterGames('multi')" id="gtab-multi" class="tab-pill-inactive" style="padding: 0.6rem 1.5rem; font-size: 0.85rem; border-radius: 9999px; font-weight: 800; cursor: pointer;">Multiplayer & Squads</button>
+      <button onclick="filterGames('epic')" id="gtab-epic" class="tab-pill-inactive" style="padding: 0.6rem 1.5rem; font-size: 0.85rem; border-radius: 9999px; font-weight: 800; cursor: pointer;">Epic Action & Story</button>
     </div>
 
     <!-- GAMES SECTION -->
@@ -65,13 +60,13 @@
       <!-- MINI GAMES & ARCADE CLASSICS -->
       <div class="games-grid gcat-mini" style="margin-bottom: 2rem;">
         <div class="glass-card" style="border-color: rgba(14, 165, 233, 0.4);">
-          <h3 style="color: #0ea5e9;">🐉 Flappy Dragon</h3>
+          <h3 style="color: #0ea5e9;">Flappy Dragon</h3>
           <p style="color: var(--text-muted); font-size: 0.9rem;">Fly high and earn XP!</p>
           <div id="flappy-game-container" style="margin-top: 10px; display:flex; justify-content:center;"></div>
         </div>
 
         <div class="glass-card" style="border-color: rgba(236, 72, 153, 0.4);">
-          <h3 style="color: #ec4899;">🐍 Neon Snake</h3>
+          <h3 style="color: #ec4899;">Neon Snake</h3>
           <p style="color: var(--text-muted); font-size: 0.9rem;">Classic Snake with a modern twist!</p>
           <div id="snake-game-container" style="margin-top: 1rem;"></div>
         </div>
@@ -103,20 +98,19 @@
       <!-- MULTIPLAYER & SQUAD BUILDER -->
       <div class="gcat-multi" style="margin-bottom: 2rem;">
         <div class="glass-card" style="margin-bottom: 2rem; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2.5rem; text-align: center; border-color: rgba(251, 191, 36, 0.4); background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(217, 70, 239, 0.1));">
-          <div style="font-size: 3rem; margin-bottom: 0.5rem; filter: drop-shadow(0 0 10px rgba(251,191,36,0.5));">🏆</div>
           <h3 style="font-size: 2.2rem; margin-bottom: 0.5rem; background: linear-gradient(135deg, #fbbf24 0%, #d946ef 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-style: italic;">FC 24 Ultimate Squad Builder</h3>
           <p style="color: var(--text-muted); max-width: 600px; margin-bottom: 1.5rem;">
             Open packs, unlock legendary footballers and modern stars, build chemistry links, and create your ultimate 4-3-3 squad builder dream team!
           </p>
           <a href="fc24-squad-builder.html" style="text-decoration: none;">
             <button style="font-size: 1.1rem; padding: 0.75rem 2.5rem; border-radius: 50px; background: linear-gradient(135deg, #fbbf24, #d946ef); box-shadow: 0 4px 20px rgba(251,191,36,0.3); border: none; font-weight: bold; cursor: pointer; color: white;">
-              Launch Squad Builder ⚽
+              Launch Squad Builder
             </button>
           </a>
         </div>
 
         <div class="glass-card" style="border-color: rgba(99, 102, 241, 0.4); margin-bottom: 2rem;">
-          <h3 style="color: #6366f1;">⚔️ Multiplayer Tic-Tac-Toe</h3>
+          <h3 style="color: #6366f1;">Multiplayer Tic-Tac-Toe</h3>
           <p style="color: var(--text-muted); font-size: 0.9rem;">Play online against others!</p>
           
           <div id="ttt-lobby-ui" style="margin-top: 10px;">

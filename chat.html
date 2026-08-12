@@ -10,40 +10,35 @@
 </head>
 
 <body>
-  <div onclick="window.findEgg('egg4', this)" style="position:absolute; bottom:150px; right:50px; font-size:0.5rem; cursor:pointer; z-index:10; opacity:0.1;">🪙</div>
-
   <!-- UNIFIED SLEEK TOP NAVBAR -->
   <nav class="top-nav">
     <a href="index.html" class="top-nav-logo">
-      <span style="font-size: 1.8rem; filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.5));">🐉</span>
-      <span class="gradient-text">DrAg0n</span>
+      <span class="gradient-text" style="font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em;">DRAG0N</span>
     </a>
     <div class="top-nav-links">
-      <a href="index.html" class="top-nav-link">🏠 Home</a>
-      <a href="games.html" class="top-nav-link">🕹️ Arcade</a>
-      <a href="club.html" class="top-nav-link">📚 Books & Club</a>
-      <a href="room.html" class="top-nav-link">🛋️ Pet Room</a>
-      <a href="space-game.html" class="top-nav-link">🚀 Space Explorer</a>
-      <a href="fc24-squad-builder.html" class="top-nav-link">⚽ Squad Builder</a>
-      <a href="chat.html" class="top-nav-link active">💬 Chat</a>
+      <a href="index.html" class="top-nav-link">Home</a>
+      <a href="games.html" class="top-nav-link">Arcade</a>
+      <a href="club.html" class="top-nav-link">Books & Club</a>
+      <a href="room.html" class="top-nav-link">Pet Room</a>
+      <a href="space-game.html" class="top-nav-link">Space Explorer</a>
+      <a href="fc24-squad-builder.html" class="top-nav-link">Squad Builder</a>
+      <a href="chat.html" class="top-nav-link active">Chat</a>
     </div>
     <div class="top-nav-actions">
-      <a href="shop.html" style="background: linear-gradient(135deg, #eab308, #f59e0b); padding: 7px 16px; border-radius: 20px; font-weight: bold; color: #0f172a; text-decoration: none; font-size: 0.85rem; box-shadow: 0 4px 15px rgba(234,179,8,0.3); display: flex; align-items: center; gap: 4px;">🛒 Shop</a>
+      <a href="shop.html" style="background: linear-gradient(135deg, #eab308, #f59e0b); padding: 7px 18px; border-radius: 20px; font-weight: 800; color: #0f172a; text-decoration: none; font-size: 0.85rem; box-shadow: 0 4px 15px rgba(234,179,8,0.3);">Shop</a>
       <div id="profile-widget" class="profile-pill">
-        <span id="pw-avatar" style="font-size: 1.2rem;">👤</span>
         <div style="display: flex; flex-direction: column;">
           <span id="pw-name" style="font-weight: bold; color: var(--accent); font-size: 0.85rem;">Profile</span>
           <span id="pw-dc" style="color: #eab308; font-size: 0.75rem; font-weight: bold;">0 DC</span>
         </div>
       </div>
-      <div id="theme-toggle" style="font-size: 1.2rem; cursor: pointer; background: rgba(255,255,255,0.08); border-radius: 50%; border: 1px solid var(--border); width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">🌙</div>
     </div>
   </nav>
 
   <!-- HEADER -->
   <header style="padding: 3rem 1rem 2rem; text-align: center; position: relative;">
     <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(129, 140, 248, 0.1); border: 1px solid rgba(129, 140, 248, 0.3); padding: 0.4rem 1.25rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 800; color: #818cf8; letter-spacing: 0.08em; margin-bottom: 1.2rem; box-shadow: 0 0 20px rgba(129, 140, 248, 0.2);">
-      💬 LIVE ANIMAL CHAT CHANNELS
+      LIVE ANIMAL CHAT CHANNELS
     </div>
     <h1 style="font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 800; margin-bottom: 0.8rem;"><span class="gradient-text">Animal Chat</span></h1>
     <p style="font-size: 1.15rem; color: var(--text-muted); max-width: 600px; margin: 0 auto; line-height: 1.6;">
@@ -70,15 +65,15 @@
         <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
           <select id="chat-room-select" style="flex:1; margin:0;">
             <option value="" disabled selected>Select Room Channel</option>
-            <option value="Forest">🌲 Forest Channel</option>
-            <option value="Cave">🕳️ Cave Channel</option>
-            <option value="Ocean">🌊 Ocean Channel</option>
+            <option value="Forest">Forest Channel</option>
+            <option value="Cave">Cave Channel</option>
+            <option value="Ocean">Ocean Channel</option>
           </select>
           <select id="chat-profile-select" style="flex:1; margin:0;">
-            <option value="Dragon" selected>🐲 Dragon (Default)</option>
-            <option value="Cat">🐱 Cat</option>
-            <option value="Dog">🐶 Dog</option>
-            <option value="Kitsune">🦊 Kitsune</option>
+            <option value="Dragon" selected>Dragon (Default)</option>
+            <option value="Cat">Cat</option>
+            <option value="Dog">Dog</option>
+            <option value="Kitsune">Kitsune</option>
           </select>
         </div>
 
@@ -88,15 +83,15 @@
           </div>
         </div>
 
-        <!-- Quick Stickers & Action Chips -->
+        <!-- Quick Action Chips -->
         <div style="display: flex; gap: 0.4rem; overflow-x: auto; padding-bottom: 0.5rem; margin-bottom: 0.75rem;" id="chat-quick-stickers">
-          <button onclick="window.sendQuickSticker('🔥 Rawr Fire!')" style="padding: 0.3rem 0.7rem; font-size: 0.75rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 9999px; box-shadow: none;">🔥 Fire</button>
-          <button onclick="window.sendQuickSticker('🎉 Party Time!')" style="padding: 0.3rem 0.7rem; font-size: 0.75rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 9999px; box-shadow: none;">🎉 Party</button>
-          <button onclick="window.sendQuickSticker('🐉 Dragon Power!')" style="padding: 0.3rem 0.7rem; font-size: 0.75rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 9999px; box-shadow: none;">🐉 Dragon</button>
-          <button onclick="window.sendQuickSticker('💎 Sparkling Gem!')" style="padding: 0.3rem 0.7rem; font-size: 0.75rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 9999px; box-shadow: none;">💎 Gem</button>
-          <button onclick="window.sendQuickSticker('/roll')" style="padding: 0.3rem 0.7rem; font-size: 0.75rem; background: rgba(56,189,248,0.15); color: #38bdf8; border: 1px solid rgba(56,189,248,0.3); border-radius: 9999px; box-shadow: none;">🎲 Roll Die</button>
-          <button onclick="window.sendQuickSticker('/flip')" style="padding: 0.3rem 0.7rem; font-size: 0.75rem; background: rgba(251,191,36,0.15); color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); border-radius: 9999px; box-shadow: none;">🪙 Flip Coin</button>
-          <button onclick="window.sendQuickSticker('/joke')" style="padding: 0.3rem 0.7rem; font-size: 0.75rem; background: rgba(192,132,252,0.15); color: #c084fc; border: 1px solid rgba(192,132,252,0.3); border-radius: 9999px; box-shadow: none;">💡 Tell Joke</button>
+          <button onclick="window.sendQuickSticker('Rawr Fire!')" style="padding: 0.3rem 0.7rem; font-size: 0.75rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 9999px; box-shadow: none;">Fire</button>
+          <button onclick="window.sendQuickSticker('Party Time!')" style="padding: 0.3rem 0.7rem; font-size: 0.75rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 9999px; box-shadow: none;">Party</button>
+          <button onclick="window.sendQuickSticker('Dragon Power!')" style="padding: 0.3rem 0.7rem; font-size: 0.75rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 9999px; box-shadow: none;">Dragon</button>
+          <button onclick="window.sendQuickSticker('Sparkling Gem!')" style="padding: 0.3rem 0.7rem; font-size: 0.75rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 9999px; box-shadow: none;">Gem</button>
+          <button onclick="window.sendQuickSticker('/roll')" style="padding: 0.3rem 0.7rem; font-size: 0.75rem; background: rgba(56,189,248,0.15); color: #38bdf8; border: 1px solid rgba(56,189,248,0.3); border-radius: 9999px; box-shadow: none;">Roll Die</button>
+          <button onclick="window.sendQuickSticker('/flip')" style="padding: 0.3rem 0.7rem; font-size: 0.75rem; background: rgba(251,191,36,0.15); color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); border-radius: 9999px; box-shadow: none;">Flip Coin</button>
+          <button onclick="window.sendQuickSticker('/joke')" style="padding: 0.3rem 0.7rem; font-size: 0.75rem; background: rgba(192,132,252,0.15); color: #c084fc; border: 1px solid rgba(192,132,252,0.3); border-radius: 9999px; box-shadow: none;">Tell Joke</button>
         </div>
 
         <div style="display: flex; gap: 10px;">
