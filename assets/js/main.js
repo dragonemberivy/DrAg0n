@@ -1314,24 +1314,160 @@
     }
     window.addEventListener('load', applyBackground);
 
-    // EASTER EGG HUNT
+    // EASTER EGG & EMOJI SCAVENGER HUNT ENGINE
+    const DRINK_EMOJIS = ['🧋','🧃','🍵','🍵','🧃','🥤','🍹','🥤','🍹','🥤','🧃','🧃','🥤','🧃','🧃','🧋','🥤','🧃','🍵','🍹','🥤','🧃','🍹','🍹','🧋','🧃','🧃','🍵','🧋','🧋'];
+    const MONEY_EMOJIS = ['💸','💰','🤑','💸','🤑','🪙','🪙','🪙','🤑','🪙','💸','💰','💵','🤑','💵','🤑','💵','💸','💵','💰','🪙','💵','💵','💵','💸','💵','🤑','🪙','🪙','💸'];
+
+    function getLeftHuntState() {
+      let saved = JSON.parse(localStorage.getItem('drag0n_left_hunt') || 'null');
+      if (!saved || saved.length !== 30) {
+        saved = new Array(30).fill(false);
+        saved[0] = true; // Initial 1/30
+        localStorage.setItem('drag0n_left_hunt', JSON.stringify(saved));
+      }
+      return saved;
+    }
+
+    function getRightHuntState() {
+      let saved = JSON.parse(localStorage.getItem('drag0n_right_hunt') || 'null');
+      if (!saved || saved.length !== 30) {
+        saved = new Array(30).fill(false); // Initial 0/30
+        localStorage.setItem('drag0n_right_hunt', JSON.stringify(saved));
+      }
+      return saved;
+    }
+
+    window.toggleLeftHuntItem = function(idx) {
+      let state = getLeftHuntState();
+      state[idx] = !state[idx];
+      localStorage.setItem('drag0n_left_hunt', JSON.stringify(state));
+      if (state[idx] && window.addXP) window.addXP(20);
+      window.renderEmojiHuntModal();
+    };
+
+    window.toggleRightHuntItem = function(idx) {
+      let state = getRightHuntState();
+      state[idx] = !state[idx];
+      localStorage.setItem('drag0n_right_hunt', JSON.stringify(state));
+      if (state[idx] && window.addXP) window.addXP(20);
+      window.renderEmojiHuntModal();
+    };
+
+    window.redeemHuntCode = function(inputCode) {
+      const code = (inputCode || document.getElementById('hunt-code-input')?.value || '').trim().toLowerCase();
+      const feedbackEl = document.getElementById('hunt-code-feedback');
+      if (code === 'yay') {
+        let rightState = new Array(30).fill(true);
+        localStorage.setItem('drag0n_right_hunt', JSON.stringify(rightState));
+        let curDC = parseInt(localStorage.getItem('drag0n_dc') || '0');
+        localStorage.setItem('drag0n_dc', (curDC + 1000).toString());
+        if (window.addXP) window.addXP(500);
+        if (window.updateProfileWidget) window.updateProfileWidget();
+        if (feedbackEl) {
+          feedbackEl.style.color = '#34d399';
+          feedbackEl.innerText = '🎉 CODE "yay" ACCEPTED! Right Hunt Completed (30/30) & +1,000 Dragon Coins Awarded!';
+        }
+        window.renderEmojiHuntModal();
+      } else {
+        if (feedbackEl) {
+          feedbackEl.style.color = '#ef4444';
+          feedbackEl.innerText = '❌ Invalid code. Try code: yay';
+        }
+      }
+    };
+
+    window.openEmojiHuntModal = function() {
+      let modal = document.getElementById('emoji-hunt-modal');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'emoji-hunt-modal';
+        modal.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(5, 8, 20, 0.92); backdrop-filter:blur(16px); z-index:999999; display:flex; align-items:center; justify-content:center; padding:1rem;';
+        document.body.appendChild(modal);
+      }
+      modal.style.display = 'flex';
+      window.renderEmojiHuntModal();
+    };
+
+    window.closeEmojiHuntModal = function() {
+      const modal = document.getElementById('emoji-hunt-modal');
+      if (modal) modal.style.display = 'none';
+    };
+
+    window.renderEmojiHuntModal = function() {
+      const modal = document.getElementById('emoji-hunt-modal');
+      if (!modal) return;
+
+      const leftState = getLeftHuntState();
+      const rightState = getRightHuntState();
+
+      const leftCount = leftState.filter(Boolean).length;
+      const rightCount = rightState.filter(Boolean).length;
+
+      let leftGridHTML = '';
+      DRINK_EMOJIS.forEach((emo, i) => {
+        const found = leftState[i];
+        leftGridHTML += `<div onclick="window.toggleLeftHuntItem(${i})" style="width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; cursor:pointer; background:${found ? 'rgba(56, 189, 248, 0.25)' : 'rgba(255,255,255,0.04)'}; border:1px solid ${found ? '#38bdf8' : 'rgba(255,255,255,0.08)'}; opacity:${found ? '1' : '0.35'}; transition:all 0.2s;">${emo}</div>`;
+      });
+
+      let rightGridHTML = '';
+      MONEY_EMOJIS.forEach((emo, i) => {
+        const found = rightState[i];
+        rightGridHTML += `<div onclick="window.toggleRightHuntItem(${i})" style="width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; cursor:pointer; background:${found ? 'rgba(251, 191, 36, 0.25)' : 'rgba(255,255,255,0.04)'}; border:1px solid ${found ? '#fbbf24' : 'rgba(255,255,255,0.08)'}; opacity:${found ? '1' : '0.35'}; transition:all 0.2s;">${emo}</div>`;
+      });
+
+      modal.innerHTML = `
+        <div style="background:rgba(18, 24, 38, 0.95); border:1px solid rgba(56, 189, 248, 0.3); border-radius:24px; padding:2rem; max-width:850px; width:100%; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.6); position:relative;">
+          <button onclick="window.closeEmojiHuntModal()" style="position:absolute; top:20px; right:20px; background:rgba(255,255,255,0.08); border:none; color:#fff; width:36px; height:36px; border-radius:50%; font-size:1.2rem; cursor:pointer;">✕</button>
+          
+          <h2 style="font-size:2rem; margin-bottom:0.5rem; text-align:center; background:linear-gradient(135deg, #38bdf8, #fbbf24); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Emoji Scavenger Hunt</h2>
+          <p style="text-align:center; color:var(--text-muted); font-size:0.95rem; margin-bottom:1.8rem;">Click emojis to collect them or enter secret promo codes to complete the hunt!</p>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(340px, 1fr)); gap:1.5rem;">
+            
+            <!-- LEFT HUNT CARD -->
+            <div style="background:rgba(11, 14, 23, 0.6); border:1px solid rgba(56, 189, 248, 0.3); border-radius:18px; padding:1.5rem;">
+              <div style="display:flex; justify-space-between; align-items:center; margin-bottom:1rem;">
+                <h3 style="color:#38bdf8; font-size:1.3rem; margin:0;">Left Hunt: ${leftCount}/30</h3>
+                <span style="font-size:0.8rem; background:rgba(56, 189, 248, 0.15); color:#38bdf8; padding:3px 10px; border-radius:9999px; font-weight:800;">DRINKS</span>
+              </div>
+              <div style="display:grid; grid-template-columns:repeat(6, 1fr); gap:8px; margin-bottom:1rem;">
+                ${leftGridHTML}
+              </div>
+              <p style="font-size:0.8rem; color:var(--text-muted); margin:0;">Tap any drink to register collection (${leftCount}/30 completed).</p>
+            </div>
+
+            <!-- RIGHT HUNT CARD -->
+            <div style="background:rgba(11, 14, 23, 0.6); border:1px solid rgba(251, 191, 36, 0.3); border-radius:18px; padding:1.5rem;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h3 style="color:#fbbf24; font-size:1.3rem; margin:0;">Right Hunt: ${rightCount}/30</h3>
+                <span style="font-size:0.8rem; background:rgba(251, 191, 36, 0.15); color:#fbbf24; padding:3px 10px; border-radius:9999px; font-weight:800;">MONEY (Code: yay)</span>
+              </div>
+              <div style="display:grid; grid-template-columns:repeat(6, 1fr); gap:8px; margin-bottom:1rem;">
+                ${rightGridHTML}
+              </div>
+              
+              <!-- Code Redemption Box -->
+              <div style="display:flex; gap:8px; margin-top:1rem;">
+                <input type="text" id="hunt-code-input" placeholder="Enter code (e.g. yay)..." style="flex:1; padding:8px 12px; font-size:0.9rem; background:rgba(0,0,0,0.4); border:1px solid rgba(251, 191, 36, 0.4); border-radius:10px; color:#fff; margin:0;">
+                <button onclick="window.redeemHuntCode()" style="padding:8px 16px; font-weight:800; font-size:0.85rem; background:linear-gradient(135deg, #fbbf24, #f59e0b); color:#0f172a; border:none; border-radius:10px; cursor:pointer;">Redeem</button>
+              </div>
+              <div id="hunt-code-feedback" style="font-size:0.8rem; font-weight:700; margin-top:8px; min-height:20px;"></div>
+            </div>
+
+          </div>
+        </div>
+      `;
+    };
+
     window.findEgg = function(eggId, element) {
-      element.style.display = 'none';
+      if (element) element.style.display = 'none';
       let found = JSON.parse(localStorage.getItem('drag0n_eggs') || '[]');
       if(!found.includes(eggId)) {
         found.push(eggId);
         localStorage.setItem('drag0n_eggs', JSON.stringify(found));
         alert(`You found a secret token! (${found.length}/5)`);
         if(window.addXP) window.addXP(100);
-        
-        if(found.length === 5) {
-          alert('YOU FOUND ALL 5 TOKENS! YOU UNLOCKED THE GOLDEN DRAGON AVATAR!');
-          localStorage.setItem('drag0n_avatar', '🐲');
-          if(typeof firebase !== 'undefined' && localStorage.getItem('drag0n_user')) {
-             firebase.database().ref('users/' + localStorage.getItem('drag0n_user').toLowerCase() + '/avatar').set('🐲');
-          }
-          updateProfileWidget();
-        }
+        window.openEmojiHuntModal();
       }
     };
 
