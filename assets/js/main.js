@@ -1337,11 +1337,100 @@
       return saved;
     }
 
+    window.updateEmbeddedHuntDOM = function() {
+      const leftState = getLeftHuntState();
+      const rightState = getRightHuntState();
+      const leftCount = leftState.filter(Boolean).length;
+      const rightCount = rightState.filter(Boolean).length;
+
+      const lhEl = document.getElementById('lh-count');
+      const rhEl = document.getElementById('rh-count');
+      if (lhEl) lhEl.innerText = leftCount;
+      if (rhEl) rhEl.innerText = rightCount;
+
+      const lhScore = document.getElementById('lh-score');
+      if (lhScore) lhScore.innerText = leftCount;
+
+      const rhScoreText = document.getElementById('rh-score-text');
+      if (rhScoreText) {
+        rhScoreText.innerText = `Right Hunt: ${rightCount}/30 (Code: yay)`;
+      }
+      const scoreDisp2 = document.getElementById('score-display-2');
+      if (scoreDisp2 && !scoreDisp2.innerHTML.includes('input')) {
+        scoreDisp2.innerText = `Right Hunt: ${rightCount}/30 (Code: yay)`;
+      }
+    };
+
+    window.promptHuntCode = function() {
+      const input = prompt("Enter secret code for Right Hunt (Code: yay):");
+      if (input !== null) {
+        window.redeemHuntCode(input);
+      }
+    };
+
+    window.incrementLeftHunt = function() {
+      let state = getLeftHuntState();
+      let nextUnset = state.indexOf(false);
+      if (nextUnset !== -1) {
+        state[nextUnset] = true;
+      } else {
+        state[0] = true;
+      }
+      localStorage.setItem('drag0n_left_hunt', JSON.stringify(state));
+      if (window.addXP) window.addXP(20);
+      window.updateEmbeddedHuntDOM();
+      if (document.getElementById('emoji-hunt-modal')) window.renderEmojiHuntModal();
+    };
+
+    window.incrementRightHunt = function() {
+      let state = getRightHuntState();
+      let nextUnset = state.indexOf(false);
+      if (nextUnset !== -1) {
+        state[nextUnset] = true;
+      } else {
+        state[0] = true;
+      }
+      localStorage.setItem('drag0n_right_hunt', JSON.stringify(state));
+      if (window.addXP) window.addXP(20);
+      window.updateEmbeddedHuntDOM();
+      if (document.getElementById('emoji-hunt-modal')) window.renderEmojiHuntModal();
+    };
+
+    window.submitHuntCode = function() {
+      const inp = document.getElementById('rh-code-input');
+      const msg = document.getElementById('rh-code-msg');
+      const code = (inp ? inp.value : '').trim().toLowerCase();
+      if (code === 'yay') {
+        let rightState = new Array(30).fill(true);
+        localStorage.setItem('drag0n_right_hunt', JSON.stringify(rightState));
+        let curDC = parseInt(localStorage.getItem('drag0n_dc') || '0');
+        localStorage.setItem('drag0n_dc', (curDC + 1000).toString());
+        if (window.addXP) window.addXP(500);
+        if (window.updateProfileWidget) window.updateProfileWidget();
+        if (msg) {
+          msg.style.color = '#34d399';
+          msg.innerText = '🎉 CODE "yay" ACCEPTED! Right Hunt Completed (30/30) & +1,000 Dragon Coins Awarded!';
+        }
+        window.updateEmbeddedHuntDOM();
+        if (document.getElementById('emoji-hunt-modal')) window.renderEmojiHuntModal();
+      } else {
+        if (msg) {
+          msg.style.color = '#ef4444';
+          msg.innerText = '❌ Invalid code. Try code: yay';
+        }
+      }
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(window.updateEmbeddedHuntDOM, 100);
+    });
+
     window.toggleLeftHuntItem = function(idx) {
       let state = getLeftHuntState();
       state[idx] = !state[idx];
       localStorage.setItem('drag0n_left_hunt', JSON.stringify(state));
       if (state[idx] && window.addXP) window.addXP(20);
+      window.updateEmbeddedHuntDOM();
       window.renderEmojiHuntModal();
     };
 
@@ -1350,6 +1439,7 @@
       state[idx] = !state[idx];
       localStorage.setItem('drag0n_right_hunt', JSON.stringify(state));
       if (state[idx] && window.addXP) window.addXP(20);
+      window.updateEmbeddedHuntDOM();
       window.renderEmojiHuntModal();
     };
 
