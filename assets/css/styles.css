@@ -439,7 +439,7 @@
     ::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.35); border-radius: 999px; }
     ::-webkit-scrollbar-thumb:hover { background: rgba(56, 189, 248, 0.6); }
 
-    /* FLOATING EMOJI HUNTS HIGH TRANSPARENCY STYLING (BARELY VISIBLE SECRET HUNT) */
+    /* FLOATING EMOJI HUNTS HIGH TRANSPARENCY STYLING (REVEALS ONLY ON CLICK) */
     .emoji-hunt-box {
       position: fixed;
       bottom: 60px;
@@ -455,10 +455,10 @@
       word-break: break-all;
       box-shadow: 0 10px 30px rgba(0,0,0,0.2);
       cursor: pointer;
-      opacity: 0.05; /* Barely visible secret easter egg */
+      opacity: 0.04; /* Barely visible secret easter egg */
       transition: opacity 0.3s ease, transform 0.2s ease;
     }
-    .emoji-hunt-box:hover {
+    .emoji-hunt-box.revealed {
       opacity: 0.95;
       transform: translateY(-3px);
       box-shadow: 0 15px 35px rgba(0,0,0,0.6);
@@ -482,10 +482,10 @@
       align-items: center;
       gap: 8px;
       cursor: pointer;
-      opacity: 0.06; /* Barely visible secret hunt label */
+      opacity: 0.04; /* Barely visible secret hunt label */
       transition: opacity 0.3s ease;
     }
-    .emoji-score:hover {
+    .emoji-score.revealed {
       opacity: 0.95;
     }
     #score-display-1 { left: 20px; color: #38bdf8; border-color: rgba(56, 189, 248, 0.4); }

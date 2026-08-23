@@ -1362,6 +1362,11 @@
     };
 
     window.promptHuntCode = function() {
+      const el1 = document.getElementById('emoji-hunt-2');
+      const el2 = document.getElementById('score-display-2');
+      if (el1) el1.classList.add('revealed');
+      if (el2) el2.classList.add('revealed');
+
       const input = prompt("Enter secret code for Right Hunt (Code: yay):");
       if (input !== null) {
         window.redeemHuntCode(input);
@@ -1369,6 +1374,11 @@
     };
 
     window.incrementLeftHunt = function() {
+      const el1 = document.getElementById('emoji-hunt-1');
+      const el2 = document.getElementById('score-display-1');
+      if (el1) el1.classList.add('revealed');
+      if (el2) el2.classList.add('revealed');
+
       let state = getLeftHuntState();
       let nextUnset = state.indexOf(false);
       if (nextUnset !== -1) {
