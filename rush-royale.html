@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rush Royale - DrAg0n</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <style>
+    .rr-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2rem;
+      align-items: start;
+      max-width: 1050px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- TOP NAVIGATION BAR -->
+  <nav class="top-nav-bar">
+    <div class="top-nav-brand">
+      <a href="index.html" class="brand-title">DRAG0N</a>
+    </div>
+    <div class="top-nav-links">
+      <a href="index.html" class="top-nav-link">Home</a>
+      <a href="games.html" class="top-nav-link active">Arcade</a>
+      <a href="club.html" class="top-nav-link">Books & Club</a>
+      <a href="room.html" class="top-nav-link">Pet Room</a>
+      <a href="space-game.html" class="top-nav-link">Space Explorer</a>
+      <a href="fc24-squad-builder.html" class="top-nav-link">Squad Builder</a>
+      <a href="chess.html" class="top-nav-link">Chess vs AI</a>
+      <a href="chat.html" class="top-nav-link">Chat</a>
+    </div>
+    <div class="top-nav-actions">
+      <a href="shop.html" style="background: linear-gradient(135deg, #eab308, #f59e0b); padding: 7px 18px; border-radius: 20px; font-weight: 800; color: #0f172a; text-decoration: none; font-size: 0.85rem; box-shadow: 0 4px 15px rgba(234,179,8,0.3);">Shop</a>
+      <div id="profile-widget" class="profile-pill">
+        <div style="display: flex; flex-direction: column;">
+          <span id="pw-name" style="font-weight: bold; color: var(--accent); font-size: 0.85rem;">Profile</span>
+          <span id="pw-dc" style="color: #eab308; font-size: 0.75rem; font-weight: bold;">0 DC</span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HEADER -->
+  <header style="padding: 3rem 1rem 1.5rem; text-align: center;">
+    <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); padding: 0.4rem 1.25rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 800; color: #38bdf8; letter-spacing: 0.08em; margin-bottom: 1.2rem;">
+      PVP & CO-OP MERGE TOWER DEFENSE
+    </div>
+    <h1 style="font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 800; margin-bottom: 0.5rem;"><span class="gradient-text">Rush Royale Arena</span></h1>
+    <p style="color: var(--text-muted); max-width: 620px; margin: 0 auto 1.5rem; font-size: 1rem;">
+      Spawn heroes, merge matching units to upgrade stars, level up unit power with Mana, and defend your castle from monster waves!
+    </p>
+  </header>
+
+  <main class="container">
+    <div class="rr-container">
+      
+      <!-- GAME CANVAS CONTAINER -->
+      <div class="glass-card" style="padding: 1.5rem; border-color: rgba(56, 189, 248, 0.4); text-align: center;">
+        
+        <!-- Stats Bar -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0.8rem 1.2rem; background: rgba(11, 14, 23, 0.7); border-radius: 14px; border: 1px solid rgba(255,255,255,0.08);">
+          <div>
+            <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 800; display: block;">WAVE</span>
+            <span id="rr-wave" style="font-size: 1.2rem; font-weight: 800; color: #38bdf8;">1</span>
+          </div>
+          <div>
+            <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 800; display: block;">MANA POOL</span>
+            <span style="font-size: 1.2rem; font-weight: 800; color: #fbbf24;">⚡ <span id="rr-mana">350</span></span>
+          </div>
+          <div>
+            <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 800; display: block;">CASTLE HEALTH</span>
+            <span id="rr-lives" style="font-size: 1.1rem;">❤️❤️❤️</span>
+          </div>
+        </div>
+
+        <canvas id="rr-canvas" width="480" height="640" style="width: 100%; max-width: 480px; height: auto; border-radius: 16px; border: 2px solid rgba(56, 189, 248, 0.3); box-shadow: 0 15px 35px rgba(0,0,0,0.5); cursor: pointer;"></canvas>
+
+        <!-- SPAWN UNIT MAIN BUTTON -->
+        <button onclick="window.spawnRRUnit()" style="margin-top: 1.2rem; width: 100%; max-width: 480px; padding: 1rem; font-size: 1.1rem; font-weight: 800; border-radius: 16px; background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #0f172a; border: none; cursor: pointer; box-shadow: 0 6px 20px rgba(251,191,36,0.35);">
+          Summon Hero (<span id="rr-spawn-cost">100</span> Mana) 🧙‍♂️
+        </button>
+
+      </div>
+
+      <!-- DECK & POWER LEVEL CONTROLS -->
+      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        
+        <!-- Mana Power Up Card -->
+        <div class="glass-card" style="border-color: rgba(192, 132, 252, 0.4);">
+          <h3 style="color: #c084fc; font-size: 1.3rem; margin-bottom: 0.5rem;">Hero Mana Level Up</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Boost damage output for specific hero classes during battle!</p>
+
+          <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 10px;">
+              <span>🏹 Gunslinger</span>
+              <button id="rr-up-archer" onclick="window.upgradeRRType('ARCHER')" style="padding: 4px 12px; font-size: 0.8rem; font-weight: 800; background: #38bdf8; color: #0f172a; border: none; border-radius: 8px; cursor: pointer;">Power Lvl 1</button>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 10px;">
+              <span>🔥 Pyromancer</span>
+              <button id="rr-up-mage" onclick="window.upgradeRRType('MAGE')" style="padding: 4px 12px; font-size: 0.8rem; font-weight: 800; background: #f43f5e; color: #fff; border: none; border-radius: 8px; cursor: pointer;">Power Lvl 1</button>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 10px;">
+              <span>⚡ Zeus Zap</span>
+              <button id="rr-up-lightning" onclick="window.upgradeRRType('LIGHTNING')" style="padding: 4px 12px; font-size: 0.8rem; font-weight: 800; background: #fbbf24; color: #0f172a; border: none; border-radius: 8px; cursor: pointer;">Power Lvl 1</button>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 10px;">
+              <span>🧪 Venom Alchemist</span>
+              <button id="rr-up-poison" onclick="window.upgradeRRType('POISON')" style="padding: 4px 12px; font-size: 0.8rem; font-weight: 800; background: #34d399; color: #0f172a; border: none; border-radius: 8px; cursor: pointer;">Power Lvl 1</button>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 10px;">
+              <span>❄️ Frost Sorceress</span>
+              <button id="rr-up-frost" onclick="window.upgradeRRType('FROST')" style="padding: 4px 12px; font-size: 0.8rem; font-weight: 800; background: #a855f7; color: #fff; border: none; border-radius: 8px; cursor: pointer;">Power Lvl 1</button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- How To Play Instructions -->
+        <div class="glass-card">
+          <h3 style="font-size: 1.2rem; margin-bottom: 0.6rem; color: #fff;">How to Play</h3>
+          <ul style="padding-left: 1.2rem; font-size: 0.88rem; color: var(--text-muted); line-height: 1.6;">
+            <li>Click <strong>Summon Hero</strong> to spawn random heroes onto your 15-tile grid.</li>
+            <li>Click two heroes of the <strong>SAME CLASS & STAR RANK</strong> to merge them into a higher tier unit!</li>
+            <li>Defeat incoming creep waves to earn Mana and prevent monsters from reaching your Castle!</li>
+          </ul>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ALL SCRIPTS -->
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/rush-royale.js"></script>
+</body>
+</html>
