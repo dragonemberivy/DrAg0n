@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chess vs AI - DrAg0n</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <style>
+    .chess-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2rem;
+      align-items: start;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- TOP NAVIGATION BAR -->
+  <nav class="top-nav-bar">
+    <div class="top-nav-brand">
+      <a href="index.html" class="brand-title">DRAG0N</a>
+    </div>
+    <div class="top-nav-links">
+      <a href="index.html" class="top-nav-link">Home</a>
+      <a href="games.html" class="top-nav-link active">Arcade</a>
+      <a href="club.html" class="top-nav-link">Books & Club</a>
+      <a href="room.html" class="top-nav-link">Pet Room</a>
+      <a href="space-game.html" class="top-nav-link">Space Explorer</a>
+      <a href="fc24-squad-builder.html" class="top-nav-link">Squad Builder</a>
+      <a href="chat.html" class="top-nav-link">Chat</a>
+    </div>
+    <div class="top-nav-actions">
+      <a href="shop.html" style="background: linear-gradient(135deg, #eab308, #f59e0b); padding: 7px 18px; border-radius: 20px; font-weight: 800; color: #0f172a; text-decoration: none; font-size: 0.85rem; box-shadow: 0 4px 15px rgba(234,179,8,0.3);">Shop</a>
+      <div id="profile-widget" class="profile-pill">
+        <div style="display: flex; flex-direction: column;">
+          <span id="pw-name" style="font-weight: bold; color: var(--accent); font-size: 0.85rem;">Profile</span>
+          <span id="pw-dc" style="color: #eab308; font-size: 0.75rem; font-weight: bold;">0 DC</span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HEADER -->
+  <header style="padding: 3rem 1rem 1.5rem; text-align: center;">
+    <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); padding: 0.4rem 1.25rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 800; color: #38bdf8; letter-spacing: 0.08em; margin-bottom: 1.2rem;">
+      TACTICAL CHESS ARENA
+    </div>
+    <h1 style="font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 800; margin-bottom: 0.5rem;"><span class="gradient-text">Chess vs Tactical AI</span></h1>
+    <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto 1.5rem; font-size: 1rem;">
+      Test your strategy against our Minimax AI bot! Outsmart the AI to claim Dragon Coins (DC) & Level XP.
+    </p>
+  </header>
+
+  <main class="container">
+    <div class="chess-container">
+      
+      <!-- CHESS BOARD -->
+      <div class="glass-card" style="padding: 1.5rem; border-color: rgba(56, 189, 248, 0.4); text-align: center;">
+        
+        <!-- Turn & Check Status Banner -->
+        <div id="chess-status" style="font-size: 1.15rem; font-weight: 800; margin-bottom: 1.2rem; color: #38bdf8; min-height: 28px;">
+          Your Turn (White)
+        </div>
+
+        <div id="chess-board"></div>
+
+        <!-- Captured Pieces -->
+        <div style="display: flex; justify-content: space-between; margin-top: 1.2rem; padding: 0.75rem 1rem; background: rgba(11, 14, 23, 0.6); border-radius: 12px; font-size: 1.2rem;">
+          <div>
+            <span style="font-size: 0.75rem; color: var(--text-muted); display: block; font-weight: 800;">PLAYER CAPTURES</span>
+            <span id="chess-cap-black" style="color: #38bdf8;"></span>
+          </div>
+          <div style="text-align: right;">
+            <span style="font-size: 0.75rem; color: var(--text-muted); display: block; font-weight: 800;">AI CAPTURES</span>
+            <span id="chess-cap-white" style="color: #ffffff;"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTROLS & LOG PANEL -->
+      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        
+        <!-- Settings Card -->
+        <div class="glass-card" style="border-color: rgba(192, 132, 252, 0.4);">
+          <h3 style="color: #c084fc; font-size: 1.3rem; margin-bottom: 1rem;">AI Controls</h3>
+          
+          <div style="margin-bottom: 1.2rem;">
+            <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem; font-weight: 700;">AI DIFFICULTY</label>
+            <select onchange="window.setChessDifficulty(this.value)" style="width: 100%; padding: 0.6rem 1rem; border-radius: 10px; background: rgba(0,0,0,0.4); border: 1px solid rgba(192, 132, 252, 0.4); color: #fff; font-family: inherit; font-size: 0.95rem;">
+              <option value="easy">Novice (Easy - +75 DC reward)</option>
+              <option value="medium" selected>Tactician (Medium - +150 DC reward)</option>
+              <option value="hard">Grandmaster (Hard - +300 DC reward)</option>
+            </select>
+          </div>
+
+          <button onclick="window.restartChessGame()" style="width: 100%; padding: 0.75rem; font-weight: 800; border-radius: 12px; background: linear-gradient(135deg, #38bdf8, #818cf8); color: #0b0e17; border: none; cursor: pointer; font-size: 0.95rem;">
+            Restart Game 🔄
+          </button>
+        </div>
+
+        <!-- Move History -->
+        <div class="glass-card" style="flex: 1;">
+          <h3 style="font-size: 1.2rem; margin-bottom: 0.8rem; color: #fff;">Move Log</h3>
+          <div id="chess-history" style="height: 180px; overflow-y: auto; font-family: monospace; font-size: 0.88rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
+            <div>Game started. You play White.</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ALL SCRIPTS -->
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/chess.js"></script>
+</body>
+</html>
