@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aether Siege: Guardians of the Realm - DrAg0n</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <style>
+    .as-layout {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+      gap: 2rem;
+      align-items: start;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- TOP NAVIGATION BAR -->
+  <nav class="top-nav-bar">
+    <div class="top-nav-brand">
+      <a href="index.html" class="brand-title">DRAG0N</a>
+    </div>
+    <div class="top-nav-links">
+      <a href="index.html" class="top-nav-link">Home</a>
+      <a href="games.html" class="top-nav-link active">Arcade</a>
+      <a href="club.html" class="top-nav-link">Books & Club</a>
+      <a href="room.html" class="top-nav-link">Pet Room</a>
+      <a href="space-game.html" class="top-nav-link">Space Explorer</a>
+      <a href="fc24-squad-builder.html" class="top-nav-link">Squad Builder</a>
+      <a href="chess.html" class="top-nav-link">Chess vs AI</a>
+      <a href="aether-siege.html" class="top-nav-link active">Aether Siege</a>
+      <a href="chat.html" class="top-nav-link">Chat</a>
+    </div>
+    <div class="top-nav-actions">
+      <a href="shop.html" style="background: linear-gradient(135deg, #eab308, #f59e0b); padding: 7px 18px; border-radius: 20px; font-weight: 800; color: #0f172a; text-decoration: none; font-size: 0.85rem; box-shadow: 0 4px 15px rgba(234,179,8,0.3);">Shop</a>
+      <div id="profile-widget" class="profile-pill">
+        <div style="display: flex; flex-direction: column;">
+          <span id="pw-name" style="font-weight: bold; color: var(--accent); font-size: 0.85rem;">Profile</span>
+          <span id="pw-dc" style="color: #eab308; font-size: 0.75rem; font-weight: bold;">0 DC</span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- GAME HEADER -->
+  <header style="padding: 3rem 1rem 1.5rem; text-align: center;">
+    <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); padding: 0.4rem 1.25rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 800; color: #38bdf8; letter-spacing: 0.08em; margin-bottom: 1.2rem;">
+      FANTASY AUTO-BATTLER & TOWER DEFENSE — V1.0 BLUEPRINT
+    </div>
+    <h1 style="font-size: clamp(2.3rem, 5vw, 3.8rem); font-weight: 800; margin-bottom: 0.5rem;"><span class="gradient-text">Aether Siege: Guardians</span></h1>
+    <p style="color: var(--text-muted); max-width: 650px; margin: 0 auto 1.5rem; font-size: 1rem;">
+      <strong>Summon. Merge. Adapt. Survive.</strong> Command your 15-cell grid, evolve 8 magical unit archetypes, power up Aether levels, and defeat bosses across the Astral Realms!
+    </p>
+  </header>
+
+  <main class="container">
+    <div class="as-layout">
+      
+      <!-- BATTLEFIELD ARENA -->
+      <div class="glass-card" style="padding: 1.5rem; border-color: rgba(56, 189, 248, 0.4); text-align: center;">
+        
+        <!-- Battle HUD Bar -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0.8rem 1.2rem; background: rgba(11, 14, 23, 0.75); border-radius: 14px; border: 1px solid rgba(255,255,255,0.08);">
+          <div>
+            <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 800; display: block;">SIEGE WAVE</span>
+            <span id="as-wave" style="font-size: 1.25rem; font-weight: 800; color: #38bdf8;">1</span>
+          </div>
+          <div>
+            <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 800; display: block;">AETHER MANA</span>
+            <span style="font-size: 1.25rem; font-weight: 800; color: #fbbf24;">💎 <span id="as-aether">400</span></span>
+          </div>
+          <div>
+            <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 800; display: block;">SANCTUARY</span>
+            <span id="as-lives" style="font-size: 1.15rem;">❤️❤️❤️❤️❤️</span>
+          </div>
+        </div>
+
+        <canvas id="as-canvas" width="540" height="680" style="width: 100%; max-width: 540px; height: auto; border-radius: 16px; border: 2px solid rgba(56, 189, 248, 0.35); box-shadow: 0 18px 40px rgba(0,0,0,0.6); cursor: pointer;"></canvas>
+
+        <!-- SUMMON ACTION BUTTON -->
+        <button onclick="window.summonAetherUnit()" style="margin-top: 1.2rem; width: 100%; max-width: 540px; padding: 1rem; font-size: 1.15rem; font-weight: 800; border-radius: 16px; background: linear-gradient(135deg, #38bdf8, #818cf8); color: #0b0e17; border: none; cursor: pointer; box-shadow: 0 6px 22px rgba(56,189,248,0.35);">
+          Summon Guardian (<span id="as-summon-cost">100</span> Aether) ✨
+        </button>
+
+      </div>
+
+      <!-- STRATEGY & DECK POWER LEVEL CONTROLS -->
+      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        
+        <!-- Aether Power Leveling Station -->
+        <div class="glass-card" style="border-color: rgba(192, 132, 252, 0.4);">
+          <h3 style="color: #c084fc; font-size: 1.3rem; margin-bottom: 0.4rem;">Archetype Power Leveling</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Spend Aether to increase base damage scaling for all units of that class!</p>
+
+          <div style="display: flex; flex-direction: column; gap: 0.55rem;">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.35); padding: 8px 12px; border-radius: 10px;">
+              <span>🏹 Ranger (Single DPS)</span>
+              <button id="as-up-ranger" onclick="window.upgradeAetherPower('RANGER')" style="padding: 4px 12px; font-size: 0.8rem; font-weight: 800; background: #38bdf8; color: #0f172a; border: none; border-radius: 8px; cursor: pointer;">Lvl 1</button>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.35); padding: 8px 12px; border-radius: 10px;">
+              <span>🔥 Pyromancer (Area Splash)</span>
+              <button id="as-up-pyro" onclick="window.upgradeAetherPower('PYRO')" style="padding: 4px 12px; font-size: 0.8rem; font-weight: 800; background: #f43f5e; color: #fff; border: none; border-radius: 8px; cursor: pointer;">Lvl 1</button>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.35); padding: 8px 12px; border-radius: 10px;">
+              <span>⚡ Tempest (Chain Lightning)</span>
+              <button id="as-up-tempest" onclick="window.upgradeAetherPower('TEMPEST')" style="padding: 4px 12px; font-size: 0.8rem; font-weight: 800; background: #fbbf24; color: #0f172a; border: none; border-radius: 8px; cursor: pointer;">Lvl 1</button>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.35); padding: 8px 12px; border-radius: 10px;">
+              <span>🧪 Venom Alchemist (DOT)</span>
+              <button id="as-up-venom" onclick="window.upgradeAetherPower('VENOM')" style="padding: 4px 12px; font-size: 0.8rem; font-weight: 800; background: #34d399; color: #0f172a; border: none; border-radius: 8px; cursor: pointer;">Lvl 1</button>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.35); padding: 8px 12px; border-radius: 10px;">
+              <span>❄️ Frost Sorceress (Slow Control)</span>
+              <button id="as-up-frost" onclick="window.upgradeAetherPower('FROST')" style="padding: 4px 12px; font-size: 0.8rem; font-weight: 800; background: #a855f7; color: #fff; border: none; border-radius: 8px; cursor: pointer;">Lvl 1</button>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.35); padding: 8px 12px; border-radius: 10px;">
+              <span>🛡️ Aether Guardian (Aura Support)</span>
+              <button id="as-up-guardian" onclick="window.upgradeAetherPower('GUARDIAN')" style="padding: 4px 12px; font-size: 0.8rem; font-weight: 800; background: #eab308; color: #0f172a; border: none; border-radius: 8px; cursor: pointer;">Lvl 1</button>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.35); padding: 8px 12px; border-radius: 10px;">
+              <span>💎 Mana Siphon (Passive Econ)</span>
+              <button id="as-up-siphon" onclick="window.upgradeAetherPower('SIPHON')" style="padding: 4px 12px; font-size: 0.8rem; font-weight: 800; background: #06b6d4; color: #0f172a; border: none; border-radius: 8px; cursor: pointer;">Lvl 1</button>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.35); padding: 8px 12px; border-radius: 10px;">
+              <span>⚔️ Void Assassin (Crit Specialist)</span>
+              <button id="as-up-assassin" onclick="window.upgradeAetherPower('ASSASSIN')" style="padding: 4px 12px; font-size: 0.8rem; font-weight: 800; background: #ec4899; color: #fff; border: none; border-radius: 8px; cursor: pointer;">Lvl 1</button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Strategic Guide -->
+        <div class="glass-card">
+          <h3 style="font-size: 1.2rem; margin-bottom: 0.6rem; color: #fff;">Combat Blueprint</h3>
+          <ul style="padding-left: 1.2rem; font-size: 0.88rem; color: var(--text-muted); line-height: 1.6;">
+            <li><strong>Summoning:</strong> Spend Aether to place random units onto your 15-cell grid.</li>
+            <li><strong>Merging:</strong> Click two units of the <strong>SAME ARCHETYPE & RANK</strong> to merge into a Rank + 1 unit with a new random archetype!</li>
+            <li><strong>Synergies:</strong> Pair 🛡️ Guardians with ⚔️ Assassins or ❄️ Frost Sorceress with 🔥 Pyromancers for massive bonus damage.</li>
+            <li><strong>Boss Waves:</strong> Bosses spawn every 5 waves. Defeat them to claim bonus Dragon Coins (DC) & Level XP!</li>
+          </ul>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ALL SCRIPTS -->
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/aether-siege.js"></script>
+</body>
+</html>
