@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FC 24 Ultimate Squad Builder</title>
   <!-- Outfit Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Outfit:wght@300;400;600;700;800&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Cinzel:wght@700&display=swap" rel="stylesheet">
   
   <style>
     /* --- CSS DESIGN SYSTEM & TOKENS --- */
@@ -33,7 +33,7 @@
     }
 
     body {
-      font-family: 'Playfair Display', Georgia, serif;
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       background-color: var(--fut-dark-bg);
       background-image: 
         radial-gradient(circle at 20% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
@@ -1170,6 +1170,8 @@
     <div class="top-nav-links">
       <a href="index.html" class="top-nav-link">Home</a>
       <a href="games.html" class="top-nav-link">Arcade</a>
+      <a href="aether-siege.html" class="top-nav-link">Aether Siege</a>
+      <a href="chess.html" class="top-nav-link">Chess vs AI</a>
       <a href="club.html" class="top-nav-link">Books & Club</a>
       <a href="room.html" class="top-nav-link">Pet Room</a>
       <a href="space-game.html" class="top-nav-link">Space Explorer</a>
@@ -1346,8 +1348,8 @@
         </div>
 
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:1.5rem;">
-          <button onclick="autoSolveActiveSquad()">⚡ Auto Solve</button>
-          <button onclick="clearActiveSquad()" class="secondary-btn">🧹 Clear Pitch</button>
+          <button onclick="autoSolveActiveSquad()" style="display:flex; align-items:center; justify-content:center; gap:6px;">Auto Solve</button>
+          <button onclick="clearActiveSquad()" class="secondary-btn" style="display:flex; align-items:center; justify-content:center; gap:6px;">Clear Pitch</button>
         </div>
       </div>
 
@@ -1417,7 +1419,10 @@
   <!-- Load Three.js WebGL Engine -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <!-- Load Game Script -->
+  <script src="assets/js/sprites.js"></script>
+  <script src="assets/js/main.js"></script>
   <script src="assets/js/fc24.js?v=20260603"></script>
-
+  <script src="assets/js/mutation.js"></script>
+  <script src="assets/js/companions.js"></script>
 </body>
 </html>

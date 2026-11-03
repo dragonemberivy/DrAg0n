@@ -442,28 +442,33 @@ function renderTube(base, query) {
       </div>
     `;
   } else {
+    const getSpriteThumb = (key, fallback) => {
+      if (window.DragonSprites) return window.DragonSprites.renderSVG(key, 52);
+      return fallback;
+    };
+
     contentDiv.innerHTML = `
       <div class="dt-header">
-        <span style="color:red;">▶</span> DragonTube
+        <span style="color:#ef4444; font-size:1.2rem;">▶</span> DragonTube
       </div>
       <div class="dt-grid">
         <div class="dt-card" onclick="window.navigate('dragon://tube/watch?v=forest')">
-          <div class="dt-thumb" style="background: linear-gradient(135deg, #1e1b4b, #311042);">🌳</div>
+          <div class="dt-thumb" style="background: linear-gradient(135deg, #1e1b4b, #311042);">${getSpriteThumb('BIOME_FOREST', '🌳')}</div>
           <div class="dt-title">10 Hours of Flappy Dragon</div>
           <div class="dt-channel">ProGamer</div>
         </div>
         <div class="dt-card" onclick="window.navigate('dragon://tube/watch?v=cyber')">
-          <div class="dt-thumb" style="background: linear-gradient(135deg, #450a0a, #780202);">🧬</div>
+          <div class="dt-thumb" style="background: linear-gradient(135deg, #450a0a, #780202);">${getSpriteThumb('PET_CYBER_PUPPY', '🧬')}</div>
           <div class="dt-title">How to get infinite DC! (Not clickbait)</div>
           <div class="dt-channel">EconomyHax</div>
         </div>
         <div class="dt-card" onclick="window.navigate('dragon://tube/watch?v=space')">
-          <div class="dt-thumb" style="background: linear-gradient(135deg, #022c22, #065f46);">🌌</div>
+          <div class="dt-thumb" style="background: linear-gradient(135deg, #022c22, #065f46);">${getSpriteThumb('BIOME_VOID', '🌌')}</div>
           <div class="dt-title">Reacting to YOUR Planets!</div>
           <div class="dt-channel">SpaceExplorer</div>
         </div>
         <div class="dt-card" onclick="window.navigate('dragon://tube/watch?v=fails')">
-          <div class="dt-thumb" style="background: linear-gradient(135deg, #172554, #1e3a8a);">✨</div>
+          <div class="dt-thumb" style="background: linear-gradient(135deg, #172554, #1e3a8a);">${getSpriteThumb('RANK_STAR', '✨')}</div>
           <div class="dt-title">Global Jukebox Fail Compilation</div>
           <div class="dt-channel">FunnyClips</div>
         </div>
@@ -791,19 +796,32 @@ function renderWeather(base, query) {
   const conditions = ["Heavy Meteor Showers", "Acidic Rainfall", "Molten Solar Flare", "Solar Wind Storms", "Supercooled Freezing Fog", "Pleasant Neon Calm"];
   const cond = seededPick(conditions, rand);
   
-  const icons = {
-    "Heavy Meteor Showers": "☄️",
-    "Acidic Rainfall": "🌧️",
-    "Molten Solar Flare": "🔥",
-    "Solar Wind Storms": "💨",
-    "Supercooled Freezing Fog": "🌫️",
-    "Pleasant Neon Calm": "☀️"
+  const getCondIcon = (condition) => {
+    if (window.DragonSprites) {
+      if (condition === "Heavy Meteor Showers") return window.DragonSprites.renderSVG('BIOME_VOID', 64);
+      if (condition === "Molten Solar Flare") return window.DragonSprites.renderSVG('SHOP_FIRE_BORDER', 64);
+      if (condition === "Supercooled Freezing Fog") return window.DragonSprites.renderSVG('BIOME_TUNDRA', 64);
+      if (condition === "Pleasant Neon Calm") return window.DragonSprites.renderSVG('RANK_STAR', 64);
+      if (condition === "Acidic Rainfall" || condition === "Solar Wind Storms") return window.DragonSprites.renderSVG('AETHER_CRYSTAL', 64);
+    }
+    const fallbackIcons = {
+      "Heavy Meteor Showers": "☄️",
+      "Acidic Rainfall": "🌧️",
+      "Molten Solar Flare": "🔥",
+      "Solar Wind Storms": "💨",
+      "Supercooled Freezing Fog": "🌫️",
+      "Pleasant Neon Calm": "☀️"
+    };
+    return fallbackIcons[condition] || "☀️";
   };
-  const icon = icons[cond] || "☀️";
+  const icon = getCondIcon(cond);
+
+  const tomorrowIcon = window.DragonSprites ? window.DragonSprites.renderSVG('SHOP_FIRE_BORDER', 32) : '🌋';
+  const nextDayIcon = window.DragonSprites ? window.DragonSprites.renderSVG('BIOME_TUNDRA', 32) : '❄️';
 
   contentDiv.innerHTML = `
     <div class="fake-site dwx-bg">
-      <div style="font-size: 5rem;">${icon}</div>
+      <div style="display:flex; justify-content:center; align-items:center; margin-bottom:15px;">${icon}</div>
       <h1 style="font-size: 3rem; margin:0; text-transform: capitalize;">${location}</h1>
       <div class="dwx-temp">${temp}°C</div>
       <div class="dwx-desc">${cond}</div>
@@ -811,14 +829,14 @@ function renderWeather(base, query) {
         Wind: ${Math.floor(rand() * 300)} km/h | Humidity: ${Math.floor(rand() * 100)}% | Visibility: ${rand() > 0.5 ? "Poor" : "Excellent"}
       </p>
       <div style="margin-top: 50px; display:flex; justify-content:center; gap:20px;">
-        <div style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); padding:20px; border-radius:10px; width:100px;">
+        <div style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); padding:20px; border-radius:10px; width:100px; display:flex; flex-direction:column; align-items:center;">
           <div>Tomorrow</div>
-          <div style="font-size:2rem; margin:10px 0;">🌋</div>
+          <div style="margin:10px 0;">${tomorrowIcon}</div>
           <div>${temp + 10}°C</div>
         </div>
-        <div style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); padding:20px; border-radius:10px; width:100px;">
+        <div style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); padding:20px; border-radius:10px; width:100px; display:flex; flex-direction:column; align-items:center;">
           <div>Next Day</div>
-          <div style="font-size:2rem; margin:10px 0;">❄️</div>
+          <div style="margin:10px 0;">${nextDayIcon}</div>
           <div>${temp - 20}°C</div>
         </div>
       </div>

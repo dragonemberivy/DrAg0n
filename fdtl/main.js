@@ -297,11 +297,6 @@ window.addEventListener('keyup', (e) => {
   if (keys.hasOwnProperty(e.key)) keys[e.key] = false;
 });
 
-// Load external sound assets provided by User!
-const sfxCompanion = new Audio("./347_Elven_Procession.mp3");
-const sfxDarkness = new Audio("./506_The_Verdant_Dark.mp3");
-const sfxLore = new Audio("./502_Sentient_Eye.mp3");
-
 function playSoundEffect(type = "darkness") {
   return;
 }

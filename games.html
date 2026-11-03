@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Games - DrAg0n</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 
@@ -48,6 +48,7 @@
     </p>
   </header>
 
+  <main class="container">
     <!-- CATEGORY FILTER PILLS -->
     <div style="display: flex; justify-content: center; gap: 0.6rem; margin-bottom: 2.5rem; flex-wrap: wrap;" id="games-filter-bar">
       <button onclick="filterGames('all')" id="gtab-all" class="tab-pill-active" style="padding: 0.6rem 1.5rem; font-size: 0.85rem; border-radius: 9999px; font-weight: 800; cursor: pointer;">All Games</button>
@@ -89,11 +90,41 @@
           <h3>Rock Paper Scissors</h3>
           <p>Can you beat the computer?</p>
           <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-            <button onclick="playRPS('rock')" style="flex:1;">Rock</button>
-            <button onclick="playRPS('paper')" style="flex:1;">Paper</button>
-            <button onclick="playRPS('scissors')" style="flex:1;">Scissors</button>
+            <button onclick="playRPS('rock')" style="flex:1; display:flex; align-items:center; justify-content:center; gap:8px;"><span class="rps-icon" data-sprite="RPS_ROCK"></span>Rock</button>
+            <button onclick="playRPS('paper')" style="flex:1; display:flex; align-items:center; justify-content:center; gap:8px;"><span class="rps-icon" data-sprite="RPS_PAPER"></span>Paper</button>
+            <button onclick="playRPS('scissors')" style="flex:1; display:flex; align-items:center; justify-content:center; gap:8px;"><span class="rps-icon" data-sprite="RPS_SCISSORS"></span>Scissors</button>
           </div>
           <div id="rpsResult" style="padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 8px; text-align: center; font-weight: 600;">Make a choice!</div>
+        </div>
+
+        <!-- Fun Color SVG -->
+        <div class="glass-card">
+          <h3>Fun Color!</h3>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">Click the flower parts to paint them.</p>
+          <div style="display: flex; gap: 1rem; align-items: start; margin-top: 10px;">
+            <div style="flex: 1;">
+              <label style="font-size:0.8rem; color:#94a3b8;">Red: <input type="range" id="rSlider" min="0" max="255" value="255" style="width:100%; margin:4px 0;"></label>
+              <label style="font-size:0.8rem; color:#94a3b8;">Green: <input type="range" id="gSlider" min="0" max="255" value="100" style="width:100%; margin:4px 0;"></label>
+              <label style="font-size:0.8rem; color:#94a3b8;">Blue: <input type="range" id="bSlider" min="0" max="255" value="200" style="width:100%; margin:4px 0;"></label>
+              <div id="colorPreview" style="height: 30px; border-radius: 8px; border: 1px solid var(--border); margin: 8px 0;"></div>
+              <button id="undoBtn" style="width: 100%; background: rgba(255,255,255,0.1); font-size: 0.85rem; padding: 6px;">Undo</button>
+            </div>
+
+            <div id="svgContainer" style="background: white; border-radius: 12px; padding: 8px;">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="130" height="130" style="cursor:pointer; user-select:none;">
+                <circle cx="200" cy="200" r="190" fill="#fff" stroke="#000" stroke-width="4" />
+                <g stroke="#000" stroke-width="4" fill="#fff">
+                  <path class="colorable" d="M200 20 L230 90 L270 90 L240 140 L270 190 L220 180 L200 230 L180 180 L130 190 L160 140 L130 90 L170 90 Z" />
+                </g>
+                <g stroke="#000" stroke-width="4" fill="#fff">
+                  <ellipse class="colorable" cx="200" cy="140" rx="30" ry="60" />
+                  <ellipse class="colorable" cx="260" cy="200" rx="30" ry="60" transform="rotate(60 260 200)" />
+                  <ellipse class="colorable" cx="140" cy="200" rx="30" ry="60" transform="rotate(-60 140 200)" />
+                </g>
+                <circle class="colorable" cx="200" cy="200" r="40" fill="#fff" stroke="#000" stroke-width="4" />
+              </svg>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -109,19 +140,104 @@
               Launch Squad Builder
             </button>
           </a>
-        <!-- CHESS VS AI FEATURED CARD -->
-        <div class="glass-card" style="margin-bottom: 2rem; border-color: rgba(56, 189, 248, 0.5); background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(192, 132, 252, 0.1)); padding: 2rem;">
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        </div>
+        <!-- PLAYABLE ARCADE PET CHESS ARENA -->
+        <div class="glass-card" style="margin-bottom: 2.5rem; border-color: rgba(56, 189, 248, 0.5); background: linear-gradient(135deg, rgba(56, 189, 248, 0.08), rgba(192, 132, 252, 0.08)); padding: 2rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 1rem;">
             <div>
-              <span style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.05em;">TACTICAL AI ARENA</span>
-              <h3 style="font-size: 2rem; margin: 0.5rem 0 0.3rem; color: #fff;">Chess vs Tactical AI</h3>
-              <p style="color: var(--text-muted); max-width: 580px; margin: 0;">Play full 8x8 chess against our Minimax tactical AI! Win matches to earn up to 300 Dragon Coins & XP rewards.</p>
+              <span style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; padding: 0.3rem 0.9rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.06em;">VIRTUAL PET ARCADE CHESS</span>
+              <h3 style="font-size: 2.2rem; margin: 0.4rem 0 0.2rem; color: #fff;"><span class="gradient-text">Chess vs Virtual Pet</span></h3>
+              <p style="color: var(--text-muted); max-width: 620px; margin: 0; font-size: 0.95rem;">Challenge your active companion mascot or newly mutated hybrid pet! Watch them bark, roar, purr, or trash-talk as you duel for up to 300 DC and XP.</p>
             </div>
-            <a href="chess.html" style="text-decoration: none;">
-              <button style="font-size: 1.05rem; padding: 0.75rem 2rem; border-radius: 50px; background: linear-gradient(135deg, #38bdf8, #818cf8); color: #0b0e17; font-weight: 800; border: none; cursor: pointer; box-shadow: 0 4px 20px rgba(56,189,248,0.3);">
-                Play Chess Now
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+              <button onclick="if(window.PetMutationLab) window.PetMutationLab.openMutationLabModal();" style="padding: 9px 18px; border-radius: 9999px; background: rgba(57, 255, 20, 0.15); border: 1px solid #39ff14; color: #39ff14; font-weight: 800; font-size: 0.85rem; cursor: pointer; box-shadow: 0 0 15px rgba(57,255,20,0.3); display: flex; align-items: center; gap: 6px;">
+                🧬 Pet Mutation Lab
               </button>
-            </a>
+              <a href="chess.html" style="text-decoration: none;">
+                <button style="padding: 9px 18px; border-radius: 9999px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; font-weight: 700; font-size: 0.85rem; cursor: pointer;">
+                  Fullscreen Arena ↗
+                </button>
+              </a>
+            </div>
+          </div>
+
+          <!-- Pet Opponent Header Bar -->
+          <div class="pet-opponent-bar">
+            <div class="pet-opponent-frame" id="chess-pet-avatar">
+              <span style="font-size: 2.4rem;">🐉</span>
+              <div class="pet-reaction-badge" id="chess-pet-reaction-icon">🐾</div>
+            </div>
+            <div style="flex: 1; min-width: 200px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span id="chess-pet-name" style="font-weight: 800; font-size: 1.1rem; color: #fff;">Ignis (Baby Dragon)</span>
+                  <span style="font-size: 0.72rem; padding: 2px 8px; border-radius: 10px; background: rgba(56, 189, 248, 0.2); color: #38bdf8; font-weight: 800;">OPPONENT</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <label for="chess-pet-selector" style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700;">CHALLENGE:</label>
+                  <select id="chess-pet-selector" onchange="window.setChessPetOpponent(this.value)" style="padding: 4px 10px; border-radius: 8px; background: rgba(0,0,0,0.5); border: 1px solid rgba(56,189,248,0.4); color: white; font-family: inherit; font-size: 0.85rem; cursor: pointer;">
+                    <!-- Auto-populated from base & mutated pets -->
+                  </select>
+                </div>
+              </div>
+              <div class="pet-speech-bubble" id="chess-pet-bubble">
+                Rawr! You dare challenge Ignis to chess?! Prepare for fiery tactics!
+              </div>
+            </div>
+          </div>
+
+          <!-- The Chessboard & Control Panel Grid -->
+          <div class="arcade-chess-grid">
+            <!-- Left: Chess Board -->
+            <div style="text-align: center;">
+              <div id="chess-status" style="font-size: 1.1rem; font-weight: 800; margin-bottom: 1rem; color: #38bdf8; min-height: 26px;">
+                Your Turn (White)
+              </div>
+              <div id="chess-board"></div>
+              
+              <!-- Captured Pieces -->
+              <div style="display: flex; justify-content: space-between; margin-top: 1rem; padding: 0.6rem 1rem; background: rgba(11, 14, 23, 0.6); border-radius: 12px; font-size: 1.1rem;">
+                <div style="text-align: left;">
+                  <span style="font-size: 0.7rem; color: var(--text-muted); display: block; font-weight: 800;">YOUR CAPTURES</span>
+                  <span id="chess-cap-black" style="color: #38bdf8;"></span>
+                </div>
+                <div style="text-align: right;">
+                  <span style="font-size: 0.7rem; color: var(--text-muted); display: block; font-weight: 800;">PET CAPTURES</span>
+                  <span id="chess-cap-white" style="color: #ffffff;"></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Controls & History -->
+            <div style="display: flex; flex-direction: column; gap: 1.2rem;">
+              <div class="glass-card" style="padding: 1.2rem; border-color: rgba(192, 132, 252, 0.3);">
+                <h4 style="color: #c084fc; font-size: 1.1rem; margin: 0 0 0.8rem 0;">Pet AI Settings</h4>
+                <div style="margin-bottom: 1rem;">
+                  <label style="display: block; font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.3rem; font-weight: 700;">DIFFICULTY & REWARDS</label>
+                  <select onchange="window.setChessDifficulty(this.value)" style="width: 100%; padding: 0.6rem 0.8rem; border-radius: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(192, 132, 252, 0.4); color: #fff; font-family: inherit; font-size: 0.9rem;">
+                    <option value="easy">Casual Pet (Novice - +75 DC reward)</option>
+                    <option value="medium" selected>Clever Pet (Tactician - +150 DC reward)</option>
+                    <option value="hard">Mastermind Pet (Grandmaster - +300 DC reward)</option>
+                  </select>
+                </div>
+                <button onclick="window.restartChessGame()" style="width: 100%; padding: 0.65rem; font-weight: 800; border-radius: 10px; background: linear-gradient(135deg, #38bdf8, #818cf8); color: #0b0e17; border: none; cursor: pointer; font-size: 0.9rem;">
+                  🔄 Restart Match
+                </button>
+              </div>
+
+              <!-- Move Log -->
+              <div class="glass-card" style="padding: 1.2rem; flex: 1;">
+                <h4 style="font-size: 1rem; margin: 0 0 0.6rem 0; color: #fff;">Move Log</h4>
+                <div id="chess-history" style="height: 140px; overflow-y: auto; font-family: monospace; font-size: 0.85rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
+                  <div>Match initialized. You play White vs Pet.</div>
+                </div>
+              </div>
+
+              <!-- Victory Rewards Card -->
+              <div style="background: rgba(234, 179, 8, 0.08); border: 1px solid rgba(234, 179, 8, 0.3); border-radius: 12px; padding: 12px 16px; font-size: 0.85rem; color: #fbbf24;">
+                <strong>🏆 Victory Bounty:</strong> Defeat your pet opponent in checkmate to earn up to <strong>300 Dragon Coins</strong>, <strong>+300 Level XP</strong>, and <strong>+20 Companion Friendship</strong>!
+              </div>
+            </div>
           </div>
         </div>
 
@@ -217,9 +333,6 @@
         </div>
       </div>
 
-    </section>
-  </main>
-
   <script>
     function filterGames(cat) {
       const mini = document.querySelector('.gcat-mini');
@@ -236,45 +349,26 @@
       document.getElementById('gtab-epic').className = cat === 'epic' ? 'tab-pill-active' : 'tab-pill-inactive';
     }
   </script>
-        <!-- Game 4: Fun Color SVG -->
-        <div class="glass-card">
-          <h3>Fun Color!</h3>
-          <p style="color: var(--text-muted); font-size: 0.9rem;">Click the flower parts to paint them.</p>
-          <div style="display: flex; gap: 1rem; align-items: start; margin-top: 10px;">
-            <div style="flex: 1;">
-              <label style="font-size:0.8rem; color:#94a3b8;">Red: <input type="range" id="rSlider" min="0" max="255" value="255" style="width:100%; margin:4px 0;"></label>
-              <label style="font-size:0.8rem; color:#94a3b8;">Green: <input type="range" id="gSlider" min="0" max="255" value="100" style="width:100%; margin:4px 0;"></label>
-              <label style="font-size:0.8rem; color:#94a3b8;">Blue: <input type="range" id="bSlider" min="0" max="255" value="200" style="width:100%; margin:4px 0;"></label>
-              <div id="colorPreview" style="height: 30px; border-radius: 8px; border: 1px solid var(--border); margin: 8px 0;"></div>
-              <button id="undoBtn" style="width: 100%; background: rgba(255,255,255,0.1); font-size: 0.85rem; padding: 6px;">Undo</button>
-            </div>
-
-            <div id="svgContainer" style="background: white; border-radius: 12px; padding: 8px;">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="130" height="130" style="cursor:pointer; user-select:none;">
-                <circle cx="200" cy="200" r="190" fill="#fff" stroke="#000" stroke-width="4" />
-                <g stroke="#000" stroke-width="4" fill="#fff">
-                  <path class="colorable" d="M200 20 L230 90 L270 90 L240 140 L270 190 L220 180 L200 230 L180 180 L130 190 L160 140 L130 90 L170 90 Z" />
-                </g>
-                <g stroke="#000" stroke-width="4" fill="#fff">
-                  <ellipse class="colorable" cx="200" cy="140" rx="30" ry="60" />
-                  <ellipse class="colorable" cx="260" cy="200" rx="30" ry="60" transform="rotate(60 260 200)" />
-                  <ellipse class="colorable" cx="140" cy="200" rx="30" ry="60" transform="rotate(-60 140 200)" />
-                </g>
-                <circle class="colorable" cx="200" cy="200" r="40" fill="#fff" stroke="#000" stroke-width="4" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-      </div>
     </section>
   </main>
 
   <!-- ALL SCRIPTS (Consolidated) -->
+  <script src="assets/js/sprites.js"></script>
   <script src="assets/js/main.js?v=3"></script>
   <script src="assets/js/snake.js"></script>
   <script src="assets/js/flappy.js"></script>
+  <script src="assets/js/mutation.js"></script>
+  <script src="assets/js/chess.js"></script>
   <script src="assets/js/companions.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      if (window.DragonSprites) {
+        document.querySelectorAll('.rps-icon[data-sprite]').forEach(el => {
+          el.innerHTML = window.DragonSprites.renderSVG(el.getAttribute('data-sprite'), 20);
+        });
+      }
+    });
+  </script>
 </body>
 
 </html>

@@ -1,12 +1,19 @@
-/* DRAG0N CHESS VS AI ENGINE (2026) */
-(function() {
-  // Piece values for evaluation
+/* ==========================================================================
+   DRAG0N CHESS VS VIRTUAL PET & AI ENGINE (2026)
+   Enhanced 8x8 Chess Engine with Minimax AI, Piece-Square Tables,
+   Live Virtual Pet Opponent integration, dynamic speech/reactions,
+   sound synthesis, and Dragon Coin / XP / Friendship rewards.
+   ========================================================================== */
+
+(function(global) {
+  'use strict';
+
+  // Piece values for Minimax evaluation
   const PIECE_VALUES = {
     'p': 100, 'n': 320, 'b': 330, 'r': 500, 'q': 900, 'k': 20000,
     'P': 100, 'N': 320, 'B': 330, 'R': 500, 'Q': 900, 'K': 20000
   };
 
-  // Piece symbols map
   const PIECE_SYMBOLS = {
     'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙',
     'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟'
@@ -81,7 +88,7 @@
 
   // Game state
   let board = [];
-  let turn = 'w'; // 'w' (White/Player) or 'b' (Black/AI)
+  let turn = 'w'; // 'w' (White/Player) or 'b' (Black/Pet Opponent)
   let playerColor = 'w';
   let aiColor = 'b';
   let selectedSquare = null;
@@ -91,6 +98,231 @@
   let capturedBlack = [];
   let isGameOver = false;
   let aiDifficulty = 'medium'; // 'easy', 'medium', 'hard'
+  let activePetOpponent = 'dragon';
+
+  // Pet Dialogue Scripts
+  const PET_DIALOG_LINES = {
+    dragon: {
+      sound: 'roar',
+      name: 'Ignis (Baby Dragon)',
+      icon: '🐉',
+      start: ["Rawr! You dare challenge Ignis to chess?! Prepare for fiery tactics!", "A dragon's mind is as sharp as its claws! Make your move, mortal!"],
+      playerMove: ["A pawn push? Typical mortal defense. My flames see right through it!", "*swishes tail* Moving that piece won't save you from dragon breath!"],
+      petMove: ["Behold, a fiery advance! *flares nostrils*", "My pieces march forward like an army of flames!", "Sparks fly as my strategy unfolds!"],
+      playerCapture: ["How DARE you take my piece! Flames of vengeance will consume your board!", "*growls fiercely* That piece will be avenged tenfold!"],
+      petCapture: ["CRUNCH! Delicious piece! One step closer to your king's hoard!", "Roasted and captured! Another victory for the dragon!"],
+      checkOnPlayer: ["CHECK! *ROAAAR!* Your king is scorched by dragon fire! Tremble!", "Check! Can you smell the smoke around your king's throne?!"],
+      checkOnPet: ["*Hisses and breathes smoke* You dare threaten my royal scales?! Insolence!", "Alert the guard dragons! My king requires defense!"],
+      petWin: ["CHECKMATE! The dragon reigns supreme! Kneel and bring me gold and treats!", "Hahaha! Total annihilation! Your kingdom belongs to Ignis!"],
+      playerWin: ["Incredible... you managed to outmaneuver a dragon! Take this bounty of Dragon Coins, champion!", "A worthy adversary! My respect—and your DC reward—is yours!"],
+      draw: ["Stalemate! An eternal truce between dragon and mortal."]
+    },
+    cat: {
+      sound: 'purr',
+      name: 'Neko (Calico Cat)',
+      icon: '🐱',
+      start: ["Meow~ Hello human! Let's see if your hands are as nimble as my paws!", "Purrrrr... Chess is just like stalking a laser pointer, you know!"],
+      playerMove: ["Hmm, curious move. Did you think I wouldn't notice that diagonal?", "*licks paw* Bold move... let's see how you handle this!"],
+      petMove: ["*swishes tail* Paw to the center! Graceful and lethal.", "Meow, you didn't expect that maneuver, did you?"],
+      playerCapture: ["HISS! Put that piece down! *swipes paw grumpily*", "Meow! Hey, I was saving that knight for my nap!"],
+      petCapture: ["Yum, caught you like a fat fish! Purrrrr~", "*pounces* Captured! My claws never miss!"],
+      checkOnPlayer: ["CHECK! Purrrr~ Your king is cornered like a mouse in a box!", "Check! Meow-ha-ha, nowhere left to run!"],
+      checkOnPet: ["Mrow?! Back off my king or feel my claws! *fluffs tail*", "Hiss! Not my king! Time for a tactical leap!"],
+      petWin: ["CHECKMATE! Best feline tactician in the realm! Now, hand over the fish treats!", "Purrrrfect game! Neko wins again!"],
+      playerWin: ["Aww, you got me! Good game, human! Here are your shiny Dragon Coins!", "Meow! You played well. I'll tolerate this defeat... for now!"],
+      draw: ["Meow... a draw. Let's both curl up for a nap instead."]
+    },
+    cyber_puppy: {
+      sound: 'cyber',
+      name: 'Sparky (Cyber Puppy)',
+      icon: '🐶',
+      start: ["SYSTEM BOOT: Tactical Chess Protocol initialized! Visor: ONLINE. Woof!", "Ping 12ms. Algorithmic analysis ready. Let's compute a win!"],
+      playerMove: ["Processing opponent move... Visor scanning board coordinates.", "Move logged into tactical cache. Woof!"],
+      petMove: ["Processing minimax depth... Move executed! Woof-bot engaged.", "Calculated probability of move success: 99.4%!"],
+      playerCapture: ["Warning! Unit casualty registered in sector! Re-routing tactical circuits!", "Beep boof! Visor alarms ringing! That was my favorite piece!"],
+      petCapture: ["Target eliminated! Subroutine 'Piece Chomp' executed successfully!", "Beep! One opponent asset neutralized. Good boy status: Verified!"],
+      checkOnPlayer: ["ALERT: Hostile king pinned! Visor laser locked! CHECK!", "Tactical siren: Check state active! King defenses failing!"],
+      checkOnPet: ["CRITICAL: Threat detected near VIP King CPU! Deploying firewalls!", "Beep-beep-beep! Defensive protocol Alpha active! No checkmate allowed!"],
+      petWin: ["CHECKMATE! Algorithmic victory confirmed! Deploy victory tail wag protocol!", "SYSTEM: Mission Accomplished! Winner = Sparky! Woof woof!"],
+      playerWin: ["System override! You found a winning line! Rewarding Dragon Coins to victor!", "Error 200: Human superior tactics verified! Enjoy your DC reward!"],
+      draw: ["Computational deadlock detected! Both systems tie."]
+    },
+    red_panda: {
+      sound: 'bubble',
+      name: 'Rusty (Red Panda)',
+      icon: '🦊',
+      start: ["Enthusiastic chitter! Ready for some bamboo tactics?! *tail swish*", "Let's play! My fluffy tail is ready for high-speed chess!"],
+      playerMove: ["Ooh, tricky move! *twitches ears excitedly*", "I see what you're doing over there!"],
+      petMove: ["*bounces* Look at this move! Acrobatics on the 64 squares!", "Bamboo power! Pushing pawns like trees in the forest!"],
+      playerCapture: ["Eep! You stole my piece?! *puffs out tail*", "No fair! I was playing with that bishop!"],
+      petCapture: ["Caught it! Stashed right in my fluffy paws!", "Chomp! Like a crunchy stalk of fresh bamboo!"],
+      checkOnPlayer: ["CHECK! Look out! Red panda high jump attack!", "Check! My fluffy strategy is closing in on your king!"],
+      checkOnPet: ["Waaah! Protect the king! *scampers up a branch*", "Chitter! Hands off the royal panda!"],
+      petWin: ["CHECKMATE! The Red Panda wins the grand tournament! Yay!", "Fluffy victory dance! Best day ever!"],
+      playerWin: ["Great match! You're really clever! Here's your Dragon Coins reward!", "Aww, you won! You get all the gold coins!"],
+      draw: ["We tied! Let's share some snacks!"]
+    },
+    cosmic_axolotl: {
+      sound: 'bubble',
+      name: 'Aura (Cosmic Axolotl)',
+      icon: '🦎',
+      start: ["*starlight hum* The celestial tides align for a game of kings.", "From the astral void, I greet you! Let our minds dance among the stars."],
+      playerMove: ["A path ripples through the cosmic aether.", "*glowing frills pulse* A curious branch in spacetime."],
+      petMove: ["*frills shimmer with violet light* A move written in the constellations.", "The starlight currents flow across the board."],
+      playerCapture: ["*soft gasp* A star has faded from my constellation...", "A piece returned to the cosmic dust. Fascinating move."],
+      petCapture: ["Absorbed into nebula starlight! The galaxy balances.", "A celestial capture! The cosmos welcomes your piece."],
+      checkOnPlayer: ["CHECK! The gravitational pull of the black hole tightens around your king!", "Check! Cosmic light illuminates your king's vulnerability."],
+      checkOnPet: ["*gills flare with defensive glow* The astral realm protects its sovereign!", "A direct strike! Shifting quantum coordinates!"],
+      petWin: ["CHECKMATE! The stars have decreed this outcome! Galactic peace is restored.", "Celestial victory! The cosmic axolotl triumphs!"],
+      playerWin: ["Brilliant illumination! Your mortal mind has surpassed the stars! Claim your DC reward!", "The cosmos honors your victory! Dragon Coins and stellar glory to you!"],
+      draw: ["A harmonious celestial alignment. The game rests in cosmic equilibrium."]
+    }
+  };
+
+  function getPetOpponentData(id) {
+    if (id && id.startsWith('mutant_')) {
+      const mutants = (window.PetMutationLab && window.PetMutationLab.getMutatedPets) 
+        ? window.PetMutationLab.getMutatedPets() 
+        : JSON.parse(localStorage.getItem('drag0n_mutated_pets') || '[]');
+      const m = mutants.find(p => p.id === id);
+      if (m) {
+        return {
+          id: m.id,
+          name: m.name,
+          icon: '🧬',
+          isMutant: true,
+          mutantObj: m,
+          sound: m.traits && m.traits.personalitySound ? m.traits.personalitySound : 'mutate',
+          start: [`${m.name}: [BIO-SYNTHESIS READY] I have awakened to conquer the chessboard!`],
+          playerMove: [`${m.name}: Hybrid receptors calculating your move... intriguing!`, `${m.name}: Your pawn step triggers my mutated instincts!`],
+          petMove: [`${m.name}: Dominant traits unleashed! Check my hybrid maneuver!`, `${m.name}: *neon glow intensifies* A move forged in the mutation lab!`],
+          playerCapture: [`${m.name}: *toxic hiss* You took my piece! Genetic vengeance awaits!`, `${m.name}: A tactical loss! Regrowing defenses!`],
+          petCapture: [`${m.name}: *bio-absorption* Your piece has been consumed into my hybrid biomass!`, `${m.name}: Target acquired and dismantled!`],
+          checkOnPlayer: [`${m.name}: ⚠️ CHECK! The mutant chimera closes in on your king!`, `${m.name}: Bio-luminescent lock on your king!`],
+          checkOnPet: [`${m.name}: ☣️ Warning: Mutated core under threat! Repelling attacker!`, `${m.name}: My king resists your assault!`],
+          petWin: [`${m.name}: 🏆 CHECKMATE! The ultimate hybrid pet stands victorious! Bow to the chimera!`],
+          playerWin: [`${m.name}: Extraordinary! You bested the ultimate mutant! Take your Dragon Coins!`],
+          draw: [`${m.name}: Synthesis stalemate! Evenly matched!`]
+        };
+      }
+    }
+
+    if (PET_DIALOG_LINES[id]) {
+      return PET_DIALOG_LINES[id];
+    }
+    // Fallback to dragon or cat
+    return PET_DIALOG_LINES.dragon;
+  }
+
+  function triggerPetReaction(event, data = {}) {
+    const pet = getPetOpponentData(activePetOpponent);
+    const bubbleEl = document.getElementById('chess-pet-bubble');
+    const emoteEl = document.getElementById('chess-pet-reaction-icon');
+
+    let lines = pet[event] || pet.start;
+    let text = lines[Math.floor(Math.random() * lines.length)];
+
+    if (bubbleEl) {
+      bubbleEl.textContent = text;
+      bubbleEl.classList.remove('bubble-pop');
+      void bubbleEl.offsetWidth; // Force reflow
+      bubbleEl.classList.add('bubble-pop');
+    }
+
+    if (emoteEl) {
+      const emoteMap = {
+        start: '👋',
+        playerMove: '🤔',
+        petMove: '😼',
+        playerCapture: '😱',
+        petCapture: '😋',
+        checkOnPlayer: '⚔️',
+        checkOnPet: '😤',
+        petWin: '🏆',
+        playerWin: '🎉',
+        draw: '🤝'
+      };
+      emoteEl.textContent = emoteMap[event] || '🐾';
+    }
+
+    // Play native synth sound
+    if (window.PetMutationLab && window.PetMutationLab.playSynthSound) {
+      let snd = pet.sound || 'purr';
+      if (event === 'checkOnPlayer' || event === 'checkOnPet') snd = 'zap';
+      if (event === 'playerWin') snd = 'victory';
+      window.PetMutationLab.playSynthSound(snd);
+    }
+  }
+
+  function updatePetOpponentUI() {
+    const avatarEl = document.getElementById('chess-pet-avatar');
+    const nameEl = document.getElementById('chess-pet-name');
+    const pet = getPetOpponentData(activePetOpponent);
+
+    if (nameEl) {
+      nameEl.textContent = pet.name || 'Virtual Pet';
+    }
+
+    if (avatarEl) {
+      if (pet.isMutant && window.PetMutationLab && window.PetMutationLab.renderHybridPetSVG) {
+        avatarEl.innerHTML = window.PetMutationLab.renderHybridPetSVG(pet.mutantObj, 56);
+      } else if (window.DragonSprites && window.DragonSprites.renderSVG) {
+        const spriteKey = 'PET_' + (activePetOpponent || 'DRAGON').toUpperCase();
+        avatarEl.innerHTML = window.DragonSprites.renderSVG(spriteKey, 56) || `<span style="font-size: 2.5rem;">${pet.icon || '🐉'}</span>`;
+      } else {
+        avatarEl.innerHTML = `<span style="font-size: 2.5rem;">${pet.icon || '🐉'}</span>`;
+      }
+    }
+
+    // Sync pet selector if present
+    const sel = document.getElementById('chess-pet-selector');
+    if (sel) {
+      populatePetSelectorOptions(sel);
+      sel.value = activePetOpponent;
+    }
+  }
+
+  function populatePetSelectorOptions(selectEl) {
+    if (!selectEl) return;
+    const currentVal = activePetOpponent;
+    selectEl.innerHTML = '';
+
+    const baseGroup = document.createElement('optgroup');
+    baseGroup.label = 'Mascot Companions';
+    const mascots = [
+      { id: 'dragon', name: 'Ignis (Baby Dragon)' },
+      { id: 'cat', name: 'Neko (Calico Cat)' },
+      { id: 'cyber_puppy', name: 'Sparky (Cyber Puppy)' },
+      { id: 'red_panda', name: 'Rusty (Red Panda)' },
+      { id: 'cosmic_axolotl', name: 'Aura (Cosmic Axolotl)' }
+    ];
+    mascots.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.id;
+      opt.textContent = m.name;
+      baseGroup.appendChild(opt);
+    });
+    selectEl.appendChild(baseGroup);
+
+    // Mutated pets
+    const mutants = (window.PetMutationLab && window.PetMutationLab.getMutatedPets) 
+      ? window.PetMutationLab.getMutatedPets() 
+      : JSON.parse(localStorage.getItem('drag0n_mutated_pets') || '[]');
+    
+    if (mutants.length > 0) {
+      const mutantGroup = document.createElement('optgroup');
+      mutantGroup.label = '🧬 Mutated Hybrids';
+      mutants.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.id;
+        opt.textContent = `🧬 ${m.name} (Hybrid)`;
+        mutantGroup.appendChild(opt);
+      });
+      selectEl.appendChild(mutantGroup);
+    }
+
+    selectEl.value = currentVal;
+  }
 
   function initBoard() {
     board = [
@@ -110,8 +342,18 @@
     capturedWhite = [];
     capturedBlack = [];
     isGameOver = false;
+
+    // Default to active companion if available
+    const activeComp = localStorage.getItem('activeCompanion');
+    if (activeComp) {
+      activePetOpponent = activeComp;
+    }
+
+    updatePetOpponentUI();
     renderBoard();
     updateStatus();
+    triggerPetReaction('start');
+
     if (turn === aiColor) {
       setTimeout(makeAIMove, 400);
     }
@@ -316,7 +558,7 @@
 
     if (moves.length === 0) {
       if (isKingInCheck(bd, currentColor)) {
-        return isMaximizing ? -99999 + depth : 99999 - depth; // Checkmate
+        return isMaximizing ? -99999 + depth : 99999 - depth;
       }
       return 0; // Stalemate
     }
@@ -413,6 +655,7 @@
     const [fr, fc] = move.from;
     const [tr, tc] = move.to;
     const captured = board[tr][tc];
+    const isPlayer = (turn === playerColor);
 
     if (captured) {
       if (isWhite(captured)) capturedWhite.push(captured);
@@ -430,30 +673,63 @@
     renderBoard();
     updateStatus();
 
+    // Check game termination
     const nextMoves = getLegalMovesForColor(board, turn);
+    const inCheck = isKingInCheck(board, turn);
+
     if (nextMoves.length === 0) {
       isGameOver = true;
-      if (isKingInCheck(board, turn)) {
+      if (inCheck) {
         const winner = turn === playerColor ? 'AI' : 'Player';
         if (winner === 'Player') {
           let rewardDC = aiDifficulty === 'hard' ? 300 : (aiDifficulty === 'medium' ? 150 : 75);
-          alert(`🏆 CHECKMATE! You won against the AI! (+${rewardDC} Dragon Coins)`);
+          triggerPetReaction('playerWin');
+
+          // Persist DC rewards
           let curDC = parseInt(localStorage.getItem('drag0n_dc') || '0');
           localStorage.setItem('drag0n_dc', (curDC + rewardDC).toString());
           if (window.addXP) window.addXP(300);
           if (window.updateProfileWidget) window.updateProfileWidget();
+
+          // Add companion friendship bonus
+          try {
+            const petKey = activePetOpponent;
+            const stats = JSON.parse(localStorage.getItem(`companionStats_${petKey}`) || '{"level":1,"xp":0,"energy":100,"happiness":100,"friendship":0}');
+            stats.friendship = Math.min(100, stats.friendship + 20);
+            stats.happiness = Math.min(100, stats.happiness + 15);
+            localStorage.setItem(`companionStats_${petKey}`, JSON.stringify(stats));
+          } catch (e) {}
+
+          setTimeout(() => {
+            alert(`🏆 CHECKMATE! You defeated your pet in Chess!\n+${rewardDC} Dragon Coins (DC)\n+300 Level EXP\n+20 Pet Friendship!`);
+          }, 400);
         } else {
-          alert(`☠️ CHECKMATE! AI wins! Try again!`);
+          triggerPetReaction('petWin');
+          setTimeout(() => {
+            alert(`☠️ CHECKMATE! Your pet won the match! Rematch?`);
+          }, 400);
         }
       } else {
-        alert(`🤝 STALEMATE! Game ends in a draw!`);
+        triggerPetReaction('draw');
+        setTimeout(() => {
+          alert(`🤝 STALEMATE! Game ends in a draw!`);
+        }, 400);
       }
       updateStatus();
       return;
     }
 
+    // Reaction to move or check or capture
+    if (inCheck) {
+      triggerPetReaction(isPlayer ? 'checkOnPet' : 'checkOnPlayer');
+    } else if (captured) {
+      triggerPetReaction(isPlayer ? 'playerCapture' : 'petCapture');
+    } else {
+      triggerPetReaction(isPlayer ? 'playerMove' : 'petMove');
+    }
+
     if (!isGameOver && turn === aiColor) {
-      setTimeout(makeAIMove, 500);
+      setTimeout(makeAIMove, 550);
     }
   }
 
@@ -491,7 +767,12 @@
         if (piece) {
           const pieceEl = document.createElement('span');
           pieceEl.className = `chess-piece ${isWhite(piece) ? 'piece-white' : 'piece-black'}`;
-          pieceEl.innerText = PIECE_SYMBOLS[piece] || piece;
+          const spriteKey = (isWhite(piece) ? 'w' : 'b') + piece.toUpperCase();
+          if (window.DragonSprites && window.DragonSprites.SPRITES && window.DragonSprites.SPRITES.CHESS_PIECES && window.DragonSprites.SPRITES.CHESS_PIECES[spriteKey]) {
+            pieceEl.innerHTML = window.DragonSprites.SPRITES.CHESS_PIECES[spriteKey];
+          } else {
+            pieceEl.innerText = PIECE_SYMBOLS[piece] || piece;
+          }
           sq.appendChild(pieceEl);
         }
 
@@ -513,8 +794,26 @@
   function renderCaptured() {
     const capWEl = document.getElementById('chess-cap-white');
     const capBEl = document.getElementById('chess-cap-black');
-    if (capWEl) capWEl.innerText = capturedWhite.map(p => PIECE_SYMBOLS[p]).join(' ');
-    if (capBEl) capBEl.innerText = capturedBlack.map(p => PIECE_SYMBOLS[p]).join(' ');
+    if (capWEl) {
+      if (window.DragonSprites && window.DragonSprites.SPRITES && window.DragonSprites.SPRITES.CHESS_PIECES) {
+        capWEl.innerHTML = capturedWhite.map(p => {
+          const key = (isWhite(p) ? 'w' : 'b') + p.toUpperCase();
+          return window.DragonSprites.SPRITES.CHESS_PIECES[key] || PIECE_SYMBOLS[p];
+        }).join('');
+      } else {
+        capWEl.innerText = capturedWhite.map(p => PIECE_SYMBOLS[p]).join(' ');
+      }
+    }
+    if (capBEl) {
+      if (window.DragonSprites && window.DragonSprites.SPRITES && window.DragonSprites.SPRITES.CHESS_PIECES) {
+        capBEl.innerHTML = capturedBlack.map(p => {
+          const key = (isWhite(p) ? 'w' : 'b') + p.toUpperCase();
+          return window.DragonSprites.SPRITES.CHESS_PIECES[key] || PIECE_SYMBOLS[p];
+        }).join('');
+      } else {
+        capBEl.innerText = capturedBlack.map(p => PIECE_SYMBOLS[p]).join(' ');
+      }
+    }
   }
 
   function renderHistory() {
@@ -539,29 +838,45 @@
     const isPlayerTurn = turn === playerColor;
 
     if (inCheck) {
-      statusEl.innerText = isPlayerTurn ? '⚠️ CHECK! Your King is under attack!' : '⚔️ CHECK! AI King is under attack!';
+      statusEl.innerText = isPlayerTurn ? '⚠️ CHECK! Your King is in danger!' : '⚔️ CHECK! Pet King under attack!';
       statusEl.style.color = '#fbbf24';
     } else {
-      statusEl.innerText = isPlayerTurn ? 'Your Turn (White)' : '🤖 AI is calculating move...';
+      statusEl.innerText = isPlayerTurn ? 'Your Turn (White)' : '🐾 Pet is calculating move...';
       statusEl.style.color = isPlayerTurn ? '#38bdf8' : '#c084fc';
     }
   }
 
-  window.setChessDifficulty = function(diff) {
+  // Global Exports
+  global.setChessDifficulty = function(diff) {
     aiDifficulty = diff;
   };
 
-  window.restartChessGame = function() {
+  global.setChessPetOpponent = function(petId) {
+    activePetOpponent = petId;
+    updatePetOpponentUI();
+    triggerPetReaction('start');
+  };
+
+  global.restartChessGame = function() {
     initBoard();
   };
 
-  window.initChessUI = function() {
+  global.initChessUI = function() {
     initBoard();
   };
+
+  // Listen to mutation event so the pet opponent selector automatically updates if a pet is mutated!
+  window.addEventListener('drag0n_pet_mutated', (e) => {
+    const sel = document.getElementById('chess-pet-selector');
+    if (sel) {
+      populatePetSelectorOptions(sel);
+    }
+  });
 
   window.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('chess-board')) {
       initBoard();
     }
   });
-})();
+
+})(window);

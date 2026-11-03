@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dragon Shop - DrAg0n</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.css">
   <style>
     .shop-item {
@@ -21,13 +21,30 @@
       transform: translateY(-5px);
       box-shadow: 0 10px 20px rgba(0,0,0,0.3);
     }
+    .shop-item-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 12px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.03);
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
     .shop-price {
       font-weight: bold;
       color: #fbbf24;
       font-size: 1.2rem;
       margin-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
     }
   </style>
+  <script src="assets/js/sprites.js"></script>
 </head>
 <body>
   <!-- UNIFIED SLEEK TOP NAVBAR -->
@@ -38,6 +55,8 @@
     <div class="top-nav-links">
       <a href="index.html" class="top-nav-link">Home</a>
       <a href="games.html" class="top-nav-link">Arcade</a>
+      <a href="aether-siege.html" class="top-nav-link">Aether Siege</a>
+      <a href="chess.html" class="top-nav-link">Chess vs AI</a>
       <a href="club.html" class="top-nav-link">Books & Club</a>
       <a href="room.html" class="top-nav-link">Pet Room</a>
       <a href="space-game.html" class="top-nav-link">Space Explorer</a>
@@ -60,8 +79,8 @@
       VIRTUAL PERKS & REWARDS STORE
     </div>
     <h1 style="font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 800; margin-bottom: 0.8rem;"><span class="gradient-text-gold">Dragon Store</span></h1>
-    <p style="font-size: 1.15rem; color: var(--text-muted); max-width: 600px; margin: 0 auto; line-height: 1.6;">
-      Redeem Dragon Coins (DC) earned from games & activities! Your current balance is <span id="shop-dc-balance" style="color:#fbbf24; font-weight:800;">0 DC</span>.
+    <p style="font-size: 1.15rem; color: var(--text-muted); max-width: 600px; margin: 0 auto; line-height: 1.6; display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;">
+      Redeem Dragon Coins (DC) earned from games & activities! Your balance is <span style="display: inline-flex; align-items: center; gap: 4px; color:#fbbf24; font-weight:800;"><span id="shop-dc-icon"></span><span id="shop-dc-balance">0 DC</span></span>.
     </p>
   </header>
 
@@ -69,80 +88,88 @@
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-top: 2rem;">
       
       <div class="shop-item" onclick="window.buyItem('chatColor', 'gold', 50)">
+        <div class="shop-item-icon" data-sprite="SHOP_GOLD_CHAT"></div>
         <h3>Golden Chat Name</h3>
         <p style="color: var(--text-muted); font-size: 0.9rem;">Make your name glow gold in the Animal Chat.</p>
-        <div class="shop-price">50 DC</div>
+        <div class="shop-price"><span class="price-coin"></span>50 DC</div>
       </div>
 
       <div class="shop-item" onclick="window.buyItem('avatarBorder', 'fire', 100)">
+        <div class="shop-item-icon" data-sprite="SHOP_FIRE_BORDER"></div>
         <h3>Fire Avatar Border</h3>
         <p style="color: var(--text-muted); font-size: 0.9rem;">Adds a fiery ring around your avatar globally.</p>
-        <div class="shop-price">100 DC</div>
+        <div class="shop-price"><span class="price-coin"></span>100 DC</div>
       </div>
 
       <div class="shop-item" onclick="window.buyItem('badge', 'vip', 500)">
+        <div class="shop-item-icon" data-sprite="SHOP_VIP"></div>
         <h3>VIP Badge</h3>
         <p style="color: var(--text-muted); font-size: 0.9rem;">A permanent crown next to your name everywhere.</p>
-        <div class="shop-price">500 DC</div>
+        <div class="shop-price"><span class="price-coin"></span>500 DC</div>
       </div>
 
       <div class="shop-item" onclick="window.buyItem('pet', 'dragon', 1000)">
+        <div class="shop-item-icon" data-sprite="PET_DRAGON"></div>
         <h3>Pet Dragon</h3>
         <p style="color: var(--text-muted); font-size: 0.9rem;">A tiny dragon that floats next to your profile.</p>
-        <div class="shop-price">1000 DC</div>
+        <div class="shop-price"><span class="price-coin"></span>1000 DC</div>
       </div>
 
       <div class="shop-item" onclick="window.buyItem('pet', 'robot', 800)">
+        <div class="shop-item-icon" data-sprite="PET_CYBER_PUPPY"></div>
         <h3>Pet Robot</h3>
         <p style="color: var(--text-muted); font-size: 0.9rem;">A loyal bot companion.</p>
-        <div class="shop-price">800 DC</div>
+        <div class="shop-price"><span class="price-coin"></span>800 DC</div>
       </div>
 
       <!-- Playground Furniture Items -->
       <div class="shop-item" onclick="window.buyItem('furniture_royal_bed', true, 150)">
+        <div class="shop-item-icon" data-sprite="FURNITURE_BED"></div>
         <h3>Royal Canopy Bed</h3>
         <p style="color: var(--text-muted); font-size: 0.9rem;">A luxurious purple velvet bed for your screen pets to sleep on.</p>
-        <div class="shop-price">150 DC</div>
+        <div class="shop-price"><span class="price-coin"></span>150 DC</div>
       </div>
 
       <div class="shop-item" onclick="window.buyItem('furniture_gamer_console', true, 200)">
+        <div class="shop-item-icon" data-sprite="FURNITURE_CONSOLE"></div>
         <h3>Neon Gamer Console</h3>
         <p style="color: var(--text-muted); font-size: 0.9rem;">A high-spec glowing rig. Boosts pet EXP when used.</p>
-        <div class="shop-price">200 DC</div>
+        <div class="shop-price"><span class="price-coin"></span>200 DC</div>
       </div>
 
       <div class="shop-item" onclick="window.buyItem('furniture_disco_ball', true, 120)">
+        <div class="shop-item-icon" data-sprite="FURNITURE_DISCO"></div>
         <h3>Party Disco Ball</h3>
         <p style="color: var(--text-muted); font-size: 0.9rem;">A spinning disco ball that prompts your pet to dance.</p>
-        <div class="shop-price">120 DC</div>
+        <div class="shop-price"><span class="price-coin"></span>120 DC</div>
       </div>
 
       <div class="shop-item" onclick="window.buyItem('furniture_buffet_bowl', true, 80)">
-        <div style="font-size: 3rem;">🥣</div>
+        <div class="shop-item-icon" data-sprite="FURNITURE_BUFFET"></div>
         <h3>Gourmet Buffet Bowl</h3>
         <p style="color: var(--text-muted); font-size: 0.9rem;">Always filled with fresh food. Restores pet Energy.</p>
-        <div class="shop-price">80 DC</div>
+        <div class="shop-price"><span class="price-coin"></span>80 DC</div>
       </div>
 
       <div class="shop-item" onclick="window.buyItem('toy_yarn_ball', true, 40)">
-        <div style="font-size: 3rem;">🧶</div>
+        <div class="shop-item-icon" data-sprite="TOY_YARN"></div>
         <h3>Playground Yarn Ball</h3>
         <p style="color: var(--text-muted); font-size: 0.9rem;">Interactive yarn for the room canvas. Pets love to roll it.</p>
-        <div class="shop-price">40 DC</div>
+        <div class="shop-price"><span class="price-coin"></span>40 DC</div>
       </div>
 
       <div class="shop-item" onclick="window.buyItem('toy_gourmet_treat', true, 30)">
-        <div style="font-size: 3rem;">🍗</div>
+        <div class="shop-item-icon" data-sprite="TOY_TREAT"></div>
         <h3>Playground Gourmet Treat</h3>
-        <p style="color: var(--text-muted); font-size: 0.9rem;">Delicious drumstick to leave in your pet's playground room.</p>
-        <div class="shop-price">30 DC</div>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Delicious treat to leave in your pet's playground room.</p>
+        <div class="shop-price"><span class="price-coin"></span>30 DC</div>
       </div>
       
       <div class="shop-item" onclick="window.createClan()">
-        <div style="font-size: 3rem;">🛡️</div>
+        <div class="shop-item-icon" data-sprite="CLAN_SHIELD"></div>
         <h3>Found a Clan</h3>
         <p style="color: var(--text-muted); font-size: 0.9rem;">Get a custom [TAG] next to your name.</p>
-        <div class="shop-price">2000 DC</div>
+        <div class="shop-price"><span class="price-coin"></span>2000 DC</div>
       </div>
 
     </div>
@@ -154,6 +181,19 @@
   <script src="assets/js/main.js?v=3"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
+      // Render sprites on shop item cards
+      if (window.DragonSprites) {
+        document.querySelectorAll('.shop-item-icon[data-sprite]').forEach(el => {
+          const key = el.getAttribute('data-sprite');
+          el.innerHTML = window.DragonSprites.renderSVG(key, 46);
+        });
+        const dcIcon = document.getElementById('shop-dc-icon');
+        if (dcIcon) dcIcon.innerHTML = window.DragonSprites.renderSVG('DRAGON_COIN', 22);
+        document.querySelectorAll('.price-coin').forEach(el => {
+          el.innerHTML = window.DragonSprites.renderSVG('DRAGON_COIN', 16);
+        });
+      }
+
       window.updateShopBalance = function() {
         const dc = parseInt(localStorage.getItem('drag0n_dc') || '0');
         document.getElementById('shop-dc-balance').textContent = dc + " DC";
@@ -211,6 +251,7 @@
         }
       };
 </script>
+<script src="assets/js/mutation.js"></script>
 <script src="assets/js/companions.js"></script>
 </body>
 </html>

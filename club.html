@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DrAg0n</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 
@@ -18,11 +18,12 @@
     <div class="top-nav-links">
       <a href="index.html" class="top-nav-link">Home</a>
       <a href="games.html" class="top-nav-link">Arcade</a>
+      <a href="aether-siege.html" class="top-nav-link">Aether Siege</a>
+      <a href="chess.html" class="top-nav-link">Chess vs AI</a>
       <a href="club.html" class="top-nav-link active">Books & Club</a>
       <a href="room.html" class="top-nav-link">Pet Room</a>
       <a href="space-game.html" class="top-nav-link">Space Explorer</a>
       <a href="fc24-squad-builder.html" class="top-nav-link">Squad Builder</a>
-      <a href="chess.html" class="top-nav-link">Chess vs AI</a>
       <a href="chat.html" class="top-nav-link">Chat</a>
     </div>
     <div class="top-nav-actions">
@@ -124,7 +125,7 @@
         <div style="display: flex; flex-direction: column; gap: 2rem;">
           <!-- Discussion Questions -->
           <div class="glass-card" style="border-color: rgba(56, 189, 248, 0.4);">
-            <h3 style="color: #38bdf8;">🤔 Discussion Questions</h3>
+            <h3 style="color: #38bdf8; display: flex; align-items: center; gap: 8px;"><span class="ui-icon" data-sprite="UI_QUILL" data-size="22"></span> Discussion Questions</h3>
             <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">Think about these as you read!</p>
             <ol style="padding-left: 1.2rem; font-size: 0.95rem; line-height: 1.6;">
               <li style="margin-bottom: 0.8rem;">How does Katniss's relationship with Peeta evolve, and how much of it is strategy vs. genuine feeling?</li>
@@ -148,15 +149,13 @@
 
           <!-- Recommended Books -->
           <div class="glass-card" style="border-color: rgba(34, 197, 94, 0.4);">
-            <h3 style="color: #4ade80;">📚 Master Reading Schedule</h3>
+            <h3 style="color: #4ade80; display: flex; align-items: center; gap: 8px;"><span class="ui-icon" data-sprite="UI_BOOK" data-size="22"></span> Master Reading Schedule</h3>
             <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">The ultimate 30-book list for ages 10-15.</p>
             
             <div id="book-schedule-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 1rem; max-height: 400px; overflow-y: auto; padding: 10px 5px;">
                <!-- Books will be injected here via JS -->
             </div>
             
-            <!-- We will use a silent click/hover sound -->
-            <audio id="page-turn-audio" src="https://www.myinstants.com/media/sounds/pop.mp3" preload="auto"></audio>
           </div>
         </div>
 
@@ -164,8 +163,8 @@
 
       <!-- FREE LEGAL PUBLIC DOMAIN BOOKS SECTION -->
       <div class="glass-card" style="border-color: rgba(56, 189, 248, 0.4); margin-top: 2rem;">
-        <h3 style="color: #38bdf8; font-size: 1.6rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 8px;">
-          🏛️ Free Public Domain Classics Library (Read Online Legally)
+        <h3 style="color: #38bdf8; font-size: 1.6rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 10px;">
+          <span class="ui-icon" data-sprite="UI_TEMPLE" data-size="28"></span> Free Public Domain Classics Library (Read Online Legally)
         </h3>
         <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">
           These timeless classics are 100% free of copyright restrictions. Click any book to read its full text legally online via Project Gutenberg!
@@ -180,7 +179,7 @@
               <h4 style="font-size: 1rem; margin-bottom: 2px; color: #fff;">Sherlock Holmes</h4>
               <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">Arthur Conan Doyle</p>
             </div>
-            <a href="https://www.gutenberg.org/ebooks/1661" target="_blank" style="display: block; background: rgba(56, 189, 248, 0.2); border: 1px solid rgba(56, 189, 248, 0.5); color: #38bdf8; text-decoration: none; padding: 6px; border-radius: 6px; font-weight: bold; font-size: 0.8rem;">📖 Read Free Online</a>
+            <a href="https://www.gutenberg.org/ebooks/1661" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 6px; background: rgba(56, 189, 248, 0.2); border: 1px solid rgba(56, 189, 248, 0.5); color: #38bdf8; text-decoration: none; padding: 6px; border-radius: 6px; font-weight: bold; font-size: 0.8rem;"><span class="ui-icon" data-sprite="UI_BOOK" data-size="16"></span> Read Free Online</a>
           </div>
 
           <div class="glass-card" style="padding: 12px; text-align: center; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between;">
@@ -190,7 +189,7 @@
               <h4 style="font-size: 1rem; margin-bottom: 2px; color: #fff;">Dracula</h4>
               <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">Bram Stoker</p>
             </div>
-            <a href="https://www.gutenberg.org/ebooks/345" target="_blank" style="display: block; background: rgba(232, 121, 249, 0.2); border: 1px solid rgba(232, 121, 249, 0.5); color: #e879f9; text-decoration: none; padding: 6px; border-radius: 6px; font-weight: bold; font-size: 0.8rem;">📖 Read Free Online</a>
+            <a href="https://www.gutenberg.org/ebooks/345" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 6px; background: rgba(232, 121, 249, 0.2); border: 1px solid rgba(232, 121, 249, 0.5); color: #e879f9; text-decoration: none; padding: 6px; border-radius: 6px; font-weight: bold; font-size: 0.8rem;"><span class="ui-icon" data-sprite="UI_BOOK" data-size="16"></span> Read Free Online</a>
           </div>
 
           <div class="glass-card" style="padding: 12px; text-align: center; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between;">
@@ -200,7 +199,7 @@
               <h4 style="font-size: 1rem; margin-bottom: 2px; color: #fff;">Frankenstein</h4>
               <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">Mary Shelley</p>
             </div>
-            <a href="https://www.gutenberg.org/ebooks/84" target="_blank" style="display: block; background: rgba(74, 222, 128, 0.2); border: 1px solid rgba(74, 222, 128, 0.5); color: #4ade80; text-decoration: none; padding: 6px; border-radius: 6px; font-weight: bold; font-size: 0.8rem;">📖 Read Free Online</a>
+            <a href="https://www.gutenberg.org/ebooks/84" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 6px; background: rgba(74, 222, 128, 0.2); border: 1px solid rgba(74, 222, 128, 0.5); color: #4ade80; text-decoration: none; padding: 6px; border-radius: 6px; font-weight: bold; font-size: 0.8rem;"><span class="ui-icon" data-sprite="UI_BOOK" data-size="16"></span> Read Free Online</a>
           </div>
 
           <div class="glass-card" style="padding: 12px; text-align: center; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between;">
@@ -210,7 +209,7 @@
               <h4 style="font-size: 1rem; margin-bottom: 2px; color: #fff;">Alice in Wonderland</h4>
               <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">Lewis Carroll</p>
             </div>
-            <a href="https://www.gutenberg.org/ebooks/11" target="_blank" style="display: block; background: rgba(251, 191, 36, 0.2); border: 1px solid rgba(251, 191, 36, 0.5); color: #fbbf24; text-decoration: none; padding: 6px; border-radius: 6px; font-weight: bold; font-size: 0.8rem;">📖 Read Free Online</a>
+            <a href="https://www.gutenberg.org/ebooks/11" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 6px; background: rgba(251, 191, 36, 0.2); border: 1px solid rgba(251, 191, 36, 0.5); color: #fbbf24; text-decoration: none; padding: 6px; border-radius: 6px; font-weight: bold; font-size: 0.8rem;"><span class="ui-icon" data-sprite="UI_BOOK" data-size="16"></span> Read Free Online</a>
           </div>
 
           <div class="glass-card" style="padding: 12px; text-align: center; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between;">
@@ -220,7 +219,7 @@
               <h4 style="font-size: 1rem; margin-bottom: 2px; color: #fff;">Wizard of Oz</h4>
               <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">L. Frank Baum</p>
             </div>
-            <a href="https://www.gutenberg.org/ebooks/55" target="_blank" style="display: block; background: rgba(244, 63, 94, 0.2); border: 1px solid rgba(244, 63, 94, 0.5); color: #f43f5e; text-decoration: none; padding: 6px; border-radius: 6px; font-weight: bold; font-size: 0.8rem;">📖 Read Free Online</a>
+            <a href="https://www.gutenberg.org/ebooks/55" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 6px; background: rgba(244, 63, 94, 0.2); border: 1px solid rgba(244, 63, 94, 0.5); color: #f43f5e; text-decoration: none; padding: 6px; border-radius: 6px; font-weight: bold; font-size: 0.8rem;"><span class="ui-icon" data-sprite="UI_BOOK" data-size="16"></span> Read Free Online</a>
           </div>
 
           <div class="glass-card" style="padding: 12px; text-align: center; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between;">
@@ -230,7 +229,7 @@
               <h4 style="font-size: 1rem; margin-bottom: 2px; color: #fff;">Dr. Jekyll & Hyde</h4>
               <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">R. L. Stevenson</p>
             </div>
-            <a href="https://www.gutenberg.org/ebooks/43" target="_blank" style="display: block; background: rgba(168, 85, 247, 0.2); border: 1px solid rgba(168, 85, 247, 0.5); color: #a855f7; text-decoration: none; padding: 6px; border-radius: 6px; font-weight: bold; font-size: 0.8rem;">📖 Read Free Online</a>
+            <a href="https://www.gutenberg.org/ebooks/43" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 6px; background: rgba(168, 85, 247, 0.2); border: 1px solid rgba(168, 85, 247, 0.5); color: #a855f7; text-decoration: none; padding: 6px; border-radius: 6px; font-weight: bold; font-size: 0.8rem;"><span class="ui-icon" data-sprite="UI_BOOK" data-size="16"></span> Read Free Online</a>
           </div>
 
           <div class="glass-card" style="padding: 12px; text-align: center; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between;">
@@ -240,7 +239,7 @@
               <h4 style="font-size: 1rem; margin-bottom: 2px; color: #fff;">Count of Monte Cristo</h4>
               <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">Alexandre Dumas</p>
             </div>
-            <a href="https://www.gutenberg.org/ebooks/1184" target="_blank" style="display: block; background: rgba(56, 189, 248, 0.2); border: 1px solid rgba(56, 189, 248, 0.5); color: #38bdf8; text-decoration: none; padding: 6px; border-radius: 6px; font-weight: bold; font-size: 0.8rem;">📖 Read Free Online</a>
+            <a href="https://www.gutenberg.org/ebooks/1184" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 6px; background: rgba(56, 189, 248, 0.2); border: 1px solid rgba(56, 189, 248, 0.5); color: #38bdf8; text-decoration: none; padding: 6px; border-radius: 6px; font-weight: bold; font-size: 0.8rem;"><span class="ui-icon" data-sprite="UI_BOOK" data-size="16"></span> Read Free Online</a>
           </div>
 
           <div class="glass-card" style="padding: 12px; text-align: center; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between;">
@@ -250,7 +249,7 @@
               <h4 style="font-size: 1rem; margin-bottom: 2px; color: #fff;">Peter Pan</h4>
               <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">J. M. Barrie</p>
             </div>
-            <a href="https://www.gutenberg.org/ebooks/16" target="_blank" style="display: block; background: rgba(52, 211, 153, 0.2); border: 1px solid rgba(52, 211, 153, 0.5); color: #34d399; text-decoration: none; padding: 6px; border-radius: 6px; font-weight: bold; font-size: 0.8rem;">📖 Read Free Online</a>
+            <a href="https://www.gutenberg.org/ebooks/16" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 6px; background: rgba(52, 211, 153, 0.2); border: 1px solid rgba(52, 211, 153, 0.5); color: #34d399; text-decoration: none; padding: 6px; border-radius: 6px; font-weight: bold; font-size: 0.8rem;"><span class="ui-icon" data-sprite="UI_BOOK" data-size="16"></span> Read Free Online</a>
           </div>
 
         </div>
@@ -333,9 +332,22 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
 
   <!-- ALL SCRIPTS (Consolidated) -->
+  <script src="assets/js/sprites.js"></script>
   <script src="assets/js/main.js?v=3"></script>
   <script src="assets/js/nms/core.js?v=30"></script>
+  <script src="assets/js/mutation.js"></script>
   <script src="assets/js/companions.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      if (window.DragonSprites) {
+        document.querySelectorAll('.ui-icon[data-sprite]').forEach(el => {
+          const key = el.getAttribute('data-sprite');
+          const size = el.getAttribute('data-size') ? parseInt(el.getAttribute('data-size')) : 20;
+          el.innerHTML = window.DragonSprites.renderSVG(key, size);
+        });
+      }
+    });
+  </script>
 </body>
 
 </html>

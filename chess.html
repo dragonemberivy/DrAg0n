@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chess vs AI - DrAg0n</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.css">
   <style>
     .chess-container {
@@ -20,13 +20,15 @@
 
 <body>
   <!-- TOP NAVIGATION BAR -->
-  <nav class="top-nav-bar">
-    <div class="top-nav-brand">
-      <a href="index.html" class="brand-title">DRAG0N</a>
-    </div>
+  <nav class="top-nav">
+    <a href="index.html" class="top-nav-logo">
+      <span class="gradient-text" style="font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em;">DRAG0N</span>
+    </a>
     <div class="top-nav-links">
       <a href="index.html" class="top-nav-link">Home</a>
-      <a href="games.html" class="top-nav-link active">Arcade</a>
+      <a href="games.html" class="top-nav-link">Arcade</a>
+      <a href="aether-siege.html" class="top-nav-link">Aether Siege</a>
+      <a href="chess.html" class="top-nav-link active">Chess vs AI</a>
       <a href="club.html" class="top-nav-link">Books & Club</a>
       <a href="room.html" class="top-nav-link">Pet Room</a>
       <a href="space-game.html" class="top-nav-link">Space Explorer</a>
@@ -61,6 +63,23 @@
       <!-- CHESS BOARD -->
       <div class="glass-card" style="padding: 1.5rem; border-color: rgba(56, 189, 248, 0.4); text-align: center;">
         
+        <!-- Pet Opponent Bar -->
+        <div class="pet-opponent-bar" style="margin-bottom: 1.2rem;">
+          <div class="pet-opponent-frame" id="chess-pet-avatar">
+            <span style="font-size: 2.2rem;">🐉</span>
+            <div class="pet-reaction-badge" id="chess-pet-reaction-icon">🐾</div>
+          </div>
+          <div style="flex: 1; text-align: left;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; flex-wrap: wrap;">
+              <span id="chess-pet-name" style="font-weight: 800; font-size: 1.05rem; color: #fff;">Ignis (Baby Dragon)</span>
+              <button onclick="if(window.PetMutationLab) window.PetMutationLab.openMutationLabModal();" style="padding: 4px 10px; border-radius: 9999px; background: rgba(57,255,20,0.15); border: 1px solid #39ff14; color: #39ff14; font-size: 0.72rem; font-weight: 800; cursor: pointer;">🧬 Mutation Lab</button>
+            </div>
+            <div class="pet-speech-bubble" id="chess-pet-bubble" style="font-size: 0.88rem; min-height: 42px;">
+              Rawr! You dare challenge Ignis to chess?! Prepare for fiery tactics!
+            </div>
+          </div>
+        </div>
+
         <!-- Turn & Check Status Banner -->
         <div id="chess-status" style="font-size: 1.15rem; font-weight: 800; margin-bottom: 1.2rem; color: #38bdf8; min-height: 28px;">
           Your Turn (White)
@@ -86,19 +105,27 @@
         
         <!-- Settings Card -->
         <div class="glass-card" style="border-color: rgba(192, 132, 252, 0.4);">
-          <h3 style="color: #c084fc; font-size: 1.3rem; margin-bottom: 1rem;">AI Controls</h3>
+          <h3 style="color: #c084fc; font-size: 1.3rem; margin-bottom: 1rem;">Opponent & AI Controls</h3>
           
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem; font-weight: 700;">CHALLENGE PET</label>
+            <select id="chess-pet-selector" onchange="window.setChessPetOpponent(this.value)" style="width: 100%; padding: 0.6rem 1rem; border-radius: 10px; background: rgba(0,0,0,0.4); border: 1px solid rgba(56, 189, 248, 0.4); color: #fff; font-family: inherit; font-size: 0.95rem;">
+              <!-- Auto populated -->
+            </select>
+          </div>
+
           <div style="margin-bottom: 1.2rem;">
             <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem; font-weight: 700;">AI DIFFICULTY</label>
             <select onchange="window.setChessDifficulty(this.value)" style="width: 100%; padding: 0.6rem 1rem; border-radius: 10px; background: rgba(0,0,0,0.4); border: 1px solid rgba(192, 132, 252, 0.4); color: #fff; font-family: inherit; font-size: 0.95rem;">
-              <option value="easy">Novice (Easy - +75 DC reward)</option>
+              <option value="easy">Casual Pet (Easy - +75 DC reward)</option>
               <option value="medium" selected>Tactician (Medium - +150 DC reward)</option>
               <option value="hard">Grandmaster (Hard - +300 DC reward)</option>
             </select>
           </div>
 
-          <button onclick="window.restartChessGame()" style="width: 100%; padding: 0.75rem; font-weight: 800; border-radius: 12px; background: linear-gradient(135deg, #38bdf8, #818cf8); color: #0b0e17; border: none; cursor: pointer; font-size: 0.95rem;">
-            Restart Game 🔄
+          <button onclick="window.restartChessGame()" style="width: 100%; padding: 0.75rem; font-weight: 800; border-radius: 12px; background: linear-gradient(135deg, #38bdf8, #818cf8); color: #0b0e17; border: none; cursor: pointer; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <span id="chess-restart-icon"></span>
+            Restart Game
           </button>
         </div>
 
@@ -106,7 +133,7 @@
         <div class="glass-card" style="flex: 1;">
           <h3 style="font-size: 1.2rem; margin-bottom: 0.8rem; color: #fff;">Move Log</h3>
           <div id="chess-history" style="height: 180px; overflow-y: auto; font-family: monospace; font-size: 0.88rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
-            <div>Game started. You play White.</div>
+            <div>Game started. You play White vs Pet.</div>
           </div>
         </div>
 
@@ -116,7 +143,18 @@
   </main>
 
   <!-- ALL SCRIPTS -->
+  <script src="assets/js/sprites.js"></script>
   <script src="assets/js/main.js"></script>
+  <script src="assets/js/mutation.js"></script>
   <script src="assets/js/chess.js"></script>
+  <script src="assets/js/companions.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const iconEl = document.getElementById('chess-restart-icon');
+      if (iconEl && window.DragonSprites) {
+        iconEl.innerHTML = window.DragonSprites.renderSVG('UI_REFRESH', 18);
+      }
+    });
+  </script>
 </body>
 </html>

@@ -62,14 +62,33 @@
         (playerChoice === 'paper' && computerChoice === 'rock') ||
         (playerChoice === 'scissors' && computerChoice === 'paper')
       ) {
-        result = "You win!";
+        result = "You win! +10 DC";
+        if (window.addDC) window.addDC(10);
+        if (window.addXP) window.addXP(15);
       } else {
         result = "You lose!";
       }
 
       const map = { rock: 'Rock', paper: 'Paper', scissors: 'Scissors' };
-      document.getElementById('rpsResult').innerHTML =
-        `You: ${map[playerChoice]} vs PC: ${map[computerChoice]}<br><span style="color:var(--accent); font-size:1.2rem; margin-top:10px; display:inline-block;">${result}</span>`;
+      const spriteMap = { rock: 'RPS_ROCK', paper: 'RPS_PAPER', scissors: 'RPS_SCISSORS' };
+
+      const getIcon = (choice) => {
+        if (window.DragonSprites && spriteMap[choice]) {
+          return window.DragonSprites.renderSVG(spriteMap[choice], 24);
+        }
+        return '';
+      };
+
+      const resEl = document.getElementById('rpsResult');
+      if (resEl) {
+        resEl.innerHTML =
+          `<div style="display:flex; align-items:center; justify-content:center; gap:16px; margin-bottom:8px;">
+            <div style="display:inline-flex; align-items:center; gap:6px;">${getIcon(playerChoice)} <strong>${map[playerChoice]}</strong></div>
+            <span style="color:var(--text-muted); font-weight:bold;">VS</span>
+            <div style="display:inline-flex; align-items:center; gap:6px;">${getIcon(computerChoice)} <strong>${map[computerChoice]}</strong></div>
+          </div>
+          <span style="color:var(--accent); font-size:1.15rem; font-weight:800; display:inline-block;">${result}</span>`;
+      }
     }
 
     // ------------------------------------
@@ -636,6 +655,20 @@
             audio.currentTime = 0;
             audio.volume = 0.2;
             audio.play().catch(e => {});
+          } else if (window.AudioContext || window.webkitAudioContext) {
+            try {
+              const ctx = new (window.AudioContext || window.webkitAudioContext)();
+              const osc = ctx.createOscillator();
+              const gain = ctx.createGain();
+              osc.frequency.setValueAtTime(420, ctx.currentTime);
+              osc.frequency.exponentialRampToValueAtTime(120, ctx.currentTime + 0.04);
+              gain.gain.setValueAtTime(0.03, ctx.currentTime);
+              gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.04);
+              osc.connect(gain);
+              gain.connect(ctx.destination);
+              osc.start();
+              osc.stop(ctx.currentTime + 0.04);
+            } catch(e) {}
           }
         });
         if (book.gutenbergUrl) {
@@ -1049,214 +1082,13 @@
       });
     }
 
-    // HTML5 TRAVEL AUDIO PLAYER LOGIC
-    const travelPlaylist = [
-      { title: "1. #BoxBaddhalaiPoye Full Video Song", url: "assets/audio/travel_playlist/#BoxBaddhalaiPoye Full Video Song With Lyrics ｜ DJ Full Video Songs ｜ Allu Arjun ｜ Pooja Hegde ｜ DSP.webm" },
-      { title: "2. A Million Dreams", url: "assets/audio/travel_playlist/A Million Dreams.webm" },
-      { title: "3. ABC", url: "assets/audio/travel_playlist/ABC.webm" },
-      { title: "4. Aankh Marey (Simmba)", url: "assets/audio/travel_playlist/Aankh Marey (From ＂Simmba＂).webm" },
-      { title: "5. Believer", url: "assets/audio/travel_playlist/Believer.webm" },
-      { title: "6. Bhool Bhulaiyaa 2 Title Track", url: "assets/audio/travel_playlist/Bhool Bhulaiyaa 2 Title Track.webm" },
-      { title: "7. Billie Jean", url: "assets/audio/travel_playlist/Billie Jean.webm" },
-      { title: "8. Blank Space (Taylor's Version)", url: "assets/audio/travel_playlist/Blank Space (Taylor's Version).webm" },
-      { title: "9. Box Badhalai Poyi", url: "assets/audio/travel_playlist/Box Badhalai Poyi.webm" },
-      { title: "10. Sunny Road to Salina", url: "assets/audio/travel_playlist/CHRISTOPHE-Sunny Road to Salina.webm" },
-      { title: "11. Counting Stars", url: "assets/audio/travel_playlist/Counting Stars.webm" },
-      { title: "12. Dance Monkey", url: "assets/audio/travel_playlist/Dance Monkey.webm" },
-      { title: "13. Day Of Anger", url: "assets/audio/travel_playlist/Day Of Anger.webm" },
-      { title: "14. Demons", url: "assets/audio/travel_playlist/Demons.webm" },
-      { title: "15. Dippam Dappam", url: "assets/audio/travel_playlist/Dippam Dappam (Telugu) (From ＂Kanmani Rambo Khatija＂).webm" },
-      { title: "16. Dj Waley Babu", url: "assets/audio/travel_playlist/Dj Waley Babu.webm" },
-      { title: "17. Dynamite", url: "assets/audio/travel_playlist/Dynamite.webm" },
-      { title: "18. Empire State Of Mind", url: "assets/audio/travel_playlist/Empire State Of Mind.webm" },
-      { title: "19. Follow Follow", url: "assets/audio/travel_playlist/Follow Follow Full Video ｜ Nannaku Prematho ｜ Junior NTR ｜ Rakul Preet Singh ｜ Latest Telugu Songs.webm" },
-      { title: "20. Ghungroo (WAR)", url: "assets/audio/travel_playlist/Ghungroo (From ＂WAR＂).webm" },
-      { title: "21. Grenade (Acoustic)", url: "assets/audio/travel_playlist/Grenade (Acoustic).webm" },
-      { title: "22. Halo", url: "assets/audio/travel_playlist/Halo.webm" },
-      { title: "23. Happy", url: "assets/audio/travel_playlist/Happy (From ＂Despicable Me 2＂).webm" },
-      { title: "24. Hey Jude", url: "assets/audio/travel_playlist/Hey Jude (Remastered 2015).webm" },
-      { title: "25. Hoyna Hoyna", url: "assets/audio/travel_playlist/Hoyna Hoyna (From ＂Gang Leader＂).webm" },
-      { title: "26. Illegal Weapon 2.0", url: "assets/audio/travel_playlist/Illegal Weapon 2.0 (From ＂Street Dancer 3D＂).webm" },
-      { title: "27. Jai Jai Shivshankar", url: "assets/audio/travel_playlist/Jai Jai Shivshankar (From ＂WAR＂).webm" },
-      { title: "28. Jalebi Baby", url: "assets/audio/travel_playlist/Jalebi Baby.webm" },
-      { title: "29. Kala Chashma", url: "assets/audio/travel_playlist/Kala Chashma.webm" },
-      { title: "30. Kalaavathi", url: "assets/audio/travel_playlist/Kalaavathi.webm" },
-      { title: "31. Kinni Kinni", url: "assets/audio/travel_playlist/Kinni Kinni.webm" },
-      { title: "32. Levitating", url: "assets/audio/travel_playlist/Levitating (feat. DaBaby).webm" },
-      { title: "33. Metallica - Ecstasy Of Gold", url: "assets/audio/travel_playlist/Metallica - Ecstasy Of Gold.webm" },
-      { title: "34. Muqabla", url: "assets/audio/travel_playlist/Muqabla (From ＂Street Dancer 3D＂).webm" },
-      { title: "35. Naatu Naatu", url: "assets/audio/travel_playlist/Naatu Naatu.webm" },
-      { title: "36. Paparazzi", url: "assets/audio/travel_playlist/Paparazzi.webm" },
-      { title: "37. Poker Face", url: "assets/audio/travel_playlist/Poker Face.webm" },
-      { title: "38. Pranavalaya", url: "assets/audio/travel_playlist/Pranavalaya.webm" },
-      { title: "39. Radioactive", url: "assets/audio/travel_playlist/Radioactive.webm" },
-      { title: "40. Roar", url: "assets/audio/travel_playlist/Roar.webm" },
-      { title: "41. Royals", url: "assets/audio/travel_playlist/Royals.webm" },
-      { title: "42. Saiyaara", url: "assets/audio/travel_playlist/Saiyaara (Movie： Saiyaara).webm" },
-      { title: "43. Samajavaragamana", url: "assets/audio/travel_playlist/Samajavaragamana.webm" },
-      { title: "44. Seeti Maar", url: "assets/audio/travel_playlist/Seeti Maar.webm" },
-      { title: "45. Señorita", url: "assets/audio/travel_playlist/Señorita.webm" },
-      { title: "46. Sirivennela", url: "assets/audio/travel_playlist/Sirivennela.webm" },
-      { title: "47. Somewhere Only We Know", url: "assets/audio/travel_playlist/Somewhere Only We Know.webm" },
-      { title: "48. Sugar", url: "assets/audio/travel_playlist/Sugar.webm" },
-      { title: "49. The Ecstasy of Gold", url: "assets/audio/travel_playlist/The Ecstasy of Gold - L'Estasi dell'Oro.webm" },
-      { title: "50. The Good, The Bad And The Ugly", url: "assets/audio/travel_playlist/The Good, The Bad And The Ugly (2004 Remaster).webm" },
-      { title: "51. Thunder", url: "assets/audio/travel_playlist/Thunder.webm" },
-      { title: "52. Unwritten", url: "assets/audio/travel_playlist/Unwritten.webm" },
-      { title: "53. Uptown Funk", url: "assets/audio/travel_playlist/Uptown Funk.webm" },
-      { title: "54. Vikram (Title Track)", url: "assets/audio/travel_playlist/Vikram (Title Track).webm" },
-      { title: "55. Waka Waka", url: "assets/audio/travel_playlist/Waka Waka (Esto es Africa).webm" },
-      { title: "56. Watermelon Sugar", url: "assets/audio/travel_playlist/Watermelon Sugar.webm" },
-      { title: "57. Whatever It Takes", url: "assets/audio/travel_playlist/Whatever It Takes.webm" },
-      { title: "58. Yellow", url: "assets/audio/travel_playlist/Yellow.webm" },
-      { title: "59. Zorba's Dance", url: "assets/audio/travel_playlist/Zorba the Greek： Zorba's Dance.webm" },
-      { title: "60. Master of Puppets (Instrumental)", url: "assets/audio/travel_playlist/master of puppets - Metallica (instrumental).webm" }
-    ];
-
-    let currentTrackIdx = 0;
-
-    window.toggleTravelAudio = function() {
-      const audio = document.getElementById('travel-audio-element');
-      const btn = document.getElementById('travel-play-btn');
-      if (!audio || !btn) return;
-      if (audio.paused) {
-        audio.play().then(() => {
-          btn.innerHTML = '⏸ Pause';
-          sessionStorage.setItem('travel_audio_playing', 'true');
-        }).catch(err => {
-          console.log('Audio playback prevented or failed:', err);
-        });
-      } else {
-        audio.pause();
-        btn.innerHTML = '▶ Play';
-        sessionStorage.setItem('travel_audio_playing', 'false');
-      }
-    };
-
-    window.changeTravelTrack = function(index) {
-      const audio = document.getElementById('travel-audio-element');
-      const source = document.getElementById('travel-audio-source');
-      const titleSpan = document.getElementById('travel-track-title');
-      const btn = document.getElementById('travel-play-btn');
-      const select = document.getElementById('travel-track-select');
-      
-      currentTrackIdx = parseInt(index);
-      const track = travelPlaylist[currentTrackIdx] || travelPlaylist[0];
-
-      if (!audio || !source) return;
-      const isPlaying = !audio.paused;
-      source.src = track.url;
-      audio.load();
-      if (titleSpan) titleSpan.textContent = track.title;
-      if (select) select.value = currentTrackIdx;
-
-      if (isPlaying) {
-        audio.play().then(() => {
-          if (btn) btn.innerHTML = '⏸ Pause';
-        }).catch(e => {});
-      }
-    };
-
-    window.nextTravelTrack = function() {
-      const nextIdx = (currentTrackIdx + 1) % travelPlaylist.length;
-      window.changeTravelTrack(nextIdx);
-      const audio = document.getElementById('travel-audio-element');
-      if (audio) audio.play().catch(e => {});
-    };
-
-    window.prevTravelTrack = function() {
-      const prevIdx = (currentTrackIdx - 1 + travelPlaylist.length) % travelPlaylist.length;
-      window.changeTravelTrack(prevIdx);
-      const audio = document.getElementById('travel-audio-element');
-      if (audio) audio.play().catch(e => {});
-    };
-
-    window.setTravelVolume = function(val) {
-      const audio = document.getElementById('travel-audio-element');
-      if (audio) audio.volume = parseFloat(val);
-    };
-
-    window.toggleMusicPlayer = function() {
-      const container = document.getElementById('music-player-iframe-container');
-      const btn = document.getElementById('music-toggle-btn');
-      if (container) {
-        if (container.style.display === 'none') {
-          container.style.display = 'flex';
-          if (btn) btn.textContent = '➖ Minimize';
-        } else {
-          container.style.display = 'none';
-          if (btn) btn.textContent = '▶️ Expand';
-        }
-      }
-    };
-
-    const travelPlayerHTML = `
-      <div id="music-player" style="position:fixed; bottom:24px; right:24px; width:340px; background:rgba(18, 24, 38, 0.88); backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px); border:1px solid rgba(255,255,255,0.12); border-radius:24px; padding:16px; z-index:99999; box-shadow:0 20px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15); display:flex; flex-direction:column; gap:12px;">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <div style="display:flex; align-items:center; gap:10px;">
-            <div style="width:36px; height:36px; border-radius:9999px; background:linear-gradient(135deg, rgba(56,189,248,0.2), rgba(192,132,252,0.2)); border:1px solid rgba(56,189,248,0.3); display:flex; align-items:center; justify-content:center; font-size:1.1rem; box-shadow:0 0 15px rgba(56,189,248,0.2);">🎵</div>
-            <div>
-              <strong style="color:#ffffff; font-size:0.88rem; display:block; font-family:'Outfit', sans-serif; font-weight:800; letter-spacing:-0.01em;">Travel Audio Player</strong>
-              <span id="travel-track-title" style="font-size:0.72rem; color:#94a3b8; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:180px;">1. #BoxBaddhalaiPoye</span>
-            </div>
-          </div>
-          <div style="display:flex; gap:6px;">
-            <button onclick="window.toggleMusicPlayer()" id="music-toggle-btn" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#e2e8f0; padding:4px 10px; border-radius:9999px; cursor:pointer; font-size:0.72rem; font-weight:700;" title="Minimize / Expand">➖ Minimize</button>
-            <button onclick="document.getElementById('music-player').style.display='none'" style="background:transparent; border:none; color:#64748b; cursor:pointer; font-size:1.1rem; padding:2px 6px;" title="Close">&times;</button>
-          </div>
-        </div>
-
-        <div id="music-player-iframe-container" style="display:flex; flex-direction:column; gap:10px; transition: all 0.3s ease;">
-          <audio id="travel-audio-element" style="display:none;" onended="window.nextTravelTrack()">
-            <source id="travel-audio-source" src="${travelPlaylist[0].url}" type="audio/webm">
-          </audio>
-
-          <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(11,14,23,0.6); padding:8px 12px; border-radius:14px; border:1px solid rgba(255,255,255,0.08); gap:8px;">
-            <button onclick="window.prevTravelTrack()" style="background:rgba(255,255,255,0.08); border:none; color:white; padding:5px 10px; border-radius:9999px; cursor:pointer; font-size:0.8rem; box-shadow:none;" title="Previous">⏮</button>
-            <button id="travel-play-btn" onclick="window.toggleTravelAudio()" style="background:linear-gradient(135deg, #38bdf8, #818cf8); border:none; color:#0b0e17; padding:6px 16px; border-radius:9999px; font-weight:800; cursor:pointer; font-size:0.82rem; display:flex; align-items:center; gap:4px; box-shadow:0 4px 15px rgba(56,189,248,0.3);">
-              ▶ Play
-            </button>
-            <button onclick="window.nextTravelTrack()" style="background:rgba(255,255,255,0.08); border:none; color:white; padding:5px 10px; border-radius:9999px; cursor:pointer; font-size:0.8rem; box-shadow:none;" title="Next">⏭</button>
-            
-            <select id="travel-track-select" onchange="window.changeTravelTrack(this.value)" style="background:rgba(11,14,23,0.9); color:white; border:1px solid rgba(255,255,255,0.15); padding:6px 10px; border-radius:10px; font-size:0.75rem; max-width:130px; cursor:pointer; margin:0;">
-              ${travelPlaylist.map((t, idx) => `<option value="${idx}">${t.title}</option>`).join('')}
-            </select>
-          </div>
-
-          <div style="display:flex; align-items:center; justify-content:space-between; font-size:0.75rem; color:#94a3b8;">
-            <div style="display:flex; align-items:center; gap:8px;">
-              <span>🔊</span>
-              <input type="range" id="travel-volume-slider" min="0" max="1" step="0.05" value="0.7" oninput="window.setTravelVolume(this.value)" style="width:75px; accent-color:#38bdf8; cursor:pointer; margin:0;">
-            </div>
-            <a href="https://music.youtube.com/playlist?list=PLsWhDTkT5AxzWUi6TbQZoIryJFL4-Lly-" target="_blank" style="color:#38bdf8; text-decoration:none; font-weight:700; font-size:0.75rem; display:flex; align-items:center; gap:2px;">
-              Original YouTube ↗
-            </a>
-          </div>
-        </div>
-      </div>
-    `;
-
-    const existingLofi = document.getElementById('lofi-player');
-    const existingPlayer = document.getElementById('music-player');
-    if (existingLofi) {
-      existingLofi.outerHTML = travelPlayerHTML;
-    } else if (existingPlayer) {
-      existingPlayer.outerHTML = travelPlayerHTML;
-    } else {
-      document.body.insertAdjacentHTML('beforeend', travelPlayerHTML);
-    }
-
-    if (sessionStorage.getItem('travel_audio_playing') === 'true') {
-      setTimeout(() => {
-        const audio = document.getElementById('travel-audio-element');
-        const btn = document.getElementById('travel-play-btn');
-        if (audio && btn) {
-          audio.play().then(() => {
-            btn.innerHTML = '⏸ Pause';
-          }).catch(() => {});
-        }
-      }, 300);
-    }
+    // Audio Player (Removed commercial audio files to eliminate copyright infringement risk)
+    window.toggleTravelAudio = function() {};
+    window.changeTravelTrack = function() {};
+    window.nextTravelTrack = function() {};
+    window.prevTravelTrack = function() {};
+    window.setTravelVolume = function() {};
+    window.toggleMusicPlayer = function() {};
 
     // CHAT NOTIFICATIONS (On Index)
     if(window.location.pathname.endsWith('index.html') && typeof firebase !== 'undefined') {
@@ -1346,7 +1178,7 @@
 
     // GLOBAL WHITEBOARD
     const canvas = document.getElementById('whiteboard-canvas');
-    if (canvas && typeof firebase !== 'undefined') {
+    if (canvas) {
       const ctx = canvas.getContext('2d');
       let drawing = false;
       let colorInp = document.getElementById('wb-color');
@@ -1363,24 +1195,32 @@
         const x = Math.floor((e.clientX - rect.left) * scaleX);
         const y = Math.floor((e.clientY - rect.top) * scaleY);
         
-        const color = colorInp.value;
+        const color = colorInp ? colorInp.value : '#38bdf8';
         ctx.fillStyle = color;
         ctx.fillRect(x, y, 4, 4);
         
-        firebase.database().ref('whiteboard').push({x, y, color});
-      });
-      
-      // Receive pixels
-      firebase.database().ref('whiteboard').on('child_added', snap => {
-        const p = snap.val();
-        if(p && p.x != null && p.y != null) {
-          ctx.fillStyle = p.color || '#fff';
-          ctx.fillRect(p.x, p.y, 4, 4);
+        if (typeof firebase !== 'undefined' && firebase.database) {
+          try {
+            firebase.database().ref('whiteboard').push({x, y, color});
+          } catch(err) {}
         }
       });
-      firebase.database().ref('whiteboard').on('child_removed', () => {
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-      });
+      
+      if (typeof firebase !== 'undefined' && firebase.database) {
+        try {
+          // Receive pixels
+          firebase.database().ref('whiteboard').on('child_added', snap => {
+            const p = snap.val();
+            if(p && p.x != null && p.y != null) {
+              ctx.fillStyle = p.color || '#fff';
+              ctx.fillRect(p.x, p.y, 4, 4);
+            }
+          });
+          firebase.database().ref('whiteboard').on('child_removed', () => {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+          });
+        } catch(err) {}
+      }
     }
 
 

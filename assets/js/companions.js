@@ -404,10 +404,18 @@
   `;
   document.head.appendChild(style);
 
+  function getSp(key, fallback, size = 30) {
+    if (typeof window !== 'undefined' && window.DragonSprites && window.DragonSprites.renderSVG) {
+      const s = window.DragonSprites.renderSVG(key, size);
+      if (s) return s;
+    }
+    return fallback;
+  }
+
   // Setup DOM Elements
   const widget = document.createElement('div');
   widget.id = 'companion-widget';
-  widget.innerHTML = '🐾';
+  widget.innerHTML = getSp('UI_PAW', '🐾', 28);
   widget.title = 'Screen Companion Control Panel';
   document.body.appendChild(widget);
 
@@ -417,90 +425,133 @@
     <!-- Tabs Header -->
     <div class="panel-tabs">
       <div class="panel-tab active" data-tab="mascots">Mascots</div>
+      <div class="panel-tab" data-tab="mutants">🧬 Mutants</div>
       <div class="panel-tab" data-tab="biomes">Biomes</div>
       <div class="panel-tab" data-tab="toys">Toys</div>
     </div>
 
     <!-- TAB 1: Mascots -->
     <div id="tab-mascots" class="tab-content active">
-      <!-- 10 Mascot Pets -->
+      <button onclick="if(window.PetMutationLab) window.PetMutationLab.openMutationLabModal();" style="width:100%; padding:8px 12px; border-radius:10px; background:rgba(57,255,20,0.15); border:1px solid #39ff14; color:#39ff14; font-weight:800; font-size:0.8rem; cursor:pointer; margin-bottom:8px; display:flex; align-items:center; justify-content:center; gap:6px;">
+        🧬 Open Pet Mutation Lab
+      </button>
+
+      <!-- Mascot Pets -->
       <div class="companion-card" data-pet="cat">
-        <span class="card-icon">🐱</span>
+        <span class="card-icon">${getSp('PET_CAT', '🐱', 32)}</span>
         <div class="card-info"><h4>Neko</h4><p>A cute calico cat chasing your cursor.</p></div>
       </div>
       <div class="companion-card" data-pet="dragon">
-        <span class="card-icon">🐉</span>
+        <span class="card-icon">${getSp('PET_DRAGON', '🐉', 32)}</span>
         <div class="card-info"><h4>Ignis</h4><p>Emits neon fire sparks when clicking.</p></div>
       </div>
       <div class="companion-card" data-pet="cyber_puppy">
-        <span class="card-icon">🐶</span>
+        <span class="card-icon">${getSp('PET_CYBER_PUPPY', '🐶', 32)}</span>
         <div class="card-info"><h4>Sparky</h4><p>Neon cyber puppy with a pink visor.</p></div>
       </div>
+      <div class="companion-card" data-pet="red_panda">
+        <span class="card-icon">🦊</span>
+        <div class="card-info"><h4>Rusty</h4><p>Red Panda with ringed tail & acrobatics.</p></div>
+      </div>
+      <div class="companion-card" data-pet="cosmic_axolotl">
+        <span class="card-icon">🦎</span>
+        <div class="card-info"><h4>Aura</h4><p>Cosmic axolotl with glowing astral frills.</p></div>
+      </div>
+      <div class="companion-card" data-pet="golden_hamster">
+        <span class="card-icon">🐹</span>
+        <div class="card-info"><h4>Nugget</h4><p>Chubby golden hamster with pouch cheeks.</p></div>
+      </div>
+      <div class="companion-card" data-pet="arctic_fox">
+        <span class="card-icon">🐺</span>
+        <div class="card-info"><h4>Blizzard</h4><p>Snowy arctic fox with ice blue eyes.</p></div>
+      </div>
+      <div class="companion-card" data-pet="sloth">
+        <span class="card-icon">🦥</span>
+        <div class="card-info"><h4>Flash</h4><p>Zen chill sloth enjoying leafy naps.</p></div>
+      </div>
+      <div class="companion-card" data-pet="koala">
+        <span class="card-icon">🐨</span>
+        <div class="card-info"><h4>Euca</h4><p>Fluffy eared cuddly koala.</p></div>
+      </div>
+      <div class="companion-card" data-pet="meerkat">
+        <span class="card-icon">🦫</span>
+        <div class="card-info"><h4>Scout</h4><p>Watchful, alert desert sentry.</p></div>
+      </div>
       <div class="companion-card" data-pet="bunny">
-        <span class="card-icon">🐰</span>
+        <span class="card-icon">${getSp('PET_BUNNY', '🐰', 32)}</span>
         <div class="card-info"><h4>Usagi</h4><p>Hops joyfully toward the cursor.</p></div>
       </div>
       <div class="companion-card" data-pet="frog">
-        <span class="card-icon">🐸</span>
+        <span class="card-icon">${getSp('PET_FROG', '🐸', 32)}</span>
         <div class="card-info"><h4>Kero</h4><p>High jumping green frog companion.</p></div>
       </div>
       <div class="companion-card" data-pet="fox">
-        <span class="card-icon">🦊</span>
+        <span class="card-icon">${getSp('PET_FOX', '🦊', 32)}</span>
         <div class="card-info"><h4>Kitsune</h4><p>Clever orange fox with fluffy tail.</p></div>
       </div>
       <div class="companion-card" data-pet="owl">
-        <span class="card-icon">🦉</span>
+        <span class="card-icon">${getSp('PET_OWL', '🦉', 32)}</span>
         <div class="card-info"><h4>Hoot</h4><p>Flaps around your cursor gracefully.</p></div>
       </div>
       <div class="companion-card" data-pet="shark">
-        <span class="card-icon">🦈</span>
+        <span class="card-icon">${getSp('PET_SHARK', '🦈', 32)}</span>
         <div class="card-info"><h4>Fin</h4><p>Sky-shark gliding through screen space.</p></div>
       </div>
       <div class="companion-card" data-pet="unicorn">
-        <span class="card-icon">🦄</span>
+        <span class="card-icon">${getSp('PET_UNICORN', '🦄', 32)}</span>
         <div class="card-info"><h4>Uni</h4><p>Leaves a trailing path of rainbow dust.</p></div>
       </div>
       <div class="companion-card" data-pet="slime">
-        <span class="card-icon">👾</span>
+        <span class="card-icon">${getSp('PET_SLIME', '👾', 32)}</span>
         <div class="card-info"><h4>Gloop</h4><p>Squishy, glowing bouncy neon slime.</p></div>
       </div>
       
       <button id="dismiss-pet" style="width:100%; padding:9px; background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239,68,68,0.4); border-radius:10px; color:#f87171; font-weight:600; font-size:0.85rem; cursor:pointer; margin-top:5px; transition: all 0.2s;">Send Mascot Home</button>
     </div>
 
-    <!-- TAB 2: Biomes -->
+    <!-- TAB 2: Mutants -->
+    <div id="tab-mutants" class="tab-content">
+      <button onclick="if(window.PetMutationLab) window.PetMutationLab.openMutationLabModal();" style="width:100%; padding:10px 14px; border-radius:12px; background:linear-gradient(180deg, #39ff14 0%, #10b981 100%); color:#022c22; font-weight:900; border:none; cursor:pointer; box-shadow:0 0 16px rgba(57,255,20,0.5); margin-bottom:10px; display:flex; align-items:center; justify-content:center; gap:6px;">
+        ☣️ FORGE NEW MUTANT ☣️
+      </button>
+      <div id="mutants-card-list" style="display:flex; flex-direction:column; gap:8px;">
+        <!-- Populated via refreshMutantsList -->
+      </div>
+    </div>
+
+    <!-- TAB 3: Biomes -->
     <div id="tab-biomes" class="tab-content">
       <div class="biome-card active" data-biome="none">
-        <span class="card-icon">🏠</span>
+        <span class="card-icon">${getSp('BIOME_LOBBY', '🏠', 28)}</span>
         <div class="card-info"><h4>Standard Lobby</h4><p>Clean background layout.</p></div>
       </div>
       <div class="biome-card" data-biome="void">
-        <span class="card-icon">🌌</span>
+        <span class="card-icon">${getSp('BIOME_VOID', '🌌', 28)}</span>
         <div class="card-info"><h4>Cosmic Void</h4><p>Drift through neon star clusters.</p></div>
       </div>
       <div class="biome-card" data-biome="forest">
-        <span class="card-icon">🌳</span>
+        <span class="card-icon">${getSp('BIOME_FOREST', '🌳', 28)}</span>
         <div class="card-info"><h4>Enchanted Forest</h4><p>Gentle falling leaves and glow.</p></div>
       </div>
       <div class="biome-card" data-biome="tundra">
-        <span class="card-icon">❄️</span>
+        <span class="card-icon">${getSp('BIOME_TUNDRA', '❄️', 28)}</span>
         <div class="card-info"><h4>Frozen Tundra</h4><p>A calm snowfall sweeps the screen.</p></div>
       </div>
     </div>
 
-    <!-- TAB 3: Toys -->
+    <!-- TAB 4: Toys -->
     <div id="tab-toys" class="tab-content">
       <p style="margin: 0; font-size: 0.8rem; color: #94a3b8; text-align: center;">Pick a toy to drop on screen for your pet!</p>
       <div class="toy-card" data-toy="yarn">
-        <span class="card-icon">🧶</span>
+        <span class="card-icon">${getSp('TOY_YARN', '🧶', 28)}</span>
         <div class="card-info"><h4>Yarn Ball</h4><p>Pet will chase and play with the rolling ball.</p></div>
       </div>
       <div class="toy-card" data-toy="treat">
-        <span class="card-icon">🍗</span>
+        <span class="card-icon">${getSp('TOY_TREAT', '🍗', 28)}</span>
         <div class="card-info"><h4>Gourmet Treat</h4><p>Pet eats it to grow in size and show hearts!</p></div>
       </div>
       <div class="toy-card" data-toy="laser">
-        <span class="card-icon">⚡</span>
+        <span class="card-icon">${getSp('TOY_LASER', '⚡', 28)}</span>
         <div class="card-info"><h4>Laser Pointer</h4><p>Cursor turns into red dot; pet chases at top speed.</p></div>
       </div>
       <button id="clear-toys" style="width:100%; padding:9px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:10px; color:#cbd5e1; font-weight:600; font-size:0.85rem; cursor:pointer; margin-top:5px; transition: all 0.2s;">Clear Screen Toys</button>
@@ -523,6 +574,7 @@
   widget.addEventListener('click', (e) => {
     e.stopPropagation();
     panel.style.display = panel.style.display === 'flex' ? 'none' : 'flex';
+    refreshMutantsList();
   });
   document.addEventListener('click', (e) => {
     if (!panel.contains(e.target) && e.target !== widget && !e.target.closest('#pet-toy')) {
@@ -542,21 +594,63 @@
       panel.querySelectorAll('.tab-content').forEach(content => {
         content.classList.remove('active');
       });
-      document.getElementById(`tab-${tabTarget}`).classList.add('active');
+      const targetContent = document.getElementById(`tab-${tabTarget}`);
+      if (targetContent) targetContent.classList.add('active');
+      if (tabTarget === 'mutants') refreshMutantsList();
     });
   });
 
   // 1. MASCOTS selection
-  const mascotCards = panel.querySelectorAll('.companion-card');
-  mascotCards.forEach(card => {
-    card.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const petType = card.getAttribute('data-pet');
-      localStorage.setItem('activeCompanion', petType);
-      spawnPet(petType);
-      highlightActiveMascot();
-      panel.style.display = 'none';
+  function attachMascotListeners() {
+    const allCards = panel.querySelectorAll('.companion-card');
+    allCards.forEach(card => {
+      card.onclick = (e) => {
+        e.stopPropagation();
+        const petType = card.getAttribute('data-pet');
+        localStorage.setItem('activeCompanion', petType);
+        spawnPet(petType);
+        highlightActiveMascot();
+        panel.style.display = 'none';
+      };
     });
+  }
+  attachMascotListeners();
+
+  function refreshMutantsList() {
+    const listEl = document.getElementById('mutants-card-list');
+    if (!listEl) return;
+    const mutants = (window.PetMutationLab && window.PetMutationLab.getMutatedPets)
+      ? window.PetMutationLab.getMutatedPets()
+      : JSON.parse(localStorage.getItem('drag0n_mutated_pets') || '[]');
+
+    if (mutants.length === 0) {
+      listEl.innerHTML = `<div style="text-align:center; padding:15px; color:#94a3b8; font-size:0.85rem;">No hybrid mutants synthesized yet. Click above to forge one in the Mutation Lab!</div>`;
+      return;
+    }
+
+    listEl.innerHTML = mutants.map(m => {
+      const thumbSvg = (window.PetMutationLab && window.PetMutationLab.renderHybridPetSVG)
+        ? window.PetMutationLab.renderHybridPetSVG(m, 36)
+        : '🧬';
+      const parentsStr = (m.parents || []).join(' + ');
+      return `
+        <div class="companion-card" data-pet="${m.id}" style="border-color: rgba(57,255,20,0.3);">
+          <span class="card-icon" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center;">${thumbSvg}</span>
+          <div class="card-info" style="flex:1;">
+            <h4 style="color:#39ff14;">${m.name}</h4>
+            <p>Hybrid of: ${parentsStr}</p>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    attachMascotListeners();
+    highlightActiveMascot();
+  }
+
+  // Refresh mutants when a new pet is mutated
+  window.addEventListener('drag0n_pet_mutated', () => {
+    refreshMutantsList();
   });
 
   document.getElementById('dismiss-pet').addEventListener('click', (e) => {
@@ -569,7 +663,8 @@
 
   function highlightActiveMascot() {
     const active = localStorage.getItem('activeCompanion');
-    mascotCards.forEach(c => {
+    const allCards = panel.querySelectorAll('.companion-card');
+    allCards.forEach(c => {
       if (c.getAttribute('data-pet') === active) {
         c.classList.add('active');
       } else {
@@ -832,10 +927,20 @@
     container.style.top = `${petY}px`;
     container.style.transform = `scale(${petSizeMultiplier})`;
 
-    // SVGs collection for 10 pets!
+    // SVGs collection for pets & mutants!
     let svgContent = '';
     
-    if (type === 'cat') {
+    if (type && type.startsWith('mutant_')) {
+      const mutants = (window.PetMutationLab && window.PetMutationLab.getMutatedPets) 
+        ? window.PetMutationLab.getMutatedPets() 
+        : JSON.parse(localStorage.getItem('drag0n_mutated_pets') || '[]');
+      const mutant = mutants.find(p => p.id === type);
+      if (mutant && window.PetMutationLab && window.PetMutationLab.renderHybridPetSVG) {
+        svgContent = window.PetMutationLab.renderHybridPetSVG(mutant, 48);
+      }
+    } else if (window.PetMutationLab && window.PetMutationLab.PET_ROSTER && window.PetMutationLab.PET_ROSTER[type] && !['cat','dragon','cyber_puppy','bunny','frog','fox','owl','shark','unicorn','slime'].includes(type)) {
+      svgContent = window.PetMutationLab.renderHybridPetSVG(window.PetMutationLab.PET_ROSTER[type].traits, 48);
+    } else if (type === 'cat') {
       svgContent = `
         <svg class="pet-svg" viewBox="0 0 64 64" width="48" height="48" style="overflow: visible;">
           <ellipse cx="32" cy="50" rx="14" ry="3" fill="rgba(0,0,0,0.15)"/>
